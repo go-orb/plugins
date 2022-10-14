@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"jochum.dev/orb/orb/config"
 	"jochum.dev/orb/orb/config/configsource"
 	"jochum.dev/orb/orb/util/marshaler"
 )
@@ -21,7 +22,7 @@ func init() {
 
 type Source struct{}
 
-func New() configsource.ConfigSource {
+func New() configsource.Source {
 	return &Source{}
 }
 
@@ -36,7 +37,7 @@ func (s *Source) Init() error {
 func (s *Source) Read(u url.URL) (map[string]any, error) {
 	result := map[string]any{}
 	if u.Scheme != Name {
-		return result, configsource.ErrUnknownScheme
+		return result, config.ErrUnknownScheme
 	}
 
 	path := u.Path
@@ -48,7 +49,7 @@ func (s *Source) Read(u url.URL) (map[string]any, error) {
 		for _, m := range marshalers {
 			if _, err2 := os.Stat(path + m.FileExtension()); err2 == nil {
 				decoder = m
-				path = path + m.FileExtension()
+				path += m.FileExtension()
 			}
 		}
 	} else {
@@ -79,7 +80,7 @@ func (s *Source) Read(u url.URL) (map[string]any, error) {
 	}
 
 	// Decode
-	if err := decoder.DecodeSocket(result); err != nil {
+	if err := decoder.DecodeSocket(&result); err != nil {
 		return result, err
 	}
 
