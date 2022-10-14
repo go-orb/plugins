@@ -1,4 +1,4 @@
-module jochum.dev/orb/plugins/util/marshaler/gobmarshaler
+module jochum.dev/orb/plugins/util/marshaler/gob
 
 go 1.18
 

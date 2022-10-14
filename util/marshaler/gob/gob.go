@@ -7,6 +7,15 @@ import (
 	"jochum.dev/orb/orb/util/marshaler"
 )
 
+const Name = "gob"
+
+func init() {
+	err := marshaler.Plugins.Add(Name, New)
+	if err != nil {
+		panic(err)
+	}
+}
+
 type Marshaler struct {
 	enc *gob.Encoder
 	dec *gob.Decoder
@@ -14,6 +23,14 @@ type Marshaler struct {
 
 func New() marshaler.Marshaler {
 	return &Marshaler{}
+}
+
+func (g *Marshaler) String() string {
+	return Name
+}
+
+func (g *Marshaler) FileExtension() string {
+	return ""
 }
 
 func (g *Marshaler) Init(r io.Reader, w io.Writer) error {
