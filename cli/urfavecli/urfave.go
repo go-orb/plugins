@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/urfave/cli/v2"
 	oCli "jochum.dev/orb/orb/cli"
-	"jochum.dev/orb/orb/config/chelp"
 )
 
 func init() {
@@ -46,7 +45,7 @@ func (c *FlagCLI) Init(aConfig any) error {
 	case *oCli.BaseConfig:
 		c.config = config
 	default:
-		return chelp.ErrUnknownConfig
+		return config.ErrUnknownConfig
 	}
 
 	return nil

@@ -16,10 +16,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"jochum.dev/orb/orb/config/chelp"
+	"jochum.dev/orb/orb/config"
 	"jochum.dev/orb/orb/log"
-	"jochum.dev/orb/orb/plugins/registry/mdnsregistry/mdnsutil"
 	"jochum.dev/orb/orb/registry"
+	"jochum.dev/orb/plugins/registry/mdnsregistry/mdnsutil"
 )
 
 func init() {
@@ -154,15 +154,15 @@ func (m *mdnsRegistry) Init(aConfig any, opts ...registry.Option) error {
 	case *ConfigImpl:
 		m.config = tConfig
 	default:
-		return chelp.ErrUnknownConfig
+		return config.ErrUnknownConfig
 	}
 
-	if m.config.Timeout() == 0 {
-		m.config.SetTimeout(100)
+	if m.config.Timeout == 0 {
+		m.config.Timeout = 100
 	}
 
-	if m.config.Domain() == "" {
-		m.config.SetDomain(mdnsDomain)
+	if m.config.Domain == "" {
+		m.config.Domain = mdnsDomain
 	}
 
 	options := registry.NewOptions(opts...)
@@ -185,7 +185,7 @@ func (m *mdnsRegistry) Register(service *registry.Service, opts ...registry.Regi
 		s, err := mdnsutil.NewMDNSService(
 			service.Name,
 			"_services",
-			m.config.Domain()+".",
+			m.config.Domain+".",
 			"",
 			9999,
 			[]net.IP{net.ParseIP("0.0.0.0")},
@@ -250,7 +250,7 @@ func (m *mdnsRegistry) Register(service *registry.Service, opts ...registry.Regi
 		s, err := mdnsutil.NewMDNSService(
 			node.Id,
 			service.Name,
-			m.config.Domain()+".",
+			m.config.Domain+".",
 			"",
 			port,
 			[]net.IP{net.ParseIP(host)},
@@ -325,12 +325,12 @@ func (m *mdnsRegistry) GetService(service string, opts ...registry.GetOption) ([
 	p := mdnsutil.DefaultParams(service)
 	// set context with timeout
 	var cancel context.CancelFunc
-	p.Context, cancel = context.WithTimeout(context.Background(), time.Duration(m.config.Timeout())*time.Millisecond)
+	p.Context, cancel = context.WithTimeout(context.Background(), time.Duration(m.config.Timeout)*time.Millisecond)
 	defer cancel()
 	// set entries channel
 	p.Entries = entries
 	// set the domain
-	p.Domain = m.config.Domain()
+	p.Domain = m.config.Domain
 
 	go func() {
 		for {
@@ -340,7 +340,7 @@ func (m *mdnsRegistry) GetService(service string, opts ...registry.GetOption) ([
 				if p.Service == "_services" {
 					continue
 				}
-				if p.Domain != m.config.Domain() {
+				if p.Domain != m.config.Domain {
 					continue
 				}
 				if e.TTL == 0 {
@@ -415,12 +415,12 @@ func (m *mdnsRegistry) ListServices(opts ...registry.ListOption) ([]*registry.Se
 	p := mdnsutil.DefaultParams("_services")
 	// set context with timeout
 	var cancel context.CancelFunc
-	p.Context, cancel = context.WithTimeout(context.Background(), time.Duration(m.config.Timeout())*time.Millisecond)
+	p.Context, cancel = context.WithTimeout(context.Background(), time.Duration(m.config.Timeout)*time.Millisecond)
 	defer cancel()
 	// set entries channel
 	p.Entries = entries
 	// set domain
-	p.Domain = m.config.Domain()
+	p.Domain = m.config.Domain
 
 	var services []*registry.Service
 
@@ -468,7 +468,7 @@ func (m *mdnsRegistry) Watch(opts ...registry.WatchOption) (registry.Watcher, er
 		wo:       wo,
 		ch:       make(chan *mdnsutil.ServiceEntry, 32),
 		exit:     make(chan struct{}),
-		domain:   m.config.Domain(),
+		domain:   m.config.Domain,
 		registry: m,
 	}
 

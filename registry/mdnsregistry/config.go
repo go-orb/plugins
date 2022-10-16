@@ -12,16 +12,15 @@ type Config interface {
 }
 
 type ConfigImpl struct {
-	*registry.BaseConfig
+	*registry.ConfigImpl
 
-	domain string
+	Domain string
 }
 
 func NewConfig() *ConfigImpl {
 	return &ConfigImpl{
-		BaseConfig: registry.NewConfig(),
+		ConfigImpl: registry.NewComponentConfig(),
 	}
 }
 
-func (c *ConfigImpl) Domain() string     { return c.domain }
-func (c *ConfigImpl) SetDomain(n string) { c.domain = n }
+func (c *ConfigImpl) GetDomain() string { return c.Domain }
