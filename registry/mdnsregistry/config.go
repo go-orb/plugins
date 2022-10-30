@@ -1,26 +1,35 @@
 package mdnsregistry
 
 import (
-	"jochum.dev/orb/orb/registry"
+	"github.com/go-orb/config/source/cli"
+	"github.com/go-orb/orb/registry"
 )
 
-type Config interface {
-	registry.Config
+const name = "mdns"
 
-	Domain() string
-	SetDomain(n string)
-}
+var DefaultDomain = "orb"
 
-type ConfigImpl struct {
-	*registry.ConfigImpl
+func init() {
+	_ = cli.Flags.Add(cli.NewFlag(
+		"registry_domain",
+		DefaultDomain,
+		cli.CPSlice([]string{"registry", "domain"}),
+		cli.Usage("Registry domain."),
+	))
 
-	Domain string
-}
-
-func NewConfig() *ConfigImpl {
-	return &ConfigImpl{
-		ConfigImpl: registry.NewComponentConfig(),
+	if err := registry.Plugins.Add(name, Provide); err != nil {
+		panic(err)
 	}
 }
 
-func (c *ConfigImpl) GetDomain() string { return c.Domain }
+type Config struct {
+	*registry.Config `yaml:",inline"`
+
+	Domain string `json:"domain,omitempty" yaml:"domain,omitempty"`
+}
+
+func NewConfig() *Config {
+	return &Config{
+		Config: registry.NewConfig(),
+	}
+}

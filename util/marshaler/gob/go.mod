@@ -1,5 +1,5 @@
-module jochum.dev/orb/plugins/util/marshaler/gob
+module github.com/go-orb/plugins/util/marshaler/gob
 
 go 1.18
 
-require jochum.dev/orb/orb v0.0.0-20221013172918-c0d5f11ecc5c
+require github.com/go-orb/orb v0.0.0-20221030034022-0c15f1287cc4

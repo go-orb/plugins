@@ -4,7 +4,7 @@ import (
 	"encoding/gob"
 	"io"
 
-	"jochum.dev/orb/orb/util/marshaler"
+	"github.com/go-orb/orb/util/marshaler"
 )
 
 const Name = "gob"

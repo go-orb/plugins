@@ -3,8 +3,8 @@ package yamlmarshaler
 import (
 	"io"
 
+	"github.com/go-orb/orb/util/marshaler"
 	"gopkg.in/yaml.v3"
-	"jochum.dev/orb/orb/util/marshaler"
 )
 
 const Name = "yaml"

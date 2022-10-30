@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"jochum.dev/orb/orb/registry"
+	"github.com/go-orb/orb/registry"
 )
 
 func TestMDNS(t *testing.T) {

@@ -15,26 +15,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-orb/config"
+	"github.com/go-orb/config/source"
+	"github.com/go-orb/orb/log"
+	"github.com/go-orb/orb/registry"
+	"github.com/go-orb/orb/types"
+	"github.com/go-orb/plugins/registry/mdnsregistry/mdnsutil"
 	"github.com/google/uuid"
-	"jochum.dev/orb/orb/config"
-	"jochum.dev/orb/orb/log"
-	"jochum.dev/orb/orb/registry"
-	"jochum.dev/orb/plugins/registry/mdnsregistry/mdnsutil"
-)
-
-func init() {
-	if err := registry.Plugins.Add(
-		"mdns",
-		func() registry.Registry { return &mdnsRegistry{} },
-		func() any { return NewConfig() },
-	); err != nil {
-		panic(err)
-	}
-}
-
-var (
-	// use a .micro domain rather than .local.
-	mdnsDomain = "micro"
 )
 
 type mdnsTxt struct {
@@ -50,8 +37,8 @@ type mdnsEntry struct {
 }
 
 type mdnsRegistry struct {
-	config *ConfigImpl
-	log    log.Logger
+	config *Config
+	log    *log.Logger
 
 	sync.Mutex
 	services map[string][]*mdnsEntry
@@ -64,6 +51,9 @@ type mdnsRegistry struct {
 	// listener
 	listener chan *mdnsutil.ServiceEntry
 }
+
+// This is here to make sure mdnsRegistry implements registry.Registry.
+var _ registry.Registry = &mdnsRegistry{}
 
 type mdnsWatcher struct {
 	id   string
@@ -142,37 +132,65 @@ func decode(record []string) (*mdnsTxt, error) {
 
 	return txt, nil
 }
-func New() registry.Registry {
+
+func Provide(
+	serviceName types.ServiceName,
+	datas []source.Data,
+	logger *log.Logger,
+) (*registry.OrbRegistry, error) {
+	cfg := NewConfig()
+
+	// Read the config
+	sections := types.SplitServiceName(serviceName)
+	if err := config.Parse(append(sections, registry.ComponentType), datas, cfg); err != nil {
+		return nil, err
+	}
+
+	// Get a custom logger if needed.
+	if cfg.Logger != nil {
+		var err error
+		logger, err = log.New(cfg.Logger)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Return the new registry.
+	reg := New(cfg, logger)
+	return &registry.OrbRegistry{Registry: reg}, nil
+}
+
+func New(cfg *Config, log *log.Logger) *mdnsRegistry {
+	if cfg.Timeout == 0 {
+		cfg.Timeout = registry.DefaultTimout
+	}
+
+	if cfg.Domain == "" {
+		cfg.Domain = DefaultDomain
+	}
+
 	return &mdnsRegistry{
+		config:   cfg,
+		log:      log,
 		services: make(map[string][]*mdnsEntry),
 		watchers: make(map[string]*mdnsWatcher),
 	}
 }
 
-func (m *mdnsRegistry) Init(aConfig any, opts ...registry.Option) error {
-	switch tConfig := aConfig.(type) {
-	case *ConfigImpl:
-		m.config = tConfig
-	default:
-		return config.ErrUnknownConfig
-	}
-
-	if m.config.Timeout == 0 {
-		m.config.Timeout = 100
-	}
-
-	if m.config.Domain == "" {
-		m.config.Domain = mdnsDomain
-	}
-
-	options := registry.NewOptions(opts...)
-	m.log = options.Logger
-
+func (m *mdnsRegistry) Start() error {
 	return nil
 }
 
-func (m *mdnsRegistry) Config() any {
-	return m.Config
+func (m *mdnsRegistry) Stop() error {
+	return nil
+}
+
+func (m *mdnsRegistry) String() string {
+	return name
+}
+
+func (m *mdnsRegistry) Type() string {
+	return registry.ComponentType
 }
 
 func (m *mdnsRegistry) Register(service *registry.Service, opts ...registry.RegisterOption) error {
@@ -244,7 +262,7 @@ func (m *mdnsRegistry) Register(service *registry.Service, opts ...registry.Regi
 		}
 		port, _ := strconv.Atoi(pt)
 
-		m.log.Debug().Msgf("[mdns] registry create new service with ip: %s for: %s", net.ParseIP(host).String(), host)
+		m.log.Debug("[mdns] registry create new service with ip: %s for: %s", net.ParseIP(host).String(), host)
 
 		// we got here, new node
 		s, err := mdnsutil.NewMDNSService(
@@ -291,7 +309,7 @@ func (m *mdnsRegistry) Deregister(service *registry.Service, opts ...registry.De
 		for _, node := range service.Nodes {
 			if node.Id == entry.id {
 				if err := entry.node.Shutdown(); err != nil {
-					m.log.Err().Err(err).Send()
+					m.log.Error("Failed to shutdown node", err)
 				}
 				remove = true
 				break
@@ -307,7 +325,7 @@ func (m *mdnsRegistry) Deregister(service *registry.Service, opts ...registry.De
 	// last entry is the wildcard for list queries. Remove it.
 	if len(newEntries) == 1 && newEntries[0].id == "*" {
 		if err := newEntries[0].node.Shutdown(); err != nil {
-			m.log.Err().Err(err).Send()
+			m.log.Error("failed to shutdown node", err)
 		}
 		delete(m.services, service.Name)
 	} else {
@@ -372,7 +390,7 @@ func (m *mdnsRegistry) GetService(service string, opts ...registry.GetOption) ([
 				} else if len(e.AddrV6) > 0 {
 					addr = net.JoinHostPort(e.AddrV6.String(), fmt.Sprint(e.Port))
 				} else {
-					m.log.Info().Msgf("[mdns]: invalid endpoint received: %v", e)
+					m.log.Info("[mdns]: invalid endpoint received: %v", e)
 					continue
 				}
 				s.Nodes = append(s.Nodes, &registry.Node{
@@ -538,9 +556,9 @@ func (m *mdnsRegistry) Watch(opts ...registry.WatchOption) (registry.Watcher, er
 
 			// start listening, blocking call
 			if err := mdnsutil.Listen(ch, exit); err != nil {
-				m.log.Err().Err(err).Send()
+				m.log.Error("Failed to listen", err)
 			} else {
-				m.log.Info().Msg("Listening")
+				m.log.Info("Listening")
 			}
 
 			// mdns.Listen has unblocked
@@ -553,10 +571,6 @@ func (m *mdnsRegistry) Watch(opts ...registry.WatchOption) (registry.Watcher, er
 	}()
 
 	return md, nil
-}
-
-func (m *mdnsRegistry) String() string {
-	return "mdns"
 }
 
 func (m *mdnsWatcher) Next() (*registry.Result, error) {
