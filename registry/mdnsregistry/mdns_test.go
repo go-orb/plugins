@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-orb/orb/log"
 	"github.com/go-orb/orb/registry"
 )
 
@@ -64,8 +65,12 @@ func TestMDNS(t *testing.T) {
 	}
 
 	// new registry
-	r := New()
-	if err := r.Init(NewConfig()); err != nil {
+	l, err := log.New(log.NewConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := New(NewConfig(), l)
+	if err := r.Start(); err != nil {
 		t.Fatal(err)
 	}
 
@@ -284,8 +289,12 @@ func TestWatcher(t *testing.T) {
 	}
 
 	// new registry
-	r := New()
-	if err := r.Init(NewConfig()); err != nil {
+	l, err := log.New(log.NewConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := New(NewConfig(), l)
+	if err = r.Start(); err != nil {
 		t.Fatal(err)
 	}
 
