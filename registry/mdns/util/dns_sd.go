@@ -1,4 +1,4 @@
-package mdnsutil
+package util
 
 import "github.com/miekg/dns"
 

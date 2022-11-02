@@ -1,5 +1,5 @@
 // Package mdnsutil contains mdns utils ;P.
-package mdnsutil
+package util
 
 import (
 	"context"

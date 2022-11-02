@@ -1,4 +1,4 @@
-module github.com/go-orb/plugins/registry/mdnsregistry
+module github.com/go-micro/plugins/registry/mdns
 
 go 1.18
 

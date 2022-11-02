@@ -1,4 +1,4 @@
-package mdnsutil
+package util
 
 import (
 	"bytes"
