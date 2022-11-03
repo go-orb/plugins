@@ -232,7 +232,7 @@ function create_summary() {
 	fi
 }
 
-git clone https://github.com/go-orb/orb
+git clone https://github.com/go-orb/orb ../orb
 pwd
 ls -la
 
