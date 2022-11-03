@@ -1,3 +1,4 @@
+// Package json provides a the slog json handler.
 package json
 
 import (
@@ -8,21 +9,21 @@ import (
 )
 
 func init() {
-	if err := log.Plugins.Add("jsonstdout", JSONStdoutPlugin); err != nil {
+	if err := log.Plugins.Add("jsonstdout", NewHandlerStdout); err != nil {
 		panic(err)
 	}
 
-	if err := log.Plugins.Add("jsonstderr", JSONStderrPlugin); err != nil {
+	if err := log.Plugins.Add("jsonstderr", NewHandlerStderr); err != nil {
 		panic(err)
 	}
 }
 
-// JSONStdoutPlugin writes json to stdout.
-func JSONStdoutPlugin(level slog.Leveler) (slog.Handler, error) {
+// NewHandlerStdout writes json to stdout.
+func NewHandlerStdout(level slog.Leveler) (slog.Handler, error) {
 	return slog.HandlerOptions{Level: level}.NewJSONHandler(os.Stdout), nil
 }
 
-// JSONStderrPlugin writes json to stderr.
-func JSONStderrPlugin(level slog.Leveler) (slog.Handler, error) {
+// NewHandlerStderr writes json to stderr.
+func NewHandlerStderr(level slog.Leveler) (slog.Handler, error) {
 	return slog.HandlerOptions{Level: level}.NewJSONHandler(os.Stderr), nil
 }
