@@ -204,10 +204,6 @@ linters:
     - godox
     - forcetypeassert
 
-    # Enable this again when removing replace directive
-    - goanalysis_metalinter
-
-
 issues:
   # List of regexps of issue texts to exclude, empty list by default.
   # But independently from this option we use default exclude patterns,
