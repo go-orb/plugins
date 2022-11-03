@@ -8,21 +8,21 @@ import (
 )
 
 func init() {
-	if err := log.Plugins.Add("textstdout", TextStdoutPlugin); err != nil {
+	if err := log.Plugins.Add("textstdout", NewHandlerstdout); err != nil {
 		panic(err)
 	}
 
-	if err := log.Plugins.Add("textstderr", TextStderrPlugin); err != nil {
+	if err := log.Plugins.Add("textstderr", NewHandlerStderr); err != nil {
 		panic(err)
 	}
 }
 
-// TextStdoutPlugin writes text to stdout.
-func TextStdoutPlugin(level slog.Leveler) (slog.Handler, error) {
+// NewHandlerstdout writes text to stdout.
+func NewHandlerstdout(level slog.Leveler) (slog.Handler, error) {
 	return slog.HandlerOptions{Level: level}.NewTextHandler(os.Stdout), nil
 }
 
-// TextStderrPlugin writes text to stderr.
-func TextStderrPlugin(level slog.Leveler) (slog.Handler, error) {
+// NewHandlerStderr writes text to stderr.
+func NewHandlerStderr(level slog.Leveler) (slog.Handler, error) {
 	return slog.HandlerOptions{Level: level}.NewTextHandler(os.Stderr), nil
 }
