@@ -1,3 +1,4 @@
+// Package text provides a the slog text handler.
 package text
 
 import (
