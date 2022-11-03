@@ -2,7 +2,7 @@ module github.com/go-micro/plugins/log/json
 
 go 1.19
 
-replace go-micro.dev/v5 => ../../../orb
+replace go-micro.dev/v5 => ../../../../orb
 
 require golang.org/x/exp v0.0.0-20221012211006-4de253d81b95
 
