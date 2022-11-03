@@ -233,8 +233,6 @@ function create_summary() {
 }
 
 git clone https://github.com/go-orb/orb ../orb
-pwd
-ls -la
 
 case $1 in
 "lint")

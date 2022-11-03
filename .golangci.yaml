@@ -178,7 +178,7 @@ linters:
     - ifshort
     - structcheck
     - deadcode
-    # - nosnakecase
+    - nosnakecase
     - interfacer
     - maligned
     - scopelint
@@ -203,6 +203,10 @@ linters:
     - containedctx
     - godox
     - forcetypeassert
+
+    # Enable this again when removing replace directive
+    - goanalysis_metalinter
+
 
 issues:
   # List of regexps of issue texts to exclude, empty list by default.
