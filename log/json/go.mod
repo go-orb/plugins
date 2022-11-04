@@ -6,7 +6,7 @@ replace go-micro.dev/v5 => ../../../orb
 
 require (
 	go-micro.dev/v5 v5.0.0-00010101000000-000000000000
-	golang.org/x/exp v0.0.0-20221012211006-4de253d81b95
+	golang.org/x/exp v0.0.0-20221031165847-c99f073a8326
 )
 
 require (
