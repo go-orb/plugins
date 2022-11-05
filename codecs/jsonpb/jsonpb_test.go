@@ -25,7 +25,165 @@ import (
 )
 
 var (
-	builtinFieldFixtures = []struct { //nolint:gochecknoglobals
+	fieldFixtures = []struct {
+		data          interface{}
+		json          string
+		skipUnmarshal bool
+	}{
+		{data: int32(1), json: "1"},
+		{data: proto.Int32(1), json: "1"},
+		{data: int64(1), json: "1"},
+		{data: proto.Int64(1), json: "1"},
+		{data: uint32(1), json: "1"},
+		{data: proto.Uint32(1), json: "1"},
+		{data: uint64(1), json: "1"},
+		{data: proto.Uint64(1), json: "1"},
+		{data: "abc", json: `"abc"`},
+		{data: []byte("abc"), json: `"YWJj"`},
+		{data: []byte{}, json: `""`},
+		{data: proto.String("abc"), json: `"abc"`},
+		{data: float32(1.5), json: "1.5"},
+		{data: proto.Float32(1.5), json: "1.5"},
+		{data: float64(1.5), json: "1.5"},
+		{data: proto.Float64(1.5), json: "1.5"},
+		{data: true, json: "true"},
+		{data: false, json: "false"},
+		{data: (*string)(nil), json: "null"},
+		{
+			data: examplepb.NumericEnum_ONE,
+			json: `"ONE"`,
+			// TODO(yugui) support unmarshaling of symbolic enum
+			skipUnmarshal: true,
+		},
+		{
+			data: (*examplepb.NumericEnum)(proto.Int32(int32(examplepb.NumericEnum_ONE))),
+			json: `"ONE"`,
+			// TODO(yugui) support unmarshaling of symbolic enum
+			skipUnmarshal: true,
+		},
+
+		{
+			data: map[string]int32{
+				"foo": 1,
+			},
+			json: `{"foo":1}`,
+		},
+		{
+			data: map[string]*examplepb.SimpleMessage{
+				"foo": {Id: "bar"},
+			},
+			json: `{"foo":{"id":"bar"}}`,
+		},
+		{
+			data: map[int32]*examplepb.SimpleMessage{
+				1: {Id: "foo"},
+			},
+			json: `{"1":{"id":"foo"}}`,
+		},
+		{
+			data: map[bool]*examplepb.SimpleMessage{
+				true: {Id: "foo"},
+			},
+			json: `{"true":{"id":"foo"}}`,
+		},
+		{
+			data: &durationpb.Duration{
+				Seconds: 123,
+				Nanos:   456000000,
+			},
+			json: `"123.456s"`,
+		},
+		{
+			data: &timestamppb.Timestamp{
+				Seconds: 1462875553,
+				Nanos:   123000000,
+			},
+			json: `"2016-05-10T10:19:13.123Z"`,
+		},
+		{
+			data: new(emptypb.Empty),
+			json: "{}",
+		},
+		{
+			data: &structpb.Value{
+				Kind: new(structpb.Value_NullValue),
+			},
+			json:          "null",
+			skipUnmarshal: true,
+		},
+		{
+			data: &structpb.Value{
+				Kind: &structpb.Value_NumberValue{
+					NumberValue: 123.4,
+				},
+			},
+			json:          "123.4",
+			skipUnmarshal: true,
+		},
+		{
+			data: &structpb.Value{
+				Kind: &structpb.Value_StringValue{
+					StringValue: "abc",
+				},
+			},
+			json:          `"abc"`,
+			skipUnmarshal: true,
+		},
+		{
+			data: &structpb.Value{
+				Kind: &structpb.Value_BoolValue{
+					BoolValue: true,
+				},
+			},
+			json:          "true",
+			skipUnmarshal: true,
+		},
+		{
+			data: &structpb.Struct{
+				Fields: map[string]*structpb.Value{
+					"foo_bar": {
+						Kind: &structpb.Value_BoolValue{
+							BoolValue: true,
+						},
+					},
+				},
+			},
+			json:          `{"foo_bar":true}`,
+			skipUnmarshal: true,
+		},
+
+		{
+			data: &wrapperspb.BoolValue{Value: true},
+			json: "true",
+		},
+		{
+			data: &wrapperspb.DoubleValue{Value: 123.456},
+			json: "123.456",
+		},
+		{
+			data: &wrapperspb.FloatValue{Value: 123.456},
+			json: "123.456",
+		},
+		{
+			data: &wrapperspb.Int32Value{Value: -123},
+			json: "-123",
+		},
+		{
+			data: &wrapperspb.Int64Value{Value: -123},
+			json: `"-123"`,
+		},
+		{
+			data: &wrapperspb.UInt32Value{Value: 123},
+			json: "123",
+		},
+		{
+			data: &wrapperspb.UInt64Value{Value: 123},
+			json: `"123"`,
+		},
+		// TODO(yugui) Add other well-known types once jsonpb supports them
+	}
+
+	builtinFieldFixtures = []struct {
 		data interface{}
 		json string
 	}{
@@ -559,166 +717,6 @@ func TestJSONPbDecoderUnknownField(t *testing.T) {
 		t.Errorf("m.Unmarshal(&got) not failed; want `unknown field` error; data=%q", data)
 	}
 }
-
-var (
-	fieldFixtures = []struct {
-		data          interface{}
-		json          string
-		skipUnmarshal bool
-	}{
-		{data: int32(1), json: "1"},
-		{data: proto.Int32(1), json: "1"},
-		{data: int64(1), json: "1"},
-		{data: proto.Int64(1), json: "1"},
-		{data: uint32(1), json: "1"},
-		{data: proto.Uint32(1), json: "1"},
-		{data: uint64(1), json: "1"},
-		{data: proto.Uint64(1), json: "1"},
-		{data: "abc", json: `"abc"`},
-		{data: []byte("abc"), json: `"YWJj"`},
-		{data: []byte{}, json: `""`},
-		{data: proto.String("abc"), json: `"abc"`},
-		{data: float32(1.5), json: "1.5"},
-		{data: proto.Float32(1.5), json: "1.5"},
-		{data: float64(1.5), json: "1.5"},
-		{data: proto.Float64(1.5), json: "1.5"},
-		{data: true, json: "true"},
-		{data: false, json: "false"},
-		{data: (*string)(nil), json: "null"},
-		{
-			data: examplepb.NumericEnum_ONE,
-			json: `"ONE"`,
-			// TODO(yugui) support unmarshaling of symbolic enum
-			skipUnmarshal: true,
-		},
-		{
-			data: (*examplepb.NumericEnum)(proto.Int32(int32(examplepb.NumericEnum_ONE))),
-			json: `"ONE"`,
-			// TODO(yugui) support unmarshaling of symbolic enum
-			skipUnmarshal: true,
-		},
-
-		{
-			data: map[string]int32{
-				"foo": 1,
-			},
-			json: `{"foo":1}`,
-		},
-		{
-			data: map[string]*examplepb.SimpleMessage{
-				"foo": {Id: "bar"},
-			},
-			json: `{"foo":{"id":"bar"}}`,
-		},
-		{
-			data: map[int32]*examplepb.SimpleMessage{
-				1: {Id: "foo"},
-			},
-			json: `{"1":{"id":"foo"}}`,
-		},
-		{
-			data: map[bool]*examplepb.SimpleMessage{
-				true: {Id: "foo"},
-			},
-			json: `{"true":{"id":"foo"}}`,
-		},
-		{
-			data: &durationpb.Duration{
-				Seconds: 123,
-				Nanos:   456000000,
-			},
-			json: `"123.456s"`,
-		},
-		{
-			data: &timestamppb.Timestamp{
-				Seconds: 1462875553,
-				Nanos:   123000000,
-			},
-			json: `"2016-05-10T10:19:13.123Z"`,
-		},
-		{
-			data: new(emptypb.Empty),
-			json: "{}",
-		},
-		{
-			data: &structpb.Value{
-				Kind: new(structpb.Value_NullValue),
-			},
-			json:          "null",
-			skipUnmarshal: true,
-		},
-		{
-			data: &structpb.Value{
-				Kind: &structpb.Value_NumberValue{
-					NumberValue: 123.4,
-				},
-			},
-			json:          "123.4",
-			skipUnmarshal: true,
-		},
-		{
-			data: &structpb.Value{
-				Kind: &structpb.Value_StringValue{
-					StringValue: "abc",
-				},
-			},
-			json:          `"abc"`,
-			skipUnmarshal: true,
-		},
-		{
-			data: &structpb.Value{
-				Kind: &structpb.Value_BoolValue{
-					BoolValue: true,
-				},
-			},
-			json:          "true",
-			skipUnmarshal: true,
-		},
-		{
-			data: &structpb.Struct{
-				Fields: map[string]*structpb.Value{
-					"foo_bar": {
-						Kind: &structpb.Value_BoolValue{
-							BoolValue: true,
-						},
-					},
-				},
-			},
-			json:          `{"foo_bar":true}`,
-			skipUnmarshal: true,
-		},
-
-		{
-			data: &wrapperspb.BoolValue{Value: true},
-			json: "true",
-		},
-		{
-			data: &wrapperspb.DoubleValue{Value: 123.456},
-			json: "123.456",
-		},
-		{
-			data: &wrapperspb.FloatValue{Value: 123.456},
-			json: "123.456",
-		},
-		{
-			data: &wrapperspb.Int32Value{Value: -123},
-			json: "-123",
-		},
-		{
-			data: &wrapperspb.Int64Value{Value: -123},
-			json: `"-123"`,
-		},
-		{
-			data: &wrapperspb.UInt32Value{Value: 123},
-			json: "123",
-		},
-		{
-			data: &wrapperspb.UInt64Value{Value: 123},
-			json: `"123"`,
-		},
-		// TODO(yugui) Add other well-known types once jsonpb supports them
-	}
-)
 
 func TestJSONPbUnmarshalNullField(t *testing.T) {
 	var out map[string]interface{}
