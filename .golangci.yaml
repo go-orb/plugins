@@ -189,6 +189,7 @@ linters:
     - makezero
     - gofumpt
     - nlreturn
+    - thelper
 
     # Can be considered to be enabled
     - gochecknoinits
@@ -226,6 +227,9 @@ issues:
         - funlen
         - varnamelen
         - wsl
+        - gocognit
+        - cyclop
+        - maintidx
 
   # Independently from option `exclude` we use default exclude patterns,
   # it can be disabled by this option. To list all

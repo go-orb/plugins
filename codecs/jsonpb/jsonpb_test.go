@@ -947,7 +947,6 @@ func TestJSONPbMarshalResponseBodies(t *testing.T) {
 			},
 		},
 	} {
-
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			m := JSONPb{
 				JSONPb: runtime.JSONPb{
