@@ -1,4 +1,4 @@
-package forms
+package form
 
 // Source:
 // https://github.com/go-kratos/kratos/blob/main/encoding/form/proto_encode.go
@@ -17,7 +17,7 @@ import (
 	"go-micro.dev/v5/codecs"
 )
 
-var _ codecs.Marshaler = (*Codec)(nil)
+var _ codecs.Marshaler = (*Form)(nil)
 
 const (
 	// Name is form codec name.
@@ -27,9 +27,9 @@ const (
 	nullStr = "null"
 )
 
-// Codec is used to encode/decode HTML form values as used in GET request URL
+// Form is used to encode/decode HTML form values as used in GET request URL
 // query parameters or POST request bodies.
-type Codec struct {
+type Form struct {
 	encoder *form.Encoder
 	decoder *form.Decoder
 }
@@ -42,14 +42,14 @@ func init() {
 
 // NewFormCodec will create a codec used to encode/decode HTML form values as
 // used in GET request URL query parameters or POST request bodies.
-func NewFormCodec() *Codec {
-	return &Codec{
+func NewFormCodec() *Form {
+	return &Form{
 		encoder: form.NewEncoder(),
 		decoder: form.NewDecoder(),
 	}
 }
 
-func (c Codec) Marshal(v interface{}) ([]byte, error) {
+func (c Form) Marshal(v interface{}) ([]byte, error) {
 	var (
 		vs  url.Values
 		err error
@@ -76,7 +76,7 @@ func (c Codec) Marshal(v interface{}) ([]byte, error) {
 	return []byte(vs.Encode()), nil
 }
 
-func (c Codec) Unmarshal(data []byte, v interface{}) error {
+func (c Form) Unmarshal(data []byte, v interface{}) error {
 	vs, err := url.ParseQuery(string(data))
 	if err != nil {
 		return err
@@ -101,7 +101,7 @@ func (c Codec) Unmarshal(data []byte, v interface{}) error {
 }
 
 // NewDecoder returns a Decoder which reads byte sequence from "r".
-func (p Codec) NewDecoder(r io.Reader) codecs.Decoder {
+func (p Form) NewDecoder(r io.Reader) codecs.Decoder {
 	return codecs.DecoderFunc(func(v interface{}) error {
 		b, err := io.ReadAll(r)
 		if err != nil {
@@ -113,7 +113,7 @@ func (p Codec) NewDecoder(r io.Reader) codecs.Decoder {
 }
 
 // NewEncoder returns an Encoder which writes bytes sequence into "w".
-func (p Codec) NewEncoder(w io.Writer) codecs.Encoder {
+func (p Form) NewEncoder(w io.Writer) codecs.Encoder {
 	return codecs.EncoderFunc(func(v interface{}) error {
 		b, err := p.Marshal(v)
 		if err != nil {
@@ -126,13 +126,13 @@ func (p Codec) NewEncoder(w io.Writer) codecs.Encoder {
 	})
 }
 
-func (Codec) String() string {
+func (Form) String() string {
 	return Name
 }
 
 // ContentTypes returns the Content-Type which this marshaler is responsible for.
 // The parameter describes the type which is being marshalled, which can sometimes
 // affect the content type returned.
-func (p *Codec) ContentTypes() []string {
+func (p *Form) ContentTypes() []string {
 	return []string{ContentType}
 }

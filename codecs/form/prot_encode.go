@@ -1,4 +1,4 @@
-package forms
+package form
 
 import (
 	"encoding/base64"
@@ -14,7 +14,7 @@ import (
 )
 
 // EncodeValues encode a message into url values.
-func (c Codec) EncodeValues(msg interface{}) (url.Values, error) {
+func (c Form) EncodeValues(msg interface{}) (url.Values, error) {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return url.Values{}, nil
 	}

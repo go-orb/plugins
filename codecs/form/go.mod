@@ -1,4 +1,4 @@
-module github.com/go-micro/plugins/codecs/forms
+module github.com/go-micro/plugins/codecs/form
 
 go 1.19
 
