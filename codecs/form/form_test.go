@@ -3,63 +3,68 @@ package form
 import (
 	"encoding/base64"
 	"reflect"
+	"strconv"
 	"testing"
 
-	"google.golang.org/grpc/encoding"
+	"go-micro.dev/v5/codecs"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/go-micro/plugins/codecs/form/testdata"
 )
 
 type LoginRequest struct {
-	Username string `json:"username,omitempty"`
-	Password string `json:"password,omitempty"`
+	Username string `json:"username,omitempty" form:"username"`
+	Password string `json:"password,omitempty" form:"password,omitempty"`
 }
 
 type TestModel struct {
-	ID   int32  `json:"id"`
-	Name string `json:"name"`
+	ID   int32  `json:"id" form:"id"`
+	Name string `json:"name" form:"name"`
 }
 
-const contentType = "x-www-form-urlencoded"
+var marshalTests = []struct {
+	Input    any
+	Expected string
+}{
+	{
+		Input: LoginRequest{
+			Username: "micro",
+			Password: "micro_pwd",
+		},
+		Expected: "password=micro_pwd&username=micro",
+	},
+	{
+		Input: LoginRequest{
+			Username: "micro",
+			Password: "",
+		},
+		Expected: "username=micro",
+	},
+	{
+		Input: TestModel{
+			ID:   1,
+			Name: "micro",
+		},
+		Expected: "id=1&name=micro",
+	},
+}
 
 func TestFormCodecMarshal(t *testing.T) {
-	req := &LoginRequest{
-		Username: "micro",
-		Password: "micro_pwd",
-	}
-	content, err := encoding.GetCodec(contentType).Marshal(req)
-	if err != nil {
-		t.Errorf("marshal error: %v", err)
-	}
-	if !reflect.DeepEqual([]byte("password=micro_pwd&username=micro"), content) {
-		t.Errorf("expect %v, got %v", []byte("password=micro_pwd&username=micro"), content)
-	}
+	form := getCodec(t)
 
-	req = &LoginRequest{
-		Username: "micro",
-		Password: "",
-	}
-	content, err = encoding.GetCodec(contentType).Marshal(req)
-	if err != nil {
-		t.Errorf("expect %v, got %v", nil, err)
-	}
-	if !reflect.DeepEqual([]byte("username=micro"), content) {
-		t.Errorf("expect %v, got %v", []byte("username=micro"), content)
-	}
+	for i, test := range marshalTests {
+		t.Run("MarshalTest"+strconv.Itoa(i), func(t *testing.T) {
+			c, err := form.Marshal(&test.Input)
+			assert.NoError(t, err)
 
-	m := &TestModel{
-		ID:   1,
-		Name: "micro",
-	}
-	content, err = encoding.GetCodec(contentType).Marshal(m)
-	t.Log(string(content))
-	if err != nil {
-		t.Errorf("expect %v, got %v", nil, err)
-	}
-	if !reflect.DeepEqual([]byte("id=1&name=micro"), content) {
-		t.Errorf("expect %v, got %v", []byte("id=1&name=micro"), content)
+			content := string(c)
+			assert.Equal(t, content, test.Expected)
+		})
 	}
 }
 
@@ -68,32 +73,23 @@ func TestFormCodecUnmarshal(t *testing.T) {
 		Username: "micro",
 		Password: "micro_pwd",
 	}
-	content, err := encoding.GetCodec(contentType).Marshal(req)
-	if err != nil {
-		t.Errorf("expect %v, got %v", nil, err)
-	}
+	content, err := getCodec(t).Marshal(req)
+	assert.NoError(t, err)
 
 	bindReq := new(LoginRequest)
-	err = encoding.GetCodec(contentType).Unmarshal(content, bindReq)
-	if err != nil {
-		t.Errorf("expect %v, got %v", nil, err)
-	}
-	if !reflect.DeepEqual("micro", bindReq.Username) {
-		t.Errorf("expect %v, got %v", "micro", bindReq.Username)
-	}
-	if !reflect.DeepEqual("micro_pwd", bindReq.Password) {
-		t.Errorf("expect %v, got %v", "micro_pwd", bindReq.Password)
-	}
+	assert.NoError(t, getCodec(t).Unmarshal(content, bindReq))
+	assert.Equal(t, "micro", bindReq.Username)
+	assert.Equal(t, "micro_pwd", bindReq.Password)
 }
 
 func TestProtoEncodeDecode(t *testing.T) {
-	in := &complex.Complex{
+	in := &testdata.Complex{
 		Id:      2233,
 		NoOne:   "2233",
-		Simple:  &complex.Simple{Component: "5566"},
+		Simple:  &testdata.Simple{Component: "5566"},
 		Simples: []string{"3344", "5566"},
 		B:       true,
-		Sex:     complex.Sex_woman,
+		Sex:     testdata.Sex_woman,
 		Age:     18,
 		A:       19,
 		Count:   3,
@@ -115,33 +111,28 @@ func TestProtoEncodeDecode(t *testing.T) {
 		String_:   &wrapperspb.StringValue{Value: "go-micro"},
 		Bytes:     &wrapperspb.BytesValue{Value: []byte("123")},
 	}
-	content, err := encoding.GetCodec(contentType).Marshal(in)
+	content, err := getCodec(t).Marshal(in)
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}
-	if !reflect.DeepEqual("a=19&age=18&b=true&bool=false&byte=MTIz&bytes=MTIz&count=3&d=22.22&double=12.33&duration="+
-		"2m0.000000022s&field=1%2C2&float=12.34&id=2233&int32=32&int64=64&map%5Bmicro%5D=https%3A%2F%2Fgo-micro.dev%2F&"+
-		"numberOne=2233&price=11.23&sex=woman&simples=3344&simples=5566&string=go-micro"+
-		"&timestamp=1970-01-01T00%3A00%3A20.000000002Z&uint32=32&uint64=64&very_simple.component=5566", string(content)) {
-		t.Errorf("rawpath is not equal to %v", string(content))
-	}
-	in2 := &complex.Complex{}
-	err = encoding.GetCodec(contentType).Unmarshal(content, in2)
-	if err != nil {
-		t.Errorf("expect %v, got %v", nil, err)
-	}
-	if !reflect.DeepEqual(int64(2233), in2.Id) {
-		t.Errorf("expect %v, got %v", int64(2233), in2.Id)
-	}
-	if !reflect.DeepEqual("2233", in2.NoOne) {
-		t.Errorf("expect %v, got %v", "2233", in2.NoOne)
-	}
-	if reflect.DeepEqual(in2.Simple, nil) {
-		t.Errorf("expect %v, got %v", nil, in2.Simple)
-	}
-	if !reflect.DeepEqual("5566", in2.Simple.Component) {
-		t.Errorf("expect %v, got %v", "5566", in2.Simple.Component)
-	}
+
+	expected := "a=19&age=18&b=true&bool=false&byte=MTIz&bytes=MTIz&count=3&d=" +
+		"22.22&double=12.33&duration=2m0.000000022s&field=1%2C2&float=12.34&id=" +
+		"2233&int32=32&int64=64&map%5Bmicro%5D=https%3A%2F%2Fgo-micro.dev%2F&" +
+		"numberOne=2233&price=11.23&sex=woman&simples=3344&simples=5566&string=go-micro" +
+		"&timestamp=1970-01-01T00%3A00%3A20.000000002Z&uint32=32&uint64=64&very_simple.component=5566"
+
+	assert.Equal(t, expected, string(content))
+
+	in2 := testdata.Complex{}
+	assert.NoError(t, getCodec(t).Unmarshal(content, &in2))
+	assert.Equal(t, int64(2233), in2.Id)
+	assert.Equal(t, "2233", in2.NoOne)
+	assert.NotEqual(t, nil, in2.Simple.Component)
+	assert.Equal(t, "5566", in2.Simple.Component)
+	// assert.Equal(t, int64(2233), in2.Id)
+	// assert.Equal(t, int64(2233), in2.Id)
+
 	if reflect.DeepEqual(in2.Simples, nil) {
 		t.Errorf("expect %v, got %v", nil, in2.Simples)
 	}
@@ -157,9 +148,9 @@ func TestProtoEncodeDecode(t *testing.T) {
 }
 
 func TestDecodeStructPb(t *testing.T) {
-	req := new(ectest.StructPb)
+	req := new(testdata.StructPb)
 	query := `data={"name":"micro"}&data_list={"name1": "micro"}&data_list={"name2": "go-micro"}`
-	if err := encoding.GetCodec(contentType).Unmarshal([]byte(query), req); err != nil {
+	if err := getCodec(t).Unmarshal([]byte(query), req); err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}
 	if !reflect.DeepEqual("micro", req.Data.GetFields()["name"].GetStringValue()) {
@@ -181,8 +172,8 @@ func TestDecodeBytesValuePb(t *testing.T) {
 	url := "https://example.com/xx/?a=1&b=2&c=3"
 	val := base64.URLEncoding.EncodeToString([]byte(url))
 	content := "bytes=" + val
-	in2 := &complex.Complex{}
-	if err := encoding.GetCodec(contentType).Unmarshal([]byte(content), in2); err != nil {
+	in2 := &testdata.Complex{}
+	if err := getCodec(t).Unmarshal([]byte(content), in2); err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}
 	if !reflect.DeepEqual(url, string(in2.Bytes.Value)) {
@@ -191,7 +182,7 @@ func TestDecodeBytesValuePb(t *testing.T) {
 }
 
 func TestEncodeFieldMask(t *testing.T) {
-	req := &bdtest.HelloRequest{
+	req := &testdata.HelloRequest{
 		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"foo", "bar"}},
 	}
 	if v := EncodeFieldMask(req.ProtoReflect()); v != "updateMask=foo,bar" {
@@ -203,14 +194,29 @@ func TestEncodeFieldMask(t *testing.T) {
 
 func TestOptional(t *testing.T) {
 	v := int32(100)
-	req := &bdtest.HelloRequest{
+	req := &testdata.HelloRequest{
 		Name:     "foo",
-		Sub:      &bdtest.Sub{Name: "bar"},
+		Sub:      &testdata.Sub{Name: "bar"},
 		OptInt32: &v,
 	}
-	if v, _ := EncodeValues(req); v.Encode() != "name=foo&optInt32=100&sub.naming=bar" {
+
+	if v, _ := getCodec(t).EncodeValues(req); v.Encode() != "name=foo&optInt32=100&sub.naming=bar" {
 		t.Errorf("got %s", v.Encode())
 	} else {
 		t.Log(v)
 	}
+}
+
+func getCodec(t *testing.T) *Form {
+	codec, err := codecs.Plugins.Get(Name)
+	if err != nil {
+		t.Fatalf("retrieve codec plugin: %v", err)
+	}
+
+	form, ok := codec.(*Form)
+	if !ok {
+		t.Fatal("failed to cast codec to *Form")
+	}
+
+	return form
 }
