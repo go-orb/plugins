@@ -1,3 +1,4 @@
+// Package form provides HTTP form <> protobuf encoding/decoding.
 package form
 
 // Source:
@@ -20,7 +21,8 @@ var _ codecs.Marshaler = (*Form)(nil)
 
 const (
 	// Name is form codec name.
-	Name        = "form"
+	Name = "form"
+	// ContentType used by HTTP forms.
 	ContentType = "x-www-form-urlencoded"
 	// Null value string.
 	nullStr = "null"
@@ -48,6 +50,7 @@ func NewFormCodec() *Form {
 	}
 }
 
+// Marshal marshals an object into HTTP form format.
 func (c Form) Marshal(v any) ([]byte, error) {
 	var (
 		vs  url.Values
@@ -75,6 +78,7 @@ func (c Form) Marshal(v any) ([]byte, error) {
 	return []byte(vs.Encode()), nil
 }
 
+// Unmarshal unmarshals a struct from HTTP form format into an object.
 func (c Form) Unmarshal(data []byte, v any) error {
 	vs, err := url.ParseQuery(string(data))
 	if err != nil {
@@ -89,21 +93,21 @@ func (c Form) Unmarshal(data []byte, v any) error {
 }
 
 // NewDecoder returns a Decoder which reads byte sequence from "r".
-func (p Form) NewDecoder(r io.Reader) codecs.Decoder {
+func (c Form) NewDecoder(r io.Reader) codecs.Decoder {
 	return codecs.DecoderFunc(func(v any) error {
 		b, err := io.ReadAll(r)
 		if err != nil {
 			return err
 		}
 
-		return p.Unmarshal(b, v)
+		return c.Unmarshal(b, v)
 	})
 }
 
 // NewEncoder returns an Encoder which writes bytes sequence into "w".
-func (p Form) NewEncoder(w io.Writer) codecs.Encoder {
+func (c Form) NewEncoder(w io.Writer) codecs.Encoder {
 	return codecs.EncoderFunc(func(v any) error {
-		b, err := p.Marshal(v)
+		b, err := c.Marshal(v)
 		if err != nil {
 			return err
 		}
@@ -119,8 +123,8 @@ func (Form) String() string {
 }
 
 // ContentTypes returns the Content-Type which this marshaler is responsible for.
-// The parameter describes the type which is being marshalled, which can sometimes
+// The parameter describes the type which is being marshaled, which can sometimes
 // affect the content type returned.
-func (p *Form) ContentTypes() []string {
+func (c Form) ContentTypes() []string {
 	return []string{ContentType}
 }

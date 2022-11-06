@@ -21,5 +21,4 @@ require (
 require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/stretchr/testify v1.8.1
-	google.golang.org/grpc v1.50.1
 )
