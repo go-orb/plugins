@@ -9,7 +9,6 @@ package form
 import (
 	"io"
 	"net/url"
-	"reflect"
 
 	"github.com/go-playground/form/v4"
 	"google.golang.org/protobuf/proto"
@@ -49,7 +48,7 @@ func NewFormCodec() *Form {
 	}
 }
 
-func (c Form) Marshal(v interface{}) ([]byte, error) {
+func (c Form) Marshal(v any) ([]byte, error) {
 	var (
 		vs  url.Values
 		err error
@@ -76,24 +75,13 @@ func (c Form) Marshal(v interface{}) ([]byte, error) {
 	return []byte(vs.Encode()), nil
 }
 
-func (c Form) Unmarshal(data []byte, v interface{}) error {
+func (c Form) Unmarshal(data []byte, v any) error {
 	vs, err := url.ParseQuery(string(data))
 	if err != nil {
 		return err
 	}
 
-	rv := reflect.ValueOf(v)
-	for rv.Kind() == reflect.Ptr {
-		if rv.IsNil() {
-			rv.Set(reflect.New(rv.Type().Elem()))
-		}
-
-		rv = rv.Elem()
-	}
-
 	if m, ok := v.(proto.Message); ok {
-		return DecodeValues(m, vs)
-	} else if m, ok := reflect.Indirect(reflect.ValueOf(v)).Interface().(proto.Message); ok {
 		return DecodeValues(m, vs)
 	}
 
@@ -102,7 +90,7 @@ func (c Form) Unmarshal(data []byte, v interface{}) error {
 
 // NewDecoder returns a Decoder which reads byte sequence from "r".
 func (p Form) NewDecoder(r io.Reader) codecs.Decoder {
-	return codecs.DecoderFunc(func(v interface{}) error {
+	return codecs.DecoderFunc(func(v any) error {
 		b, err := io.ReadAll(r)
 		if err != nil {
 			return err
@@ -114,7 +102,7 @@ func (p Form) NewDecoder(r io.Reader) codecs.Decoder {
 
 // NewEncoder returns an Encoder which writes bytes sequence into "w".
 func (p Form) NewEncoder(w io.Writer) codecs.Encoder {
-	return codecs.EncoderFunc(func(v interface{}) error {
+	return codecs.EncoderFunc(func(v any) error {
 		b, err := p.Marshal(v)
 		if err != nil {
 			return err
