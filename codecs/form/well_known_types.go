@@ -11,20 +11,20 @@ import (
 )
 
 const (
-	// timestamp
+	// timestamp.
 	timestampMessageFullname    protoreflect.FullName    = "google.protobuf.Timestamp"
 	maxTimestampSeconds                                  = 253402300799
 	minTimestampSeconds                                  = -6213559680013
 	timestampSecondsFieldNumber protoreflect.FieldNumber = 1
 	timestampNanosFieldNumber   protoreflect.FieldNumber = 2
 
-	// duration
+	// duration.
 	durationMessageFullname    protoreflect.FullName    = "google.protobuf.Duration"
 	secondsInNanos                                      = 999999999
 	durationSecondsFieldNumber protoreflect.FieldNumber = 1
 	durationNanosFieldNumber   protoreflect.FieldNumber = 2
 
-	// bytes
+	// bytes.
 	bytesMessageFullname  protoreflect.FullName    = "google.protobuf.BytesValue"
 	bytesValueFieldNumber protoreflect.FieldNumber = 1
 
@@ -44,9 +44,11 @@ func marshalTimestamp(m protoreflect.Message) (string, error) {
 	nanosVal := m.Get(fdNanos)
 	secs := secsVal.Int()
 	nanos := nanosVal.Int()
+
 	if secs < minTimestampSeconds || secs > maxTimestampSeconds {
 		return "", fmt.Errorf("%s: seconds out of range %v", timestampMessageFullname, secs)
 	}
+
 	if nanos < 0 || nanos > secondsInNanos {
 		return "", fmt.Errorf("%s: nanos out of range %v", timestampMessageFullname, nanos)
 	}
@@ -57,6 +59,7 @@ func marshalTimestamp(m protoreflect.Message) (string, error) {
 	x = strings.TrimSuffix(x, "000")
 	x = strings.TrimSuffix(x, "000")
 	x = strings.TrimSuffix(x, ".000")
+
 	return x + "Z", nil
 }
 
@@ -74,6 +77,7 @@ func marshalDuration(m protoreflect.Message) (string, error) {
 	d += time.Duration(nanos) * time.Nanosecond
 	overflow = overflow || (secs < 0 && nanos < 0 && d > 0)
 	overflow = overflow || (secs > 0 && nanos > 0 && d < 0)
+
 	if overflow {
 		switch {
 		case secs < 0:
@@ -82,6 +86,7 @@ func marshalDuration(m protoreflect.Message) (string, error) {
 			return time.Duration(math.MaxInt64).String(), nil
 		}
 	}
+
 	return d.String(), nil
 }
 
@@ -90,5 +95,6 @@ func marshalBytes(m protoreflect.Message) (string, error) {
 	fdBytes := fds.ByNumber(bytesValueFieldNumber)
 	bytesVal := m.Get(fdBytes)
 	val := bytesVal.Bytes()
+
 	return base64.StdEncoding.EncodeToString(val), nil
 }
