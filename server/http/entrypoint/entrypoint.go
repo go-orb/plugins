@@ -67,7 +67,6 @@ func NewEntrypoint(router router.Router, logger log.Logger, config Config, optio
 	entrypoint.http3Server, err = entrypoint.newHTTP3Server()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP3 server: %w", err)
-
 	}
 
 	return &entrypoint, nil

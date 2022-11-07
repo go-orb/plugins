@@ -12,10 +12,10 @@ import (
 	"github.com/go-micro/plugins/server/http/utils/header"
 )
 
-// TODO: decode body now also does content type setting, maybe seperate that out
+// TODO: decode body now also does content type setting, maybe separate that out
 
 // Decode body takes the request body and decodes it into the proto type.
-func (s *Server) decodeBody(w http.ResponseWriter, request *http.Request, in any) (string, error) {
+func (s *Server) decodeBody(resp http.ResponseWriter, request *http.Request, msg any) (string, error) {
 	var (
 		body        io.Reader
 		contentType string
@@ -53,7 +53,7 @@ func (s *Server) decodeBody(w http.ResponseWriter, request *http.Request, in any
 	// Set response content type
 	aHeader := request.Header.Get(headers.Accept)
 	accept := header.GetAcceptType(s.codecs, aHeader, contentType)
-	w.Header().Set(headers.ContentType, accept)
+	resp.Header().Set(headers.ContentType, accept)
 
 	codec, ok := s.codecs[contentType]
 	if !ok {
@@ -61,7 +61,7 @@ func (s *Server) decodeBody(w http.ResponseWriter, request *http.Request, in any
 		return "", ErrContentTypeNotSupported
 	}
 
-	if err := codec.NewDecoder(body).Decode(in); err != nil {
+	if err := codec.NewDecoder(body).Decode(msg); err != nil {
 		s.logger.Debug("Request failed, failed to decode body: %v", err)
 		return "", fmt.Errorf("decode content type '%s': %w", contentType, err)
 	}
@@ -82,13 +82,14 @@ func (s *Server) encodeBody(w http.ResponseWriter, r *http.Request, v any) error
 		return ErrContentTypeNotSupported
 	}
 
-	nw := w.(io.Writer)
+	nw := w.(io.Writer) //nolint:errcheck
 
 	eHeader := r.Header.Get(headers.AcceptEncoding)
 	if s.Config.EnableGzip && strings.Contains(eHeader, headers.GzipContentEncoding) {
 		w.Header().Set(headers.ConentEncoding, headers.GzipContentEncoding)
+
 		nw = gzip.NewWriter(w)
-		defer nw.(io.Closer).Close()
+		defer nw.(io.Closer).Close() //nolint:errcheck
 	}
 
 	if err := codec.NewEncoder(nw).Encode(v); err != nil {

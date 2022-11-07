@@ -13,6 +13,8 @@ import (
 )
 
 // Default config values.
+//
+//nolint:gochecknoglobals
 var (
 	DefaultAddress        = "0.0.0.0:42069"
 	DefaultRouter         = "chi"
@@ -22,6 +24,7 @@ var (
 	DefaultConfigSection = "http"
 )
 
+// Errors.
 var (
 	ErrNoRouter            = errors.New("no router plugin name set in config")
 	ErrRouterNotFound      = errors.New("router plugin not found, did you register it?")
@@ -55,7 +58,7 @@ type Config struct {
 	// want to add every codec plugin that has been registered to be automaically
 	// added to the server.
 	//
-	// Adding a codec to this list will mean that if the codec has been registerd,
+	// Adding a codec to this list will mean that if the codec has been registered,
 	// you will be able to make RPC requests in that format.
 	CodecWhitelist []string
 
@@ -78,7 +81,7 @@ func NewConfig(serviceName types.ServiceName, data []source.Data, options ...Opt
 
 	cfg.ApplyOptions(options...)
 
-	// TODO: optimize this. extract this part into a seperate function? How can we make config easy
+	// TODO: optimize this. extract this part into a separate function? How can we make config easy
 	sections := types.SplitServiceName(serviceName)
 	if err := config.Parse(append(sections, DefaultConfigSection), data, &cfg); err != nil {
 		return cfg, err
@@ -107,6 +110,7 @@ func (c *Config) NewCodecMap() (codecs.Map, error) {
 	}
 
 	cm := make(codecs.Map, len(c.CodecWhitelist))
+
 	for name, codec := range codecs.Plugins.All() {
 		if slice.In(c.CodecWhitelist, name) {
 			for _, mime := range codec.ContentTypes() {
@@ -221,6 +225,7 @@ func WithRouter(name string) Option {
 	}
 }
 
+// WithDisableHTTP2 disables HTTP2 by default on all newly created entrypoints.
 func WithDisableHTTP2() Option {
 	return WithEntrypointOptions(entrypoint.DisableHTTP2())
 }
