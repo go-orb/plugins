@@ -54,7 +54,7 @@ func (e *Entrypoint) newHTTP3Server() (*http3server, error) {
 
 	h2.Handler = http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		if err := h3.SetQuicHeaders(rw.Header()); err != nil {
-			e.logger.Errorf("Failed to set HTTP3 headers: %v", err)
+			e.logger.Error("Failed to set HTTP3 headers", err)
 		}
 
 		previousHandler.ServeHTTP(rw, req)

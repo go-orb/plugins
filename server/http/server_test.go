@@ -2,25 +2,29 @@ package http
 
 import (
 	"context"
-	"os"
 	"sync"
 	"testing"
 	"time"
 
-	"go-micro.dev/v4/logger"
+	"go-micro.dev/v5/log"
+	"go-micro.dev/v5/types"
 
-	"http-poc/logger/zerolog"
-
-	"github.com/go-micro/plugins/server/http/codec"
-	"github.com/go-micro/plugins/server/http/router/chi"
 	"github.com/go-micro/plugins/server/http/router/router"
 	"github.com/go-micro/plugins/server/http/utils/tests"
 	"github.com/go-micro/plugins/server/http/utils/tests/handler"
+
+	_ "github.com/go-micro/plugins/codecs/form"
+	_ "github.com/go-micro/plugins/codecs/jsonpb"
+	_ "github.com/go-micro/plugins/codecs/proto"
+	_ "github.com/go-micro/plugins/log/text"
+	_ "github.com/go-micro/plugins/server/http/router/chi"
 )
 
 // TODO: test if asking for specific content type back works
-// TODO: for client, provide info on this error: 		t.Error("As:", errors.As(err, &x509.HostnameError{})) >> change URL to proper hostname
-// TODO: Provide context on unknown authority error for client x509.UnknownAuthorityError >> Self signed cert was used
+// TODO: for client, provide info on this error: 		t.Error("As:", errors.As(err, &x509.HostnameError{}))
+//       >> change URL to proper hostname
+// TODO: Provide context on unknown authority error for client x509.UnknownAuthorityError
+//       >> Self signed cert was used
 
 /*
 Notes for HTTP/client << micro client
@@ -39,7 +43,8 @@ func TestServerSimple(t *testing.T) {
 	}
 
 	defer func() {
-		ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
+		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
+		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
 			t.Fatal("failed to stop", err)
@@ -85,7 +90,8 @@ func TestServerHTTPS(t *testing.T) {
 	}
 
 	defer func() {
-		ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
+		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
+		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
 			t.Fatal("failed to stop", err)
@@ -131,7 +137,8 @@ func TestServerHTTP2(t *testing.T) {
 	}
 
 	defer func() {
-		ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
+		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
+		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
 			t.Fatal("failed to stop", err)
@@ -180,7 +187,8 @@ func TestServerH2c(t *testing.T) {
 	}
 
 	defer func() {
-		ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
+		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
+		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
 			t.Fatal("failed to stop", err)
@@ -217,7 +225,8 @@ func TestServerHTTP3(t *testing.T) {
 	}
 
 	defer func() {
-		ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
+		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
+		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
 			t.Fatal("failed to stop", err)
@@ -329,7 +338,8 @@ func benchmark(b *testing.B, testFunc func(testing.TB, string) error, pN, sN int
 	}
 
 	defer func() {
-		ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(time.Second*10))
+		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*10))
+		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
 			b.Fatal("failed to stop", err)
@@ -381,27 +391,17 @@ func runBenchmark(b *testing.B, addr string, testFunc func(testing.TB, string) e
 	}
 }
 
-func setupRouter() router.Router {
-	return chi.ProvideChiRouter()
-}
-
-func setupLogger() logger.Logger {
-	return zerolog.ProvideZerologLogger(logger.WithOutput(os.Stdout), zerolog.WithDevelopmentMode())
-}
-
-func setupCodecs() codec.Codecs {
-	return codec.ProvideCodecs(codec.ProvideDefaultCodecs()...)
-}
-
 func setupServer(t testing.TB, opts ...Option) (*Server, router.Router) {
-	router := setupRouter()
-	logger := zerolog.ProvideZerologLogger(logger.WithOutput(os.Stdout), zerolog.WithDevelopmentMode())
-	codecs := setupCodecs()
+	name := types.ServiceName("test-server")
+	logger, err := log.ProvideLogger(name, nil)
+	if err != nil {
+		t.Fatalf("failed to setup logger: %v", err)
+	}
 
-	server, err := ProvideServerHTTP(router, codecs, logger, opts...)
+	server, err := ProvideServerHTTP(name, nil, logger, opts...)
 	if err != nil {
 		t.Fatalf("failed to provide http server: %v", err)
 	}
 
-	return server, router
+	return server, server.Router()
 }

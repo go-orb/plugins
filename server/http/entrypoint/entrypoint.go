@@ -5,17 +5,16 @@ package entrypoint
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net"
+
+	"go-micro.dev/v5/log"
 
 	"github.com/go-micro/plugins/server/http/router/router"
 	mip "github.com/go-micro/plugins/server/http/utils/ip"
 	mtcp "github.com/go-micro/plugins/server/http/utils/tcp"
 	mtls "github.com/go-micro/plugins/server/http/utils/tls"
 	mudp "github.com/go-micro/plugins/server/http/utils/udp"
-
-	"github.com/pkg/errors"
-
-	"http-poc/logger"
 )
 
 // Entrypoint represents a listener on one address. You can create multiple
@@ -24,7 +23,7 @@ import (
 // with the same handler.
 type Entrypoint struct {
 	Config Config
-	logger logger.Logger
+	logger log.Logger
 
 	listenerUDP net.PacketConn
 	listenerTCP net.Listener
@@ -37,7 +36,7 @@ type Entrypoint struct {
 // multiple entrypoints for multiple addresses and ports. One entrypoint
 // can serve a HTTP1, HTTP2 and HTTP3 server. If you enable HTTP3 it will listen
 // on both TCP and UDP on the same port.
-func NewEntrypoint(router router.Router, logger logger.Logger, config Config, options ...Option) (*Entrypoint, error) {
+func NewEntrypoint(router router.Router, logger log.Logger, config Config, options ...Option) (*Entrypoint, error) {
 	config.ApplyOptions(options...)
 
 	if err := mip.ValidateAddress(config.Address); err != nil {
@@ -58,7 +57,7 @@ func NewEntrypoint(router router.Router, logger logger.Logger, config Config, op
 
 	entrypoint.httpServer, err = entrypoint.newHTTPServer(router)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create HTTP server")
+		return nil, fmt.Errorf("failed to create HTTP server: %w", err)
 	}
 
 	if !entrypoint.Config.HTTP3 {
@@ -67,7 +66,8 @@ func NewEntrypoint(router router.Router, logger logger.Logger, config Config, op
 
 	entrypoint.http3Server, err = entrypoint.newHTTP3Server()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create HTTP3 server")
+		return nil, fmt.Errorf("failed to create HTTP3 server: %w", err)
+
 	}
 
 	return &entrypoint, nil
@@ -77,7 +77,7 @@ func NewEntrypoint(router router.Router, logger logger.Logger, config Config, op
 func (e *Entrypoint) Start() error {
 	var err error
 
-	// e.logger.Debug("Starting all HTTP entrypoints")
+	e.logger.Debug("Starting all HTTP entrypoints")
 
 	e.listenerTCP, err = mtcp.BuildListenerTCP(e.Config.Address, e.Config.TLS)
 	if err != nil {
@@ -86,7 +86,7 @@ func (e *Entrypoint) Start() error {
 
 	go func() {
 		if err = e.httpServer.Start(e.listenerTCP); err != nil {
-			e.logger.Errorf("Failed to start HTTP server: %v", err)
+			e.logger.Error("Failed to start HTTP server", err)
 		}
 	}()
 
@@ -97,12 +97,12 @@ func (e *Entrypoint) Start() error {
 	// Listen on the same UDP port as TCP for HTTP3
 	e.listenerUDP, err = mudp.BuildListenerUDP(e.Config.Address)
 	if err != nil {
-		return errors.Wrap(err, "failed to start UDP listener")
+		return fmt.Errorf("failed to start UDP listener: %w", err)
 	}
 
 	go func() {
 		if err := e.http3Server.Start(e.listenerUDP); err != nil {
-			e.logger.Errorf("Failed to start HTTP3 server: %v", err)
+			e.logger.Error("Failed to start HTTP3 server", err)
 		}
 	}()
 
@@ -118,7 +118,7 @@ func (e *Entrypoint) Stop(ctx context.Context) error {
 	errChan := make(chan error)
 	defer close(errChan)
 
-	// e.logger.Debug("Stopping all HTTP entrypoints")
+	e.logger.Debug("Stopping all HTTP entrypoints")
 
 	c := 1
 	if e.Config.HTTP3 {
@@ -161,7 +161,7 @@ func (e *Entrypoint) setupTLS() (*tls.Config, error) {
 	if len(e.Config.CertFile) > 0 && len(e.Config.KeyFile) > 0 && e.Config.TLS == nil {
 		config, err = mtls.LoadTLSConfig(e.Config.CertFile, e.Config.KeyFile)
 		if err != nil {
-			return config, errors.Wrap(err, "failed to load TLS config from files")
+			return config, fmt.Errorf("failed to load TLS config from files: %w", err)
 		}
 	}
 
@@ -169,7 +169,7 @@ func (e *Entrypoint) setupTLS() (*tls.Config, error) {
 	if !e.Config.Insecure && e.Config.TLS == nil {
 		config, err = mtls.GenTlSConfig(e.Config.Address)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to generate self signed certificate")
+			return nil, fmt.Errorf("failed to generate self signed certificate: %w", err)
 		}
 	}
 

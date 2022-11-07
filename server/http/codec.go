@@ -12,7 +12,7 @@ import (
 	"github.com/go-micro/plugins/server/http/utils/header"
 )
 
-// TODO: decode body now also does content type setting, maybe sepearte that out
+// TODO: decode body now also does content type setting, maybe seperate that out
 
 // Decode body takes the request body and decodes it into the proto type.
 func (s *Server) decodeBody(w http.ResponseWriter, request *http.Request, in any) (string, error) {
@@ -63,7 +63,7 @@ func (s *Server) decodeBody(w http.ResponseWriter, request *http.Request, in any
 
 	if err := codec.NewDecoder(body).Decode(in); err != nil {
 		s.logger.Debug("Request failed, failed to decode body: %v", err)
-		return "", fmt.Errorf("decode content type '%s': %w", err)
+		return "", fmt.Errorf("decode content type '%s': %w", contentType, err)
 	}
 
 	return accept, nil
