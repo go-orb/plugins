@@ -3,7 +3,7 @@
 //
 // One server contains multiple entrypoints, with one entrypoint being one
 // address to listen on. Each entrypoint with start its own HTTP2 server, and
-// optionally also an HTTP3 server. Each entrypoint can be customised individually,
+// optionally also an HTTP3 server. Each entrypoint can be customized individually,
 // but default options are provided, and can be tweaked.
 //
 // The architecture is based on the Traefik server implementation.
@@ -25,7 +25,7 @@ var _ ServerHTTP = (*Server)(nil)
 
 // TODO: check if we need to add cache
 
-// ServerHTTP implements the HTTP server interface.
+// ServerHTTP interface is the component interface for the HTTP server.
 type ServerHTTP interface {
 	Router() router.Router
 
@@ -35,6 +35,7 @@ type ServerHTTP interface {
 	String() string
 }
 
+// Server implements the HTTP server interface.
 type Server struct {
 	codecs map[string]codecs.Marshaler
 	logger log.Logger
@@ -47,8 +48,8 @@ type Server struct {
 }
 
 // ProvideServerHTTP creates a new HTTP server.
-func ProvideServerHTTP(serviceName types.ServiceName, data []source.Data, logger log.Logger, options ...Option) (*Server, error) {
-	cfg, err := NewConfig(serviceName, data, options...)
+func ProvideServerHTTP(serviceName types.ServiceName, data []source.Data, logger log.Logger, opts ...Option) (*Server, error) {
+	cfg, err := NewConfig(serviceName, data, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("create http server config: %w", err)
 	}
@@ -89,7 +90,7 @@ func (s *Server) Start() error {
 	return nil
 }
 
-// Stop will stop the HTTP servers on all entrypoints and close the listners.
+// Stop will stop the HTTP servers on all entrypoints and close the listeners.
 func (s *Server) Stop(ctx context.Context) error {
 	errChan := make(chan error)
 

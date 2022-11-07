@@ -9,7 +9,6 @@ require (
 	github.com/go-micro/plugins/codecs/proto v0.0.0-00010101000000-000000000000
 	github.com/go-micro/plugins/log/text v0.0.0-00010101000000-000000000000
 	github.com/go-orb/config v0.0.0-20221031022024-e60230f51cb8
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.13.0
 	github.com/lucas-clemente/quic-go v0.30.1-0.20221107095222-2de4af00d068
 	github.com/pkg/errors v0.9.1
 	go-micro.dev/v5 v5.0.0-00010101000000-000000000000
@@ -24,6 +23,7 @@ require (
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/pprof v0.0.0-20221103000818-d260c55eee4c // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.13.0 // indirect
 	github.com/marten-seemann/qpack v0.3.0 // indirect
 	github.com/marten-seemann/qtls-go1-18 v0.1.3 // indirect
 	github.com/marten-seemann/qtls-go1-19 v0.1.1 // indirect

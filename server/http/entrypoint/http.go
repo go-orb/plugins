@@ -18,13 +18,21 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
+// Errors.
+var (
+	ErrRouterHandlerInterface = errors.New("router does not implement http.Handler interface")
+)
+
 // httpServer is a server with Start and Stop methods.
 type httpServer struct {
 	Server *http.Server
 }
 
 func (e *Entrypoint) newHTTPServer(router router.Router) (*httpServer, error) {
-	handler := router.(http.Handler)
+	handler, ok := router.(http.Handler)
+	if !ok {
+		return nil, ErrRouterHandlerInterface
+	}
 
 	if e.Config.AllowH2C {
 		handler = h2c.NewHandler(handler, &http2.Server{

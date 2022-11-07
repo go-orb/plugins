@@ -62,49 +62,64 @@ func NewEntrypointConfig(options ...Option) Config {
 	return cfg
 }
 
+// ApplyOptions applies a set of options to the config.
 func (c *Config) ApplyOptions(options ...Option) {
 	for _, option := range options {
 		option(c)
 	}
 }
 
+// WithAddress specifies the address to listen on.
+// If you want to listen on all interfaces use the format ":8080"
+// If you want to listen on a specific interface/address use the full IP.
 func WithAddress(address string) Option {
 	return func(c *Config) {
 		c.Address = address
 	}
 }
 
+// WithTLSFile loads in a certificate and keyfile.
 func WithTLSFile(certfile, keyfile string) Option {
 	return func(c *Config) {
+		// TODO: load them in already here, and then set the contents in the configt.
 		c.CertFile = certfile
 		c.KeyFile = keyfile
 	}
 }
 
+// WithTLS sets a tls config.
 func WithTLS(tlsConfig *tls.Config) Option {
 	return func(c *Config) {
 		c.TLS = tlsConfig
 	}
 }
 
+// WithInsecure will create the entrypoint without using TLS.
+// Note: as a result you can only make insecure HTTP requests, and no HTTP2
+// unless you set WithH2C.
+// It is not recommended to use this option as it will result in  unecrypted HTTP traffick.
 func WithInsecure() Option {
 	return func(c *Config) {
 		c.Insecure = true
 	}
 }
 
+// WithHTTP3 will additionally enable an HTTP3 server on the entrypoint.
 func WithHTTP3() Option {
 	return func(c *Config) {
 		c.HTTP3 = true
 	}
 }
 
+// DisableHTTP2 will prevent the creation of an HTTP2 server on the entrypoint.
 func DisableHTTP2() Option {
 	return func(c *Config) {
 		c.HTTP2 = false
 	}
 }
 
+// AllowH2C will allow H2C connections on the entrypoint. H2C is HTTP2 without TLS.
+// It is not recommended to turn this on.
 func AllowH2C() Option {
 	return func(c *Config) {
 		c.AllowH2C = true
