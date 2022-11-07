@@ -35,7 +35,7 @@ Else
 */
 
 func TestServerSimple(t *testing.T) {
-	server, router := setupServer(t, WithInsecure())
+	server, router := setupServer(t, false, WithInsecure())
 
 	h := new(handler.EchoHandler)
 	if err := server.Start(); err != nil {
@@ -82,7 +82,7 @@ func TestServerSimple(t *testing.T) {
 }
 
 func TestServerHTTPS(t *testing.T) {
-	server, router := setupServer(t, WithDisableHTTP2())
+	server, router := setupServer(t, false, WithDisableHTTP2())
 
 	h := new(handler.EchoHandler)
 	if err := server.Start(); err != nil {
@@ -129,7 +129,7 @@ func TestServerHTTPS(t *testing.T) {
 }
 
 func TestServerHTTP2(t *testing.T) {
-	server, router := setupServer(t)
+	server, router := setupServer(t, false)
 
 	h := new(handler.EchoHandler)
 	if err := server.Start(); err != nil {
@@ -176,7 +176,7 @@ func TestServerHTTP2(t *testing.T) {
 }
 
 func TestServerH2c(t *testing.T) {
-	server, router := setupServer(t,
+	server, router := setupServer(t, false,
 		WithInsecure(),
 		WithAllowH2C(),
 	)
@@ -215,7 +215,7 @@ func TestServerH2c(t *testing.T) {
 
 func TestServerHTTP3(t *testing.T) {
 	// To fix warning about buf size run: sysctl -w net.core.rmem_max=2500000
-	server, router := setupServer(t,
+	server, router := setupServer(t, false,
 		WithHTTP3(),
 	)
 
@@ -330,7 +330,7 @@ func benchmark(b *testing.B, testFunc func(testing.TB, string) error, pN, sN int
 	b.StopTimer()
 	b.ReportAllocs()
 
-	server, router := setupServer(b, opts...)
+	server, router := setupServer(b, true, opts...)
 
 	h := new(handler.EchoHandler)
 	if err := server.Start(); err != nil {
@@ -391,9 +391,13 @@ func runBenchmark(b *testing.B, addr string, testFunc func(testing.TB, string) e
 	}
 }
 
-func setupServer(t testing.TB, opts ...Option) (*Server, router.Router) {
+func setupServer(t testing.TB, nolog bool, opts ...Option) (*Server, router.Router) {
 	name := types.ServiceName("test-server")
-	logger, err := log.ProvideLogger(name, nil)
+	lopts := []log.Option{}
+	if nolog {
+		lopts = append(lopts, log.WithLevel(log.ErrorLevel))
+	}
+	logger, err := log.ProvideLogger(name, nil, lopts...)
 	if err != nil {
 		t.Fatalf("failed to setup logger: %v", err)
 	}
