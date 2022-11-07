@@ -24,7 +24,11 @@ func init() {
 // handle.
 func (p *Proto) ContentTypes() []string {
 	return []string{
+		"application/octet-stream",
 		"application/proto",
+		"application/protobuf",
+		"application/x-proto",
+		"application/x-protobuf",
 	}
 }
 
