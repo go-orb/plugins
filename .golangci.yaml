@@ -232,6 +232,8 @@ issues:
         - cyclop
         - maintidx
         - gochecknoglobals
+        - goconst
+        - unparam
 
   # Independently from option `exclude` we use default exclude patterns,
   # it can be disabled by this option. To list all

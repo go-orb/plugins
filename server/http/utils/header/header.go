@@ -5,8 +5,8 @@ import (
 	"mime"
 	"strings"
 
-	"github.com/go-micro/plugins/server/http/codec"
 	"github.com/go-micro/plugins/server/http/headers"
+	"go-micro.dev/v5/codecs"
 )
 
 // GetContentType parses the content type from the header value.
@@ -22,7 +22,7 @@ func GetContentType(header string) (string, error) {
 
 // GetAcceptType parses the Accept header and checks against the available codecs
 // to find a matching content type.
-func GetAcceptType(c codec.Codecs, acceptHeader string, contentType string) string {
+func GetAcceptType(c codecs.Map, acceptHeader string, contentType string) string {
 	accept := contentType
 
 	// If request used Form content type, return JSON instead of form.

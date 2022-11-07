@@ -3,16 +3,14 @@ package router
 
 import (
 	"net/http"
-
-	"github.com/go-micro/plugins/server/http/router/chi"
 )
 
-var _ Router = (*chi.ChiRouter)(nil)
+type NewRouterFunc func() Router
 
 // TODO: check all comments
 
 // The Router interface as found here is a copy of the Chi router interface.
-// It was selected for it's versaility and compliance with the stdlib.
+// It was selected for it's simplicity compliance with the stdlib.
 // Some methods were removded as they were considered unnecessary for go-micro.
 // If you are missing anything please open an issue.
 

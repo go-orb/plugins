@@ -13,11 +13,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-micro/plugins/server/http/codec"
 	"github.com/go-micro/plugins/server/http/entrypoint"
 	"github.com/go-micro/plugins/server/http/router/router"
-
-	"http-poc/logger"
+	"github.com/go-orb/config/source"
+	"go-micro.dev/v5/codecs"
+	"go-micro.dev/v5/log"
+	"go-micro.dev/v5/types"
 )
 
 var _ ServerHTTP = (*Server)(nil)
@@ -35,8 +36,8 @@ type ServerHTTP interface {
 }
 
 type Server struct {
-	codecs codec.Codecs
-	logger logger.Logger
+	codecs map[string]codecs.Marshaler
+	logger log.Logger
 
 	// TODO: check if thread safe to use with multiple servers
 	router router.Router
@@ -45,12 +46,28 @@ type Server struct {
 	entrypoints map[string]*entrypoint.Entrypoint
 }
 
-func ProvideServerHTTP(router router.Router, codecs codec.Codecs, logger logger.Logger, options ...Option) (*Server, error) {
+// ProvideServerHTTP creates a new HTTP server.
+func ProvideServerHTTP(serviceName types.ServiceName, data []source.Data, logger log.Logger, options ...Option) (*Server, error) {
+	cfg, err := NewConfig(serviceName, data, options...)
+	if err != nil {
+		return nil, fmt.Errorf("create http server config: %w", err)
+	}
+
+	c, err := cfg.NewCodecMap()
+	if err != nil {
+		return nil, err
+	}
+
+	r, err := cfg.NewRouter()
+	if err != nil {
+		return nil, err
+	}
+
 	s := Server{
-		codecs:      codecs,
+		Config:      cfg,
+		codecs:      c,
+		router:      r,
 		logger:      logger,
-		router:      router,
-		Config:      NewConfig(options...),
 		entrypoints: make(map[string]*entrypoint.Entrypoint, 1),
 	}
 
@@ -59,19 +76,6 @@ func ProvideServerHTTP(router router.Router, codecs codec.Codecs, logger logger.
 	}
 
 	return &s, nil
-}
-
-func (s *Server) createEntrypoints() error {
-	for _, e := range s.Config.Entrypoints {
-		ep, err := entrypoint.NewEntrypoint(s.router, s.logger, s.Config.EntrypointDefaults, e...)
-		if err != nil {
-			return fmt.Errorf("server create entrypoint: %w", err)
-		}
-
-		s.entrypoints[ep.Config.Address] = ep
-	}
-
-	return nil
 }
 
 // Start will start the HTTP servers on all entrypoints.
@@ -124,4 +128,17 @@ func (s *Server) String() string {
 // Router returns the HTTP servers' router (mux).
 func (s *Server) Router() router.Router {
 	return s.router
+}
+
+func (s *Server) createEntrypoints() error {
+	for _, e := range s.Config.Entrypoints {
+		ep, err := entrypoint.NewEntrypoint(s.router, s.logger, s.Config.EntrypointDefaults, e...)
+		if err != nil {
+			return fmt.Errorf("server create entrypoint: %w", err)
+		}
+
+		s.entrypoints[ep.Config.Address] = ep
+	}
+
+	return nil
 }

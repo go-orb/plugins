@@ -1,12 +1,32 @@
 package http
 
 import (
+	"errors"
+
 	"github.com/go-micro/plugins/server/http/entrypoint"
+	"github.com/go-micro/plugins/server/http/router/router"
+	"github.com/go-orb/config"
+	"github.com/go-orb/config/source"
+	"go-micro.dev/v5/codecs"
+	"go-micro.dev/v5/types"
+	"go-micro.dev/v5/util/slice"
 )
 
-const (
-	// DefaultAddress to use when no custom entrypoints are provided.
-	DefaultAddress = "0.0.0.0:42069"
+// Default config values.
+var (
+	DefaultAddress        = "0.0.0.0:42069"
+	DefaultRouter         = "chi"
+	DefaultEnableGzip     = false
+	DefaultCodecWhitelist = []string{"proto", "jsonpb", "form", "xml"}
+
+	DefaultConfigSection = "http"
+)
+
+var (
+	ErrNoRouter            = errors.New("no router plugin name set in config")
+	ErrRouterNotFound      = errors.New("router plugin not found, did you register it?")
+	ErrEmptyCodecWhitelist = errors.New("codec whitelist is empty")
+	ErrNoMatchingCodecs    = errors.New("no matching codecs found, did you register the codec plugins?")
 )
 
 // Option is a functional HTTP server option.
@@ -27,6 +47,18 @@ type Config struct {
 	// Entrypoints is the list of entrypoints that will be created.
 	Entrypoints []Entrypoint
 
+	// Router is the router plugin name to use.
+	Router string
+
+	// CodecWhitelist is the list of codec names that are allowed to be used
+	// with the HTTP server. We explicitly whitelist codecs, as we don't
+	// want to add every codec plugin that has been registered to be automaically
+	// added to the server.
+	//
+	// Adding a codec to this list will mean that if the codec has been registerd,
+	// you will be able to make RPC requests in that format.
+	CodecWhitelist []string
+
 	// EnableGzip enables gzip response compression. Only use this if your
 	// messages are sufficiently large. For small messages the compute overhead
 	// is not worth the reduction in transport time.
@@ -35,20 +67,29 @@ type Config struct {
 
 // NewConfig creates a new server config with default values.
 // To customize the options pas in a list of options.
-func NewConfig(options ...Option) Config {
+func NewConfig(serviceName types.ServiceName, data []source.Data, options ...Option) (Config, error) {
 	cfg := Config{
 		EntrypointDefaults: entrypoint.NewEntrypointConfig(),
 		Entrypoints:        make([]Entrypoint, 0, 1),
+		Router:             DefaultRouter,
+		CodecWhitelist:     DefaultCodecWhitelist,
+		EnableGzip:         DefaultEnableGzip,
 	}
 
 	cfg.ApplyOptions(options...)
+
+	// TODO: optimize this. extract this part into a seperate function? How can we make config easy
+	sections := types.SplitServiceName(serviceName)
+	if err := config.Parse(append(sections, DefaultConfigSection), data, &cfg); err != nil {
+		return cfg, err
+	}
 
 	if len(cfg.Entrypoints) == 0 {
 		e := Entrypoint{entrypoint.WithAddress(DefaultAddress)}
 		cfg.Entrypoints = append(cfg.Entrypoints, e)
 	}
 
-	return cfg
+	return cfg, nil
 }
 
 // ApplyOptions takes a list of options and applies them to the current config.
@@ -56,6 +97,44 @@ func (c *Config) ApplyOptions(options ...Option) {
 	for _, option := range options {
 		option(c)
 	}
+}
+
+// NewCodecMap fetches the whitelisted codec plugins from the registered codecs
+// if present.
+func (c *Config) NewCodecMap() (codecs.Map, error) {
+	if len(c.CodecWhitelist) == 0 {
+		return nil, ErrEmptyCodecWhitelist
+	}
+
+	cm := make(codecs.Map, len(c.CodecWhitelist))
+	for name, codec := range codecs.Plugins.All() {
+		if slice.In(c.CodecWhitelist, name) {
+			for _, mime := range codec.ContentTypes() {
+				cm[mime] = codec
+			}
+		}
+	}
+
+	if len(cm) == 0 {
+		return nil, ErrNoMatchingCodecs
+	}
+
+	return cm, nil
+}
+
+// NewRouter uses the config.Router to craete a new router.
+// It fetches the factory from the registered router plugins.
+func (c *Config) NewRouter() (router.Router, error) {
+	if len(c.Router) == 0 {
+		return nil, ErrNoRouter
+	}
+
+	newRouter, err := router.Plugins.Get(c.Router)
+	if err != nil {
+		return nil, ErrRouterNotFound
+	}
+
+	return newRouter(), nil
 }
 
 // WithEntrypointOptions takes a list of entrypoint.Option to apply to the
@@ -105,7 +184,7 @@ func WithAddress(addrs ...string) Option {
 //
 //	WithEntrypoints([]http.Entrypoint{
 //	 {entrypoint.WithAddress(":8080")},
-//	 {entrypoint.WithAddress(":8081"), WithHTTP3()},
+//	 {entrypoint.WithAddress("192.168.1.50:8081"), WithHTTP3()},
 //	 {entrypoint.WithAddress(":8082"), WithInsecure(), WithWriteTimeout(...)},
 //	})
 func WithEntrypoints(entrypoints ...Entrypoint) Option {
@@ -131,6 +210,14 @@ func WithHTTP3() Option {
 func WithGzip() Option {
 	return func(c *Config) {
 		c.EnableGzip = true
+	}
+}
+
+// WithRouter sets the default router plugin to use.
+// Make sure to import your router plugin.
+func WithRouter(name string) Option {
+	return func(c *Config) {
+		c.Router = name
 	}
 }
 
