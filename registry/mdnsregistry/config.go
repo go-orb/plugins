@@ -1,8 +1,8 @@
 package mdnsregistry
 
 import (
-	"github.com/go-orb/config/source/cli"
-	"github.com/go-orb/orb/registry"
+	"go-micro.dev/v5/config/source/cli"
+	"go-micro.dev/v5/registry"
 )
 
 const name = "mdns"

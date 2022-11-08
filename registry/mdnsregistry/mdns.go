@@ -15,13 +15,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-orb/config"
-	"github.com/go-orb/config/source"
-	"github.com/go-orb/orb/log"
-	"github.com/go-orb/orb/registry"
-	"github.com/go-orb/orb/types"
-	"github.com/go-orb/plugins/registry/mdnsregistry/mdnsutil"
+	"github.com/go-micro/plugins/registry/mdnsregistry/mdnsutil"
 	"github.com/google/uuid"
+	"go-micro.dev/v5/config"
+	"go-micro.dev/v5/config/source"
+	"go-micro.dev/v5/log"
+	"go-micro.dev/v5/registry"
+	"go-micro.dev/v5/types"
+	"go-micro.dev/v5/types/component"
 )
 
 type mdnsTxt struct {
@@ -38,7 +39,7 @@ type mdnsEntry struct {
 
 type mdnsRegistry struct {
 	config *Config
-	log    *log.Logger
+	log    log.Logger
 
 	sync.Mutex
 	services map[string][]*mdnsEntry
@@ -53,7 +54,7 @@ type mdnsRegistry struct {
 }
 
 // This is here to make sure mdnsRegistry implements registry.Registry.
-var _ registry.Registry = &mdnsRegistry{}
+var _ registry.Registry = (*mdnsRegistry)(nil)
 
 type mdnsWatcher struct {
 	id   string
@@ -136,7 +137,7 @@ func decode(record []string) (*mdnsTxt, error) {
 func Provide(
 	serviceName types.ServiceName,
 	datas []source.Data,
-	logger *log.Logger,
+	logger log.Logger,
 ) (*registry.OrbRegistry, error) {
 	cfg := NewConfig()
 
@@ -149,7 +150,7 @@ func Provide(
 	// Get a custom logger if needed.
 	if cfg.Logger != nil {
 		var err error
-		logger, err = log.New(cfg.Logger)
+		logger, err = logger.WithComponent(registry.ComponentType, "mdns", cfg.Logger.Plugin, cfg.Logger.Level)
 		if err != nil {
 			return nil, err
 		}
@@ -160,7 +161,7 @@ func Provide(
 	return &registry.OrbRegistry{Registry: reg}, nil
 }
 
-func New(cfg *Config, log *log.Logger) *mdnsRegistry {
+func New(cfg *Config, log log.Logger) *mdnsRegistry {
 	if cfg.Timeout == 0 {
 		cfg.Timeout = registry.DefaultTimout
 	}
@@ -189,7 +190,7 @@ func (m *mdnsRegistry) String() string {
 	return name
 }
 
-func (m *mdnsRegistry) Type() string {
+func (m *mdnsRegistry) Type() component.Type {
 	return registry.ComponentType
 }
 
