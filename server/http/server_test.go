@@ -182,6 +182,7 @@ func BenchmarkHTTP2JSON16(b *testing.B) {
 
 	benchmark(b, testFunc, 16, 1)
 }
+
 func BenchmarkHTTP2Proto16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
 		return tests.TestPostRequestProto(tb, addr, "application/octet-stream", tests.TypeHTTP2)
@@ -278,7 +279,7 @@ func setupServer(t testing.TB, nolog bool, opts ...Option) (*Server, func()) {
 	}
 
 	cleanup := func() {
-		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
+		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*10))
 		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
