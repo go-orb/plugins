@@ -30,6 +30,8 @@ type Entrypoint struct {
 
 	httpServer  *httpServer
 	http3Server *http3server
+
+	started bool
 }
 
 // NewEntrypoint creates a new entrypoint for a single address. You can create
@@ -74,6 +76,10 @@ func NewEntrypoint(router router.Router, logger log.Logger, config Config, optio
 
 // Start will create the listeners and start the server on the entrypoint.
 func (e *Entrypoint) Start() error {
+	if e.started {
+		return nil
+	}
+
 	var err error
 
 	e.logger.Debug("Starting all HTTP entrypoints")
@@ -90,6 +96,7 @@ func (e *Entrypoint) Start() error {
 	}()
 
 	if !e.Config.HTTP3 {
+		e.started = true
 		return nil
 	}
 
@@ -105,6 +112,8 @@ func (e *Entrypoint) Start() error {
 		}
 	}()
 
+	e.started = true
+
 	return nil
 }
 
@@ -114,6 +123,10 @@ type stopper interface {
 
 // Stop will stop all servers and close the listeners.
 func (e *Entrypoint) Stop(ctx context.Context) error {
+	if !e.started {
+		return nil
+	}
+
 	errChan := make(chan error)
 	defer close(errChan)
 
@@ -146,6 +159,8 @@ func (e *Entrypoint) Stop(ctx context.Context) error {
 			err = nerr
 		}
 	}
+
+	e.started = false
 
 	return err
 }

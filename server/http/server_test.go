@@ -93,6 +93,32 @@ func TestServerMultipleEntrypoints(t *testing.T) {
 	}
 }
 
+func TestServerEntrypointsStarts(t *testing.T) {
+	addrs := []string{"localhost:45451", "localhost:45452", "localhost:45453", "localhost:45454", "localhost:45455"}
+	server, cleanup := setupServer(t, false, WithAddress(addrs...))
+
+	if err := server.Start(); err != nil {
+		t.Fatal("failed to start", err)
+	}
+
+	if err := server.Start(); err != nil {
+		t.Fatal("failed to start", err)
+	}
+
+	if err := server.Start(); err != nil {
+		t.Fatal("failed to start", err)
+	}
+
+	for _, addr := range addrs {
+		addr = "https://" + addr
+		makeRequests(t, addr, tests.TypeHTTP2)
+	}
+
+	cleanup()
+	cleanup()
+	cleanup()
+}
+
 func TestServerGzip(t *testing.T) {
 	_, cleanup := setupServer(t, false, WithGzip())
 	defer cleanup()
