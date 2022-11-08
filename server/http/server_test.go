@@ -233,6 +233,7 @@ func runBenchmark(b *testing.B, addr string, testFunc func(testing.TB, string) e
 	// Start requests
 	go func() {
 		for i := 0; i < b.N; i++ {
+			tests.RefreshClients()
 			for p := 0; p < pN; p++ {
 				wg.Add(1)
 				go func() {

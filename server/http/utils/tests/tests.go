@@ -3,6 +3,7 @@ package tests
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -55,18 +56,19 @@ var (
 )
 
 func init() {
-	refreshClients()
+	RefreshClients()
 }
 
-func refreshClients() {
+func RefreshClients() {
 	httpInsecureClient = &http.Client{}
 
 	http1Client = &http.Client{
+		Timeout: time.Second * 5,
 		Transport: &http.Transport{
-			MaxIdleConns:        64,
-			MaxIdleConnsPerHost: 64,
-			ForceAttemptHTTP2:   false,
-			TLSHandshakeTimeout: 700 * time.Millisecond,
+			// MaxIdleConns:        64,
+			// MaxIdleConnsPerHost: 64,
+			// TLSHandshakeTimeout: 700 * time.Millisecond,
+			ForceAttemptHTTP2: false,
 			TLSClientConfig: &tls.Config{
 				//nolint:gosec
 				InsecureSkipVerify: true,
@@ -246,19 +248,21 @@ func makeGetReq(t testing.TB, addr, _ string, _ []byte, client *http.Client) ([]
 
 func makePostReq(t testing.TB, addr, ct string, data []byte, client *http.Client) ([]byte, error) {
 	// NOTE: this would be nice to use, but gices TCP errors
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	// defer cancel()
-	//
-	// req, err := http.NewRequestWithContext(ctx, http.MethodPost, addr, bytes.NewReader(data))
-	// if err != nil {
-	// 	return nil, fmt.Errorf("create GET request failed: %w", err)
-	// }
-	//
-	// req.Header.Set("Content-Type", ct)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	// ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*10))
+	// ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, addr, bytes.NewReader(data))
+	if err != nil {
+		return nil, fmt.Errorf("create GET request failed: %w", err)
+	}
+
+	req.Header.Set("Content-Type", ct)
 	// req.Close = true
-	//
-	// resp, err := client.Do(req)
-	resp, err := client.Post(addr, ct, bytes.NewReader(data)) //nolint:noctx
+
+	resp, err := client.Do(req)
+	// resp, err := client.Post(addr, ct, bytes.NewReader(data)) //nolint:noctx
 	if err != nil {
 		return nil, fmt.Errorf("failed to make POST request: %w", err)
 	}
@@ -269,16 +273,16 @@ func makePostReq(t testing.TB, addr, ct string, data []byte, client *http.Client
 		}
 	}()
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("Post request failed")
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
 	logResponse(t, resp, body)
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("Post request failed")
-	}
 
 	return body, nil
 }
