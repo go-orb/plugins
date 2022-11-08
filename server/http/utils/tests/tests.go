@@ -58,6 +58,7 @@ func init() {
 	RefreshClients()
 }
 
+// RefreshClients creates new clients for the HTTP requests to tetst with.
 func RefreshClients() {
 	httpInsecureClient = &http.Client{}
 
