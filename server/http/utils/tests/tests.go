@@ -219,7 +219,7 @@ func makeGetReq(t testing.TB, addr, _ string, _ []byte, client *http.Client) ([]
 	// }
 	//
 	// resp, err := client.Do(req)
-	resp, err := client.Get(addr)
+	resp, err := client.Get(addr) //nolint:noctx
 	if err != nil {
 		return nil, fmt.Errorf("failed to make GET request: %w", err)
 	}
@@ -258,7 +258,7 @@ func makePostReq(t testing.TB, addr, ct string, data []byte, client *http.Client
 	// req.Close = true
 	//
 	// resp, err := client.Do(req)
-	resp, err := client.Post(addr, ct, bytes.NewReader(data))
+	resp, err := client.Post(addr, ct, bytes.NewReader(data)) //nolint:noctx
 	if err != nil {
 		return nil, fmt.Errorf("failed to make POST request: %w", err)
 	}

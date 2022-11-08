@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// NewRouterFunc can be used to create a new router.
 type NewRouterFunc func() Router
 
 // TODO: check all comments
@@ -15,8 +16,9 @@ type NewRouterFunc func() Router
 // If you are missing anything please open an issue.
 
 // TODO: proper comment
+
 // Router is a servermux.
-type Router interface {
+type Router interface { //nolint:interfacebloat
 	http.Handler
 	Routes
 
