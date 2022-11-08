@@ -13,17 +13,19 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-micro/plugins/server/http/entrypoint"
-	"github.com/go-micro/plugins/server/http/router/router"
 	"github.com/go-orb/config/source"
 	"go-micro.dev/v5/codecs"
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/types"
+
+	"github.com/go-micro/plugins/server/http/entrypoint"
+	"github.com/go-micro/plugins/server/http/router/router"
 )
 
 var _ ServerHTTP = (*Server)(nil)
 
 // TODO: check if we need to add cache
+// TODO: request scoped logger, add req information to logger as fields
 
 // ServerHTTP interface is the component interface for the HTTP server.
 type ServerHTTP interface {
@@ -40,7 +42,7 @@ type Server struct {
 	codecs map[string]codecs.Marshaler
 	logger log.Logger
 
-	// TODO: check if thread safe to use with multiple servers
+	// TODO: check if thread safe to use with multiple servers, I think yes
 	router router.Router
 	Config Config
 
@@ -117,8 +119,7 @@ func (s *Server) Stop(ctx context.Context) error {
 
 // Type returns the micro component type.
 func (s *Server) Type() string {
-	// TODO: abstract this away in a const in the core.
-	return "Server"
+	return "server"
 }
 
 // String returns the server implementation name.

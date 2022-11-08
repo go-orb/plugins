@@ -9,7 +9,8 @@ import (
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/types"
 
-	"github.com/go-micro/plugins/server/http/router/router"
+	"github.com/stretchr/testify/require"
+
 	"github.com/go-micro/plugins/server/http/utils/tests"
 	"github.com/go-micro/plugins/server/http/utils/tests/handler"
 
@@ -36,232 +37,76 @@ Else
 */
 
 func TestServerSimple(t *testing.T) {
-	server, router := setupServer(t, false, WithInsecure())
-
-	h := new(handler.EchoHandler)
-	if err := server.Start(); err != nil {
-		t.Fatal("failed to start", err)
-	}
-
-	defer func() {
-		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
-		defer cancel()
-
-		if err := server.Stop(ctx); err != nil {
-			t.Fatal("failed to stop", err)
-		}
-	}()
-
-	router.Get("/echo", NewGRPCHandler(server, h.Call))
-	router.Post("/echo", NewGRPCHandler(server, h.Call))
+	_, cleanup := setupServer(t, false, WithInsecure())
+	defer cleanup()
 
 	addr := "http://0.0.0.0:42069"
-
-	if err := tests.TestGetRequest(t, addr, tests.TypeInsecure); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestJSON(t, addr, tests.TypeInsecure); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestProto(t, addr, "application/octet-stream", tests.TypeInsecure); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestProto(t, addr, "application/proto", tests.TypeInsecure); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestProto(t, addr, "application/x-proto", tests.TypeInsecure); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestProto(t, addr, "application/protobuf", tests.TypeInsecure); err != nil {
-		t.Fatal(err)
-	}
+	makeRequests(t, addr, tests.TypeInsecure)
 }
 
 func TestServerHTTPS(t *testing.T) {
-	server, router := setupServer(t, false, WithDisableHTTP2())
-
-	h := new(handler.EchoHandler)
-	if err := server.Start(); err != nil {
-		t.Fatal("failed to start", err)
-	}
-
-	defer func() {
-		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
-		defer cancel()
-
-		if err := server.Stop(ctx); err != nil {
-			t.Fatal("failed to stop", err)
-		}
-	}()
-
-	router.Get("/echo", NewGRPCHandler(server, h.Call))
-	router.Post("/echo", NewGRPCHandler(server, h.Call))
+	_, cleanup := setupServer(t, false, WithDisableHTTP2())
+	defer cleanup()
 
 	addr := "https://localhost:42069"
-
-	if err := tests.TestGetRequest(t, addr, tests.TypeHTTP2); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestJSON(t, addr, tests.TypeHTTP2); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestProto(t, addr, "application/octet-stream", tests.TypeHTTP2); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestProto(t, addr, "application/proto", tests.TypeHTTP2); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestProto(t, addr, "application/x-proto", tests.TypeHTTP2); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestProto(t, addr, "application/protobuf", tests.TypeHTTP2); err != nil {
-		t.Fatal(err)
-	}
+	makeRequests(t, addr, tests.TypeHTTP1)
 }
 
 func TestServerHTTP2(t *testing.T) {
-	server, router := setupServer(t, false)
-
-	h := new(handler.EchoHandler)
-	if err := server.Start(); err != nil {
-		t.Fatal("failed to start", err)
-	}
-
-	defer func() {
-		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
-		defer cancel()
-
-		if err := server.Stop(ctx); err != nil {
-			t.Fatal("failed to stop", err)
-		}
-	}()
-
-	router.Get("/echo", NewGRPCHandler(server, h.Call))
-	router.Post("/echo", NewGRPCHandler(server, h.Call))
+	_, cleanup := setupServer(t, false)
+	defer cleanup()
 
 	addr := "https://localhost:42069"
-
-	if err := tests.TestGetRequest(t, addr, tests.TypeHTTP2); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestJSON(t, addr, tests.TypeHTTP2); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestProto(t, addr, "application/octet-stream", tests.TypeHTTP2); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestProto(t, addr, "application/proto", tests.TypeHTTP2); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestProto(t, addr, "application/x-proto", tests.TypeHTTP2); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestProto(t, addr, "application/protobuf", tests.TypeHTTP2); err != nil {
-		t.Fatal(err)
-	}
+	makeRequests(t, addr, tests.TypeHTTP2)
 }
 
 func TestServerH2c(t *testing.T) {
-	server, router := setupServer(t, false,
+	_, cleanup := setupServer(t, false,
 		WithInsecure(),
 		WithAllowH2C(),
 	)
-
-	h := new(handler.EchoHandler)
-	if err := server.Start(); err != nil {
-		t.Fatal("failed to start", err)
-	}
-
-	defer func() {
-		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
-		defer cancel()
-
-		if err := server.Stop(ctx); err != nil {
-			t.Fatal("failed to stop", err)
-		}
-	}()
-
-	router.Get("/echo", NewGRPCHandler(server, h.Call))
-	router.Post("/echo", NewGRPCHandler(server, h.Call))
+	defer cleanup()
 
 	addr := "http://localhost:42069"
-
-	if err := tests.TestGetRequest(t, addr, tests.TypeH2C); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestJSON(t, addr, tests.TypeH2C); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := tests.TestPostRequestProto(t, addr, "application/octet-stream", tests.TypeH2C); err != nil {
-		t.Fatal(err)
-	}
+	makeRequests(t, addr, tests.TypeH2C)
 }
 
 func TestServerHTTP3(t *testing.T) {
 	// To fix warning about buf size run: sysctl -w net.core.rmem_max=2500000
-	server, router := setupServer(t, false,
+	_, cleanup := setupServer(t, false,
 		WithHTTP3(),
 	)
-
-	h := new(handler.EchoHandler)
-	if err := server.Start(); err != nil {
-		t.Fatal("failed to start", err)
-	}
-
-	defer func() {
-		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
-		defer cancel()
-
-		if err := server.Stop(ctx); err != nil {
-			t.Fatal("failed to stop", err)
-		}
-	}()
-
-	router.Get("/echo", NewGRPCHandler(server, h.Call))
-	router.Post("/echo", NewGRPCHandler(server, h.Call))
+	defer cleanup()
 
 	addr := "https://localhost:42069"
+	makeRequests(t, addr, tests.TypeHTTP3)
+}
 
-	if err := tests.TestGetRequest(t, addr, tests.TypeHTTP3); err != nil {
-		t.Fatal(err)
-	}
+func TestServerMultipleEntrypoints(t *testing.T) {
+	addrs := []string{"localhost:45451", "localhost:45452", "localhost:45453", "localhost:45454", "localhost:45455"}
+	_, cleanup := setupServer(t, false, WithAddress(addrs...))
+	defer cleanup()
 
-	if err := tests.TestPostRequestJSON(t, addr, tests.TypeHTTP3); err != nil {
-		t.Fatal(err)
+	for _, addr := range addrs {
+		addr = "https://" + addr
+		makeRequests(t, addr, tests.TypeHTTP2)
 	}
+}
 
-	if err := tests.TestPostRequestProto(t, addr, "application/octet-stream", tests.TypeHTTP3); err != nil {
-		t.Fatal(err)
-	}
+func TestServerGzip(t *testing.T) {
+	_, cleanup := setupServer(t, false, WithGzip())
+	defer cleanup()
 
-	if err := tests.TestPostRequestProto(t, addr, "application/proto", tests.TypeHTTP3); err != nil {
-		t.Fatal(err)
-	}
+	addr := "https://localhost:42069"
+	makeRequests(t, addr, tests.TypeHTTP2)
+}
 
-	if err := tests.TestPostRequestProto(t, addr, "application/x-proto", tests.TypeHTTP3); err != nil {
-		t.Fatal(err)
-	}
+func TestServerInvalidContentType(t *testing.T) {
+	_, cleanup := setupServer(t, false, WithGzip())
+	defer cleanup()
 
-	if err := tests.TestPostRequestProto(t, addr, "application/protobuf", tests.TypeHTTP3); err != nil {
-		t.Fatal(err)
-	}
+	addr := "https://localhost:42069"
+	require.Error(t, tests.TestPostRequestProto(t, addr, "application/abcdef", tests.TypeHTTP2), "POST Proto")
 }
 
 func BenchmarkHTTPInsecureJSON16(b *testing.B) {
@@ -339,24 +184,8 @@ func benchmark(b *testing.B, testFunc func(testing.TB, string) error, pN, sN int
 	b.StopTimer()
 	b.ReportAllocs()
 
-	server, router := setupServer(b, true, opts...)
-
-	h := new(handler.EchoHandler)
-	if err := server.Start(); err != nil {
-		b.Fatal("failed to start", err)
-	}
-
-	defer func() {
-		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*10))
-		defer cancel()
-
-		if err := server.Stop(ctx); err != nil {
-			b.Fatal("failed to stop", err)
-		}
-	}()
-
-	router.Get("/echo", NewGRPCHandler(server, h.Call))
-	router.Post("/echo", NewGRPCHandler(server, h.Call))
+	server, cleanup := setupServer(b, true, opts...)
+	defer cleanup()
 
 	addr := "https://localhost:42069"
 	if server.Config.EntrypointDefaults.Insecure {
@@ -401,7 +230,7 @@ func runBenchmark(b *testing.B, addr string, testFunc func(testing.TB, string) e
 	}
 }
 
-func setupServer(t testing.TB, nolog bool, opts ...Option) (*Server, router.Router) {
+func setupServer(t testing.TB, nolog bool, opts ...Option) (*Server, func()) {
 	name := types.ServiceName("test-server")
 	lopts := []log.Option{}
 	if nolog {
@@ -417,5 +246,33 @@ func setupServer(t testing.TB, nolog bool, opts ...Option) (*Server, router.Rout
 		t.Fatalf("failed to provide http server: %v", err)
 	}
 
-	return server, server.Router()
+	h := new(handler.EchoHandler)
+	if err := server.Start(); err != nil {
+		t.Fatal("failed to start", err)
+	}
+
+	cleanup := func() {
+		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
+		defer cancel()
+
+		if err := server.Stop(ctx); err != nil {
+			t.Fatal("failed to stop", err)
+		}
+	}
+
+	router := server.Router()
+	router.Get("/echo", NewGRPCHandler(server, h.Call))
+	router.Post("/echo", NewGRPCHandler(server, h.Call))
+
+	return server, cleanup
+}
+
+func makeRequests(t *testing.T, addr string, reqType tests.ReqType) {
+	require.NoError(t, tests.TestGetRequest(t, addr, reqType), "GET")
+	require.NoError(t, tests.TestPostRequestJSON(t, addr, reqType), "POST JSON")
+	require.NoError(t, tests.TestPostRequestProto(t, addr, "application/octet-stream", reqType), "POST Proto")
+	require.NoError(t, tests.TestPostRequestProto(t, addr, "application/proto", reqType), "POST Proto")
+	require.NoError(t, tests.TestPostRequestProto(t, addr, "application/x-proto", reqType), "POST Proto")
+	require.NoError(t, tests.TestPostRequestProto(t, addr, "application/protobuf", reqType), "POST Proto")
+	require.NoError(t, tests.TestPostRequestProto(t, addr, "application/x-protobuf", reqType), "POST Proto")
 }
