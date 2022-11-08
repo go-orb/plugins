@@ -5,15 +5,15 @@ import (
 	"mime"
 	"strings"
 
-	"github.com/go-micro/plugins/server/http/headers"
 	"go-micro.dev/v5/codecs"
+
+	"github.com/go-micro/plugins/server/http/headers"
 )
 
 // GetContentType parses the content type from the header value.
 func GetContentType(header string) (string, error) {
 	ct, _, err := mime.ParseMediaType(header)
 	if err != nil {
-		// TODO: return custom error, log this error
 		return "", err
 	}
 
