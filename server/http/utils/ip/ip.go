@@ -3,6 +3,7 @@ package ip
 
 import (
 	"net"
+	"regexp"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -14,8 +15,10 @@ var (
 	// ErrPortInvalid is returned when the provided port is below 0.
 	ErrPortInvalid = errors.New("port must be >= 0")
 	// ErrInvalidIP is returned an invalid IP is provided.
-	ErrInvalidIP = errors.New("invalid IP provided")
+	ErrInvalidIP = errors.New("invalid IP provided, must be between 0 and 65535")
 )
+
+var ipRe = regexp.MustCompile(`^(?:[0-9]{1,3}\.){3}[0-9]{1,3}`)
 
 // ValidateAddress will do basic validation on an address string.
 func ValidateAddress(address string) error {
@@ -33,7 +36,7 @@ func ValidateAddress(address string) error {
 		return err
 	}
 
-	if p < 0 {
+	if p < 0 || p > 65535 {
 		return ErrPortInvalid
 	}
 
@@ -42,7 +45,7 @@ func ValidateAddress(address string) error {
 		return nil
 	}
 
-	if net.ParseIP(host) == nil {
+	if ipRe.Match([]byte(host)) && net.ParseIP(host) == nil {
 		return ErrInvalidIP
 	}
 

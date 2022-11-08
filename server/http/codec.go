@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 
+	"golang.org/x/exp/slog"
+
 	"github.com/go-micro/plugins/server/http/headers"
 	"github.com/go-micro/plugins/server/http/utils/header"
 )
@@ -34,7 +36,7 @@ func (s *Server) decodeBody(resp http.ResponseWriter, request *http.Request, msg
 	default:
 		contentType, err = header.GetContentType(ctHeader)
 		if err != nil {
-			s.logger.Debug("Request failed while parsing content type: %v", err)
+			s.logger.Debug("Request failed while parsing content type: "+err.Error(), slog.String("Content-Type", ctHeader))
 			return "", err
 		}
 

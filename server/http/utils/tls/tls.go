@@ -136,7 +136,7 @@ func Certificate(host ...string) (tls.Certificate, error) {
 
 	// Create public key
 	certOut := bytes.NewBuffer(nil)
-	if err := pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes}); err != nil {
+	if err = pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes}); err != nil {
 		return emptyCert, err
 	}
 
@@ -148,7 +148,7 @@ func Certificate(host ...string) (tls.Certificate, error) {
 		return emptyCert, err
 	}
 
-	if err := pem.Encode(keyOut, &pem.Block{Type: "EC PRIVATE KEY", Bytes: b}); err != nil {
+	if err = pem.Encode(keyOut, &pem.Block{Type: "EC PRIVATE KEY", Bytes: b}); err != nil {
 		return emptyCert, err
 	}
 
