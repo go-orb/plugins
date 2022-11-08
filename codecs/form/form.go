@@ -128,3 +128,7 @@ func (Form) String() string {
 func (c Form) ContentTypes() []string {
 	return []string{ContentType}
 }
+
+func (c Form) Exts() []string {
+	return []string{}
+}

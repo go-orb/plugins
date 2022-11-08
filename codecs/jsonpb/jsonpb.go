@@ -44,3 +44,7 @@ func (j *JSONPb) ContentTypes() []string {
 func (j *JSONPb) String() string {
 	return "jsonpb"
 }
+
+func (j *JSONPb) Exts() []string {
+	return []string{""}
+}

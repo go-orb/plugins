@@ -83,3 +83,7 @@ func (p *Proto) NewEncoder(writer io.Writer) codecs.Encoder {
 func (p *Proto) String() string {
 	return "proto"
 }
+
+func (j *Proto) Exts() []string {
+	return []string{""}
+}

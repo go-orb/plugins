@@ -1,10 +1,8 @@
 module github.com/go-micro/plugins/codecs/form
 
-go 1.19
+go 1.18
 
 replace github.com/go-micro/plugins/codecs/proto => ../proto
-
-replace go-micro.dev/v5 => ../../../orb
 
 require (
 	github.com/go-playground/form/v4 v4.2.0
