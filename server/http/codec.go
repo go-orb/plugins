@@ -59,12 +59,12 @@ func (s *Server) decodeBody(resp http.ResponseWriter, request *http.Request, msg
 
 	codec, ok := s.codecs[contentType]
 	if !ok {
-		s.logger.Debug("Request failed, codec not found for contet type: %v", contentType)
+		s.logger.Debug("Request failed, codec not found for contet type: " + contentType)
 		return "", ErrContentTypeNotSupported
 	}
 
 	if err := codec.NewDecoder(body).Decode(msg); err != nil {
-		s.logger.Debug("Request failed, failed to decode body: %v", err)
+		s.logger.Debug("Request failed, failed to decode body: " + err.Error())
 		return "", fmt.Errorf("decode content type '%s': %w", contentType, err)
 	}
 
@@ -80,7 +80,7 @@ func (s *Server) encodeBody(w http.ResponseWriter, r *http.Request, v any) error
 
 	codec, ok := s.codecs[contentType]
 	if !ok {
-		s.logger.Debug("Request failed, codec for content type not available: %v", contentType)
+		s.logger.Debug("Request failed, codec for content type not available: " + contentType)
 		return ErrContentTypeNotSupported
 	}
 
@@ -95,7 +95,7 @@ func (s *Server) encodeBody(w http.ResponseWriter, r *http.Request, v any) error
 	}
 
 	if err := codec.NewEncoder(nw).Encode(v); err != nil {
-		s.logger.Debug("Request failed, failed to encode response: %v", err)
+		s.logger.Debug("Request failed, failed to encode response: " + err.Error())
 		return err
 	}
 
