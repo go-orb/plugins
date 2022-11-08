@@ -156,6 +156,11 @@ func (e *Entrypoint) setupTLS() (*tls.Config, error) {
 		err    error
 	)
 
+	// TLS already provided
+	if e.Config.TLS != nil {
+		return e.Config.TLS, nil
+	}
+
 	// Load TLS from file
 	if len(e.Config.CertFile) > 0 && len(e.Config.KeyFile) > 0 && e.Config.TLS == nil {
 		config, err = mtls.LoadTLSConfig(e.Config.CertFile, e.Config.KeyFile)

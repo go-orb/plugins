@@ -17,6 +17,7 @@ import (
 	_ "github.com/go-micro/plugins/codecs/jsonpb"
 	_ "github.com/go-micro/plugins/codecs/proto"
 	_ "github.com/go-micro/plugins/log/text"
+
 	_ "github.com/go-micro/plugins/server/http/router/chi"
 )
 
@@ -281,7 +282,15 @@ func BenchmarkHTTPInseucreProto16(b *testing.B) {
 
 func BenchmarkHTTP1JSON16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
-		return tests.TestPostRequestJSON(tb, addr, tests.TypeHTTP2)
+		return tests.TestPostRequestJSON(tb, addr, tests.TypeHTTP1)
+	}
+
+	benchmark(b, testFunc, 16, 1, WithDisableHTTP2())
+}
+
+func BenchmarkHTTP1Form16(b *testing.B) {
+	testFunc := func(tb testing.TB, addr string) error {
+		return tests.TestGetRequest(tb, addr, tests.TypeHTTP1)
 	}
 
 	benchmark(b, testFunc, 16, 1, WithDisableHTTP2())
@@ -289,7 +298,7 @@ func BenchmarkHTTP1JSON16(b *testing.B) {
 
 func BenchmarkHTTP1Proto16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
-		return tests.TestPostRequestProto(tb, addr, "application/octet-stream", tests.TypeHTTP2)
+		return tests.TestPostRequestProto(tb, addr, "application/octet-stream", tests.TypeHTTP1)
 	}
 
 	benchmark(b, testFunc, 16, 1, WithDisableHTTP2())
@@ -302,7 +311,7 @@ func BenchmarkHTTP2JSON16(b *testing.B) {
 
 	benchmark(b, testFunc, 16, 1)
 }
-func BenchmarkHTTP2PROTO16(b *testing.B) {
+func BenchmarkHTTP2Proto16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
 		return tests.TestPostRequestProto(tb, addr, "application/octet-stream", tests.TypeHTTP2)
 	}
@@ -346,6 +355,7 @@ func benchmark(b *testing.B, testFunc func(testing.TB, string) error, pN, sN int
 		}
 	}()
 
+	router.Get("/echo", NewGRPCHandler(server, h.Call))
 	router.Post("/echo", NewGRPCHandler(server, h.Call))
 
 	addr := "https://localhost:42069"
@@ -381,13 +391,13 @@ func runBenchmark(b *testing.B, addr string, testFunc func(testing.TB, string) e
 			wg.Wait()
 		}
 		done <- struct{}{}
-		b.StopTimer()
 	}()
 
 	select {
 	case err := <-errChan:
-		b.Fatal("Benchmark failed", err)
+		b.Fatalf("Benchmark failed: %v", err)
 	case <-done:
+		b.StopTimer()
 	}
 }
 

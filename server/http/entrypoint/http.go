@@ -1,6 +1,6 @@
 package entrypoint
 
-// Copied and adapted from Traefik
+// Inspired by and adapted from Traefik
 // https://github.com/traefik/traefik/blob/master/pkg/server/server_entrypoint_tcp_http3.go
 
 import (
@@ -21,6 +21,7 @@ import (
 // Errors.
 var (
 	ErrRouterHandlerInterface = errors.New("router does not implement http.Handler interface")
+	ErrNoTLS                  = errors.New("no TLS config provided")
 )
 
 // httpServer is a server with Start and Stop methods.
@@ -52,6 +53,8 @@ func (e *Entrypoint) newHTTPServer(router router.Router) (*httpServer, error) {
 
 	if !e.Config.Insecure && e.Config.TLS != nil {
 		server.TLSConfig = e.Config.TLS
+	} else if !e.Config.Insecure && e.Config.TLS == nil {
+		return nil, ErrNoTLS
 	}
 
 	if e.Config.HTTP2 && !strings.Contains(os.Getenv("GODEBUG"), "http2server=0") {
