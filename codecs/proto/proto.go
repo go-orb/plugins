@@ -84,6 +84,7 @@ func (p *Proto) String() string {
 	return "proto"
 }
 
-func (j *Proto) Exts() []string {
+// Exts is a list of file extensions this encoder supports.
+func (p *Proto) Exts() []string {
 	return []string{""}
 }

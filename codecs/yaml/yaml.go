@@ -17,12 +17,15 @@ func init() {
 	}
 }
 
+// Yaml is the Yaml codec for go-micro.
 type Yaml struct{}
 
+// Marshal marshals any pointer into yaml byte.
 func (j *Yaml) Marshal(v any) ([]byte, error) {
 	return yaml.Marshal(v)
 }
 
+// Unmarshal decodes yaml byte to v pointer.
 func (j *Yaml) Unmarshal(data []byte, v any) error {
 	return yaml.Unmarshal(data, v)
 }
@@ -49,6 +52,7 @@ func (j *Yaml) String() string {
 	return "yaml"
 }
 
+// Exts is a list of file extensions this encoder supports.
 func (j *Yaml) Exts() []string {
 	return []string{".yaml", ".yml"}
 }
