@@ -3,7 +3,6 @@ package tests
 
 import (
 	"bytes"
-	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -47,7 +46,7 @@ const (
 var (
 	httpInsecureClient *http.Client
 	http1Client        *http.Client
-	http2Client        *http.Client
+	HTTP2Client        *http.Client
 	// TODO: As long as https://github.com/lucas-clemente/quic-go/issues/765
 	//       exists, the client cannot be re-used.
 	//nolint:unused
@@ -76,7 +75,7 @@ func RefreshClients() {
 		},
 	}
 
-	http2Client = &http.Client{
+	HTTP2Client = &http.Client{
 		Transport: &http.Transport{
 			ForceAttemptHTTP2: true,
 			TLSClientConfig: &tls.Config{
@@ -247,22 +246,22 @@ func makeGetReq(t testing.TB, addr, _ string, _ []byte, client *http.Client) ([]
 }
 
 func makePostReq(t testing.TB, addr, ct string, data []byte, client *http.Client) ([]byte, error) {
-	// NOTE: this would be nice to use, but gices TCP errors
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	// ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*10))
-	// ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, addr, bytes.NewReader(data))
-	if err != nil {
-		return nil, fmt.Errorf("create GET request failed: %w", err)
-	}
-
-	req.Header.Set("Content-Type", ct)
-	// req.Close = true
-
-	resp, err := client.Do(req)
-	// resp, err := client.Post(addr, ct, bytes.NewReader(data)) //nolint:noctx
+	// NOTE: this would be nice to use, but gices TCP errors when a context with timeout is passed in.
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	// // ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*10))
+	// // ctx, cancel := context.WithCancel(context.Background())
+	// defer cancel()
+	//
+	// req, err := http.NewRequestWithContext(ctx, http.MethodPost, addr, bytes.NewReader(data))
+	// if err != nil {
+	// 	return nil, fmt.Errorf("create POST request failed: %w", err)
+	// }
+	//
+	// req.Header.Set("Content-Type", ct)
+	// // req.Close = true
+	//
+	// resp, err := client.Do(req)
+	resp, err := client.Post(addr, ct, bytes.NewReader(data)) //nolint:noctx
 	if err != nil {
 		return nil, fmt.Errorf("failed to make POST request: %w", err)
 	}
@@ -299,7 +298,7 @@ func switchRequest(tb testing.TB, url, ct string, msg []byte, reqFunc ReqFunc, r
 	case TypeHTTP1:
 		body, err = reqFunc(tb, url, ct, msg, http1Client)
 	case TypeHTTP2:
-		body, err = reqFunc(tb, url, ct, msg, http2Client)
+		body, err = reqFunc(tb, url, ct, msg, HTTP2Client)
 	case TypeHTTP3:
 		// Required because of issue quic-go#765
 		client := http.Client{

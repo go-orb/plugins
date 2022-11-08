@@ -59,7 +59,7 @@ func (s *Server) decodeBody(resp http.ResponseWriter, request *http.Request, msg
 
 	codec, ok := s.codecs[contentType]
 	if !ok {
-		s.logger.Debug("Request failed, codec not found for contet type: " + contentType)
+		s.logger.Debug("Request failed, codec not found for content type: " + contentType)
 		return "", ErrContentTypeNotSupported
 	}
 

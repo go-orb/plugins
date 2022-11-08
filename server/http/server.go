@@ -17,6 +17,7 @@ import (
 	"go-micro.dev/v5/codecs"
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/types"
+	"golang.org/x/exp/slog"
 
 	"github.com/go-micro/plugins/server/http/entrypoint"
 	"github.com/go-micro/plugins/server/http/router/router"
@@ -60,6 +61,8 @@ func ProvideServerHTTP(serviceName types.ServiceName, data []source.Data, logger
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Debug("using content types", slog.Any("codecs", c))
 
 	r, err := cfg.NewRouter()
 	if err != nil {
