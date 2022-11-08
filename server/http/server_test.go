@@ -1,7 +1,11 @@
 package http
 
 import (
+	"bytes"
 	"context"
+	"io"
+	"mime"
+	"net/http"
 	"sync"
 	"testing"
 	"time"
@@ -9,6 +13,7 @@ import (
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/types"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/go-micro/plugins/server/http/utils/tests"
@@ -18,11 +23,9 @@ import (
 	_ "github.com/go-micro/plugins/codecs/jsonpb"
 	_ "github.com/go-micro/plugins/codecs/proto"
 	_ "github.com/go-micro/plugins/log/text"
-
 	_ "github.com/go-micro/plugins/server/http/router/chi"
 )
 
-// TODO: test if asking for specific content type back works
 // TODO: for client, provide info on this error: 		t.Error("As:", errors.As(err, &x509.HostnameError{}))
 //       >> change URL to proper hostname
 // TODO: Provide context on unknown authority error for client x509.UnknownAuthorityError
@@ -128,11 +131,54 @@ func TestServerGzip(t *testing.T) {
 }
 
 func TestServerInvalidContentType(t *testing.T) {
-	_, cleanup := setupServer(t, false, WithGzip())
+	_, cleanup := setupServer(t, false)
 	defer cleanup()
 
 	addr := "https://localhost:42069"
 	require.Error(t, tests.TestPostRequestProto(t, addr, "application/abcdef", tests.TypeHTTP2), "POST Proto")
+	require.Error(t, tests.TestPostRequestProto(t, addr, "yadayadayada", tests.TypeHTTP2), "POST Proto")
+}
+
+func TestServerRequestSpecificContentType(t *testing.T) {
+	_, cleanup := setupServer(t, false)
+	defer cleanup()
+
+	tests.RefreshClients()
+
+	addr := "https://localhost:42069/echo"
+	msg := `{"name": "Alex"}`
+
+	testCt := func(expectedCt string) {
+		req, err := http.NewRequest(http.MethodPost, addr, bytes.NewReader([]byte(msg))) //nolint:noctx
+		if err != nil {
+			t.Fatalf("create POST request failed: %v", err)
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Accept", expectedCt)
+
+		resp, err := tests.HTTP2Client.Do(req)
+		assert.NoError(t, err)
+		body, err := io.ReadAll(resp.Body)
+		assert.NoError(t, err)
+
+		// Validate conent type received
+		assert.Equal(t, http.StatusOK, resp.StatusCode, string(body))
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		assert.NoError(t, err)
+		assert.Equal(t, expectedCt, ct, string(body))
+
+		// Close connection
+		_, err = io.Copy(io.Discard, resp.Body)
+		assert.NoError(t, err)
+		assert.NoError(t, resp.Body.Close())
+	}
+
+	testCt("application/proto")
+	testCt("application/protobuf")
+	testCt("application/x-proto")
+	testCt("application/json")
+	testCt("application/x-www-form-urlencoded")
 }
 
 func BenchmarkHTTPInsecureJSON16(b *testing.B) {
@@ -263,7 +309,10 @@ func setupServer(t testing.TB, nolog bool, opts ...Option) (*Server, func()) {
 	lopts := []log.Option{}
 	if nolog {
 		lopts = append(lopts, log.WithLevel(log.ErrorLevel))
+	} else {
+		lopts = append(lopts, log.WithLevel(log.DebugLevel))
 	}
+
 	logger, err := log.ProvideLogger(name, nil, lopts...)
 	if err != nil {
 		t.Fatalf("failed to setup logger: %v", err)
