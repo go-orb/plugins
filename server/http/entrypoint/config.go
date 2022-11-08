@@ -87,8 +87,8 @@ func WithTLSFile(certfile, keyfile string) Option {
 	}
 }
 
-// WithTLS sets a tls config.
-func WithTLS(tlsConfig *tls.Config) Option {
+// WithTLSConfig sets a tls config.
+func WithTLSConfig(tlsConfig *tls.Config) Option {
 	return func(c *Config) {
 		c.TLS = tlsConfig
 	}

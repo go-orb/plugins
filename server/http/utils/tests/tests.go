@@ -1,3 +1,4 @@
+// Package tests provides testing utilities.
 package tests
 
 import (
@@ -9,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/lucas-clemente/quic-go/http3"
 	"github.com/pkg/errors"
@@ -19,7 +21,10 @@ import (
 	pb "github.com/go-micro/plugins/server/http/utils/tests/proto"
 )
 
+// ReqType set the HTTP request type to make.
 type ReqType int
+
+// ReqFunc sets thd request function to test.
 type ReqFunc func(testing.TB, string, string, []byte, *http.Client) ([]byte, error)
 
 // Request types.
@@ -35,12 +40,16 @@ const (
 	testName = "Alex"
 )
 
+// HTTP Clients for reuse, to pool connections during tests.
+//
+//nolint:gochecknoglobals
 var (
 	httpInsecureClient *http.Client
 	http1Client        *http.Client
 	http2Client        *http.Client
 	// TODO: As long as https://github.com/lucas-clemente/quic-go/issues/765
 	//       exists, the client cannot be re-used.
+	//nolint:unused
 	http3Client   *http.Client
 	httpH2CClient *http.Client
 )
@@ -54,7 +63,10 @@ func refreshClients() {
 
 	http1Client = &http.Client{
 		Transport: &http.Transport{
-			ForceAttemptHTTP2: false,
+			MaxIdleConns:        64,
+			MaxIdleConnsPerHost: 64,
+			ForceAttemptHTTP2:   false,
+			TLSHandshakeTimeout: 700 * time.Millisecond,
 			TLSClientConfig: &tls.Config{
 				//nolint:gosec
 				InsecureSkipVerify: true,
@@ -148,15 +160,16 @@ func TestPostRequestProto(t testing.TB, addr, ct string, reqT ReqType) error {
 	if err := checkProtoResponse(body, name); err != nil {
 		return err
 	}
+
 	return nil
 }
 
-// temporary test stuff
+// TestTLSProto temporary test stuff.
 func TestTLSProto(t testing.TB, addr string) error {
 	t.Log("Testing TLS")
 
 	conn, err := tls.Dial("tcp", addr, &tls.Config{
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: true, //nolint:gosec
 		NextProtos:         []string{"HTTP/3.0", "My custom proto", "ClientGarbage"},
 	})
 	if err != nil {
@@ -196,31 +209,65 @@ func checkProtoResponse(body []byte, name string) error {
 }
 
 func makeGetReq(t testing.TB, addr, _ string, _ []byte, client *http.Client) ([]byte, error) {
+	// NOTE: this would be nice to use, but gices TCP errors
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	// defer cancel()
+	//
+	// req, err := http.NewRequestWithContext(ctx, http.MethodGet, addr, nil)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("create GET request failed: %w", err)
+	// }
+	//
+	// resp, err := client.Do(req)
 	resp, err := client.Get(addr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to make GET request: %w", err)
 	}
-	defer resp.Body.Close()
+
+	defer func() {
+		if err = resp.Body.Close(); err != nil {
+			t.Errorf("failed to close body: %v", err)
+		}
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
+
 	logResponse(t, resp, body)
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("GET request failed: %w", err)
+		return nil, fmt.Errorf("GET request failed, status not OK: %+v", resp)
 	}
 
 	return body, nil
 }
 
 func makePostReq(t testing.TB, addr, ct string, data []byte, client *http.Client) ([]byte, error) {
-	resp, err := client.Post(addr, ct, bytes.NewBuffer(data))
+	// NOTE: this would be nice to use, but gices TCP errors
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	// defer cancel()
+	//
+	// req, err := http.NewRequestWithContext(ctx, http.MethodPost, addr, bytes.NewReader(data))
+	// if err != nil {
+	// 	return nil, fmt.Errorf("create GET request failed: %w", err)
+	// }
+	//
+	// req.Header.Set("Content-Type", ct)
+	// req.Close = true
+	//
+	// resp, err := client.Do(req)
+	resp, err := client.Post(addr, ct, bytes.NewReader(data))
 	if err != nil {
 		return nil, fmt.Errorf("failed to make POST request: %w", err)
 	}
-	defer resp.Body.Close()
+
+	defer func() {
+		if err = resp.Body.Close(); err != nil {
+			t.Errorf("failed to close body: %v", err)
+		}
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -250,7 +297,7 @@ func switchRequest(tb testing.TB, url, ct string, msg []byte, reqFunc ReqFunc, r
 	case TypeHTTP2:
 		body, err = reqFunc(tb, url, ct, msg, http2Client)
 	case TypeHTTP3:
-		// Required becuase of issue quic-go#765
+		// Required because of issue quic-go#765
 		client := http.Client{
 			Transport: &http3.RoundTripper{
 				TLSClientConfig: &tls.Config{
@@ -268,8 +315,12 @@ func switchRequest(tb testing.TB, url, ct string, msg []byte, reqFunc ReqFunc, r
 }
 
 func logResponse(tb testing.TB, resp *http.Response, body []byte) {
-	tb.Logf(
-		"[%+v] Status: %v, \n\tProto: %v, ConentType: %v, Length: %v, \n\tTransferEncoding: %v, Uncompressed: %v, \n\tBody: %v",
-		resp.Request.Method, resp.Status, resp.Proto, resp.Header.Get("Content-Type"), resp.ContentLength, resp.TransferEncoding, resp.Uncompressed, string(body),
-	)
+	// only log if not benchmark
+	if t, ok := tb.(*testing.T); ok {
+		t.Logf(
+			"[%+v] Status: %v, \n\tProto: %v, ConentType: %v, Length: %v, \n\tTransferEncoding: %v, Uncompressed: %v, \n\tBody: %v",
+			resp.Request.Method, resp.Status, resp.Proto, resp.Header.Get("Content-Type"),
+			resp.ContentLength, resp.TransferEncoding, resp.Uncompressed, string(body),
+		)
+	}
 }
