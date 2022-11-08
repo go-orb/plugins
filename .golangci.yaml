@@ -68,6 +68,9 @@ linters-settings:
     # Default: 5
     max-distance: 26
     ignore-names:
+      - t
+      - req
+      - resp
       - err
       - id
       - ch

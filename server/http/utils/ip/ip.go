@@ -1,4 +1,4 @@
-// Package IP provides validation and parsing utilities.
+// Package ip provides validation and parsing utilities.
 package ip
 
 import (

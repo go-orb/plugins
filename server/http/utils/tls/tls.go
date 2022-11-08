@@ -64,6 +64,8 @@ func GenTlSConfig(addr ...string) (*tls.Config, error) {
 	return &config, nil
 }
 
+// CertificateQuic generates a certificate for use with QUIC.
+// NOTE: this is redundant, was just here to test.
 func CertificateQuic() (tls.Certificate, error) {
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
