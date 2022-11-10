@@ -17,7 +17,8 @@ func init() {
 	}
 }
 
-// Yaml is the Yaml codec for go-micro.
+// Yaml implements the codecs.Marshaler interface. It can be used to encode/decode
+// yaml files, or web requests.
 type Yaml struct{}
 
 // Marshal marshals any pointer into yaml byte.
