@@ -26,4 +26,4 @@ replace github.com/go-micro/plugins/registry/mdns/zone => ./zone
 
 replace github.com/go-micro/plugins/registry/mdns/ => ./
 
-replace go-micro.dev/v5 => ../../../orb
+// replace go-micro.dev/v5 => ../../../orb
