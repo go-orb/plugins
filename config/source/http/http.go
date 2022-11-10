@@ -1,4 +1,5 @@
-// Package file is the file source for orb/config.
+// Package file provides the file source for the config. It allows you to read in
+// files from disk with any extension for which a codec plugin has been loaded.
 package file
 
 import (
@@ -12,8 +13,7 @@ import (
 )
 
 func init() {
-	err := source.Plugins.Add(New())
-	if err != nil {
+	if err := source.Plugins.Add(New()); err != nil {
 		panic(err)
 	}
 }
@@ -45,6 +45,7 @@ func (s *Source) Read(myURL *url.URL) source.Data {
 	marshalers := codecs.Plugins.All()
 
 	var decoder codecs.Marshaler
+
 	// Get the marshaler from the extension.
 	pathExt := filepath.Ext(path)
 	for _, m := range marshalers {
@@ -54,16 +55,17 @@ func (s *Source) Read(myURL *url.URL) source.Data {
 				break
 			}
 		}
+
 		if decoder != nil {
 			break
 		}
 	}
 
-	// No marshaler found
 	if decoder == nil {
 		result.Error = codecs.ErrNoFileMarshaler
 		return result
 	}
+
 	result.Marshaler = decoder
 
 	// Download the file
@@ -75,6 +77,7 @@ func (s *Source) Read(myURL *url.URL) source.Data {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		io.Copy(io.Discard, resp.Body)
 		result.Error = fmt.Errorf("bad response status code '%d', status text: %s", resp.StatusCode, resp.Status)
 		return result
 	}

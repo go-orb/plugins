@@ -70,6 +70,7 @@ func (s *Source) Read(u *url.URL) source.Data {
 					break
 				}
 			}
+
 			if decoder != nil {
 				break
 			}
@@ -83,7 +84,6 @@ func (s *Source) Read(u *url.URL) source.Data {
 
 	result.Marshaler = decoder
 
-	// Open the file
 	fh, err := os.Open(path)
 	if err != nil {
 		result.Error = err
@@ -91,7 +91,6 @@ func (s *Source) Read(u *url.URL) source.Data {
 	}
 	defer fh.Close()
 
-	// Decode
 	if err := decoder.NewDecoder(fh).Decode(&result.Data); err != nil {
 		result.Error = err
 		return result

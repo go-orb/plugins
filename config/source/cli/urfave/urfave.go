@@ -36,13 +36,7 @@ func Parse(config *oCli.Config, flags []*oCli.Flag, args []string) error {
 		stringSliceFlags: make(map[string]*cli.StringSliceFlag),
 	}
 
-	var result *multierror.Error
-
-	for _, f := range flags {
-		if err := parser.add(f); err != nil {
-			result = multierror.Append(result, err)
-		}
-	}
+	var merr *multierror.Error
 
 	if result.ErrorOrNil() != nil {
 		return result
