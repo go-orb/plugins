@@ -5,19 +5,21 @@ import (
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"go-micro.dev/v5/config"
+	"go-micro.dev/v5/config/source/cli"
+
 	_ "github.com/go-micro/plugins/codecs/json"
 	_ "github.com/go-micro/plugins/codecs/yaml"
 	_ "github.com/go-micro/plugins/config/source/cli/urfave"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"go-micro.dev/v5/config"
-	"go-micro.dev/v5/config/source/cli"
 )
 
 func testSections(t *testing.T, sections []string) {
 	t.Helper()
 
-	// Clear flags
+	// Clear flags from other tests
 	cli.Flags.Clear()
 
 	err := cli.Flags.Add(cli.NewFlag(
@@ -44,7 +46,6 @@ func testSections(t *testing.T, sections []string) {
 	))
 	require.NoError(t, err)
 
-	// Setup os.Args
 	os.Args = []string{
 		"testapp",
 		"--registry",
@@ -55,11 +56,9 @@ func testSections(t *testing.T, sections []string) {
 		"nats://localhost:4222",
 	}
 
-	// Setup the urls.
 	u1, err := url.Parse("cli://urfave")
 	require.NoError(t, err)
 
-	// Read the urls.
 	datas, err := config.Read([]*url.URL{u1}, sections)
 	require.NoError(t, err)
 
