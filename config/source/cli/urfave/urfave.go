@@ -78,7 +78,7 @@ func (c *flagCLI) add(flag *oCli.Flag) error {
 		}
 		c.stringSliceFlags[flag.Name] = f
 	default:
-		return fmt.Errorf("found a unknown flag: %s", flag.Name)
+		return fmt.Errorf("unknown flag: %s", flag.Name)
 	}
 
 	c.flags[flag.Name] = flag
