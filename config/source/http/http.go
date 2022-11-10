@@ -2,11 +2,13 @@
 package http
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"time"
 
 	"go-micro.dev/v5/codecs"
 	"go-micro.dev/v5/config/source"
@@ -76,7 +78,17 @@ func (s *Source) Read(myURL *url.URL) source.Data {
 	result.Marshaler = decoder
 
 	// Download the file
-	resp, err := http.Get(myURL.String())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, myURL.String(), nil)
+	if err != nil {
+		result.Error = err
+
+		return result
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		result.Error = err
 
@@ -93,6 +105,7 @@ func (s *Source) Read(myURL *url.URL) source.Data {
 		if _, err := io.Copy(io.Discard, resp.Body); err != nil {
 			log.Error("Error while closing the body", err)
 		}
+
 		result.Error = fmt.Errorf("bad response status code '%d', status text: %s", resp.StatusCode, resp.Status)
 
 		return result
