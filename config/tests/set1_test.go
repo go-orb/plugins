@@ -14,6 +14,8 @@ import (
 	_ "github.com/go-micro/plugins/config/source/http"
 )
 
+const urlRepo = "https://raw.githubusercontent.com/go-orb/plugins/main/config/tests/data"
+
 func testSet1URLs(t *testing.T, urls []*url.URL) {
 	t.Helper()
 
@@ -39,7 +41,7 @@ func TestSet1FileNoExt(t *testing.T) {
 	u2, err := url.Parse("./data/set1/registry2")
 	require.NoError(t, err)
 
-	testSet1URLs(t, []*url.URL{ u1, u2, })
+	testSet1URLs(t, []*url.URL{u1, u2})
 }
 
 func TestSet1FileJsonYaml(t *testing.T) {
@@ -69,10 +71,10 @@ func TestSet1FileYamlJson(t *testing.T) {
 }
 
 func TestSet1HttpYamlJson(t *testing.T) {
-	u1, err := url.Parse("https://raw.githubusercontent.com/go-orb/config-plugins/main/test/data/set1/registry1.yaml")
+	u1, err := url.Parse(urlRepo + "/set1/registry1.yaml")
 	require.NoError(t, err)
 
-	u2, err := url.Parse("https://raw.githubusercontent.com/go-orb/config-plugins/main/test/data/set1/registry2.json")
+	u2, err := url.Parse(urlRepo + "/set1/registry2.json")
 	require.NoError(t, err)
 
 	testSet1URLs(t, []*url.URL{
@@ -85,7 +87,7 @@ func TestSet1FileNoExtAndHttp(t *testing.T) {
 	u1, err := url.Parse("./data/set1/registry1")
 	require.NoError(t, err)
 
-	u2, err := url.Parse("https://raw.githubusercontent.com/go-orb/config-plugins/main/test/data/set1/registry2.json")
+	u2, err := url.Parse(urlRepo + "/set1/registry2.json")
 	require.NoError(t, err)
 
 	testSet1URLs(t, []*url.URL{
@@ -98,7 +100,7 @@ func TestSet1IgnoreUnknown(t *testing.T) {
 	u1, err := url.Parse("./data/set1/registry1")
 	require.NoError(t, err)
 
-	u2, err := url.Parse("https://raw.githubusercontent.com/go-orb/config-plugins/main/test/data/set1/registry2.json")
+	u2, err := url.Parse(urlRepo + "/set1/registry2.json")
 	require.NoError(t, err)
 
 	u3, err := url.Parse("./data/set1/unknown.yaml?ignore_error=true")
@@ -115,7 +117,7 @@ func TestSet1FailUnknown(t *testing.T) {
 	u1, err := url.Parse("./data/set1/registry1")
 	require.NoError(t, err)
 
-	u2, err := url.Parse("https://raw.githubusercontent.com/go-orb/config-plugins/main/test/data/set1/registry2.json")
+	u2, err := url.Parse(urlRepo + "/set1/registry2.json")
 	require.NoError(t, err)
 
 	u3, err := url.Parse("./data/set1/unknown.yaml")

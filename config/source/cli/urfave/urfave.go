@@ -1,4 +1,4 @@
-// Package urfavecli provides a urfave implemenation for the CLI interface used by the config package.
+// Package urfavecli is a cli wrapper for urfave.
 package urfave
 
 import (
@@ -36,10 +36,16 @@ func Parse(config *oCli.Config, flags []*oCli.Flag, args []string) error {
 		stringSliceFlags: make(map[string]*cli.StringSliceFlag),
 	}
 
-	var merr *multierror.Error
+	var mErr *multierror.Error
 
-	if result.ErrorOrNil() != nil {
-		return result
+	for _, f := range flags {
+		if err := parser.add(f); err != nil {
+			mErr = multierror.Append(mErr, err)
+		}
+	}
+
+	if mErr.ErrorOrNil() != nil {
+		return mErr
 	}
 
 	return parser.parse(args)
@@ -72,7 +78,7 @@ func (c *flagCLI) add(flag *oCli.Flag) error {
 		}
 		c.stringSliceFlags[flag.Name] = f
 	default:
-		return fmt.Errorf("unknown flag: %s", flag.Name)
+		return fmt.Errorf("found a unknown flag: %s", flag.Name)
 	}
 
 	c.flags[flag.Name] = flag

@@ -21,19 +21,19 @@ func TestParse(t *testing.T) {
 	flagString := cli.NewFlag(
 		FlagString,
 		"orb!1!1",
-		cli.CPSlice([]string{"orb", "registry", FlagString}),
+		cli.ConfigPathSlice([]string{"orb", "registry", FlagString}),
 		cli.Usage("string flag usage"),
 	)
 
 	flagInt := cli.NewFlag(
 		FlagInt,
 		0,
-		cli.CPSlice([]string{"orb", "registry", FlagInt}),
+		cli.ConfigPathSlice([]string{"orb", "registry", FlagInt}),
 		cli.Usage("int flag usage"),
 	)
 
 	err := Parse(
-		myConfig,
+		&myConfig,
 		[]*cli.Flag{flagString, flagInt},
 		[]string{
 			"testapp",

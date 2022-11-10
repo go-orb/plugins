@@ -73,10 +73,10 @@ func TestSet2FileYamlJson(t *testing.T) {
 }
 
 func TestSet2HttpYamlJson(t *testing.T) {
-	u1, err := url.Parse("https://raw.githubusercontent.com/go-orb/config-plugins/main/test/data/set2/registry1.yaml")
+	u1, err := url.Parse(urlRepo + "/set2/registry1.yaml")
 	require.NoError(t, err)
 
-	u2, err := url.Parse("https://raw.githubusercontent.com/go-orb/config-plugins/main/test/data/set2/registry2.json")
+	u2, err := url.Parse(urlRepo + "/set2/registry2.json")
 	require.NoError(t, err)
 
 	testSet2URLs(t, []*url.URL{
@@ -89,7 +89,7 @@ func TestSet2FileNoExtAndHttp(t *testing.T) {
 	u1, err := url.Parse("./data/set2/registry1")
 	require.NoError(t, err)
 
-	u2, err := url.Parse("https://raw.githubusercontent.com/go-orb/config-plugins/main/test/data/set2/registry2.json")
+	u2, err := url.Parse(urlRepo + "/set2/registry2.json")
 	require.NoError(t, err)
 
 	testSet2URLs(t, []*url.URL{

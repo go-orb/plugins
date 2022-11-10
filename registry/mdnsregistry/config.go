@@ -13,7 +13,7 @@ func init() {
 	_ = cli.Flags.Add(cli.NewFlag(
 		"registry_domain",
 		DefaultDomain,
-		cli.CPSlice([]string{"registry", "domain"}),
+		cli.ConfigPathSlice([]string{"registry", "domain"}),
 		cli.Usage("Registry domain."),
 	))
 

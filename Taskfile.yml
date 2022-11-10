@@ -2,9 +2,9 @@ version: "3"
 
 tasks:
   tidy:
-    desc: Run "go mod tidy -go=1.18" in all packages
+    desc: Run "go mod tidy -go=1.19" in all packages
     cmds:
-      - find . -name 'go.mod' -exec /bin/bash -c 'pushd `dirname $1`; go mod tidy -go=1.18; popd' '_' {} \;
+      - find . -name 'go.mod' -exec /bin/bash -c 'pushd `dirname $1`; go mod tidy -go=1.19; popd' '_' {} \;
   update:
     desc: Run "go get -u ./..." in all packages
     cmds:

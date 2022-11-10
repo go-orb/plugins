@@ -33,7 +33,7 @@ func testSections(t *testing.T, sections []string) {
 	err = cli.Flags.Add(cli.NewFlag(
 		"registry_ttl",
 		300,
-		cli.CPSlice([]string{"registry", "ttl"}),
+		cli.ConfigPathSlice([]string{"registry", "ttl"}),
 		cli.Usage("int flag usage"),
 	))
 	require.NoError(t, err)
@@ -41,7 +41,7 @@ func testSections(t *testing.T, sections []string) {
 	err = cli.Flags.Add(cli.NewFlag(
 		"nats-address",
 		[]string{},
-		cli.CPSlice([]string{"registry", "addresses"}),
+		cli.ConfigPathSlice([]string{"registry", "addresses"}),
 		cli.Usage("NATS Address"),
 	))
 	require.NoError(t, err)
