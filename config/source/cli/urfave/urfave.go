@@ -1,4 +1,4 @@
-// Package urfavecli is a cli wrapper for urfave.
+// Package urfavecli provides a urfave implemenation for the CLI interface used by the config package.
 package urfave
 
 import (
