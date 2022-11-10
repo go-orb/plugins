@@ -217,7 +217,7 @@ func (m *mdnsRegistry) Register(service *registry.Service, opts ...registry.Regi
 			return err
 		}
 
-		srv, err := server.NewServer(&server.Config{Zone: &dns.DNSSDService{MDNSService: s}})
+		srv, err := server.NewServer(&server.Config{Zone: &dns.SDService{MDNSService: s}})
 		if err != nil {
 			return err
 		}

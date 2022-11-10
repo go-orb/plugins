@@ -39,7 +39,7 @@ import (
 // }
 
 func TestDNSSDServiceRecords(t *testing.T) {
-	s := &DNSSDService{
+	s := &SDService{
 		MDNSService: &zone.TestMDNSService,
 	}
 	q := dns.Question{

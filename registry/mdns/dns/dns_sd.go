@@ -5,16 +5,16 @@ import (
 	"github.com/miekg/dns"
 )
 
-// DNSSDService is a service that complies with the DNS-SD (RFC 6762) and MDNS
+// SDService is a service that complies with the DNS-SD (RFC 6762) and MDNS
 // (RFC 6762) specs for local, multicast-DNS-based discovery.
 //
-// DNSSDService implements the Zone interface and wraps an MDNSService instance.
+// SDService implements the Zone interface and wraps an MDNSService instance.
 // To deploy an mDNS service that is compliant with DNS-SD, it's recommended to
 // register only the wrapped instance with the server.
 //
 // Example usage:
 //
-//	    service := &mdns.DNSSDService{
+//	    service := &mdns.SDService{
 //	      MDNSService: &mdns.MDNSService{
 //		       Instance: "My Foobar Service",
 //		       Service: "_foobar._tcp",
@@ -26,7 +26,7 @@ import (
 //	       log.Fatalf("Error creating server: %v", err)
 //	     }
 //	     defer server.Shutdown()
-type DNSSDService struct {
+type SDService struct {
 	MDNSService *zone.MDNSService
 }
 
@@ -37,11 +37,12 @@ type DNSSDService struct {
 // _services._dns-sd._udp.<Domain>", as described in section 9 of RFC 6763
 // ("Service Type Enumeration"), to allow browsing of the underlying MDNSService
 // instance.
-func (s *DNSSDService) Records(q dns.Question) []dns.RR {
+func (s *SDService) Records(q dns.Question) []dns.RR {
 	var recs []dns.RR
 	if q.Name == "_services._dns-sd._udp."+s.MDNSService.Domain+"." {
 		recs = s.dnssdMetaQueryRecords(q)
 	}
+
 	return append(recs, s.MDNSService.Records(q)...)
 }
 
@@ -50,7 +51,7 @@ func (s *DNSSDService) Records(q dns.Question) []dns.RR {
 //
 // A meta-query has a name of the form "_services._dns-sd._udp.<Domain>" where
 // Domain is a fully-qualified domain, such as "local.".
-func (s *DNSSDService) dnssdMetaQueryRecords(q dns.Question) []dns.RR {
+func (s *SDService) dnssdMetaQueryRecords(q dns.Question) []dns.RR {
 	// Intended behavior, as described in the RFC:
 	//     ...it may be useful for network administrators to find the list of
 	//     advertised service types on the network, even if those Service Names

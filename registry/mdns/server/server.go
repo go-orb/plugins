@@ -18,12 +18,16 @@ import (
 )
 
 // mDNS Groups.
+//
+//nolint:gochecknoglobals
 var (
 	MDNSGroupIPv4 = net.ParseIP("224.0.0.251")
 	MDNSGroupIPv6 = net.ParseIP("ff02::fb")
 )
 
 // mDNS wildcard addresses.
+//
+//nolint:gochecknoglobals
 var (
 	MDNSWildcardAddrIPv4 = &net.UDPAddr{
 		IP:   net.ParseIP("224.0.0.0"),
@@ -36,6 +40,8 @@ var (
 )
 
 // mDNS endpoint addresses.
+//
+//nolint:gochecknoglobals
 var (
 	IPv4Addr = &net.UDPAddr{
 		IP:   MDNSGroupIPv4,
@@ -66,8 +72,11 @@ type Config struct {
 
 	// GetMachineIP is a function to return the IP of the local machine
 	GetMachineIP GetMachineIP
-	// LocalhostChecking if enabled asks the server to also send responses to 0.0.0.0 if the target IP
-	// is this host (as defined by GetMachineIP). Useful in case machine is on a VPN which blocks comms on non standard ports
+
+	// LocalhostChecking if enabled asks the server to also send responses to
+	// 0.0.0.0 if the target IP
+	// is this host (as defined by GetMachineIP).
+	// Useful in case machine is on a VPN which blocks comms on non standard ports
 	LocalhostChecking bool
 }
 
@@ -88,13 +97,14 @@ type Server struct {
 }
 
 // NewServer is used to create a new mDNS server from a config.
-func NewServer(config *Config) (*Server, error) {
+func NewServer(config *Config) (*Server, error) { //nolint:gocyclo
 	setCustomPort(config.Port)
 
 	// Create the listeners
 	// Create wildcard connections (because :5353 can be already taken by other apps)
-	ipv4List, _ := net.ListenUDP("udp4", MDNSWildcardAddrIPv4)
-	ipv6List, _ := net.ListenUDP("udp6", MDNSWildcardAddrIPv6)
+	ipv4List, _ := net.ListenUDP("udp4", MDNSWildcardAddrIPv4) //nolint:errcheck
+	ipv6List, _ := net.ListenUDP("udp6", MDNSWildcardAddrIPv6) //nolint:errcheck
+
 	if ipv4List == nil && ipv6List == nil {
 		return nil, fmt.Errorf("mdns: failed to bind to any udp port")
 	}
@@ -102,25 +112,29 @@ func NewServer(config *Config) (*Server, error) {
 	if ipv4List == nil {
 		ipv4List = &net.UDPConn{}
 	}
+
 	if ipv6List == nil {
 		ipv6List = &net.UDPConn{}
 	}
 
 	// Join multicast groups to receive announcements
-	p1 := ipv4.NewPacketConn(ipv4List)
-	p2 := ipv6.NewPacketConn(ipv6List)
-	if err := p1.SetMulticastLoopback(true); err != nil {
-		return nil, err
-	}
-	if err := p2.SetMulticastLoopback(true); err != nil {
+	connIPv4 := ipv4.NewPacketConn(ipv4List)
+	connIPv6 := ipv6.NewPacketConn(ipv6List)
+
+	if err := connIPv4.SetMulticastLoopback(true); err != nil {
 		return nil, err
 	}
 
-	if config.Iface != nil {
-		if err := p1.JoinGroup(config.Iface, &net.UDPAddr{IP: MDNSGroupIPv4}); err != nil {
+	if err := connIPv6.SetMulticastLoopback(true); err != nil {
+		return nil, err
+	}
+
+	if config.Iface != nil { //nolint:nestif
+		if err := connIPv4.JoinGroup(config.Iface, &net.UDPAddr{IP: MDNSGroupIPv4}); err != nil {
 			return nil, err
 		}
-		if err := p2.JoinGroup(config.Iface, &net.UDPAddr{IP: MDNSGroupIPv6}); err != nil {
+
+		if err := connIPv6.JoinGroup(config.Iface, &net.UDPAddr{IP: MDNSGroupIPv6}); err != nil {
 			return nil, err
 		}
 	} else {
@@ -128,16 +142,24 @@ func NewServer(config *Config) (*Server, error) {
 		if err != nil {
 			return nil, err
 		}
-		errCount1, errCount2 := 0, 0
+
+		// Check if we succeed on atleast one interface.
+		success := false
+
 		for _, iface := range ifaces {
-			if err := p1.JoinGroup(&iface, &net.UDPAddr{IP: MDNSGroupIPv4}); err != nil {
-				errCount1++
+			i := iface
+			if err := connIPv4.JoinGroup(&i, &net.UDPAddr{IP: MDNSGroupIPv4}); err != nil {
+				continue
 			}
-			if err := p2.JoinGroup(&iface, &net.UDPAddr{IP: MDNSGroupIPv6}); err != nil {
-				errCount2++
+
+			i = iface
+			if err := connIPv6.JoinGroup(&i, &net.UDPAddr{IP: MDNSGroupIPv6}); err != nil {
+				continue
 			}
+			success = true
 		}
-		if len(ifaces) == errCount1 && len(ifaces) == errCount2 {
+
+		if !success {
 			return nil, fmt.Errorf("failed to join multicast group on all interfaces")
 		}
 	}
@@ -159,6 +181,7 @@ func NewServer(config *Config) (*Server, error) {
 	go s.recv(s.ipv6List)
 
 	s.wg.Add(1)
+
 	go s.probe()
 
 	return s, nil
@@ -175,6 +198,7 @@ func (s *Server) Shutdown() error {
 
 	s.shutdown = true
 	close(s.shutdownCh)
+
 	if err := s.unregister(); err != nil {
 		return err
 	}
@@ -182,11 +206,13 @@ func (s *Server) Shutdown() error {
 	if s.ipv4List != nil {
 		s.ipv4List.Close()
 	}
+
 	if s.ipv6List != nil {
 		s.ipv6List.Close()
 	}
 
 	s.wg.Wait()
+
 	return nil
 }
 
@@ -195,7 +221,9 @@ func (s *Server) recv(c *net.UDPConn) {
 	if c == nil {
 		return
 	}
+
 	buf := make([]byte, 65536)
+
 	for {
 		s.shutdownLock.Lock()
 		if s.shutdown {
@@ -203,10 +231,12 @@ func (s *Server) recv(c *net.UDPConn) {
 			return
 		}
 		s.shutdownLock.Unlock()
+
 		n, from, err := c.ReadFrom(buf)
 		if err != nil {
 			continue
 		}
+
 		if err := s.parsePacket(buf[:n], from); err != nil {
 			log.Error("[ERR] mdns: Failed to handle query", err)
 		}
@@ -224,6 +254,7 @@ func (s *Server) parsePacket(packet []byte, from net.Addr) error {
 	// We decided to ignore some mDNS answers for the time being
 	// See: https://tools.ietf.org/html/rfc6762#section-7.2
 	msg.Truncated = false
+
 	return s.handleQuery(&msg, from)
 }
 
@@ -236,6 +267,7 @@ func (s *Server) handleQuery(query *dns.Msg, from net.Addr) error {
 		// than zero MUST be silently ignored."  Note: OpcodeQuery == 0
 		return fmt.Errorf("mdns: received query with non-zero Opcode %v: %v", query.Opcode, *query)
 	}
+
 	if query.Rcode != 0 {
 		// "In both multicast query and multicast response messages, the Response
 		// Code MUST be zero on transmission.  Multicast DNS messages received with
@@ -277,6 +309,7 @@ func (s *Server) handleQuery(query *dns.Msg, from net.Addr) error {
 		} else {
 			answer = multicastAnswer
 		}
+
 		if len(answer) == 0 {
 			return nil
 		}
@@ -317,14 +350,16 @@ func (s *Server) handleQuery(query *dns.Msg, from net.Addr) error {
 
 	if mresp := resp(false); mresp != nil {
 		if err := s.sendResponse(mresp, from); err != nil {
-			return fmt.Errorf("mdns: error sending multicast response: %v", err)
+			return fmt.Errorf("mdns: error sending multicast response: %w", err)
 		}
 	}
+
 	if uresp := resp(true); uresp != nil {
 		if err := s.sendResponse(uresp, from); err != nil {
-			return fmt.Errorf("mdns: error sending unicast response: %v", err)
+			return fmt.Errorf("mdns: error sending unicast response: %w", err)
 		}
 	}
+
 	return nil
 }
 
@@ -352,22 +387,24 @@ func (s *Server) handleQuestion(q dns.Question) (multicastRecs, unicastRecs []dn
 	if q.Qclass&(1<<15) != 0 {
 		return nil, records
 	}
+
 	return records, nil
 }
 
 func (s *Server) probe() {
 	defer s.wg.Done()
 
-	sd, ok := s.config.Zone.(*zone.MDNSService)
+	mdnsService, ok := s.config.Zone.(*zone.MDNSService)
 	if !ok {
 		return
 	}
 
-	name := fmt.Sprintf("%s.%s.%s.", sd.Instance, util.TrimDot(sd.Service), util.TrimDot(sd.Domain))
+	name := fmt.Sprintf("%s.%s.%s.", mdnsService.Instance,
+		util.TrimDot(mdnsService.Service), util.TrimDot(mdnsService.Domain))
 
-	q := new(dns.Msg)
-	q.SetQuestion(name, dns.TypePTR)
-	q.RecursionDesired = false
+	msg := new(dns.Msg)
+	msg.SetQuestion(name, dns.TypePTR)
+	msg.RecursionDesired = false
 
 	srv := &dns.SRV{
 		Hdr: dns.RR_Header{
@@ -378,8 +415,8 @@ func (s *Server) probe() {
 		},
 		Priority: 0,
 		Weight:   0,
-		Port:     uint16(sd.Port),
-		Target:   sd.HostName,
+		Port:     uint16(mdnsService.Port),
+		Target:   mdnsService.HostName,
 	}
 	txt := &dns.TXT{
 		Hdr: dns.RR_Header{
@@ -388,16 +425,17 @@ func (s *Server) probe() {
 			Class:  dns.ClassINET,
 			Ttl:    zone.DefaultTTL,
 		},
-		Txt: sd.TXT,
+		Txt: mdnsService.TXT,
 	}
-	q.Ns = []dns.RR{srv, txt}
+	msg.Ns = []dns.RR{srv, txt}
 
 	randomizer := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	for i := 0; i < 3; i++ {
-		if err := s.SendMulticast(q); err != nil {
+		if err := s.SendMulticast(msg); err != nil {
 			log.Error("[ERR] mdns: failed to send probe", err)
 		}
+
 		time.Sleep(time.Duration(randomizer.Intn(250)) * time.Millisecond)
 	}
 
@@ -405,12 +443,12 @@ func (s *Server) probe() {
 	resp.Response = true
 
 	// set for query
-	q.SetQuestion(name, dns.TypeANY)
+	msg.SetQuestion(name, dns.TypeANY)
 
-	resp.Answer = append(resp.Answer, s.config.Zone.Records(q.Question[0])...)
+	resp.Answer = append(resp.Answer, s.config.Zone.Records(msg.Question[0])...)
 
 	// reset
-	q.SetQuestion(name, dns.TypePTR)
+	msg.SetQuestion(name, dns.TypePTR)
 
 	// From RFC6762
 	//    The Multicast DNS responder MUST send at least two unsolicited
@@ -420,6 +458,7 @@ func (s *Server) probe() {
 	//    at least a factor of two with every response sent.
 	timeout := 1 * time.Second
 	timer := time.NewTimer(timeout)
+
 	for i := 0; i < 3; i++ {
 		if err := s.SendMulticast(resp); err != nil {
 			log.Error("[ERR] mdns: failed to send announcement", err)
@@ -441,16 +480,19 @@ func (s *Server) SendMulticast(msg *dns.Msg) error {
 	if err != nil {
 		return err
 	}
+
 	if s.ipv4List != nil {
 		if _, err := s.ipv4List.WriteToUDP(buf, IPv4Addr); err != nil {
 			return err
 		}
 	}
+
 	if s.ipv6List != nil {
 		if _, err := s.ipv6List.WriteToUDP(buf, IPv6Addr); err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -464,7 +506,7 @@ func (s *Server) sendResponse(resp *dns.Msg, from net.Addr) error {
 	}
 
 	// Determine the socket to send from
-	addr := from.(*net.UDPAddr)
+	addr := from.(*net.UDPAddr) //nolint:errcheck
 	conn := s.ipv4List
 	backupTarget := net.IPv4zero
 
@@ -472,9 +514,12 @@ func (s *Server) sendResponse(resp *dns.Msg, from net.Addr) error {
 		conn = s.ipv6List
 		backupTarget = net.IPv6zero
 	}
+
 	_, err = conn.WriteToUDP(buf, addr)
-	// If the address we're responding to is this machine then we can also attempt sending on 0.0.0.0
-	// This covers the case where this machine is using a VPN and certain ports are blocked so the response never gets there
+	// If the address we're responding to is this machine then we can also
+	// attempt sending on 0.0.0.0
+	// This covers the case where this machine is using a VPN and certain ports
+	// are blocked so the response never gets there
 	// Sending two responses is OK
 	if s.config.LocalhostChecking && addr.IP.Equal(s.outboundIP) {
 		// ignore any errors, this is best efforts
@@ -482,6 +527,7 @@ func (s *Server) sendResponse(resp *dns.Msg, from net.Addr) error {
 			return err
 		}
 	}
+
 	return err
 }
 
@@ -509,12 +555,15 @@ func setCustomPort(port int) {
 		if MDNSWildcardAddrIPv4.Port != port {
 			MDNSWildcardAddrIPv4.Port = port
 		}
+
 		if MDNSWildcardAddrIPv6.Port != port {
 			MDNSWildcardAddrIPv6.Port = port
 		}
+
 		if IPv4Addr.Port != port {
 			IPv4Addr.Port = port
 		}
+
 		if IPv6Addr.Port != port {
 			IPv6Addr.Port = port
 		}
