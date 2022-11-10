@@ -86,5 +86,5 @@ func (p *Proto) String() string {
 
 // Exts is a list of file extensions this marshaler supports.
 func (p *Proto) Exts() []string {
-	return []string{""}
+	return []string{".proto"}
 }
