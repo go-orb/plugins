@@ -45,6 +45,7 @@ func (j *JSONPb) String() string {
 	return "jsonpb"
 }
 
+// Exts is a list of file extensions this marshaler supports.
 func (j *JSONPb) Exts() []string {
 	return []string{""}
 }

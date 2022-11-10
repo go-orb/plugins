@@ -1,0 +1,25 @@
+go 1.19
+
+use (
+	../orb
+	./codecs/form
+	./codecs/json
+	./codecs/jsonpb
+	./codecs/proto
+	./codecs/yaml
+	./config/source/cli/urfave
+	./config/source/file
+	./config/source/http
+	./config/tests
+	./log/json
+	./log/text
+	./registry/mdnsregistry
+)
+
+replace go-micro.dev/v5 v5.0.0-00010101000000-000000000000 => ../orb
+
+replace github.com/go-micro/plugins/config/source/cli/urfave => ./config/source/cli/urfave
+
+replace github.com/go-micro/plugins/config/source/file => ./config/source/file
+
+replace github.com/go-micro/plugins/config/source/http => ./config/source/http

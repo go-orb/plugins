@@ -1,8 +1,8 @@
 package mdnsregistry
 
 import (
-	"github.com/go-orb/config/source/cli"
-	"github.com/go-orb/orb/registry"
+	"go-micro.dev/v5/config/source/cli"
+	"go-micro.dev/v5/registry"
 )
 
 const name = "mdns"
@@ -10,10 +10,11 @@ const name = "mdns"
 var DefaultDomain = "orb"
 
 func init() {
+	//nolint:errcheck
 	_ = cli.Flags.Add(cli.NewFlag(
 		"registry_domain",
 		DefaultDomain,
-		cli.CPSlice([]string{"registry", "domain"}),
+		cli.ConfigPathSlice([]string{"registry", "domain"}),
 		cli.Usage("Registry domain."),
 	))
 

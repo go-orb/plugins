@@ -1,0 +1,6 @@
+---
+app:
+  registry:
+    enabled: true
+    timeout: 600
+    domain: app

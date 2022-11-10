@@ -84,6 +84,7 @@ func (p *Proto) String() string {
 	return "proto"
 }
 
-func (j *Proto) Exts() []string {
-	return []string{""}
+// Exts is a list of file extensions this marshaler supports.
+func (p *Proto) Exts() []string {
+	return []string{".proto"}
 }
