@@ -1,19 +1,22 @@
 module github.com/go-micro/plugins/registry/mdns
 
-go 1.18
+go 1.19
 
 require (
-	github.com/go-orb/config v0.0.0-20221030033613-c8559119f197
-	github.com/go-orb/orb v0.0.0-20221030035336-f1af9ec35d6d
+	github.com/go-micro/plugins/registry/mdns/mdnsutil v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.3.0
 	github.com/miekg/dns v1.1.50
-	golang.org/x/net v0.0.0-20221014081412-f15817d10f9b
+	go-micro.dev/v5 v5.0.0-00010101000000-000000000000
+	golang.org/x/net v0.1.0
 )
 
 require (
-	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/exp v0.0.0-20221012211006-4de253d81b95 // indirect
-	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
-	golang.org/x/sys v0.0.0-20221013171732-95e765b1cc43 // indirect
-	golang.org/x/tools v0.1.12 // indirect
+	golang.org/x/exp v0.0.0-20221108223516-5d533826c662 // indirect
+	golang.org/x/mod v0.6.0 // indirect
+	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/tools v0.2.0 // indirect
 )
+
+replace github.com/go-micro/plugins/registry/mdns/mdnsutil => ./
+
+// replace go-micro.dev/v5 => ../../../orb

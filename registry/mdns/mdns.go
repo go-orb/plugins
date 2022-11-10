@@ -1,5 +1,5 @@
-// Package mdnsregistry is a multicast dns registry
-package mdnsregistry
+// Package mdns provides a multicast dns registry
+package mdns
 
 import (
 	"bytes"
@@ -15,13 +15,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-micro/plugins/registry/mdns/util"
-	"github.com/go-orb/config"
-	"github.com/go-orb/config/source"
-	"github.com/go-orb/orb/log"
-	"github.com/go-orb/orb/registry"
-	"github.com/go-orb/orb/types"
+	"github.com/go-micro/plugins/registry/mdns/mdnsutil"
 	"github.com/google/uuid"
+	"go-micro.dev/v5/config"
+	"go-micro.dev/v5/config/source"
+	"go-micro.dev/v5/log"
+	"go-micro.dev/v5/registry"
+	"go-micro.dev/v5/types"
+	"go-micro.dev/v5/types/component"
 )
 
 type mdnsTxt struct {
@@ -33,12 +34,12 @@ type mdnsTxt struct {
 
 type mdnsEntry struct {
 	id   string
-	node *util.Server
+	node *mdnsutil.Server
 }
 
 type mdnsRegistry struct {
 	config *Config
-	log    *log.Logger
+	log    log.Logger
 
 	sync.Mutex
 	services map[string][]*mdnsEntry
@@ -49,16 +50,16 @@ type mdnsRegistry struct {
 	watchers map[string]*mdnsWatcher
 
 	// listener
-	listener chan *util.ServiceEntry
+	listener chan *mdnsutil.ServiceEntry
 }
 
 // This is here to make sure mdnsRegistry implements registry.Registry.
-var _ registry.Registry = &mdnsRegistry{}
+var _ registry.Registry = (*mdnsRegistry)(nil)
 
 type mdnsWatcher struct {
 	id   string
 	wo   registry.WatchOptions
-	ch   chan *util.ServiceEntry
+	ch   chan *mdnsutil.ServiceEntry
 	exit chan struct{}
 	// the mdns domain
 	domain string
@@ -136,7 +137,7 @@ func decode(record []string) (*mdnsTxt, error) {
 func Provide(
 	serviceName types.ServiceName,
 	datas []source.Data,
-	logger *log.Logger,
+	logger log.Logger,
 ) (*registry.OrbRegistry, error) {
 	cfg := NewConfig()
 
@@ -149,7 +150,7 @@ func Provide(
 	// Get a custom logger if needed.
 	if cfg.Logger != nil {
 		var err error
-		logger, err = log.New(cfg.Logger)
+		logger, err = logger.WithComponent(registry.ComponentType, "mdns", cfg.Logger.Plugin, cfg.Logger.Level)
 		if err != nil {
 			return nil, err
 		}
@@ -160,7 +161,7 @@ func Provide(
 	return &registry.OrbRegistry{Registry: reg}, nil
 }
 
-func New(cfg *Config, log *log.Logger) *mdnsRegistry {
+func New(cfg *Config, log log.Logger) *mdnsRegistry {
 	if cfg.Timeout == 0 {
 		cfg.Timeout = registry.DefaultTimout
 	}
@@ -189,7 +190,7 @@ func (m *mdnsRegistry) String() string {
 	return name
 }
 
-func (m *mdnsRegistry) Type() string {
+func (m *mdnsRegistry) Type() component.Type {
 	return registry.ComponentType
 }
 
@@ -200,7 +201,7 @@ func (m *mdnsRegistry) Register(service *registry.Service, opts ...registry.Regi
 	entries, ok := m.services[service.Name]
 	// first entry, create wildcard used for list queries
 	if !ok {
-		s, err := util.NewMDNSService(
+		s, err := mdnsutil.NewMDNSService(
 			service.Name,
 			"_services",
 			m.config.Domain+".",
@@ -213,7 +214,7 @@ func (m *mdnsRegistry) Register(service *registry.Service, opts ...registry.Regi
 			return err
 		}
 
-		srv, err := util.NewServer(&util.Config{Zone: &util.DNSSDService{MDNSService: s}})
+		srv, err := mdnsutil.NewServer(&mdnsutil.Config{Zone: &mdnsutil.DNSSDService{MDNSService: s}})
 		if err != nil {
 			return err
 		}
@@ -265,7 +266,7 @@ func (m *mdnsRegistry) Register(service *registry.Service, opts ...registry.Regi
 		m.log.Debug("[mdns] registry create new service with ip: %s for: %s", net.ParseIP(host).String(), host)
 
 		// we got here, new node
-		s, err := util.NewMDNSService(
+		s, err := mdnsutil.NewMDNSService(
 			node.Id,
 			service.Name,
 			m.config.Domain+".",
@@ -279,7 +280,7 @@ func (m *mdnsRegistry) Register(service *registry.Service, opts ...registry.Regi
 			continue
 		}
 
-		srv, err := util.NewServer(&util.Config{Zone: s, LocalhostChecking: true})
+		srv, err := mdnsutil.NewServer(&mdnsutil.Config{Zone: s, LocalhostChecking: true})
 		if err != nil {
 			gerr = err
 			continue
@@ -337,10 +338,10 @@ func (m *mdnsRegistry) Deregister(service *registry.Service, opts ...registry.De
 
 func (m *mdnsRegistry) GetService(service string, opts ...registry.GetOption) ([]*registry.Service, error) {
 	serviceMap := make(map[string]*registry.Service)
-	entries := make(chan *util.ServiceEntry, 10)
+	entries := make(chan *mdnsutil.ServiceEntry, 10)
 	done := make(chan bool)
 
-	p := util.DefaultParams(service)
+	p := mdnsutil.DefaultParams(service)
 	// set context with timeout
 	var cancel context.CancelFunc
 	p.Context, cancel = context.WithTimeout(context.Background(), time.Duration(m.config.Timeout)*time.Millisecond)
@@ -408,7 +409,7 @@ func (m *mdnsRegistry) GetService(service string, opts ...registry.GetOption) ([
 	}()
 
 	// execute the query
-	if err := util.Query(p); err != nil {
+	if err := mdnsutil.Query(p); err != nil {
 		return nil, err
 	}
 
@@ -427,10 +428,10 @@ func (m *mdnsRegistry) GetService(service string, opts ...registry.GetOption) ([
 
 func (m *mdnsRegistry) ListServices(opts ...registry.ListOption) ([]*registry.Service, error) {
 	serviceMap := make(map[string]bool)
-	entries := make(chan *util.ServiceEntry, 10)
+	entries := make(chan *mdnsutil.ServiceEntry, 10)
 	done := make(chan bool)
 
-	p := util.DefaultParams("_services")
+	p := mdnsutil.DefaultParams("_services")
 	// set context with timeout
 	var cancel context.CancelFunc
 	p.Context, cancel = context.WithTimeout(context.Background(), time.Duration(m.config.Timeout)*time.Millisecond)
@@ -465,7 +466,7 @@ func (m *mdnsRegistry) ListServices(opts ...registry.ListOption) ([]*registry.Se
 	}()
 
 	// execute query
-	if err := util.Query(p); err != nil {
+	if err := mdnsutil.Query(p); err != nil {
 		return nil, err
 	}
 
@@ -484,7 +485,7 @@ func (m *mdnsRegistry) Watch(opts ...registry.WatchOption) (registry.Watcher, er
 	md := &mdnsWatcher{
 		id:       uuid.New().String(),
 		wo:       wo,
-		ch:       make(chan *util.ServiceEntry, 32),
+		ch:       make(chan *mdnsutil.ServiceEntry, 32),
 		exit:     make(chan struct{}),
 		domain:   m.config.Domain,
 		registry: m,
@@ -522,14 +523,14 @@ func (m *mdnsRegistry) Watch(opts ...registry.WatchOption) (registry.Watcher, er
 
 			// reset the listener
 			exit := make(chan struct{})
-			ch := make(chan *util.ServiceEntry, 32)
+			ch := make(chan *mdnsutil.ServiceEntry, 32)
 			m.listener = ch
 
 			m.mtx.Unlock()
 
 			// send messages to the watchers
 			go func() {
-				send := func(w *mdnsWatcher, e *util.ServiceEntry) {
+				send := func(w *mdnsWatcher, e *mdnsutil.ServiceEntry) {
 					select {
 					case w.ch <- e:
 					default:
@@ -555,7 +556,7 @@ func (m *mdnsRegistry) Watch(opts ...registry.WatchOption) (registry.Watcher, er
 			}()
 
 			// start listening, blocking call
-			if err := util.Listen(ch, exit); err != nil {
+			if err := mdnsutil.Listen(ch, exit); err != nil {
 				m.log.Error("Failed to listen", err)
 			} else {
 				m.log.Info("Listening")

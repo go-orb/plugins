@@ -1,4 +1,4 @@
-// Package mdnsutil contains mdns utils ;P.
+// Package util provides utility functions for the mdns registry.
 package util
 
 import (
@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-orb/orb/log"
 	"github.com/miekg/dns"
+	"go-micro.dev/v5/log"
 	"golang.org/x/net/ipv4"
 	"golang.org/x/net/ipv6"
 )
@@ -518,3 +518,4 @@ func messageToEntry(m *dns.Msg, inprogress map[string]*ServiceEntry) *ServiceEnt
 
 	return inp
 }
+Footer
