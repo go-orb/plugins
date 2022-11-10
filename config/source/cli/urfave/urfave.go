@@ -1,4 +1,4 @@
-// Package urfavecli is a cli wrapper for urfave.
+// Package urfave is a cli wrapper for urfave.
 package urfave
 
 import (
@@ -27,6 +27,7 @@ type flagCLI struct {
 	config           *oCli.Config
 }
 
+// Parse parses all the CLI flags.
 func Parse(config *oCli.Config, flags []*oCli.Flag, args []string) error {
 	parser := &flagCLI{
 		config:           config,
