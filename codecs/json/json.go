@@ -37,7 +37,7 @@ func (j *JSON) NewEncoder(w io.Writer) codecs.Encoder {
 	return json.NewEncoder(w)
 }
 
-// NewDecoder returns a new JSON/ProtocolBuffer decoder.
+// NewDecoder returns a new JSON decoder.
 func (j *JSON) NewDecoder(r io.Reader) codecs.Decoder {
 	return json.NewDecoder(r)
 }
