@@ -42,7 +42,7 @@ func (j *JSON) NewDecoder(r io.Reader) codecs.Decoder {
 	return json.NewDecoder(r)
 }
 
-// ContentTypes returns the content types the marshaller can handle.
+// ContentTypes returns the content types the marshaler can handle.
 func (j *JSON) ContentTypes() []string {
 	return []string{
 		"application/json",
