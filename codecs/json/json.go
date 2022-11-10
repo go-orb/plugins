@@ -20,7 +20,8 @@ func init() {
 // JSON config files, and web requests.
 type JSON struct{}
 
-// Marshal marshals any pointer into json byte.
+// Marshal marshals any object into json bytes.
+// Param v should be a pointer type.
 func (j *JSON) Marshal(v any) ([]byte, error) {
 	return json.Marshal(v)
 }
