@@ -25,7 +25,8 @@ func (j *JSON) Marshal(v any) ([]byte, error) {
 	return json.Marshal(v)
 }
 
-// Unmarshal decodes json byte to v pointer.
+// Unmarshal decodes json bytes into object v.
+// Param v should be a pointer type.
 func (j *JSON) Unmarshal(data []byte, v any) error {
 	return json.Unmarshal(data, v)
 }
