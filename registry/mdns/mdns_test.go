@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	_ "github.com/go-micro/plugins/log/text"
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/registry"
 )
