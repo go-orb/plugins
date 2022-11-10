@@ -32,7 +32,7 @@ func (j *JSON) Unmarshal(data []byte, v any) error {
 	return json.Unmarshal(data, v)
 }
 
-// NewEncoder returns a new JSON/ProtocolBuffer encoder.
+// NewEncoder returns a new JSON encoder.
 func (j *JSON) NewEncoder(w io.Writer) codecs.Encoder {
 	return json.NewEncoder(w)
 }
