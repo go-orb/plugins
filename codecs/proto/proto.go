@@ -84,7 +84,7 @@ func (p *Proto) String() string {
 	return "proto"
 }
 
-// Exts is a list of file extensions this encoder supports.
+// Exts is a list of file extensions this marshaler supports.
 func (p *Proto) Exts() []string {
 	return []string{""}
 }
