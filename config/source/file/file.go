@@ -12,8 +12,7 @@ import (
 )
 
 func init() {
-	err := source.Plugins.Add(New())
-	if err != nil {
+	if err := source.Plugins.Add(New()); err != nil {
 		panic(err)
 	}
 }
