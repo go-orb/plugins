@@ -39,10 +39,7 @@ func TestSet1FileNoExt(t *testing.T) {
 	u2, err := url.Parse("./data/set1/registry2")
 	require.NoError(t, err)
 
-	testSet1URLs(t, []*url.URL{
-		u1,
-		u2,
-	})
+	testSet1URLs(t, []*url.URL{ u1, u2, })
 }
 
 func TestSet1FileJsonYaml(t *testing.T) {
