@@ -54,7 +54,7 @@ func (j *JSON) String() string {
 	return "json"
 }
 
-// Exts is a list of file extensions this encoder supports.
+// Exts is a list of file extensions this marshaler supports.
 func (j *JSON) Exts() []string {
 	return []string{".json"}
 }
