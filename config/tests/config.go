@@ -6,7 +6,7 @@ type logConfig struct {
 	Enabled         bool           `json:"enabled" yaml:"enabled"`
 	Level           string         `json:"level" yaml:"level"`
 	Fields          map[string]any `json:"fields" yaml:"fields"`
-	CallerSkipFrame int            `json:"caller_skip_frame" yaml:"callerSkipFrame"`
+	CallerSkipFrame int            `json:"callerSkipFrame" yaml:"callerSkipFrame"`
 }
 
 func newLogConfig() *logConfig {
@@ -55,8 +55,8 @@ type registryNatsConfig struct {
 	Addresses []string `json:"addresses" yaml:"addresses"`
 	Secure    bool     `json:"secure" yaml:"secure"`
 
-	QueryTopic string `json:"query_topic" yaml:"queryTopic"`
-	WatchTopic string `json:"watch_topic" yaml:"watchTopic"`
+	QueryTopic string `json:"queryTopic" yaml:"queryTopic"`
+	WatchTopic string `json:"watchTopic" yaml:"watchTopic"`
 }
 
 // newRegistryNatsConfig creates a new config with defaults.

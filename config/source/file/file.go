@@ -81,6 +81,7 @@ func (s *Source) Read(u *url.URL) source.Data {
 		result.Error = err
 		return result
 	}
+
 	defer func() {
 		if err := fh.Close(); err != nil {
 			log.Error("failed to close config file", err)

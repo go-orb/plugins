@@ -10,6 +10,7 @@ const name = "mdns"
 var DefaultDomain = "orb"
 
 func init() {
+	//nolint:errcheck
 	_ = cli.Flags.Add(cli.NewFlag(
 		"registry_domain",
 		DefaultDomain,

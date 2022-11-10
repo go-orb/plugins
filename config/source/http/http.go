@@ -79,8 +79,10 @@ func (s *Source) Read(myURL *url.URL) source.Data {
 	resp, err := http.Get(myURL.String())
 	if err != nil {
 		result.Error = err
+
 		return result
 	}
+
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
 			log.Error("Error while closing the body", err)
@@ -92,11 +94,13 @@ func (s *Source) Read(myURL *url.URL) source.Data {
 			log.Error("Error while closing the body", err)
 		}
 		result.Error = fmt.Errorf("bad response status code '%d', status text: %s", resp.StatusCode, resp.Status)
+
 		return result
 	}
 
 	if err := decoder.NewDecoder(resp.Body).Decode(&result.Data); err != nil {
 		result.Error = err
+
 		return result
 	}
 
