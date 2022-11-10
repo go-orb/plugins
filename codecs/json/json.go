@@ -16,7 +16,8 @@ func init() {
 	}
 }
 
-// JSON is the JSON Codec for go-micro.
+// JSON implements the codecs.Marshal interface, and can be used for marshaling
+// JSON config files, and web requests.
 type JSON struct{}
 
 // Marshal marshals any pointer into json byte.
