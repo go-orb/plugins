@@ -40,10 +40,7 @@ import (
 
 func TestDNSSDServiceRecords(t *testing.T) {
 	s := &DNSSDService{
-		MDNSService: &zone.MDNSService{
-			// serviceAddr: "_foobar._tcp.local.",
-			Domain: "local",
-		},
+		MDNSService: &zone.TestMDNSService,
 	}
 	q := dns.Question{
 		Name:   "_services._dns-sd._udp.local.",

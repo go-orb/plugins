@@ -327,3 +327,9 @@ func (m *MDNSService) instanceRecords(question dns.Question) []dns.RR { //nolint
 func (m *MDNSService) GetServiceAddr() string {
 	return m.serviceAddr
 }
+
+// TestMDNSService is used for tests. Don't use.
+var TestMDNSService = MDNSService{ //nolint:gochecknoglobals
+	serviceAddr: "_foobar._tcp.local.",
+	Domain:      "local",
+}
