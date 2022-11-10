@@ -26,7 +26,8 @@ func (j *Yaml) Marshal(v any) ([]byte, error) {
 	return yaml.Marshal(v)
 }
 
-// Unmarshal decodes yaml byte to v pointer.
+// Unmarshal decodes yaml bytes into object v.
+// Param v should be a pointer type.
 func (j *Yaml) Unmarshal(data []byte, v any) error {
 	return yaml.Unmarshal(data, v)
 }
