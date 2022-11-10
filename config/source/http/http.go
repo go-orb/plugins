@@ -1,6 +1,5 @@
-// Package file provides the file source for the config. It allows you to read in
-// files from disk with any extension for which a codec plugin has been loaded.
-package file
+// Package http provides the http source for the config.
+package http
 
 import (
 	"fmt"

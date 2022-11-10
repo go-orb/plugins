@@ -127,11 +127,10 @@ func (c *flagCLI) parse(args []string) error {
 		return err
 	}
 
+	// When help get's called ctx is nil so we exit out.
 	if ctx == nil {
 		os.Exit(0)
 	}
-
-	var err error
 
 	for n, tf := range c.intFlags {
 		c.flags[n].Value = tf.Get(ctx)
@@ -145,5 +144,5 @@ func (c *flagCLI) parse(args []string) error {
 		c.flags[n].Value = tf.Get(ctx)
 	}
 
-	return err
+	return nil
 }

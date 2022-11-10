@@ -11,7 +11,7 @@ type logConfig struct {
 
 func newLogConfig() *logConfig {
 	return &logConfig{
-		Plugin:          "zerolog",
+		Plugin:          "jsonstderr",
 		Enabled:         false,
 		Level:           "info",
 		CallerSkipFrame: 2,
