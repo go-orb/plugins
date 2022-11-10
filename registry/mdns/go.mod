@@ -17,16 +17,6 @@ require (
 	golang.org/x/tools v0.3.0 // indirect
 )
 
-replace github.com/go-micro/plugins/registry/mdns/server => ./server
-
-replace github.com/go-micro/plugins/registry/mdns/client => ./client
-
-replace github.com/go-micro/plugins/registry/mdns/dns => ./dns
-
-replace github.com/go-micro/plugins/registry/mdns/zone => ./zone
-
-replace github.com/go-micro/plugins/registry/mdns/ => ./
-
 replace github.com/go-micro/plugins/log/text => ../../log/text
 
 replace go-micro.dev/v5 => ../../../orb
