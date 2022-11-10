@@ -1,4 +1,4 @@
-// Package util provides utility functions for the mdns registry.
+// Package client provides utility functions for the mdns registry.
 package client
 
 import (
@@ -73,7 +73,7 @@ func Query(params *QueryParam) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer client.Close() //nolint:errcheck
 
 	// Set the multicast interface
 	if params.Interface != nil {
@@ -91,9 +91,12 @@ func Query(params *QueryParam) error {
 		if params.Timeout == 0 {
 			params.Timeout = time.Second
 		}
+
 		var cancel context.CancelFunc
+
 		params.Context, cancel = context.WithTimeout(context.Background(), params.Timeout)
 		defer cancel()
+
 		if err != nil {
 			return err
 		}
@@ -110,7 +113,7 @@ func Listen(entries chan<- *ServiceEntry, exit chan struct{}) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer client.Close() //nolint:errcheck
 
 	// client.setInterface(nil, true)
 
@@ -141,8 +144,10 @@ func Listen(entries chan<- *ServiceEntry, exit chan struct{}) error {
 				if e.sent {
 					continue
 				}
+
 				e.sent = true
 				entries <- e
+
 				ip = make(map[string]*ServiceEntry)
 			} else {
 				// Fire off a node specific query
@@ -161,6 +166,7 @@ func Listen(entries chan<- *ServiceEntry, exit chan struct{}) error {
 func Lookup(service string, entries chan<- *ServiceEntry) error {
 	params := DefaultParams(service)
 	params.Entries = entries
+
 	return Query(params)
 }
 
@@ -180,11 +186,12 @@ type client struct {
 
 // NewClient creates a new mdns Client that can be used to query
 // for records.
-func newClient() (*client, error) {
+func newClient() (*client, error) { //nolint:funlen,gocyclo
 	// TODO(reddaly): At least attempt to bind to the port required in the spec.
 	// Create a IPv4 listener
 	uconn4, err4 := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: 0})
 	uconn6, err6 := net.ListenUDP("udp6", &net.UDPAddr{IP: net.IPv6zero, Port: 0})
+
 	if err4 != nil && err6 != nil {
 		log.Error("[mdns] failed to bind to udp port: %v %v", err4, err6)
 	}
@@ -203,6 +210,7 @@ func newClient() (*client, error) {
 
 	mconn4, err4 := net.ListenUDP("udp4", server.MDNSWildcardAddrIPv4)
 	mconn6, err6 := net.ListenUDP("udp6", server.MDNSWildcardAddrIPv6)
+
 	if err4 != nil && err6 != nil {
 		log.Error("[mdns] failed to bind to udp port: %v %v", err4, err6)
 	}
@@ -221,9 +229,11 @@ func newClient() (*client, error) {
 
 	p1 := ipv4.NewPacketConn(mconn4)
 	p2 := ipv6.NewPacketConn(mconn6)
+
 	if err := p1.SetMulticastLoopback(true); err != nil {
 		return nil, err
 	}
+
 	if err := p2.SetMulticastLoopback(true); err != nil {
 		return nil, err
 	}
@@ -233,18 +243,24 @@ func newClient() (*client, error) {
 		return nil, err
 	}
 
-	var errCount1, errCount2 int
+	// Check if we manage to succeed on atleast one interface.
+	success := false
 
 	for _, iface := range ifaces {
-		if err := p1.JoinGroup(&iface, &net.UDPAddr{IP: server.MDNSGroupIPv4}); err != nil {
-			errCount1++
+		i := iface
+		if err := p1.JoinGroup(&i, &net.UDPAddr{IP: server.MDNSGroupIPv4}); err != nil {
+			continue
 		}
-		if err := p2.JoinGroup(&iface, &net.UDPAddr{IP: server.MDNSGroupIPv6}); err != nil {
-			errCount2++
+
+		i = iface
+		if err := p2.JoinGroup(&i, &net.UDPAddr{IP: server.MDNSGroupIPv6}); err != nil {
+			continue
 		}
+
+		success = true
 	}
 
-	if len(ifaces) == errCount1 && len(ifaces) == errCount2 {
+	if !success {
 		return nil, fmt.Errorf("failed to join multicast group on all interfaces")
 	}
 
@@ -255,6 +271,7 @@ func newClient() (*client, error) {
 		ipv6UnicastConn:   uconn6,
 		closedCh:          make(chan struct{}),
 	}
+
 	return c, nil
 }
 
@@ -266,24 +283,38 @@ func (c *client) Close() error {
 	if c.closed {
 		return nil
 	}
+
 	c.closed = true
 
 	close(c.closedCh)
 
+	var gerr error
+
 	if c.ipv4UnicastConn != nil {
-		c.ipv4UnicastConn.Close()
-	}
-	if c.ipv6UnicastConn != nil {
-		c.ipv6UnicastConn.Close()
-	}
-	if c.ipv4MulticastConn != nil {
-		c.ipv4MulticastConn.Close()
-	}
-	if c.ipv6MulticastConn != nil {
-		c.ipv6MulticastConn.Close()
+		if err := c.ipv4UnicastConn.Close(); err != nil {
+			gerr = fmt.Errorf("close ipv4 unicast connection: %w", err)
+		}
 	}
 
-	return nil
+	if c.ipv6UnicastConn != nil {
+		if err := c.ipv6UnicastConn.Close(); err != nil {
+			gerr = fmt.Errorf("close ipv6 unicast connection: %w", err)
+		}
+	}
+
+	if c.ipv4MulticastConn != nil {
+		if err := c.ipv4MulticastConn.Close(); err != nil {
+			gerr = fmt.Errorf("close ipv4 multicast connection: %w", err)
+		}
+	}
+
+	if c.ipv6MulticastConn != nil {
+		if err := c.ipv6MulticastConn.Close(); err != nil {
+			gerr = fmt.Errorf("close ipv6 multicast connection: %w", err)
+		}
+	}
+
+	return gerr
 }
 
 // setInterface is used to set the query interface, uses system
@@ -293,14 +324,17 @@ func (c *client) setInterface(iface *net.Interface, loopback bool) error {
 	if err := p.JoinGroup(iface, &net.UDPAddr{IP: server.MDNSGroupIPv4}); err != nil {
 		return err
 	}
+
 	p2 := ipv6.NewPacketConn(c.ipv6UnicastConn)
 	if err := p2.JoinGroup(iface, &net.UDPAddr{IP: server.MDNSGroupIPv6}); err != nil {
 		return err
 	}
+
 	p = ipv4.NewPacketConn(c.ipv4MulticastConn)
 	if err := p.JoinGroup(iface, &net.UDPAddr{IP: server.MDNSGroupIPv4}); err != nil {
 		return err
 	}
+
 	p2 = ipv6.NewPacketConn(c.ipv6MulticastConn)
 	if err := p2.JoinGroup(iface, &net.UDPAddr{IP: server.MDNSGroupIPv6}); err != nil {
 		return err
@@ -310,6 +344,7 @@ func (c *client) setInterface(iface *net.Interface, loopback bool) error {
 		if err := p.SetMulticastLoopback(true); err != nil {
 			return err
 		}
+
 		if err := p2.SetMulticastLoopback(true); err != nil {
 			return err
 		}
@@ -319,7 +354,7 @@ func (c *client) setInterface(iface *net.Interface, loopback bool) error {
 }
 
 // query is used to perform a lookup and stream results.
-func (c *client) query(params *QueryParam) error {
+func (c *client) query(params *QueryParam) error { //nolint:gocognit
 	// Create the service name
 	serviceAddr := fmt.Sprintf("%s.%s.", util.TrimDot(params.Service), util.TrimDot(params.Domain))
 
@@ -331,11 +366,11 @@ func (c *client) query(params *QueryParam) error {
 	go c.recv(c.ipv6MulticastConn, msgCh)
 
 	// Send the query
-	m := new(dns.Msg)
+	msg := new(dns.Msg)
 	if params.Type == dns.TypeNone {
-		m.SetQuestion(serviceAddr, dns.TypePTR)
+		msg.SetQuestion(serviceAddr, dns.TypePTR)
 	} else {
-		m.SetQuestion(serviceAddr, params.Type)
+		msg.SetQuestion(serviceAddr, params.Type)
 	}
 	// RFC 6762, section 18.12.  Repurposing of Top Bit of qclass in Question
 	// Section
@@ -344,10 +379,12 @@ func (c *client) query(params *QueryParam) error {
 	// field is used to indicate that unicast responses are preferred for this
 	// particular question.  (See Section 5.4.)
 	if params.WantUnicastResponse {
-		m.Question[0].Qclass |= 1 << 15
+		msg.Question[0].Qclass |= 1 << 15
 	}
-	m.RecursionDesired = false
-	if err := c.sendQuery(m); err != nil {
+
+	msg.RecursionDesired = false
+
+	if err := c.sendQuery(msg); err != nil {
 		return err
 	}
 
@@ -362,7 +399,8 @@ func (c *client) query(params *QueryParam) error {
 			if inp == nil {
 				continue
 			}
-			if len(resp.Question) == 0 || resp.Question[0].Name != m.Question[0].Name {
+
+			if len(resp.Question) == 0 || resp.Question[0].Name != msg.Question[0].Name {
 				// discard anything which we've not asked for
 				continue
 			}
@@ -400,16 +438,19 @@ func (c *client) sendQuery(q *dns.Msg) error {
 	if err != nil {
 		return err
 	}
+
 	if c.ipv4UnicastConn != nil {
 		if _, err := c.ipv4UnicastConn.WriteToUDP(buf, server.IPv4Addr); err != nil {
 			return err
 		}
 	}
+
 	if c.ipv6UnicastConn != nil {
 		if _, err := c.ipv6UnicastConn.WriteToUDP(buf, server.IPv6Addr); err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -418,18 +459,23 @@ func (c *client) recv(l *net.UDPConn, msgCh chan *dns.Msg) {
 	if l == nil {
 		return
 	}
+
 	buf := make([]byte, 65536)
+
 	for {
 		c.closeLock.Lock()
 		if c.closed {
 			c.closeLock.Unlock()
 			return
 		}
+
 		c.closeLock.Unlock()
+
 		n, err := l.Read(buf)
 		if err != nil {
 			continue
 		}
+
 		msg := new(dns.Msg)
 		if err := msg.Unpack(buf[:n]); err != nil {
 			continue
@@ -447,11 +493,14 @@ func ensureName(inprogress map[string]*ServiceEntry, name string, typ uint16) *S
 	if inp, ok := inprogress[name]; ok {
 		return inp
 	}
+
 	inp := &ServiceEntry{
 		Name: name,
 		Type: typ,
 	}
+
 	inprogress[name] = inp
+
 	return inp
 }
 
@@ -466,51 +515,55 @@ func messageToEntry(m *dns.Msg, inprogress map[string]*ServiceEntry) *ServiceEnt
 
 	for _, answer := range append(m.Answer, m.Extra...) {
 		// TODO(reddaly): Check that response corresponds to serviceAddr?
-		switch rr := answer.(type) {
+		switch dnsAnswer := answer.(type) {
 		case *dns.PTR:
 			// Create new entry for this
-			inp = ensureName(inprogress, rr.Ptr, rr.Hdr.Rrtype)
+			inp = ensureName(inprogress, dnsAnswer.Ptr, dnsAnswer.Hdr.Rrtype)
 			if inp.complete() {
 				continue
 			}
 		case *dns.SRV:
 			// Check for a target mismatch
-			if rr.Target != rr.Hdr.Name {
-				alias(inprogress, rr.Hdr.Name, rr.Target, rr.Hdr.Rrtype)
+			if dnsAnswer.Target != dnsAnswer.Hdr.Name {
+				alias(inprogress, dnsAnswer.Hdr.Name, dnsAnswer.Target, dnsAnswer.Hdr.Rrtype)
 			}
 
 			// Get the port
-			inp = ensureName(inprogress, rr.Hdr.Name, rr.Hdr.Rrtype)
+			inp = ensureName(inprogress, dnsAnswer.Hdr.Name, dnsAnswer.Hdr.Rrtype)
 			if inp.complete() {
 				continue
 			}
-			inp.Host = rr.Target
-			inp.Port = int(rr.Port)
+
+			inp.Host = dnsAnswer.Target
+			inp.Port = int(dnsAnswer.Port)
 		case *dns.TXT:
 			// Pull out the txt
-			inp = ensureName(inprogress, rr.Hdr.Name, rr.Hdr.Rrtype)
+			inp = ensureName(inprogress, dnsAnswer.Hdr.Name, dnsAnswer.Hdr.Rrtype)
 			if inp.complete() {
 				continue
 			}
-			inp.Info = strings.Join(rr.Txt, "|")
-			inp.InfoFields = rr.Txt
+
+			inp.Info = strings.Join(dnsAnswer.Txt, "|")
+			inp.InfoFields = dnsAnswer.Txt
 			inp.hasTXT = true
 		case *dns.A:
 			// Pull out the IP
-			inp = ensureName(inprogress, rr.Hdr.Name, rr.Hdr.Rrtype)
+			inp = ensureName(inprogress, dnsAnswer.Hdr.Name, dnsAnswer.Hdr.Rrtype)
 			if inp.complete() {
 				continue
 			}
-			inp.Addr = rr.A // @Deprecated
-			inp.AddrV4 = rr.A
+
+			inp.Addr = dnsAnswer.A // @Deprecated
+			inp.AddrV4 = dnsAnswer.A
 		case *dns.AAAA:
 			// Pull out the IP
-			inp = ensureName(inprogress, rr.Hdr.Name, rr.Hdr.Rrtype)
+			inp = ensureName(inprogress, dnsAnswer.Hdr.Name, dnsAnswer.Hdr.Rrtype)
 			if inp.complete() {
 				continue
 			}
-			inp.Addr = rr.AAAA // @Deprecated
-			inp.AddrV6 = rr.AAAA
+
+			inp.Addr = dnsAnswer.AAAA // @Deprecated
+			inp.AddrV6 = dnsAnswer.AAAA
 		}
 
 		if inp != nil {
