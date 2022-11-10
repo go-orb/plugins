@@ -82,7 +82,6 @@ func (s *Source) Read(myURL *url.URL) source.Data {
 		return result
 	}
 
-	// Decode
 	if err := decoder.NewDecoder(resp.Body).Decode(&result.Data); err != nil {
 		result.Error = err
 		return result
