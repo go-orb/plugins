@@ -1,0 +1,11 @@
+{
+  "app": {
+    "registry": {
+      "enabled": true,
+      "plugin": "nats",
+      "timeout": 600,
+      "secure": false,
+      "addresses": ["nats://localhost:4222"]
+    }
+  }
+}
