@@ -178,7 +178,7 @@ linters:
     - ifshort
     - structcheck
     - deadcode
-    # - nosnakecase
+    - nosnakecase
     - interfacer
     - maligned
     - scopelint
@@ -189,6 +189,7 @@ linters:
     - makezero
     - gofumpt
     - nlreturn
+    - thelper
 
     # Can be considered to be enabled
     - gochecknoinits
@@ -203,6 +204,7 @@ linters:
     - containedctx
     - godox
     - forcetypeassert
+    - gci
 
 issues:
   # List of regexps of issue texts to exclude, empty list by default.
@@ -226,6 +228,10 @@ issues:
         - funlen
         - varnamelen
         - wsl
+        - gocognit
+        - cyclop
+        - maintidx
+        - gochecknoglobals
 
   # Independently from option `exclude` we use default exclude patterns,
   # it can be disabled by this option. To list all
