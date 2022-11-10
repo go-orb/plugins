@@ -1,6 +1,9 @@
-package util
+package dns
 
-import "github.com/miekg/dns"
+import (
+	"github.com/go-micro/plugins/registry/mdns/zone"
+	"github.com/miekg/dns"
+)
 
 // DNSSDService is a service that complies with the DNS-SD (RFC 6762) and MDNS
 // (RFC 6762) specs for local, multicast-DNS-based discovery.
@@ -24,7 +27,7 @@ import "github.com/miekg/dns"
 //	     }
 //	     defer server.Shutdown()
 type DNSSDService struct {
-	MDNSService *MDNSService
+	MDNSService *zone.MDNSService
 }
 
 // Records returns DNS records in response to a DNS question.
@@ -70,9 +73,9 @@ func (s *DNSSDService) dnssdMetaQueryRecords(q dns.Question) []dns.RR {
 				Name:   q.Name,
 				Rrtype: dns.TypePTR,
 				Class:  dns.ClassINET,
-				Ttl:    defaultTTL,
+				Ttl:    zone.DefaultTTL,
 			},
-			Ptr: s.MDNSService.serviceAddr,
+			Ptr: s.MDNSService.GetServiceAddr(),
 		},
 	}
 }

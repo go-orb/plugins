@@ -1,9 +1,10 @@
-package util
+package dns
 
 import (
 	"reflect"
 	"testing"
 
+	"github.com/go-micro/plugins/registry/mdns/zone"
 	"github.com/miekg/dns"
 )
 
@@ -39,9 +40,9 @@ import (
 
 func TestDNSSDServiceRecords(t *testing.T) {
 	s := &DNSSDService{
-		MDNSService: &MDNSService{
-			serviceAddr: "_foobar._tcp.local.",
-			Domain:      "local",
+		MDNSService: &zone.MDNSService{
+			// serviceAddr: "_foobar._tcp.local.",
+			Domain: "local",
 		},
 	}
 	q := dns.Question{
@@ -59,7 +60,7 @@ func TestDNSSDServiceRecords(t *testing.T) {
 			Name:   "_services._dns-sd._udp.local.",
 			Rrtype: dns.TypePTR,
 			Class:  dns.ClassINET,
-			Ttl:    defaultTTL,
+			Ttl:    zone.DefaultTTL,
 		},
 		Ptr: "_foobar._tcp.local.",
 	})

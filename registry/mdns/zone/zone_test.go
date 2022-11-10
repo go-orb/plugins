@@ -1,4 +1,4 @@
-package util
+package zone
 
 import (
 	"bytes"
@@ -9,11 +9,14 @@ import (
 	"github.com/miekg/dns"
 )
 
-func makeService(t *testing.T) *MDNSService {
+func MakeTestService(t *testing.T) *MDNSService {
+	t.Helper()
 	return makeServiceWithServiceName(t, "_http._tcp")
 }
 
 func makeServiceWithServiceName(t *testing.T, service string) *MDNSService {
+	t.Helper()
+
 	m, err := NewMDNSService(
 		"hostname",
 		service,
@@ -21,8 +24,8 @@ func makeServiceWithServiceName(t *testing.T, service string) *MDNSService {
 		"testhost.",
 		80, // port
 		[]net.IP{net.IP([]byte{192, 168, 0, 42}), net.ParseIP("2620:0:1000:1900:b0c2:d0b2:c411:18bc")},
-		[]string{"Local web server"}) // TXT
-
+		[]string{"Local web server"},
+	) // TXT
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}
@@ -62,7 +65,7 @@ func TestNewMDNSService_BadParams(t *testing.T) {
 }
 
 func TestMDNSService_BadAddr(t *testing.T) {
-	s := makeService(t)
+	s := MakeTestService(t)
 	q := dns.Question{
 		Name:  "random",
 		Qtype: dns.TypeANY,
@@ -74,7 +77,7 @@ func TestMDNSService_BadAddr(t *testing.T) {
 }
 
 func TestMDNSService_ServiceAddr(t *testing.T) {
-	s := makeService(t)
+	s := MakeTestService(t)
 	q := dns.Question{
 		Name:  "_http._tcp.local.",
 		Qtype: dns.TypeANY,
@@ -110,7 +113,7 @@ func TestMDNSService_ServiceAddr(t *testing.T) {
 }
 
 func TestMDNSService_InstanceAddr_ANY(t *testing.T) {
-	s := makeService(t)
+	s := MakeTestService(t)
 	q := dns.Question{
 		Name:  "hostname._http._tcp.local.",
 		Qtype: dns.TypeANY,
@@ -134,7 +137,7 @@ func TestMDNSService_InstanceAddr_ANY(t *testing.T) {
 }
 
 func TestMDNSService_InstanceAddr_SRV(t *testing.T) {
-	s := makeService(t)
+	s := MakeTestService(t)
 	q := dns.Question{
 		Name:  "hostname._http._tcp.local.",
 		Qtype: dns.TypeSRV,
@@ -160,7 +163,7 @@ func TestMDNSService_InstanceAddr_SRV(t *testing.T) {
 }
 
 func TestMDNSService_InstanceAddr_A(t *testing.T) {
-	s := makeService(t)
+	s := MakeTestService(t)
 	q := dns.Question{
 		Name:  "hostname._http._tcp.local.",
 		Qtype: dns.TypeA,
@@ -179,7 +182,7 @@ func TestMDNSService_InstanceAddr_A(t *testing.T) {
 }
 
 func TestMDNSService_InstanceAddr_AAAA(t *testing.T) {
-	s := makeService(t)
+	s := MakeTestService(t)
 	q := dns.Question{
 		Name:  "hostname._http._tcp.local.",
 		Qtype: dns.TypeAAAA,
@@ -196,13 +199,14 @@ func TestMDNSService_InstanceAddr_AAAA(t *testing.T) {
 	if got := len(ip6); got != net.IPv6len {
 		t.Fatalf("test IP failed to parse (len = %d, want %d)", got, net.IPv6len)
 	}
-	if !bytes.Equal(a4.AAAA, ip6) {
+
+	if !ip6.Equal(a4.AAAA) {
 		t.Fatalf("bad: %v", recs[0])
 	}
 }
 
 func TestMDNSService_InstanceAddr_TXT(t *testing.T) {
-	s := makeService(t)
+	s := MakeTestService(t)
 	q := dns.Question{
 		Name:  "hostname._http._tcp.local.",
 		Qtype: dns.TypeTXT,
@@ -221,7 +225,7 @@ func TestMDNSService_InstanceAddr_TXT(t *testing.T) {
 }
 
 func TestMDNSService_HostNameQuery(t *testing.T) {
-	s := makeService(t)
+	s := MakeTestService(t)
 	for _, test := range []struct {
 		q    dns.Question
 		want []dns.RR
@@ -229,7 +233,7 @@ func TestMDNSService_HostNameQuery(t *testing.T) {
 		{
 			dns.Question{Name: "testhost.", Qtype: dns.TypeA},
 			[]dns.RR{&dns.A{
-				Hdr: dns.RR_Header{
+				Hdr: dns.RR_Header{ //nolint:nosnakecase
 					Name:   "testhost.",
 					Rrtype: dns.TypeA,
 					Class:  dns.ClassINET,
@@ -241,7 +245,7 @@ func TestMDNSService_HostNameQuery(t *testing.T) {
 		{
 			dns.Question{Name: "testhost.", Qtype: dns.TypeAAAA},
 			[]dns.RR{&dns.AAAA{
-				Hdr: dns.RR_Header{
+				Hdr: dns.RR_Header{ //nolint:nosnakecase
 					Name:   "testhost.",
 					Rrtype: dns.TypeAAAA,
 					Class:  dns.ClassINET,
@@ -258,7 +262,7 @@ func TestMDNSService_HostNameQuery(t *testing.T) {
 }
 
 func TestMDNSService_serviceEnum_PTR(t *testing.T) {
-	s := makeService(t)
+	s := MakeTestService(t)
 	q := dns.Question{
 		Name:  "_services._dns-sd._udp.local.",
 		Qtype: dns.TypePTR,

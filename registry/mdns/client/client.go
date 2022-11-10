@@ -1,5 +1,5 @@
 // Package util provides utility functions for the mdns registry.
-package util
+package client
 
 import (
 	"context"
@@ -9,6 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-micro/plugins/registry/mdns/server"
+	"github.com/go-micro/plugins/registry/mdns/util"
 	"github.com/miekg/dns"
 	"go-micro.dev/v5/log"
 	"golang.org/x/net/ipv4"
@@ -75,7 +77,7 @@ func Query(params *QueryParam) error {
 
 	// Set the multicast interface
 	if params.Interface != nil {
-		if err := client.setInterface(params.Interface, false); err != nil {
+		if err = client.setInterface(params.Interface, false); err != nil {
 			return err
 		}
 	}
@@ -199,8 +201,8 @@ func newClient() (*client, error) {
 		uconn6 = &net.UDPConn{}
 	}
 
-	mconn4, err4 := net.ListenUDP("udp4", mdnsWildcardAddrIPv4)
-	mconn6, err6 := net.ListenUDP("udp6", mdnsWildcardAddrIPv6)
+	mconn4, err4 := net.ListenUDP("udp4", server.MDNSWildcardAddrIPv4)
+	mconn6, err6 := net.ListenUDP("udp6", server.MDNSWildcardAddrIPv6)
 	if err4 != nil && err6 != nil {
 		log.Error("[mdns] failed to bind to udp port: %v %v", err4, err6)
 	}
@@ -234,10 +236,10 @@ func newClient() (*client, error) {
 	var errCount1, errCount2 int
 
 	for _, iface := range ifaces {
-		if err := p1.JoinGroup(&iface, &net.UDPAddr{IP: mdnsGroupIPv4}); err != nil {
+		if err := p1.JoinGroup(&iface, &net.UDPAddr{IP: server.MDNSGroupIPv4}); err != nil {
 			errCount1++
 		}
-		if err := p2.JoinGroup(&iface, &net.UDPAddr{IP: mdnsGroupIPv6}); err != nil {
+		if err := p2.JoinGroup(&iface, &net.UDPAddr{IP: server.MDNSGroupIPv6}); err != nil {
 			errCount2++
 		}
 	}
@@ -288,19 +290,19 @@ func (c *client) Close() error {
 // default if not provided.
 func (c *client) setInterface(iface *net.Interface, loopback bool) error {
 	p := ipv4.NewPacketConn(c.ipv4UnicastConn)
-	if err := p.JoinGroup(iface, &net.UDPAddr{IP: mdnsGroupIPv4}); err != nil {
+	if err := p.JoinGroup(iface, &net.UDPAddr{IP: server.MDNSGroupIPv4}); err != nil {
 		return err
 	}
 	p2 := ipv6.NewPacketConn(c.ipv6UnicastConn)
-	if err := p2.JoinGroup(iface, &net.UDPAddr{IP: mdnsGroupIPv6}); err != nil {
+	if err := p2.JoinGroup(iface, &net.UDPAddr{IP: server.MDNSGroupIPv6}); err != nil {
 		return err
 	}
 	p = ipv4.NewPacketConn(c.ipv4MulticastConn)
-	if err := p.JoinGroup(iface, &net.UDPAddr{IP: mdnsGroupIPv4}); err != nil {
+	if err := p.JoinGroup(iface, &net.UDPAddr{IP: server.MDNSGroupIPv4}); err != nil {
 		return err
 	}
 	p2 = ipv6.NewPacketConn(c.ipv6MulticastConn)
-	if err := p2.JoinGroup(iface, &net.UDPAddr{IP: mdnsGroupIPv6}); err != nil {
+	if err := p2.JoinGroup(iface, &net.UDPAddr{IP: server.MDNSGroupIPv6}); err != nil {
 		return err
 	}
 
@@ -319,7 +321,7 @@ func (c *client) setInterface(iface *net.Interface, loopback bool) error {
 // query is used to perform a lookup and stream results.
 func (c *client) query(params *QueryParam) error {
 	// Create the service name
-	serviceAddr := fmt.Sprintf("%s.%s.", trimDot(params.Service), trimDot(params.Domain))
+	serviceAddr := fmt.Sprintf("%s.%s.", util.TrimDot(params.Service), util.TrimDot(params.Domain))
 
 	// Start listening for response packets
 	msgCh := make(chan *dns.Msg, 32)
@@ -399,12 +401,12 @@ func (c *client) sendQuery(q *dns.Msg) error {
 		return err
 	}
 	if c.ipv4UnicastConn != nil {
-		if _, err := c.ipv4UnicastConn.WriteToUDP(buf, ipv4Addr); err != nil {
+		if _, err := c.ipv4UnicastConn.WriteToUDP(buf, server.IPv4Addr); err != nil {
 			return err
 		}
 	}
 	if c.ipv6UnicastConn != nil {
-		if _, err := c.ipv6UnicastConn.WriteToUDP(buf, ipv6Addr); err != nil {
+		if _, err := c.ipv6UnicastConn.WriteToUDP(buf, server.IPv6Addr); err != nil {
 			return err
 		}
 	}
@@ -518,4 +520,3 @@ func messageToEntry(m *dns.Msg, inprogress map[string]*ServiceEntry) *ServiceEnt
 
 	return inp
 }
-Footer

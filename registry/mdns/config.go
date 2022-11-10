@@ -1,7 +1,8 @@
-package mdnsregistry
+package mdns
 
 import (
 	"go-micro.dev/v5/config/source/cli"
+	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/registry"
 )
 
@@ -27,6 +28,7 @@ type Config struct {
 	*registry.Config `yaml:",inline"`
 
 	Domain string `json:"domain,omitempty" yaml:"domain,omitempty"`
+	Logger log.Logger
 }
 
 func NewConfig() *Config {

@@ -1,4 +1,4 @@
-package mdns
+package server
 
 import (
 	"fmt"
@@ -12,29 +12,37 @@ import (
 	"go-micro.dev/v5/log"
 	"golang.org/x/net/ipv4"
 	"golang.org/x/net/ipv6"
+
+	"github.com/go-micro/plugins/registry/mdns/util"
+	"github.com/go-micro/plugins/registry/mdns/zone"
 )
 
+// mDNS Groups.
 var (
-	mdnsGroupIPv4 = net.ParseIP("224.0.0.251")
-	mdnsGroupIPv6 = net.ParseIP("ff02::fb")
+	MDNSGroupIPv4 = net.ParseIP("224.0.0.251")
+	MDNSGroupIPv6 = net.ParseIP("ff02::fb")
+)
 
-	// mDNS wildcard addresses.
-	mdnsWildcardAddrIPv4 = &net.UDPAddr{
+// mDNS wildcard addresses.
+var (
+	MDNSWildcardAddrIPv4 = &net.UDPAddr{
 		IP:   net.ParseIP("224.0.0.0"),
 		Port: 5353,
 	}
-	mdnsWildcardAddrIPv6 = &net.UDPAddr{
+	MDNSWildcardAddrIPv6 = &net.UDPAddr{
 		IP:   net.ParseIP("ff02::"),
 		Port: 5353,
 	}
+)
 
-	// mDNS endpoint addresses.
-	ipv4Addr = &net.UDPAddr{
-		IP:   mdnsGroupIPv4,
+// mDNS endpoint addresses.
+var (
+	IPv4Addr = &net.UDPAddr{
+		IP:   MDNSGroupIPv4,
 		Port: 5353,
 	}
-	ipv6Addr = &net.UDPAddr{
-		IP:   mdnsGroupIPv6,
+	IPv6Addr = &net.UDPAddr{
+		IP:   MDNSGroupIPv6,
 		Port: 5353,
 	}
 )
@@ -46,7 +54,7 @@ type GetMachineIP func() net.IP
 // Config is used to configure the mDNS server.
 type Config struct {
 	// Zone must be provided to support responding to queries
-	Zone Zone
+	Zone zone.Zone
 
 	// Iface if provided binds the multicast listener to the given
 	// interface. If not provided, the system default multicase interface
@@ -85,10 +93,10 @@ func NewServer(config *Config) (*Server, error) {
 
 	// Create the listeners
 	// Create wildcard connections (because :5353 can be already taken by other apps)
-	ipv4List, _ := net.ListenUDP("udp4", mdnsWildcardAddrIPv4)
-	ipv6List, _ := net.ListenUDP("udp6", mdnsWildcardAddrIPv6)
+	ipv4List, _ := net.ListenUDP("udp4", MDNSWildcardAddrIPv4)
+	ipv6List, _ := net.ListenUDP("udp6", MDNSWildcardAddrIPv6)
 	if ipv4List == nil && ipv6List == nil {
-		return nil, fmt.Errorf("[ERR] mdns: Failed to bind to any udp port!")
+		return nil, fmt.Errorf("mdns: failed to bind to any udp port")
 	}
 
 	if ipv4List == nil {
@@ -109,10 +117,10 @@ func NewServer(config *Config) (*Server, error) {
 	}
 
 	if config.Iface != nil {
-		if err := p1.JoinGroup(config.Iface, &net.UDPAddr{IP: mdnsGroupIPv4}); err != nil {
+		if err := p1.JoinGroup(config.Iface, &net.UDPAddr{IP: MDNSGroupIPv4}); err != nil {
 			return nil, err
 		}
-		if err := p2.JoinGroup(config.Iface, &net.UDPAddr{IP: mdnsGroupIPv6}); err != nil {
+		if err := p2.JoinGroup(config.Iface, &net.UDPAddr{IP: MDNSGroupIPv6}); err != nil {
 			return nil, err
 		}
 	} else {
@@ -122,15 +130,15 @@ func NewServer(config *Config) (*Server, error) {
 		}
 		errCount1, errCount2 := 0, 0
 		for _, iface := range ifaces {
-			if err := p1.JoinGroup(&iface, &net.UDPAddr{IP: mdnsGroupIPv4}); err != nil {
+			if err := p1.JoinGroup(&iface, &net.UDPAddr{IP: MDNSGroupIPv4}); err != nil {
 				errCount1++
 			}
-			if err := p2.JoinGroup(&iface, &net.UDPAddr{IP: mdnsGroupIPv6}); err != nil {
+			if err := p2.JoinGroup(&iface, &net.UDPAddr{IP: MDNSGroupIPv6}); err != nil {
 				errCount2++
 			}
 		}
 		if len(ifaces) == errCount1 && len(ifaces) == errCount2 {
-			return nil, fmt.Errorf("Failed to join multicast group on all interfaces!")
+			return nil, fmt.Errorf("failed to join multicast group on all interfaces")
 		}
 	}
 
@@ -350,12 +358,12 @@ func (s *Server) handleQuestion(q dns.Question) (multicastRecs, unicastRecs []dn
 func (s *Server) probe() {
 	defer s.wg.Done()
 
-	sd, ok := s.config.Zone.(*MDNSService)
+	sd, ok := s.config.Zone.(*zone.MDNSService)
 	if !ok {
 		return
 	}
 
-	name := fmt.Sprintf("%s.%s.%s.", sd.Instance, trimDot(sd.Service), trimDot(sd.Domain))
+	name := fmt.Sprintf("%s.%s.%s.", sd.Instance, util.TrimDot(sd.Service), util.TrimDot(sd.Domain))
 
 	q := new(dns.Msg)
 	q.SetQuestion(name, dns.TypePTR)
@@ -366,7 +374,7 @@ func (s *Server) probe() {
 			Name:   name,
 			Rrtype: dns.TypeSRV,
 			Class:  dns.ClassINET,
-			Ttl:    defaultTTL,
+			Ttl:    zone.DefaultTTL,
 		},
 		Priority: 0,
 		Weight:   0,
@@ -378,7 +386,7 @@ func (s *Server) probe() {
 			Name:   name,
 			Rrtype: dns.TypeTXT,
 			Class:  dns.ClassINET,
-			Ttl:    defaultTTL,
+			Ttl:    zone.DefaultTTL,
 		},
 		Txt: sd.TXT,
 	}
@@ -394,7 +402,7 @@ func (s *Server) probe() {
 	}
 
 	resp := new(dns.Msg)
-	resp.MsgHdr.Response = true
+	resp.Response = true
 
 	// set for query
 	q.SetQuestion(name, dns.TypeANY)
@@ -434,12 +442,12 @@ func (s *Server) SendMulticast(msg *dns.Msg) error {
 		return err
 	}
 	if s.ipv4List != nil {
-		if _, err := s.ipv4List.WriteToUDP(buf, ipv4Addr); err != nil {
+		if _, err := s.ipv4List.WriteToUDP(buf, IPv4Addr); err != nil {
 			return err
 		}
 	}
 	if s.ipv6List != nil {
-		if _, err := s.ipv6List.WriteToUDP(buf, ipv6Addr); err != nil {
+		if _, err := s.ipv6List.WriteToUDP(buf, IPv6Addr); err != nil {
 			return err
 		}
 	}
@@ -470,7 +478,7 @@ func (s *Server) sendResponse(resp *dns.Msg, from net.Addr) error {
 	// Sending two responses is OK
 	if s.config.LocalhostChecking && addr.IP.Equal(s.outboundIP) {
 		// ignore any errors, this is best efforts
-		if _, err := conn.WriteToUDP(buf, &net.UDPAddr{IP: backupTarget, Port: addr.Port}); err != nil {
+		if _, err = conn.WriteToUDP(buf, &net.UDPAddr{IP: backupTarget, Port: addr.Port}); err != nil {
 			return err
 		}
 	}
@@ -478,19 +486,19 @@ func (s *Server) sendResponse(resp *dns.Msg, from net.Addr) error {
 }
 
 func (s *Server) unregister() error {
-	sd, ok := s.config.Zone.(*MDNSService)
+	sd, ok := s.config.Zone.(*zone.MDNSService)
 	if !ok {
 		return nil
 	}
 
 	atomic.StoreUint32(&sd.TTL, 0)
-	name := fmt.Sprintf("%s.%s.%s.", sd.Instance, trimDot(sd.Service), trimDot(sd.Domain))
+	name := fmt.Sprintf("%s.%s.%s.", sd.Instance, util.TrimDot(sd.Service), util.TrimDot(sd.Domain))
 
 	q := new(dns.Msg)
 	q.SetQuestion(name, dns.TypeANY)
 
 	resp := new(dns.Msg)
-	resp.MsgHdr.Response = true
+	resp.Response = true
 	resp.Answer = append(resp.Answer, s.config.Zone.Records(q.Question[0])...)
 
 	return s.SendMulticast(resp)
@@ -498,17 +506,17 @@ func (s *Server) unregister() error {
 
 func setCustomPort(port int) {
 	if port != 0 {
-		if mdnsWildcardAddrIPv4.Port != port {
-			mdnsWildcardAddrIPv4.Port = port
+		if MDNSWildcardAddrIPv4.Port != port {
+			MDNSWildcardAddrIPv4.Port = port
 		}
-		if mdnsWildcardAddrIPv6.Port != port {
-			mdnsWildcardAddrIPv6.Port = port
+		if MDNSWildcardAddrIPv6.Port != port {
+			MDNSWildcardAddrIPv6.Port = port
 		}
-		if ipv4Addr.Port != port {
-			ipv4Addr.Port = port
+		if IPv4Addr.Port != port {
+			IPv4Addr.Port = port
 		}
-		if ipv6Addr.Port != port {
-			ipv6Addr.Port = port
+		if IPv6Addr.Port != port {
+			IPv6Addr.Port = port
 		}
 	}
 }
