@@ -42,16 +42,27 @@ func TestServer_StartStop(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}
-	defer serv.Shutdown()
+	defer func() {
+		if err := serv.Shutdown(); err != nil {
+			t.Error(err)
+		}
+	}()
 }
 
 func TestServer_Lookup(t *testing.T) {
-
-	serv, err := server.NewServer(&server.Config{Zone: makeServiceWithServiceName(t, "_foobar._tcp"), LocalhostChecking: true})
+	serv, err := server.NewServer(
+		&server.Config{
+			Zone:              makeServiceWithServiceName(t, "_foobar._tcp"),
+			LocalhostChecking: true,
+		})
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}
-	defer serv.Shutdown()
+	defer func() {
+		if err = serv.Shutdown(); err != nil {
+			t.Error(err)
+		}
+	}()
 
 	entries := make(chan *ServiceEntry, 1)
 	found := false

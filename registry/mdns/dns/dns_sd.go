@@ -1,3 +1,4 @@
+// Package dns provides mdns dns utilities.
 package dns
 
 import (

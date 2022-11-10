@@ -1,3 +1,4 @@
+// Package server provides an MDNS server.
 package server
 
 import (
@@ -97,7 +98,7 @@ type Server struct {
 }
 
 // NewServer is used to create a new mDNS server from a config.
-func NewServer(config *Config) (*Server, error) { //nolint:gocyclo
+func NewServer(config *Config) (*Server, error) { //nolint:gocyclo,funlen
 	setCustomPort(config.Port)
 
 	// Create the listeners
@@ -203,17 +204,23 @@ func (s *Server) Shutdown() error {
 		return err
 	}
 
+	var gerr error
+
 	if s.ipv4List != nil {
-		s.ipv4List.Close()
+		if err := s.ipv4List.Close(); err != nil {
+			gerr = fmt.Errorf("close IPv4 UDP connection: %w", err)
+		}
 	}
 
 	if s.ipv6List != nil {
-		s.ipv6List.Close()
+		if err := s.ipv6List.Close(); err != nil {
+			gerr = fmt.Errorf("close IPv4 UDP connection: %w", err)
+		}
 	}
 
 	s.wg.Wait()
 
-	return nil
+	return gerr
 }
 
 // recv is a long running routine to receive packets from an interface.
@@ -259,7 +266,7 @@ func (s *Server) parsePacket(packet []byte, from net.Addr) error {
 }
 
 // handleQuery is used to handle an incoming query.
-func (s *Server) handleQuery(query *dns.Msg, from net.Addr) error {
+func (s *Server) handleQuery(query *dns.Msg, from net.Addr) error { //nolint:funlen
 	if query.Opcode != dns.OpcodeQuery {
 		// "In both multicast query and multicast response messages, the OPCODE MUST
 		// be zero on transmission (only standard queries are currently supported
@@ -429,7 +436,7 @@ func (s *Server) probe() {
 	}
 	msg.Ns = []dns.RR{srv, txt}
 
-	randomizer := rand.New(rand.NewSource(time.Now().UnixNano()))
+	randomizer := rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec
 
 	for i := 0; i < 3; i++ {
 		if err := s.SendMulticast(msg); err != nil {
@@ -576,9 +583,9 @@ func getOutboundIP() net.IP {
 		// no net connectivity maybe so fallback
 		return nil
 	}
-	defer conn.Close()
+	defer conn.Close() //nolint:errcheck
 
-	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	localAddr := conn.LocalAddr().(*net.UDPAddr) //nolint:errcheck
 
 	return localAddr.IP
 }
