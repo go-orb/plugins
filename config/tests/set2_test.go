@@ -17,7 +17,6 @@ import (
 func testSet2URLs(t *testing.T, urls []*url.URL) {
 	t.Helper()
 
-	// Read the urls.
 	datas, err := config.Read(urls, []string{"app"})
 	require.NoError(t, err)
 
