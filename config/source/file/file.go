@@ -76,7 +76,6 @@ func (s *Source) Read(u *url.URL) source.Data {
 		}
 	}
 
-	// No marshaler found
 	if decoder == nil {
 		result.Error = config.ErrNoSuchFile
 		return result
