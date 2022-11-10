@@ -130,6 +130,8 @@ func (c Form) ContentTypes() []string {
 }
 
 // Exts is a list of file extensions this encoder supports.
+// Since the form codec is only used for request marshaling, no file extensions
+// are supported.
 func (c Form) Exts() []string {
 	return []string{}
 }
