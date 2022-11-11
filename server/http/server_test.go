@@ -183,7 +183,7 @@ func TestServerRequestSpecificContentType(t *testing.T) {
 
 func BenchmarkHTTPInsecureJSON16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
-		return tests.TestPostRequestJSON(tb, addr, tests.TypeHTTP2)
+		return tests.TestPostRequestJSON(tb, addr, tests.TypeInsecure)
 	}
 
 	benchmark(b, testFunc, 16, 1, WithInsecure())
