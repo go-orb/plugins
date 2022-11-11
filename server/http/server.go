@@ -13,7 +13,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-orb/config/source"
 	"go-micro.dev/v5/codecs"
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/types"
@@ -51,7 +50,7 @@ type Server struct {
 }
 
 // ProvideServerHTTP creates a new HTTP server.
-func ProvideServerHTTP(serviceName types.ServiceName, data []source.Data, logger log.Logger, opts ...Option) (*Server, error) {
+func ProvideServerHTTP(serviceName types.ServiceName, data types.ConfigData, logger log.Logger, opts ...Option) (*Server, error) {
 	cfg, err := NewConfig(serviceName, data, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("create http server config: %w", err)

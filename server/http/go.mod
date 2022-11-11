@@ -8,7 +8,6 @@ require (
 	github.com/go-micro/plugins/codecs/jsonpb v0.0.0-00010101000000-000000000000
 	github.com/go-micro/plugins/codecs/proto v0.0.0-00010101000000-000000000000
 	github.com/go-micro/plugins/log/text v0.0.0-00010101000000-000000000000
-	github.com/go-orb/config v0.0.0-20221031022024-e60230f51cb8
 	github.com/lucas-clemente/quic-go v0.30.1-0.20221107095222-2de4af00d068
 	github.com/pkg/errors v0.9.1
 	go-micro.dev/v5 v5.0.0-00010101000000-000000000000
@@ -41,12 +40,14 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace go-micro.dev/v5 => ../../../orb
+replace github.com/go-micro/plugins/server/http => ./
 
-replace github.com/go-micro/plugins/log/text => ../../log/text
-
-replace github.com/go-micro/plugins/codecs/jsonpb => ../../codecs/jsonpb
-
-replace github.com/go-micro/plugins/codecs/form => ../../codecs/form
-
-replace github.com/go-micro/plugins/codecs/proto => ../../codecs/proto
+// replace go-micro.dev/v5 => ../../../orb
+// 
+// replace github.com/go-micro/plugins/log/text => ../../log/text
+// 
+// replace github.com/go-micro/plugins/codecs/jsonpb => ../../codecs/jsonpb
+// 
+// replace github.com/go-micro/plugins/codecs/form => ../../codecs/form
+// 
+// replace github.com/go-micro/plugins/codecs/proto => ../../codecs/proto
