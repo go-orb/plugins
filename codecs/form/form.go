@@ -23,7 +23,7 @@ const (
 	// Name is form codec name.
 	Name = "form"
 	// ContentType used by HTTP forms.
-	ContentType = "x-www-form-urlencoded"
+	ContentType = "application/x-www-form-urlencoded"
 	// Null value string.
 	nullStr = "null"
 )
@@ -126,5 +126,12 @@ func (Form) String() string {
 // The parameter describes the type which is being marshaled, which can sometimes
 // affect the content type returned.
 func (c Form) ContentTypes() []string {
-	return []string{ContentType}
+	return []string{"application/x-www-form-urlencoded", "x-www-form-urlencoded"}
+}
+
+// Exts is a list of file extensions this encoder supports.
+// Since the form codec is only used for request marshaling, no file extensions
+// are supported.
+func (c Form) Exts() []string {
+	return []string{}
 }

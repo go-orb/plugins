@@ -1,11 +1,9 @@
-module github.com/go-micro/plugins/codecs/json
+module github.com/go-micro/plugins/codecs/jsonpb
 
 go 1.19
 
-replace go-micro.dev/v5 => ../../../orb
-
 require (
-	github.com/godror/knownpb v0.1.0
+	github.com/go-micro/plugins/codecs/proto v0.0.0-00010101000000-000000000000
 	github.com/google/go-cmp v0.5.9
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.13.0
 	go-micro.dev/v5 v5.0.0-00010101000000-000000000000
@@ -13,7 +11,6 @@ require (
 )
 
 require (
-	github.com/go-micro/plugins/codecs/proto v0.0.0-00010101000000-000000000000 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	golang.org/x/net v0.1.0 // indirect
 	golang.org/x/sys v0.1.0 // indirect
