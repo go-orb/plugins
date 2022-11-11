@@ -7,6 +7,7 @@ import (
 	_ "github.com/go-micro/plugins/log/text"
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/registry"
+	"go-micro.dev/v5/types"
 )
 
 func TestMDNS(t *testing.T) {
@@ -16,7 +17,7 @@ func TestMDNS(t *testing.T) {
 			Version: "1.0.1",
 			Nodes: []*registry.Node{
 				{
-					Id:      "test1-1",
+					ID:      "test1-1",
 					Address: "10.0.0.1:10001",
 					Metadata: map[string]string{
 						"foo": "bar",
@@ -29,7 +30,7 @@ func TestMDNS(t *testing.T) {
 			Version: "1.0.2",
 			Nodes: []*registry.Node{
 				{
-					Id:      "test2-1",
+					ID:      "test2-1",
 					Address: "10.0.0.2:10002",
 					Metadata: map[string]string{
 						"foo2": "bar2",
@@ -42,7 +43,7 @@ func TestMDNS(t *testing.T) {
 			Version: "1.0.3",
 			Nodes: []*registry.Node{
 				{
-					Id:      "test3-1",
+					ID:      "test3-1",
 					Address: "10.0.0.3:10003",
 					Metadata: map[string]string{
 						"foo3": "bar3",
@@ -55,7 +56,7 @@ func TestMDNS(t *testing.T) {
 			Version: "1.0.4",
 			Nodes: []*registry.Node{
 				{
-					Id:      "test4-1",
+					ID:      "test4-1",
 					Address: "[::]:10004",
 					Metadata: map[string]string{
 						"foo4": "bar4",
@@ -70,19 +71,26 @@ func TestMDNS(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	r := New(NewConfig(), l)
-	if err := r.Start(); err != nil {
+
+	cfg, err := NewConfig(types.ServiceName("test.service"), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	r := New(cfg, l)
+	if err = r.Start(); err != nil {
 		t.Fatal(err)
 	}
 
 	for _, service := range testData {
 		// register service
-		if err := r.Register(service); err != nil {
+		if err = r.Register(service); err != nil {
 			t.Fatal(err)
 		}
 
 		// get registered service
-		s, err := r.GetService(service.Name)
+		var s []*registry.Service
+		s, err = r.GetService(service.Name)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -105,8 +113,8 @@ func TestMDNS(t *testing.T) {
 
 		node := s[0].Nodes[0]
 
-		if node.Id != service.Nodes[0].Id {
-			t.Fatalf("Expected node id %s got %s", service.Nodes[0].Id, node.Id)
+		if node.ID != service.Nodes[0].ID {
+			t.Fatalf("Expected node id %s got %s", service.Nodes[0].ID, node.ID)
 		}
 
 		if node.Address != service.Nodes[0].Address {
@@ -139,7 +147,7 @@ func TestMDNS(t *testing.T) {
 		time.Sleep(time.Millisecond * 5)
 
 		// check its gone
-		s, _ := r.GetService(service.Name)
+		s, _ := r.GetService(service.Name) //nolint:errcheck
 		if len(s) > 0 {
 			t.Fatalf("Expected nothing got %+v", s[0])
 		}
@@ -212,7 +220,7 @@ func TestWatcher(t *testing.T) {
 			Version: "1.0.1",
 			Nodes: []*registry.Node{
 				{
-					Id:      "test1-1",
+					ID:      "test1-1",
 					Address: "10.0.0.1:10001",
 					Metadata: map[string]string{
 						"foo": "bar",
@@ -225,7 +233,7 @@ func TestWatcher(t *testing.T) {
 			Version: "1.0.2",
 			Nodes: []*registry.Node{
 				{
-					Id:      "test2-1",
+					ID:      "test2-1",
 					Address: "10.0.0.2:10002",
 					Metadata: map[string]string{
 						"foo2": "bar2",
@@ -238,7 +246,7 @@ func TestWatcher(t *testing.T) {
 			Version: "1.0.3",
 			Nodes: []*registry.Node{
 				{
-					Id:      "test3-1",
+					ID:      "test3-1",
 					Address: "10.0.0.3:10003",
 					Metadata: map[string]string{
 						"foo3": "bar3",
@@ -251,7 +259,7 @@ func TestWatcher(t *testing.T) {
 			Version: "1.0.4",
 			Nodes: []*registry.Node{
 				{
-					Id:      "test4-1",
+					ID:      "test4-1",
 					Address: "[::]:10004",
 					Metadata: map[string]string{
 						"foo4": "bar4",
@@ -280,8 +288,8 @@ func TestWatcher(t *testing.T) {
 
 		node := s.Nodes[0]
 
-		if node.Id != service.Nodes[0].Id {
-			t.Fatalf("Expected node id %s got %s", service.Nodes[0].Id, node.Id)
+		if node.ID != service.Nodes[0].ID {
+			t.Fatalf("Expected node id %s got %s", service.Nodes[0].ID, node.ID)
 		}
 
 		if node.Address != service.Nodes[0].Address {
@@ -289,12 +297,18 @@ func TestWatcher(t *testing.T) {
 		}
 	}
 
-	// new registry
+	// New registry
 	l, err := log.New(log.NewConfig())
 	if err != nil {
 		t.Fatal(err)
 	}
-	r := New(NewConfig(), l)
+
+	cfg, err := NewConfig(types.ServiceName("test.service"), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	r := New(cfg, l)
 	if err = r.Start(); err != nil {
 		t.Fatal(err)
 	}

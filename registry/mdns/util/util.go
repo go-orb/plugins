@@ -1,3 +1,4 @@
+// Package util provides utilities.
 package util
 
 import "strings"
