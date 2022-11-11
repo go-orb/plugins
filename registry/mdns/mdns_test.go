@@ -4,14 +4,17 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/go-micro/plugins/log/text"
+	"github.com/stretchr/testify/require"
+
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/registry"
 	"go-micro.dev/v5/types"
+
+	_ "github.com/go-micro/plugins/log/text"
 )
 
-func TestMDNS(t *testing.T) {
-	testData := []*registry.Service{
+var (
+	testData = []*registry.Service{
 		{
 			Name:    "test1",
 			Version: "1.0.1",
@@ -66,96 +69,7 @@ func TestMDNS(t *testing.T) {
 		},
 	}
 
-	// new registry
-	l, err := log.New(log.NewConfig())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	cfg, err := NewConfig(types.ServiceName("test.service"), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	r := New(cfg, l)
-	if err = r.Start(); err != nil {
-		t.Fatal(err)
-	}
-
-	for _, service := range testData {
-		// register service
-		if err = r.Register(service); err != nil {
-			t.Fatal(err)
-		}
-
-		// get registered service
-		var s []*registry.Service
-		s, err = r.GetService(service.Name)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if len(s) != 1 {
-			t.Fatalf("Expected one result for %s got %d", service.Name, len(s))
-		}
-
-		if s[0].Name != service.Name {
-			t.Fatalf("Expected name %s got %s", service.Name, s[0].Name)
-		}
-
-		if s[0].Version != service.Version {
-			t.Fatalf("Expected version %s got %s", service.Version, s[0].Version)
-		}
-
-		if len(s[0].Nodes) != 1 {
-			t.Fatalf("Expected 1 node, got %d", len(s[0].Nodes))
-		}
-
-		node := s[0].Nodes[0]
-
-		if node.ID != service.Nodes[0].ID {
-			t.Fatalf("Expected node id %s got %s", service.Nodes[0].ID, node.ID)
-		}
-
-		if node.Address != service.Nodes[0].Address {
-			t.Fatalf("Expected node address %s got %s", service.Nodes[0].Address, node.Address)
-		}
-	}
-
-	services, err := r.ListServices()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	for _, service := range testData {
-		var seen bool
-		for _, s := range services {
-			if s.Name == service.Name {
-				seen = true
-				break
-			}
-		}
-		if !seen {
-			t.Fatalf("Expected service %s got nothing", service.Name)
-		}
-
-		// deregister
-		if err := r.Deregister(service); err != nil {
-			t.Fatal(err)
-		}
-
-		time.Sleep(time.Millisecond * 5)
-
-		// check its gone
-		s, _ := r.GetService(service.Name) //nolint:errcheck
-		if len(s) > 0 {
-			t.Fatalf("Expected nothing got %+v", s[0])
-		}
-	}
-}
-
-func TestEncoding(t *testing.T) {
-	testData := []*mdnsTxt{
+	testDataEncoding = []*mdnsTxt{
 		{
 			Version: "1.0.0",
 			Metadata: map[string]string{
@@ -180,41 +94,7 @@ func TestEncoding(t *testing.T) {
 		},
 	}
 
-	for _, d := range testData {
-		encoded, err := encode(d)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		for _, txt := range encoded {
-			if len(txt) > 255 {
-				t.Fatalf("One of parts for txt is %d characters", len(txt))
-			}
-		}
-
-		decoded, err := decode(encoded)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if decoded.Version != d.Version {
-			t.Fatalf("Expected version %s got %s", d.Version, decoded.Version)
-		}
-
-		if len(decoded.Endpoints) != len(d.Endpoints) {
-			t.Fatalf("Expected %d endpoints, got %d", len(d.Endpoints), len(decoded.Endpoints))
-		}
-
-		for k, v := range d.Metadata {
-			if val := decoded.Metadata[k]; val != v {
-				t.Fatalf("Expected %s=%s got %s=%s", k, v, k, val)
-			}
-		}
-	}
-}
-
-func TestWatcher(t *testing.T) {
-	testData := []*registry.Service{
+	testDataWatcher = []*registry.Service{
 		{
 			Name:    "test1",
 			Version: "1.0.1",
@@ -268,91 +148,129 @@ func TestWatcher(t *testing.T) {
 			},
 		},
 	}
+)
 
+func TestMDNS(t *testing.T) {
+	l, err := log.New(log.NewConfig())
+	require.NoError(t, err, "failed to create logger")
+
+	cfg, err := NewConfig(types.ServiceName("test.service"), nil)
+	require.NoError(t, err, "failed to create registry config")
+
+	r := New(cfg, l)
+	require.NoError(t, r.Start(), "failed to start")
+
+	for _, service := range testData {
+		require.NoError(t, r.Register(service), "failed to register service")
+
+		// Assure service has been registered properly.
+		var s []*registry.Service
+		s, err = r.GetService(service.Name)
+		require.NoError(t, err, "failed fetch services")
+		require.Equal(t, len(s), 1, "registry should only contain one registered service")
+		require.Equal(t, s[0].Name, service.Name, "service name does not match")
+		require.Equal(t, s[0].Version, service.Version, "service version does not match")
+		require.Equal(t, len(s[0].Nodes), 1, "service should only contain one node")
+
+		node := s[0].Nodes[0]
+		require.Equal(t, node.ID, service.Nodes[0].ID, "node ID does not match")
+		require.Equal(t, node.Address, service.Nodes[0].Address, "node address does not match")
+	}
+
+	services, err := r.ListServices()
+	require.NoError(t, err, "failed to list services")
+
+	for _, service := range testData {
+		var seen bool
+		for _, s := range services {
+			if s.Name == service.Name {
+				seen = true
+				break
+			}
+		}
+
+		// Assure service is present in registry.
+		require.Equal(t, seen, true,
+			"service not found in listed services, it has not been registered properly: "+service.Name)
+
+		// Deregister and give the registry time to process.
+		require.NoError(t, r.Deregister(service), "failed to deregister service: "+service.Name)
+		time.Sleep(time.Millisecond * 100)
+
+		// Assure service has deregistered properly.
+		s, _ := r.GetService(service.Name) //nolint:errcheck
+		require.GreaterOrEqual(t, 0, len(s), "service count should be 0, as all services should be deregistered")
+	}
+}
+
+func TestEncoding(t *testing.T) {
+	for _, d := range testDataEncoding {
+		encoded, err := encode(d)
+		require.NoError(t, err, "failed to encode")
+
+		for _, txt := range encoded {
+			require.GreaterOrEqual(t, 255, len(txt), "one of parts for txt is too long")
+		}
+
+		decoded, err := decode(encoded)
+		require.NoError(t, err, "failed to decode")
+		require.Equal(t, decoded.Version, d.Version)
+		require.Equal(t, decoded.Endpoints, d.Endpoints)
+
+		for k, v := range d.Metadata {
+			require.Equal(t, decoded.Metadata[k], v)
+		}
+	}
+}
+
+func TestWatcher(t *testing.T) {
 	testFn := func(service, s *registry.Service) {
-		if s == nil {
-			t.Fatalf("Expected one result for %s got nil", service.Name)
-		}
-
-		if s.Name != service.Name {
-			t.Fatalf("Expected name %s got %s", service.Name, s.Name)
-		}
-
-		if s.Version != service.Version {
-			t.Fatalf("Expected version %s got %s", service.Version, s.Version)
-		}
-
-		if len(s.Nodes) != 1 {
-			t.Fatalf("Expected 1 node, got %d", len(s.Nodes))
-		}
+		require.NotEqual(t, s, nil, "expected result, got nil: "+service.Name)
+		require.Equal(t, s.Name, service.Name, "service name not equal")
+		require.Equal(t, s.Version, service.Version, "service version not equal")
+		require.Equal(t, len(s.Nodes), 1, "expected only 1 node")
 
 		node := s.Nodes[0]
-
-		if node.ID != service.Nodes[0].ID {
-			t.Fatalf("Expected node id %s got %s", service.Nodes[0].ID, node.ID)
-		}
-
-		if node.Address != service.Nodes[0].Address {
-			t.Fatalf("Expected node address %s got %s", service.Nodes[0].Address, node.Address)
-		}
+		require.Equal(t, node.ID, service.Nodes[0].ID, "node IDs not equal")
+		require.Equal(t, node.Address, service.Nodes[0].Address, "node addresses not equal")
 	}
 
 	// New registry
 	l, err := log.New(log.NewConfig())
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err, "failed to create logger")
 
 	cfg, err := NewConfig(types.ServiceName("test.service"), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err, "failed to create registry config")
 
 	r := New(cfg, l)
-	if err = r.Start(); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, r.Start(), "failed to start service")
 
 	w, err := r.Watch()
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err, "failed to start registry watcher")
 	defer w.Stop()
 
-	for _, service := range testData {
-		// register service
-		if err := r.Register(service); err != nil {
-			t.Fatal(err)
-		}
+	for _, service := range testDataWatcher {
+		require.NoError(t, r.Register(service), "failed to register service")
 
 		for {
 			res, err := w.Next()
-			if err != nil {
-				t.Fatal(err)
-			}
+			require.NoError(t, err, "failed to fetch next")
 
 			if res.Service.Name != service.Name {
 				continue
 			}
 
-			if res.Action != "create" {
-				t.Fatalf("Expected create event got %s for %s", res.Action, res.Service.Name)
-			}
+			require.Equal(t, res.Action, "create", "expected create event")
 
 			testFn(service, res.Service)
 			break
 		}
 
-		// deregister
-		if err := r.Deregister(service); err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, r.Deregister(service), "failed to deregister service: "+service.Name)
 
 		for {
 			res, err := w.Next()
-			if err != nil {
-				t.Fatal(err)
-			}
+			require.NoError(t, err, "failed to fetch next")
 
 			if res.Service.Name != service.Name {
 				continue
