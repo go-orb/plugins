@@ -34,16 +34,6 @@ func testSet1URLs(t *testing.T, urls []*url.URL) {
 	assert.Equal(t, 600, cfg.Timeout)
 }
 
-func TestSet1FileNoExt(t *testing.T) {
-	u1, err := url.Parse("./data/set1/registry1")
-	require.NoError(t, err)
-
-	u2, err := url.Parse("./data/set1/registry2")
-	require.NoError(t, err)
-
-	testSet1URLs(t, []*url.URL{u1, u2})
-}
-
 func TestSet1FileJsonYaml(t *testing.T) {
 	u1, err := url.Parse("./data/set1/registry1.json")
 	require.NoError(t, err)
@@ -83,8 +73,8 @@ func TestSet1HttpYamlJson(t *testing.T) {
 	})
 }
 
-func TestSet1FileNoExtAndHttp(t *testing.T) {
-	u1, err := url.Parse("./data/set1/registry1")
+func TestSet1FileAndHttp(t *testing.T) {
+	u1, err := url.Parse("./data/set1/registry1.json")
 	require.NoError(t, err)
 
 	u2, err := url.Parse(urlRepo + "/set1/registry2.json")
@@ -97,7 +87,7 @@ func TestSet1FileNoExtAndHttp(t *testing.T) {
 }
 
 func TestSet1IgnoreUnknown(t *testing.T) {
-	u1, err := url.Parse("./data/set1/registry1")
+	u1, err := url.Parse("./data/set1/registry1.json")
 	require.NoError(t, err)
 
 	u2, err := url.Parse(urlRepo + "/set1/registry2.json")
@@ -114,7 +104,7 @@ func TestSet1IgnoreUnknown(t *testing.T) {
 }
 
 func TestSet1FailUnknown(t *testing.T) {
-	u1, err := url.Parse("./data/set1/registry1")
+	u1, err := url.Parse("./data/set1/registry1.json")
 	require.NoError(t, err)
 
 	u2, err := url.Parse(urlRepo + "/set1/registry2.json")

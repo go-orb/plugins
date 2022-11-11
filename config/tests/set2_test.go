@@ -33,19 +33,6 @@ func testSet2URLs(t *testing.T, urls []*url.URL) {
 	assert.EqualValues(t, []string{"nats://localhost:4222"}, cfg.Addresses)
 }
 
-func TestSet2FileNoExt(t *testing.T) {
-	u1, err := url.Parse("./data/set2/registry1")
-	require.NoError(t, err)
-
-	u2, err := url.Parse("./data/set2/registry2")
-	require.NoError(t, err)
-
-	testSet2URLs(t, []*url.URL{
-		u1,
-		u2,
-	})
-}
-
 func TestSet2FileJsonYaml(t *testing.T) {
 	u1, err := url.Parse("./data/set2/registry1.json")
 	require.NoError(t, err)
@@ -85,8 +72,8 @@ func TestSet2HttpYamlJson(t *testing.T) {
 	})
 }
 
-func TestSet2FileNoExtAndHttp(t *testing.T) {
-	u1, err := url.Parse("./data/set2/registry1")
+func TestSet2FileAndHttp(t *testing.T) {
+	u1, err := url.Parse("./data/set2/registry1.json")
 	require.NoError(t, err)
 
 	u2, err := url.Parse(urlRepo + "/set2/registry2.json")

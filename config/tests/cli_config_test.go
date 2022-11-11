@@ -21,11 +21,11 @@ func TestCliConfig(t *testing.T) {
 	os.Args = []string{
 		"testapp",
 		"--config",
-		"./data/set2/registry2",
+		"./data/set2/registry2.yaml",
 	}
 
 	// Setup the urls.
-	u1, err := url.Parse("./data/set2/registry1")
+	u1, err := url.Parse("./data/set2/registry1.yaml")
 	require.NoError(t, err)
 
 	u2, err := url.Parse("cli://urfave")
