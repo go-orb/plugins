@@ -1,0 +1,10 @@
+{
+  "app": {
+    "registry": {
+      "enabled": false,
+      "plugin": "mdns",
+      "timeout": 350,
+      "domain": "micro"
+    }
+  }
+}

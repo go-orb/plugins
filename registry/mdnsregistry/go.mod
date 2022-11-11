@@ -1,10 +1,9 @@
-module github.com/go-orb/plugins/registry/mdnsregistry
+module github.com/go-micro/plugins/registry/mdnsregistry
 
 go 1.18
 
 require (
-	github.com/go-orb/config v0.0.0-20221030033613-c8559119f197
-	github.com/go-orb/orb v0.0.0-20221030035336-f1af9ec35d6d
+	go-micro.dev/v5 v5.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.3.0
 	github.com/miekg/dns v1.1.50
 	golang.org/x/net v0.0.0-20221014081412-f15817d10f9b

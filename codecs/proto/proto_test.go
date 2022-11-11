@@ -9,7 +9,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-var message = &examplepb.ABitOfEverything{ //nolint:gochecknoglobals
+var message = &examplepb.ABitOfEverything{
 	SingleNested:        &examplepb.ABitOfEverything_Nested{},
 	RepeatedStringValue: nil,
 	MappedStringValue:   nil,

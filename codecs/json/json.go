@@ -8,46 +8,53 @@ import (
 	"go-micro.dev/v5/codecs"
 )
 
-var _ codecs.Marshaler = (*Json)(nil)
+var _ codecs.Marshaler = (*JSON)(nil)
 
 func init() {
-	if err := codecs.Plugins.Add("json", &Json{}); err != nil {
+	if err := codecs.Plugins.Add("json", &JSON{}); err != nil {
 		panic(err)
 	}
 }
 
-type Json struct{}
+// JSON implements the codecs.Marshal interface, and can be used for marshaling
+// JSON config files, and web requests.
+type JSON struct{}
 
-func (j *Json) Marshal(v any) ([]byte, error) {
+// Marshal marshals any object into json bytes.
+// Param v should be a pointer type.
+func (j *JSON) Marshal(v any) ([]byte, error) {
 	return json.Marshal(v)
 }
 
-func (j *Json) Unmarshal(data []byte, v any) error {
+// Unmarshal decodes json bytes into object v.
+// Param v should be a pointer type.
+func (j *JSON) Unmarshal(data []byte, v any) error {
 	return json.Unmarshal(data, v)
 }
 
-// NewEncoder returns a new JSON/ProtocolBuffer encoder.
-func (j *Json) NewEncoder(w io.Writer) codecs.Encoder {
+// NewEncoder returns a new JSON encoder.
+func (j *JSON) NewEncoder(w io.Writer) codecs.Encoder {
 	return json.NewEncoder(w)
 }
 
-// NewDecoder returns a new JSON/ProtocolBuffer decoder.
-func (j *Json) NewDecoder(r io.Reader) codecs.Decoder {
+// NewDecoder returns a new JSON decoder.
+func (j *JSON) NewDecoder(r io.Reader) codecs.Decoder {
 	return json.NewDecoder(r)
 }
 
-// ContentTypes returns the content types the marshaller can handle.
-func (j *Json) ContentTypes() []string {
+// ContentTypes returns the content types the marshaler can handle.
+func (j *JSON) ContentTypes() []string {
 	return []string{
 		"application/json",
 	}
 }
 
 // String returns the plugin implementation of the marshaler.
-func (j *Json) String() string {
+func (j *JSON) String() string {
 	return "json"
 }
 
-func (j *Json) Exts() []string {
+// Exts is a list of file extensions this marshaler supports.
+func (j *JSON) Exts() []string {
 	return []string{".json"}
 }

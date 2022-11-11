@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-orb/orb/log"
-	"github.com/go-orb/orb/registry"
+	"go-micro.dev/v5/log"
+	"go-micro.dev/v5/registry"
 )
 
 func TestMDNS(t *testing.T) {
