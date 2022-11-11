@@ -21,7 +21,6 @@ import (
 	"github.com/go-micro/plugins/registry/mdns/zone"
 
 	"github.com/google/uuid"
-	"go-micro.dev/v5/config/source"
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/registry"
 	"go-micro.dev/v5/types"
@@ -74,7 +73,7 @@ type mdnsWatcher struct {
 // ProvideRegistryMDNS creates a new MDNS registry.
 func ProvideRegistryMDNS(
 	name types.ServiceName,
-	data []source.Data,
+	data types.ConfigData,
 	logger log.Logger,
 	opts ...registry.Option,
 ) (*registry.MicroRegistry, error) {

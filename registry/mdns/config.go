@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"go-micro.dev/v5/config"
-	"go-micro.dev/v5/config/source"
 	"go-micro.dev/v5/config/source/cli"
 	"go-micro.dev/v5/registry"
 	"go-micro.dev/v5/types"
@@ -51,7 +50,11 @@ type Config struct {
 }
 
 // NewConfig creates a new config object.
-func NewConfig(serviceName types.ServiceName, datas []source.Data, opts ...registry.Option) (Config, error) {
+func NewConfig(
+	serviceName types.ServiceName,
+	datas types.ConfigData,
+	opts ...registry.Option,
+) (Config, error) {
 	cfg := Config{
 		Config: registry.NewConfig(),
 	}
