@@ -167,7 +167,7 @@ func (m *RegistryMDNS) Register(service *registry.Service, opts ...registry.Regi
 		entries = append(entries, &mdnsEntry{id: "*", node: srv})
 	}
 
-	err := m.registerNodes(service, entries)
+	entries, err := m.registerNodes(service, entries)
 
 	// Save
 	m.services[service.Name] = entries
@@ -175,7 +175,7 @@ func (m *RegistryMDNS) Register(service *registry.Service, opts ...registry.Regi
 	return err
 }
 
-func (m *RegistryMDNS) registerNodes(service *registry.Service, entries []*mdnsEntry) error {
+func (m *RegistryMDNS) registerNodes(service *registry.Service, entries []*mdnsEntry) ([]*mdnsEntry, error) {
 	var gerr error
 
 	for _, node := range service.Nodes {
@@ -247,7 +247,7 @@ func (m *RegistryMDNS) registerNodes(service *registry.Service, entries []*mdnsE
 		entries = append(entries, entry)
 	}
 
-	return gerr
+	return entries, gerr
 }
 
 // Deregister a service from the registry.
