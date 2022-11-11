@@ -1,7 +1,7 @@
 go 1.19
 
 use (
-	../orb
+	../go-micro
 	./codecs/form
 	./codecs/json
 	./codecs/jsonpb
@@ -16,7 +16,7 @@ use (
 	./registry/mdns
 )
 
-replace go-micro.dev/v5 v5.0.0-00010101000000-000000000000 => ../orb
+replace go-micro.dev/v5 v5.0.0-00010101000000-000000000000 => ../go-micro
 
 replace github.com/go-micro/plugins/config/source/cli/urfave => ./config/source/cli/urfave
 
