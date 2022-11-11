@@ -28,7 +28,7 @@ func init() {
 		cli.Usage("Registry domain."),
 	))
 
-	if err := registry.Plugins.Add(name, registry.Provider(ProvideRegistryMDNS)); err != nil {
+	if err := registry.Plugins.Add(name, registry.ProviderFunc(ProvideRegistryMDNS)); err != nil {
 		panic(err)
 	}
 }
