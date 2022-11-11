@@ -32,16 +32,6 @@ func init() {
 	}
 }
 
-// WithDomain sets the MDNS domain.
-func WithDomain(domain string) registry.Option {
-	return func(c registry.ConfigType) {
-		cfg, ok := c.(*Config)
-		if ok {
-			cfg.Domain = domain
-		}
-	}
-}
-
 // Config provides configuration for the MDNS registry.
 type Config struct {
 	registry.Config `yaml:",inline"`
@@ -67,4 +57,14 @@ func NewConfig(
 	}
 
 	return cfg, nil
+}
+
+// WithDomain sets the MDNS domain.
+func WithDomain(domain string) registry.Option {
+	return func(c registry.ConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.Domain = domain
+		}
+	}
 }
