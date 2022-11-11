@@ -3,9 +3,8 @@ package http
 import (
 	"errors"
 
-	"github.com/go-orb/config"
-	"github.com/go-orb/config/source"
 	"go-micro.dev/v5/codecs"
+	"go-micro.dev/v5/config"
 	"go-micro.dev/v5/types"
 	"go-micro.dev/v5/util/slice"
 
@@ -71,7 +70,7 @@ type Config struct {
 
 // NewConfig creates a new server config with default values.
 // To customize the options pas in a list of options.
-func NewConfig(serviceName types.ServiceName, data []source.Data, options ...Option) (Config, error) {
+func NewConfig(serviceName types.ServiceName, data types.ConfigData, options ...Option) (Config, error) {
 	cfg := Config{
 		EntrypointDefaults: entrypoint.NewEntrypointConfig(),
 		Entrypoints:        make([]Entrypoint, 0, 1),
