@@ -42,7 +42,7 @@ require (
 
 replace github.com/go-micro/plugins/server/http => ./
 
-replace github.com/go-micro/plugins/testdata => ../../testdata
+// replace github.com/go-micro/plugins/testdata => ../../testdata
 
 // replace go-micro.dev/v5 => ../../../orb
 // 

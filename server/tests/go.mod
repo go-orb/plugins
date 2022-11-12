@@ -6,19 +6,19 @@ replace github.com/go-micro/plugins/server/tests => ./
 
 replace github.com/go-micro/plugins/server/http => ../http
 
-// replace github.com/go-micro/plugins/codecs/proto => ../../codecs/proto
-// 
-// replace github.com/go-micro/plugins/codecs/jsonpb => ../../codecs/jsonpb
-// 
-// replace github.com/go-micro/plugins/codecs/yaml => ../../codecs/yaml
-// 
-// replace github.com/go-micro/plugins/codecs/form => ../../codecs/form
-// 
-// replace github.com/go-micro/plugins/log/text => ../../log/text
-// 
-// replace github.com/go-micro/plugins/log/json => ../../log/json
-//
-// replace go-micro.dev/v5 => ../../../go-micro/
+replace github.com/go-micro/plugins/codecs/proto => ../../codecs/proto
+
+replace github.com/go-micro/plugins/codecs/jsonpb => ../../codecs/jsonpb
+
+replace github.com/go-micro/plugins/codecs/yaml => ../../codecs/yaml
+
+replace github.com/go-micro/plugins/codecs/form => ../../codecs/form
+
+replace github.com/go-micro/plugins/log/text => ../../log/text
+
+replace github.com/go-micro/plugins/log/json => ../../log/json
+
+replace go-micro.dev/v5 => ../../../go-micro/
 
 require (
 	github.com/go-micro/plugins/codecs/form v0.0.0-00010101000000-000000000000
