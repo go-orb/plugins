@@ -28,33 +28,33 @@ type http3server struct {
 	getter func(info *tls.ClientHelloInfo) (*tls.Config, error)
 }
 
-func (e *ServerHTTP) newHTTP3Server() (*http3server, error) {
-	port, err := mip.ParsePort(e.Config.Address)
+func (s *ServerHTTP) newHTTP3Server() (*http3server, error) {
+	port, err := mip.ParsePort(s.Config.Address)
 	if err != nil {
 		return nil, err
 	}
 
 	h3 := http3server{
 		getter: func(info *tls.ClientHelloInfo) (*tls.Config, error) {
-			return e.Config.TLS, nil
+			return s.Config.TLS, nil
 			// return nil, ErrNoTLSConfig
 		},
 	}
 
-	h2 := e.httpServer.Server
+	h2 := s.httpServer.Server
 
 	h3.Server = &http3.Server{
-		Addr:      e.Config.Address,
+		Addr:      s.Config.Address,
 		Port:      port,
 		Handler:   h2.Handler,
-		TLSConfig: h3.prepareTLSConfig(e.Config.TLS),
+		TLSConfig: h3.prepareTLSConfig(s.Config.TLS),
 	}
 
 	previousHandler := h2.Handler
 
 	h2.Handler = http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		if err := h3.SetQuicHeaders(rw.Header()); err != nil {
-			e.Logger.Error("Failed to set HTTP3 headers", err)
+			s.Logger.Error("Failed to set HTTP3 headers", err)
 		}
 
 		previousHandler.ServeHTTP(rw, req)

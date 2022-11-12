@@ -3,21 +3,19 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/types/pluginpb"
 )
 
-var (
-	showVersion = flag.Bool("version", false, "print the version and exit")
-	omitempty   = flag.Bool("omitempty", true, "omit if google.api is empty")
-)
-
 func main() {
+	showVersion := flag.Bool("version", false, "print the version and exit")
+	omitempty := flag.Bool("omitempty", true, "omit if google.api is empty")
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Printf("protoc-gen-go-http %v\n", release)
+		fmt.Fprintf(os.Stdout, "protoc-gen-go-http %v\n", release)
 		return
 	}
 

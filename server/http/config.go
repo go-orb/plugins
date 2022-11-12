@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-micro/plugins/server/http/router/router"
 	"github.com/google/uuid"
 	"go-micro.dev/v5/codecs"
 	"go-micro.dev/v5/config"
@@ -14,13 +13,16 @@ import (
 	"go-micro.dev/v5/types"
 	"go-micro.dev/v5/util/slice"
 	"golang.org/x/exp/slog"
+
+	"github.com/go-micro/plugins/server/http/router/router"
 )
 
-var ( //nolint:gochecknoglobals
+//nolint:gochecknoglobals
+var (
 	// TODO: revisit default address, probably use random addr
 	// DefaultAddress to use for new HTTP servers.
 	// If set to "random", the default, a random address will be selected,
-	// preferably on a private interface (XX subet). TODO: implement
+	// preferably on a private interface (XX subet). TODO: implement.
 	DefaultAddress = "0.0.0.0:42069"
 	// DefaultInsecure will create an HTTP server without TLS, for insecure connections.
 	// Note: as a result you can only make insecure HTTP requests, and no HTTP2
@@ -169,7 +171,7 @@ func (f *fileConfig) GetConfig(name string) (Config, error) {
 	return Config{}, errors.New("entrypoint config not found in file config list")
 }
 
-// NewDefaultConfig will create a new deafult config for the entrypoint.
+// NewDefaultConfig will create a new default config for the entrypoint.
 func NewDefaultConfig(service types.ServiceName, data types.ConfigData, options ...Option) (Config, error) {
 	cfg := Config{
 		Name:                 "http-" + uuid.NewString(),
@@ -343,13 +345,16 @@ func WithAllowH2C() Option {
 // WithDefaults sets default options to use on the creattion of new HTTP entrypoints.
 func WithDefaults(options ...Option) server.Option {
 	return func(c *server.Config) {
-		cfg := c.Defaults[Plugin].(Config)
+		cfg, ok := c.Defaults[Plugin].(Config)
+		if ok {
+			for _, o := range options {
+				o(&cfg)
+			}
 
-		for _, o := range options {
-			o(&cfg)
+			c.Defaults[Plugin] = cfg
 		}
-
-		c.Defaults[Plugin] = cfg
+		// Should never happen.
+		panic("http.WithDefaults received invalid type, not *server.Config")
 	}
 }
 
@@ -378,6 +383,7 @@ func WithMiddleware(middlewares ...func(http.Handler) http.Handler) Option {
 	}
 }
 
+// WithEntrypoint adds an HTTP entrypoint with the provided options.
 func WithEntrypoint(options ...Option) server.Option {
 	return func(c *server.Config) {
 		cfgAny, ok := c.Defaults[Plugin]
