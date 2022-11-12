@@ -29,41 +29,41 @@ type httpServer struct {
 	Server *http.Server
 }
 
-func (e *ServerHTTP) newHTTPServer(router router.Router) (*httpServer, error) {
+func (s *ServerHTTP) newHTTPServer(router router.Router) (*httpServer, error) {
 	handler, ok := router.(http.Handler)
 	if !ok {
 		return nil, ErrRouterHandlerInterface
 	}
 
-	if e.Config.H2C {
+	if s.Config.H2C {
 		handler = h2c.NewHandler(handler, &http2.Server{
-			MaxConcurrentStreams: uint32(e.Config.MaxConcurrentStreams),
+			MaxConcurrentStreams: uint32(s.Config.MaxConcurrentStreams),
 		})
 	}
 
 	server := http.Server{
 		Handler:           handler,
-		ReadTimeout:       e.Config.ReadTimeout,
-		WriteTimeout:      e.Config.WriteTimeout,
-		IdleTimeout:       e.Config.IdleTimeout,
+		ReadTimeout:       s.Config.ReadTimeout,
+		WriteTimeout:      s.Config.WriteTimeout,
+		IdleTimeout:       s.Config.IdleTimeout,
 		ReadHeaderTimeout: time.Second * 4,
 		// TODO: do we need to set this? would be nice but doesn't take interface
 		// ErrorLog:          httpServerLogger,
 	}
 
-	if !e.Config.Insecure && e.Config.TLS != nil {
-		server.TLSConfig = e.Config.TLS
-	} else if !e.Config.Insecure && e.Config.TLS == nil {
+	if !s.Config.Insecure && s.Config.TLS != nil {
+		server.TLSConfig = s.Config.TLS
+	} else if !s.Config.Insecure && s.Config.TLS == nil {
 		return nil, ErrNoTLS
 	}
 
-	if e.Config.HTTP2 && !strings.Contains(os.Getenv("GODEBUG"), "http2server=0") {
-		if e.Config.TLS != nil {
-			e.Config.TLS.NextProtos = append([]string{"h2"}, e.Config.TLS.NextProtos...)
+	if s.Config.HTTP2 && !strings.Contains(os.Getenv("GODEBUG"), "http2server=0") {
+		if s.Config.TLS != nil {
+			s.Config.TLS.NextProtos = append([]string{"h2"}, s.Config.TLS.NextProtos...)
 		}
 
 		h2 := http2.Server{
-			MaxConcurrentStreams: uint32(e.Config.MaxConcurrentStreams),
+			MaxConcurrentStreams: uint32(s.Config.MaxConcurrentStreams),
 			NewWriteScheduler:    func() http2.WriteScheduler { return http2.NewPriorityWriteScheduler(nil) },
 		}
 

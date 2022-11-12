@@ -16,7 +16,7 @@ import (
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 
-var methodSets = make(map[string]int)
+var methodSets = make(map[string]int) //nolint:gochecknoglobals
 
 // generateFile generates a _http.micro.pb.go file containing kratos errors definitions.
 func generateFile(gen *protogen.Plugin, file *protogen.File, omitempty bool) *protogen.GeneratedFile {
@@ -67,10 +67,12 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	}
 }
 
-func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, service *protogen.Service, omitempty bool) {
+func genService(gen *protogen.Plugin, file *protogen.File, generated *protogen.GeneratedFile, service *protogen.Service, omitempty bool) {
+	_ = gen
+
 	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() {
-		g.P("//")
-		g.P(deprecationComment)
+		generated.P("//")
+		generated.P(deprecationComment)
 	}
 
 	// HTTP Server.
@@ -89,18 +91,18 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 		rule, ok := proto.GetExtension(method.Desc.Options(), annotations.E_Http).(*annotations.HttpRule)
 		if rule != nil && ok {
 			for _, bind := range rule.AdditionalBindings {
-				serviceDescription.Methods = append(serviceDescription.Methods, buildHTTPRule(g, method, bind))
+				serviceDescription.Methods = append(serviceDescription.Methods, buildHTTPRule(generated, method, bind))
 			}
 
-			serviceDescription.Methods = append(serviceDescription.Methods, buildHTTPRule(g, method, rule))
+			serviceDescription.Methods = append(serviceDescription.Methods, buildHTTPRule(generated, method, rule))
 		} else if !omitempty {
 			path := fmt.Sprintf("/%s/%s", service.Desc.FullName(), method.Desc.Name())
-			serviceDescription.Methods = append(serviceDescription.Methods, buildMethodDesc(g, method, http.MethodPost, path))
+			serviceDescription.Methods = append(serviceDescription.Methods, buildMethodDesc(generated, method, http.MethodPost, path))
 		}
 	}
 
 	if len(serviceDescription.Methods) != 0 {
-		g.P(serviceDescription.execute())
+		generated.P(serviceDescription.execute())
 	}
 }
 
@@ -208,7 +210,7 @@ func buildMethodDesc(generated *protogen.GeneratedFile, protogenMethod *protogen
 			fd := fields.ByName(protoreflect.Name(field))
 			if fd == nil {
 				errMessage("The corresponding field '%s' declaration in message could not be found in '%s'", v, path)
-				os.Exit(2)
+				os.Exit(2) //nolint:gocritic
 			}
 
 			switch {

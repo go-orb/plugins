@@ -63,7 +63,14 @@ type ServerHTTP struct {
 // multiple entrypoints for multiple addresses and ports. One entrypoint
 // can serve a HTTP1, HTTP2 and HTTP3 server. If you enable HTTP3 it will listen
 // on both TCP and UDP on the same port.
-func ProvideServerHTTP(name string, service types.ServiceName, data types.ConfigData, logger log.Logger, c any, options ...Option) (*ServerHTTP, error) {
+func ProvideServerHTTP(
+	name string,
+	service types.ServiceName,
+	data types.ConfigData,
+	logger log.Logger,
+	c any,
+	options ...Option,
+) (*ServerHTTP, error) {
 	var err error
 
 	cfg, ok := c.(Config)
@@ -186,25 +193,25 @@ type stopper interface {
 }
 
 // Stop will stop the HTTP server(s).
-func (e *ServerHTTP) Stop(ctx context.Context) error {
-	if !e.started {
+func (s *ServerHTTP) Stop(ctx context.Context) error {
+	if !s.started {
 		return nil
 	}
 
 	errChan := make(chan error)
 	defer close(errChan)
 
-	e.Logger.Debug("Stopping all HTTP entrypoints")
+	s.Logger.Debug("Stopping all HTTP entrypoints")
 
 	c := 1
-	if e.Config.HTTP3 {
+	if s.Config.HTTP3 {
 		c++
 
 		go func() {
-			errChan <- e.http3Server.Stop(ctx)
+			errChan <- s.http3Server.Stop(ctx)
 
 			// Listener most likely already closed, just as a double check.
-			_ = e.listenerUDP.Close() //nolint:errcheck
+			_ = s.listenerUDP.Close() //nolint:errcheck
 		}()
 	}
 
@@ -213,7 +220,7 @@ func (e *ServerHTTP) Stop(ctx context.Context) error {
 
 		// Listener most likely already closed, just as a double check.
 		_ = l.Close() //nolint:errcheck
-	}(e.httpServer, e.listenerTCP)
+	}(s.httpServer, s.listenerTCP)
 
 	var err error
 
@@ -223,45 +230,51 @@ func (e *ServerHTTP) Stop(ctx context.Context) error {
 		}
 	}
 
-	e.started = false
+	s.started = false
 
 	return err
 }
 
-func (e *ServerHTTP) Register(register server.RegistrationFunc) {
-	register(e)
+// Register executes a registration function on the entrypoint.
+func (s *ServerHTTP) Register(register server.RegistrationFunc) {
+	register(s)
 }
 
-func (e *ServerHTTP) String() string {
+// String returns the entrypoint type; http.
+func (s *ServerHTTP) String() string {
 	return Plugin
 }
 
-func (e *ServerHTTP) Name() string {
-	return e.Config.Name
+// Name returns the entrypoint name.
+func (s *ServerHTTP) Name() string {
+	return s.Config.Name
 }
 
-func (e *ServerHTTP) Type() component.Type {
+// Type returns the component type.
+func (s *ServerHTTP) Type() component.Type {
 	return server.ComponentType
 }
 
-func (e *ServerHTTP) Router() router.Router {
-	return e.router
+// Router returns the router used by the HTTP server.
+// You can use this to register extra handlers, or mount additional routers.
+func (s *ServerHTTP) Router() router.Router {
+	return s.router
 }
 
-func (e *ServerHTTP) setupTLS() (*tls.Config, error) {
+func (s *ServerHTTP) setupTLS() (*tls.Config, error) {
 	var (
 		config *tls.Config
 		err    error
 	)
 
 	// TLS already provided
-	if e.Config.TLS != nil {
-		return e.Config.TLS, nil
+	if s.Config.TLS != nil {
+		return s.Config.TLS, nil
 	}
 
 	// Generate self signed cert
-	if !e.Config.Insecure && e.Config.TLS == nil {
-		config, err = mtls.GenTlSConfig(e.Config.Address)
+	if !s.Config.Insecure && s.Config.TLS == nil {
+		config, err = mtls.GenTlSConfig(s.Config.Address)
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate self signed certificate: %w", err)
 		}
