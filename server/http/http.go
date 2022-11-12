@@ -5,6 +5,8 @@ package http
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -13,7 +15,6 @@ import (
 
 	"github.com/go-micro/plugins/server/http/router/router"
 
-	"github.com/pkg/errors"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
@@ -68,7 +69,7 @@ func (s *ServerHTTP) newHTTPServer(router router.Router) (*httpServer, error) {
 		}
 
 		if err := http2.ConfigureServer(&server, &h2); err != nil {
-			return nil, errors.Wrap(err, "configure HTTP/2 server")
+			return nil, fmt.Errorf("configure HTTP/2 server: %w", err)
 		}
 	}
 

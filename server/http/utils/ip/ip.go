@@ -2,11 +2,11 @@
 package ip
 
 import (
+	"errors"
+	"fmt"
 	"net"
 	"regexp"
 	"strconv"
-
-	"github.com/pkg/errors"
 )
 
 var (
@@ -28,7 +28,7 @@ func ValidateAddress(address string) error {
 
 	host, port, err := net.SplitHostPort(address)
 	if err != nil {
-		return errors.Wrap(err, "failed to split host and port from address")
+		return fmt.Errorf("split host and port from address: %w", err)
 	}
 
 	p, err := strconv.Atoi(port)
@@ -56,7 +56,7 @@ func ValidateAddress(address string) error {
 func ParsePort(address string) (int, error) {
 	_, port, err := net.SplitHostPort(address)
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to split host and port from address")
+		return 0, fmt.Errorf("split host and port from address: %w", err)
 	}
 
 	p, err := strconv.Atoi(port)
