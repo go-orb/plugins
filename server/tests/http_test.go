@@ -10,14 +10,17 @@ import (
 	"testing"
 	"time"
 
-	"go-micro.dev/v5/log"
-	"go-micro.dev/v5/types"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/go-micro/plugins/server/http/utils/tests"
-	"github.com/go-micro/plugins/server/http/utils/tests/handler"
+	"go-micro.dev/v5/log"
+	"go-micro.dev/v5/types"
+
+	mhttp "github.com/go-micro/plugins/server/http"
+	thttp "github.com/go-micro/plugins/server/tests/utils/http"
+
+	"github.com/go-micro/plugins/server/tests/handler"
+	"github.com/go-micro/plugins/server/tests/proto"
 
 	_ "github.com/go-micro/plugins/codecs/form"
 	_ "github.com/go-micro/plugins/codecs/jsonpb"
@@ -25,6 +28,8 @@ import (
 	_ "github.com/go-micro/plugins/log/text"
 	_ "github.com/go-micro/plugins/server/http/router/chi"
 )
+
+// TODO: test get path params
 
 // TODO: for client, provide info on this error: 		t.Error("As:", errors.As(err, &x509.HostnameError{}))
 //       >> change URL to proper hostname
@@ -40,19 +45,19 @@ Else
 */
 
 func TestServerSimple(t *testing.T) {
-	_, cleanup := setupServer(t, false, WithInsecure())
+	_, cleanup := setupServer(t, false, mhttp.WithInsecure())
 	defer cleanup()
 
 	addr := "http://0.0.0.0:42069"
-	makeRequests(t, addr, tests.TypeInsecure)
+	makeRequests(t, addr, thttp.TypeInsecure)
 }
 
 func TestServerHTTPS(t *testing.T) {
-	_, cleanup := setupServer(t, false, WithDisableHTTP2())
+	_, cleanup := setupServer(t, false, mhttp.WithDisableHTTP2())
 	defer cleanup()
 
 	addr := "https://localhost:42069"
-	makeRequests(t, addr, tests.TypeHTTP1)
+	makeRequests(t, addr, thttp.TypeHTTP1)
 }
 
 func TestServerHTTP2(t *testing.T) {
@@ -60,29 +65,29 @@ func TestServerHTTP2(t *testing.T) {
 	defer cleanup()
 
 	addr := "https://localhost:42069"
-	makeRequests(t, addr, tests.TypeHTTP2)
+	makeRequests(t, addr, thttp.TypeHTTP2)
 }
 
 func TestServerH2c(t *testing.T) {
 	_, cleanup := setupServer(t, false,
-		WithInsecure(),
-		WithAllowH2C(),
+		mhttp.WithInsecure(),
+		mhttp.WithAllowH2C(),
 	)
 	defer cleanup()
 
 	addr := "http://localhost:42069"
-	makeRequests(t, addr, tests.TypeH2C)
+	makeRequests(t, addr, thttp.TypeH2C)
 }
 
 func TestServerHTTP3(t *testing.T) {
 	// To fix warning about buf size run: sysctl -w net.core.rmem_max=2500000
 	_, cleanup := setupServer(t, false,
-		WithHTTP3(),
+		mhttp.WithHTTP3(),
 	)
 	defer cleanup()
 
 	addr := "https://localhost:42069"
-	makeRequests(t, addr, tests.TypeHTTP3)
+	makeRequests(t, addr, thttp.TypeHTTP3)
 }
 
 // func TestServerMultipleEntrypoints(t *testing.T) {
@@ -92,13 +97,13 @@ func TestServerHTTP3(t *testing.T) {
 //
 // 	for _, addr := range addrs {
 // 		addr = "https://" + addr
-// 		makeRequests(t, addr, tests.TypeHTTP2)
+// 		makeRequests(t, addr, thttp.TypeHTTP2)
 // 	}
 // }
 
 func TestServerEntrypointsStarts(t *testing.T) {
 	addr := "localhost:45451"
-	server, cleanup := setupServer(t, false, WithAddress(addr))
+	server, cleanup := setupServer(t, false, mhttp.WithAddress(addr))
 
 	if err := server.Start(); err != nil {
 		t.Fatal("failed to start", err)
@@ -113,7 +118,7 @@ func TestServerEntrypointsStarts(t *testing.T) {
 	}
 
 	addr = "https://" + addr
-	makeRequests(t, addr, tests.TypeHTTP2)
+	makeRequests(t, addr, thttp.TypeHTTP2)
 
 	cleanup()
 	cleanup()
@@ -121,11 +126,11 @@ func TestServerEntrypointsStarts(t *testing.T) {
 }
 
 func TestServerGzip(t *testing.T) {
-	_, cleanup := setupServer(t, false, WithEnableGzip())
+	_, cleanup := setupServer(t, false, mhttp.WithEnableGzip())
 	defer cleanup()
 
 	addr := "https://localhost:42069"
-	makeRequests(t, addr, tests.TypeHTTP2)
+	makeRequests(t, addr, thttp.TypeHTTP2)
 }
 
 func TestServerInvalidContentType(t *testing.T) {
@@ -133,15 +138,15 @@ func TestServerInvalidContentType(t *testing.T) {
 	defer cleanup()
 
 	addr := "https://localhost:42069"
-	require.Error(t, tests.TestPostRequestProto(t, addr, "application/abcdef", tests.TypeHTTP2), "POST Proto")
-	require.Error(t, tests.TestPostRequestProto(t, addr, "yadayadayada", tests.TypeHTTP2), "POST Proto")
+	require.Error(t, thttp.TestPostRequestProto(t, addr, "application/abcdef", thttp.TypeHTTP2), "POST Proto")
+	require.Error(t, thttp.TestPostRequestProto(t, addr, "yadayadayada", thttp.TypeHTTP2), "POST Proto")
 }
 
 func TestServerRequestSpecificContentType(t *testing.T) {
 	_, cleanup := setupServer(t, false)
 	defer cleanup()
 
-	tests.RefreshClients()
+	thttp.RefreshClients()
 
 	addr := "https://localhost:42069/echo"
 	msg := `{"name": "Alex"}`
@@ -155,7 +160,7 @@ func TestServerRequestSpecificContentType(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Accept", expectedCt)
 
-		resp, err := tests.HTTP2Client.Do(req)
+		resp, err := thttp.HTTP2Client.Do(req)
 		assert.NoError(t, err)
 		body, err := io.ReadAll(resp.Body)
 		assert.NoError(t, err)
@@ -181,47 +186,47 @@ func TestServerRequestSpecificContentType(t *testing.T) {
 
 func BenchmarkHTTPInsecureJSON16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
-		return tests.TestPostRequestJSON(tb, addr, tests.TypeInsecure)
+		return thttp.TestPostRequestJSON(tb, addr, thttp.TypeInsecure)
 	}
 
-	benchmark(b, testFunc, 16, 1, WithInsecure())
+	benchmark(b, testFunc, 16, 1, mhttp.WithInsecure())
 }
 
 func BenchmarkHTTPInseucreProto16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
-		return tests.TestPostRequestProto(tb, addr, "application/octet-stream", tests.TypeInsecure)
+		return thttp.TestPostRequestProto(tb, addr, "application/octet-stream", thttp.TypeInsecure)
 	}
 
-	benchmark(b, testFunc, 16, 1, WithInsecure())
+	benchmark(b, testFunc, 16, 1, mhttp.WithInsecure())
 }
 
 func BenchmarkHTTP1JSON16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
-		return tests.TestPostRequestJSON(tb, addr, tests.TypeHTTP1)
+		return thttp.TestPostRequestJSON(tb, addr, thttp.TypeHTTP1)
 	}
 
-	benchmark(b, testFunc, 16, 1, WithDisableHTTP2())
+	benchmark(b, testFunc, 16, 1, mhttp.WithDisableHTTP2())
 }
 
 func BenchmarkHTTP1Form16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
-		return tests.TestGetRequest(tb, addr, tests.TypeHTTP1)
+		return thttp.TestGetRequest(tb, addr, thttp.TypeHTTP1)
 	}
 
-	benchmark(b, testFunc, 16, 1, WithDisableHTTP2())
+	benchmark(b, testFunc, 16, 1, mhttp.WithDisableHTTP2())
 }
 
 func BenchmarkHTTP1Proto16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
-		return tests.TestPostRequestProto(tb, addr, "application/octet-stream", tests.TypeHTTP1)
+		return thttp.TestPostRequestProto(tb, addr, "application/octet-stream", thttp.TypeHTTP1)
 	}
 
-	benchmark(b, testFunc, 16, 1, WithDisableHTTP2())
+	benchmark(b, testFunc, 16, 1, mhttp.WithDisableHTTP2())
 }
 
 func BenchmarkHTTP2JSON16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
-		return tests.TestPostRequestJSON(tb, addr, tests.TypeHTTP2)
+		return thttp.TestPostRequestJSON(tb, addr, thttp.TypeHTTP2)
 	}
 
 	benchmark(b, testFunc, 16, 1)
@@ -229,7 +234,7 @@ func BenchmarkHTTP2JSON16(b *testing.B) {
 
 func BenchmarkHTTP2Proto16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
-		return tests.TestPostRequestProto(tb, addr, "application/octet-stream", tests.TypeHTTP2)
+		return thttp.TestPostRequestProto(tb, addr, "application/octet-stream", thttp.TypeHTTP2)
 	}
 
 	benchmark(b, testFunc, 16, 1)
@@ -237,21 +242,21 @@ func BenchmarkHTTP2Proto16(b *testing.B) {
 
 func BenchmarkHTTP3JSON16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
-		return tests.TestPostRequestJSON(tb, addr, tests.TypeHTTP3)
+		return thttp.TestPostRequestJSON(tb, addr, thttp.TypeHTTP3)
 	}
 
-	benchmark(b, testFunc, 16, 1, WithHTTP3())
+	benchmark(b, testFunc, 16, 1, mhttp.WithHTTP3())
 }
 
 func BenchmarkHTTP3PROTO16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
-		return tests.TestPostRequestProto(tb, addr, "application/octet-stream", tests.TypeHTTP3)
+		return thttp.TestPostRequestProto(tb, addr, "application/octet-stream", thttp.TypeHTTP3)
 	}
 
-	benchmark(b, testFunc, 16, 1, WithHTTP3())
+	benchmark(b, testFunc, 16, 1, mhttp.WithHTTP3())
 }
 
-func benchmark(b *testing.B, testFunc func(testing.TB, string) error, pN, sN int, opts ...Option) {
+func benchmark(b *testing.B, testFunc func(testing.TB, string) error, pN, sN int, opts ...mhttp.Option) {
 	b.StopTimer()
 	b.ReportAllocs()
 
@@ -277,7 +282,7 @@ func runBenchmark(b *testing.B, addr string, testFunc func(testing.TB, string) e
 	// Start requests
 	go func() {
 		for i := 0; i < b.N; i++ {
-			tests.RefreshClients()
+			thttp.RefreshClients()
 			for p := 0; p < pN; p++ {
 				wg.Add(1)
 				go func() {
@@ -302,7 +307,7 @@ func runBenchmark(b *testing.B, addr string, testFunc func(testing.TB, string) e
 	}
 }
 
-func setupServer(t testing.TB, nolog bool, opts ...Option) (*ServerHTTP, func()) {
+func setupServer(t testing.TB, nolog bool, opts ...mhttp.Option) (*mhttp.ServerHTTP, func()) {
 	name := types.ServiceName("test-server")
 	lopts := []log.Option{}
 	if nolog {
@@ -316,19 +321,21 @@ func setupServer(t testing.TB, nolog bool, opts ...Option) (*ServerHTTP, func())
 		t.Fatalf("failed to setup logger: %v", err)
 	}
 
-	cfg, err := NewDefaultConfig(name, nil, opts...)
+	h := new(handler.EchoHandler)
+	opts = append(opts,
+		mhttp.WithRegistrations(
+			proto.RegisterFuncStreams(h),
+		),
+	)
+
+	cfg, err := mhttp.NewDefaultConfig(name, nil, opts...)
 	if err != nil {
 		t.Fatalf("failed to create config: %v", err)
 	}
 
-	server, err := ProvideServerHTTP("http-test", name, nil, logger, cfg)
+	server, err := mhttp.ProvideServerHTTP("http-test", name, nil, logger, cfg)
 	if err != nil {
 		t.Fatalf("failed to provide http server: %v", err)
-	}
-
-	h := new(handler.EchoHandler)
-	if err := server.Start(); err != nil {
-		t.Fatal("failed to start", err)
 	}
 
 	cleanup := func() {
@@ -340,19 +347,19 @@ func setupServer(t testing.TB, nolog bool, opts ...Option) (*ServerHTTP, func())
 		}
 	}
 
-	router := server.Router()
-	router.Get("/echo", NewGRPCHandler(server, h.Call))
-	router.Post("/echo", NewGRPCHandler(server, h.Call))
+	if err := server.Start(); err != nil {
+		t.Fatal("failed to start", err)
+	}
 
 	return server, cleanup
 }
 
-func makeRequests(t *testing.T, addr string, reqType tests.ReqType) {
-	require.NoError(t, tests.TestGetRequest(t, addr, reqType), "GET")
-	require.NoError(t, tests.TestPostRequestJSON(t, addr, reqType), "POST JSON")
-	require.NoError(t, tests.TestPostRequestProto(t, addr, "application/octet-stream", reqType), "POST Proto")
-	require.NoError(t, tests.TestPostRequestProto(t, addr, "application/proto", reqType), "POST Proto")
-	require.NoError(t, tests.TestPostRequestProto(t, addr, "application/x-proto", reqType), "POST Proto")
-	require.NoError(t, tests.TestPostRequestProto(t, addr, "application/protobuf", reqType), "POST Proto")
-	require.NoError(t, tests.TestPostRequestProto(t, addr, "application/x-protobuf", reqType), "POST Proto")
+func makeRequests(t *testing.T, addr string, reqType thttp.ReqType) {
+	require.NoError(t, thttp.TestGetRequest(t, addr, reqType), "GET")
+	require.NoError(t, thttp.TestPostRequestJSON(t, addr, reqType), "POST JSON")
+	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/octet-stream", reqType), "POST Proto")
+	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/proto", reqType), "POST Proto")
+	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/x-proto", reqType), "POST Proto")
+	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/protobuf", reqType), "POST Proto")
+	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/x-protobuf", reqType), "POST Proto")
 }

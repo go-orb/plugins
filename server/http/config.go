@@ -186,8 +186,8 @@ func NewDefaultConfig(service types.ServiceName, data types.ConfigData, options 
 		WriteTimeout:         DefaultWriteTimeout,
 		IdleTimeout:          DefaultIdleimeout,
 		Enabled:              DefaultEnabled,
-		RegistrationFuncs:    make([]server.RegistrationFunc, 5),
-		Middleware:           make([]func(http.Handler) http.Handler, 10),
+		RegistrationFuncs:    make([]server.RegistrationFunc, 0, 5),
+		Middleware:           make([]func(http.Handler) http.Handler, 0, 10),
 	}
 
 	cfg.ApplyOptions(options...)

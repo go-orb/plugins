@@ -4,7 +4,7 @@ package handler
 import (
 	"context"
 
-	"github.com/go-micro/plugins/server/http/utils/tests/proto"
+	"github.com/go-micro/plugins/server/tests/proto"
 )
 
 var _ proto.StreamsServer = (*EchoHandler)(nil)
