@@ -1,4 +1,4 @@
-package entrypoint
+package http
 
 // Copied and adapted from Traefik
 // https://github.com/traefik/traefik/blob/master/pkg/server/server_entrypoint_tcp_http3.go
@@ -28,7 +28,7 @@ type http3server struct {
 	getter func(info *tls.ClientHelloInfo) (*tls.Config, error)
 }
 
-func (e *Entrypoint) newHTTP3Server() (*http3server, error) {
+func (e *ServerHTTP) newHTTP3Server() (*http3server, error) {
 	port, err := mip.ParsePort(e.Config.Address)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (e *Entrypoint) newHTTP3Server() (*http3server, error) {
 
 	h2.Handler = http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		if err := h3.SetQuicHeaders(rw.Header()); err != nil {
-			e.logger.Error("Failed to set HTTP3 headers", err)
+			e.Logger.Error("Failed to set HTTP3 headers", err)
 		}
 
 		previousHandler.ServeHTTP(rw, req)

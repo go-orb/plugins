@@ -13,17 +13,12 @@ var (
 )
 
 // NewGRPCHandler will wrap a gRPC function with a HTTP handler.
-func NewGRPCHandler[Tin any, Tout any](s ServerHTTP, f func(context.Context, *Tin) (*Tout, error)) http.HandlerFunc {
-	srv, ok := s.(*Server)
-	if !ok {
-		panic(ErrNotHTTPServer)
-	}
-
+func NewGRPCHandler[Tin any, Tout any](srv *ServerHTTP, f func(context.Context, *Tin) (*Tout, error)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		in := new(Tin)
 
 		if _, err := srv.decodeBody(w, r, in); err != nil {
-			srv.logger.Error("failed to decode body", err)
+			srv.Logger.Error("failed to decode body", err)
 			WriteError(w, err)
 
 			return
@@ -31,14 +26,14 @@ func NewGRPCHandler[Tin any, Tout any](s ServerHTTP, f func(context.Context, *Ti
 
 		out, err := f(r.Context(), in)
 		if err != nil {
-			srv.logger.Error("RPC request failed", err)
+			srv.Logger.Error("RPC request failed", err)
 			WriteError(w, err)
 
 			return
 		}
 
 		if err := srv.encodeBody(w, r, out); err != nil {
-			srv.logger.Error("failed to encode body", err)
+			srv.Logger.Error("failed to encode body", err)
 			WriteError(w, err)
 
 			return

@@ -1,4 +1,4 @@
-package entrypoint
+package http
 
 // Inspired by and adapted from Traefik
 // https://github.com/traefik/traefik/blob/master/pkg/server/server_entrypoint_tcp_http3.go
@@ -29,13 +29,13 @@ type httpServer struct {
 	Server *http.Server
 }
 
-func (e *Entrypoint) newHTTPServer(router router.Router) (*httpServer, error) {
+func (e *ServerHTTP) newHTTPServer(router router.Router) (*httpServer, error) {
 	handler, ok := router.(http.Handler)
 	if !ok {
 		return nil, ErrRouterHandlerInterface
 	}
 
-	if e.Config.AllowH2C {
+	if e.Config.H2C {
 		handler = h2c.NewHandler(handler, &http2.Server{
 			MaxConcurrentStreams: uint32(e.Config.MaxConcurrentStreams),
 		})

@@ -85,20 +85,20 @@ func TestServerHTTP3(t *testing.T) {
 	makeRequests(t, addr, tests.TypeHTTP3)
 }
 
-func TestServerMultipleEntrypoints(t *testing.T) {
-	addrs := []string{"localhost:45451", "localhost:45452", "localhost:45453", "localhost:45454", "localhost:45455"}
-	_, cleanup := setupServer(t, false, WithAddress(addrs...))
-	defer cleanup()
-
-	for _, addr := range addrs {
-		addr = "https://" + addr
-		makeRequests(t, addr, tests.TypeHTTP2)
-	}
-}
+// func TestServerMultipleEntrypoints(t *testing.T) {
+// 	addrs := []string{"localhost:45451", "localhost:45452", "localhost:45453", "localhost:45454", "localhost:45455"}
+// 	_, cleanup := setupServer(t, false, WithAddress(addrs...))
+// 	defer cleanup()
+//
+// 	for _, addr := range addrs {
+// 		addr = "https://" + addr
+// 		makeRequests(t, addr, tests.TypeHTTP2)
+// 	}
+// }
 
 func TestServerEntrypointsStarts(t *testing.T) {
-	addrs := []string{"localhost:45451", "localhost:45452", "localhost:45453", "localhost:45454", "localhost:45455"}
-	server, cleanup := setupServer(t, false, WithAddress(addrs...))
+	addr := "localhost:45451"
+	server, cleanup := setupServer(t, false, WithAddress(addr))
 
 	if err := server.Start(); err != nil {
 		t.Fatal("failed to start", err)
@@ -112,10 +112,8 @@ func TestServerEntrypointsStarts(t *testing.T) {
 		t.Fatal("failed to start", err)
 	}
 
-	for _, addr := range addrs {
-		addr = "https://" + addr
-		makeRequests(t, addr, tests.TypeHTTP2)
-	}
+	addr = "https://" + addr
+	makeRequests(t, addr, tests.TypeHTTP2)
 
 	cleanup()
 	cleanup()
@@ -123,7 +121,7 @@ func TestServerEntrypointsStarts(t *testing.T) {
 }
 
 func TestServerGzip(t *testing.T) {
-	_, cleanup := setupServer(t, false, WithGzip())
+	_, cleanup := setupServer(t, false, WithEnableGzip())
 	defer cleanup()
 
 	addr := "https://localhost:42069"
@@ -261,7 +259,7 @@ func benchmark(b *testing.B, testFunc func(testing.TB, string) error, pN, sN int
 	defer cleanup()
 
 	addr := "https://localhost:42069"
-	if server.Config.EntrypointDefaults.Insecure {
+	if server.Config.Insecure {
 		addr = "http://localhost:42069"
 	}
 
@@ -304,7 +302,7 @@ func runBenchmark(b *testing.B, addr string, testFunc func(testing.TB, string) e
 	}
 }
 
-func setupServer(t testing.TB, nolog bool, opts ...Option) (*Server, func()) {
+func setupServer(t testing.TB, nolog bool, opts ...Option) (*ServerHTTP, func()) {
 	name := types.ServiceName("test-server")
 	lopts := []log.Option{}
 	if nolog {
@@ -318,7 +316,12 @@ func setupServer(t testing.TB, nolog bool, opts ...Option) (*Server, func()) {
 		t.Fatalf("failed to setup logger: %v", err)
 	}
 
-	server, err := ProvideServerHTTP(name, nil, logger, opts...)
+	cfg, err := NewDefaultConfig(name, nil, opts...)
+	if err != nil {
+		t.Fatalf("failed to create config: %v", err)
+	}
+
+	server, err := ProvideServerHTTP("http-test", name, nil, logger, cfg)
 	if err != nil {
 		t.Fatalf("failed to provide http server: %v", err)
 	}

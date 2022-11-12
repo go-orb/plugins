@@ -273,16 +273,16 @@ func makePostReq(t testing.TB, addr, ct string, data []byte, client *http.Client
 		}
 	}()
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("Post request failed")
-	}
-
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
 	logResponse(t, resp, body)
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("Post request failed")
+	}
 
 	return body, nil
 }
