@@ -95,12 +95,12 @@ func ProvideServerHTTP(
 
 	router, err := cfg.NewRouter()
 	if err != nil {
-		return nil, fmt.Errorf("http server: create router (%s): %w", cfg.Router, err)
+		return nil, fmt.Errorf("create router (%s): %w", cfg.Router, err)
 	}
 
 	codecs, err := cfg.NewCodecMap()
 	if err != nil {
-		return nil, fmt.Errorf("http server: create codec map: %w", err)
+		return nil, fmt.Errorf("create codec map: %w", err)
 	}
 
 	logger, err = logger.WithComponent(server.ComponentType, Plugin, cfg.Logger.Plugin, cfg.Logger.Level)

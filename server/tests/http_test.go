@@ -3,6 +3,8 @@ package http
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
+	"fmt"
 	"io"
 	"mime"
 	"net/http"
@@ -45,35 +47,47 @@ Else
 */
 
 func TestServerSimple(t *testing.T) {
-	_, cleanup := setupServer(t, false, mhttp.WithInsecure())
+	_, cleanup, err := setupServer(t, false, mhttp.WithInsecure())
 	defer cleanup()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	addr := "http://0.0.0.0:42069"
 	makeRequests(t, addr, thttp.TypeInsecure)
 }
 
 func TestServerHTTPS(t *testing.T) {
-	_, cleanup := setupServer(t, false, mhttp.WithDisableHTTP2())
+	_, cleanup, err := setupServer(t, false, mhttp.WithDisableHTTP2())
 	defer cleanup()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	addr := "https://localhost:42069"
 	makeRequests(t, addr, thttp.TypeHTTP1)
 }
 
 func TestServerHTTP2(t *testing.T) {
-	_, cleanup := setupServer(t, false)
+	_, cleanup, err := setupServer(t, false)
 	defer cleanup()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	addr := "https://localhost:42069"
 	makeRequests(t, addr, thttp.TypeHTTP2)
 }
 
 func TestServerH2c(t *testing.T) {
-	_, cleanup := setupServer(t, false,
+	_, cleanup, err := setupServer(t, false,
 		mhttp.WithInsecure(),
 		mhttp.WithAllowH2C(),
 	)
 	defer cleanup()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	addr := "http://localhost:42069"
 	makeRequests(t, addr, thttp.TypeH2C)
@@ -81,29 +95,24 @@ func TestServerH2c(t *testing.T) {
 
 func TestServerHTTP3(t *testing.T) {
 	// To fix warning about buf size run: sysctl -w net.core.rmem_max=2500000
-	_, cleanup := setupServer(t, false,
+	_, cleanup, err := setupServer(t, false,
 		mhttp.WithHTTP3(),
 	)
 	defer cleanup()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	addr := "https://localhost:42069"
 	makeRequests(t, addr, thttp.TypeHTTP3)
 }
 
-// func TestServerMultipleEntrypoints(t *testing.T) {
-// 	addrs := []string{"localhost:45451", "localhost:45452", "localhost:45453", "localhost:45454", "localhost:45455"}
-// 	_, cleanup := setupServer(t, false, WithAddress(addrs...))
-// 	defer cleanup()
-//
-// 	for _, addr := range addrs {
-// 		addr = "https://" + addr
-// 		makeRequests(t, addr, thttp.TypeHTTP2)
-// 	}
-// }
-
 func TestServerEntrypointsStarts(t *testing.T) {
 	addr := "localhost:45451"
-	server, cleanup := setupServer(t, false, mhttp.WithAddress(addr))
+	server, cleanup, err := setupServer(t, false, mhttp.WithAddress(addr))
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if err := server.Start(); err != nil {
 		t.Fatal("failed to start", err)
@@ -126,25 +135,143 @@ func TestServerEntrypointsStarts(t *testing.T) {
 }
 
 func TestServerGzip(t *testing.T) {
-	_, cleanup := setupServer(t, false, mhttp.WithEnableGzip())
+	_, cleanup, err := setupServer(t, false, mhttp.WithEnableGzip())
 	defer cleanup()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	addr := "https://localhost:42069"
 	makeRequests(t, addr, thttp.TypeHTTP2)
 }
 
 func TestServerInvalidContentType(t *testing.T) {
-	_, cleanup := setupServer(t, false)
+	_, cleanup, err := setupServer(t, false)
 	defer cleanup()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	addr := "https://localhost:42069"
 	require.Error(t, thttp.TestPostRequestProto(t, addr, "application/abcdef", thttp.TypeHTTP2), "POST Proto")
 	require.Error(t, thttp.TestPostRequestProto(t, addr, "yadayadayada", thttp.TypeHTTP2), "POST Proto")
 }
 
-func TestServerRequestSpecificContentType(t *testing.T) {
-	_, cleanup := setupServer(t, false)
+func TestServerNoRouter(t *testing.T) {
+	_, cleanup, err := setupServer(t, false, mhttp.WithRouter(""))
 	defer cleanup()
+	t.Logf("expected error: %v", err)
+	require.Error(t, err, "setting an empty router should return an error")
+
+	_, cleanup, err = setupServer(t, false, mhttp.WithRouter("invalid-router"))
+	defer cleanup()
+	t.Logf("expected error: %v", err)
+	require.Error(t, err, "setting an empty router should return an error")
+}
+
+func TestServerNoCodecs(t *testing.T) {
+	_, cleanup, err := setupServer(t, false, mhttp.WithCodecWhitelist([]string{}))
+	defer cleanup()
+	t.Logf("expected error: %v", err)
+	require.Error(t, err, "setting an empty codec whitelist should return an error")
+
+	_, cleanup, err = setupServer(t, false, mhttp.WithCodecWhitelist([]string{"abc", "def"}))
+	defer cleanup()
+	t.Logf("expected error: %v", err)
+	require.Error(t, err, "setting an empty codec whitelist should return an error")
+}
+
+func TestServerNoTLS(t *testing.T) {
+	_, cleanup, err := setupServer(t, false, mhttp.WithTLSConfig(&tls.Config{}))
+	defer cleanup()
+	t.Logf("expected error: %v", err)
+	require.Error(t, err, "setting an empty TLS config should return an error")
+}
+
+func TestServerNoAddr(t *testing.T) {
+	_, cleanup, err := setupServer(t, false, mhttp.WithAddress(""))
+	defer cleanup()
+	t.Logf("expected error: %v", err)
+	require.Error(t, err, "setting an empty address should return an error")
+}
+
+func TestServerInvalidMessage(t *testing.T) {
+	_, cleanup, err := setupServer(t, false)
+	defer cleanup()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	thttp.RefreshClients()
+
+	addr := "https://localhost:42069/echo"
+
+	// Broken json.
+	msg := `{"name": "Alex}`
+
+	req, err := http.NewRequest(http.MethodPost, addr, bytes.NewReader([]byte(msg))) //nolint:noctx
+	if err != nil {
+		t.Fatalf("create POST request failed: %v", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := thttp.HTTP2Client.Do(req)
+	assert.NoError(t, err)
+	body, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err)
+
+	t.Logf("expected error: %v", string(body))
+	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode, string(body))
+	assert.NoError(t, err)
+
+	// Close connection
+	_, err = io.Copy(io.Discard, resp.Body)
+	assert.NoError(t, err)
+	assert.NoError(t, resp.Body.Close())
+}
+
+func TestServerErrorRPC(t *testing.T) {
+	_, cleanup, err := setupServer(t, false)
+	defer cleanup()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	thttp.RefreshClients()
+
+	addr := "https://localhost:42069/echo"
+
+	msg := `{"name": "error"}`
+
+	req, err := http.NewRequest(http.MethodPost, addr, bytes.NewReader([]byte(msg))) //nolint:noctx
+	if err != nil {
+		t.Fatalf("create POST request failed: %v", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := thttp.HTTP2Client.Do(req)
+	assert.NoError(t, err)
+	body, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err)
+
+	t.Logf("expected error: %v", string(body))
+	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode, string(body))
+	assert.NoError(t, err)
+
+	// Close connection
+	_, err = io.Copy(io.Discard, resp.Body)
+	assert.NoError(t, err)
+	assert.NoError(t, resp.Body.Close())
+}
+
+func TestServerRequestSpecificContentType(t *testing.T) {
+	_, cleanup, err := setupServer(t, false)
+	defer cleanup()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	thttp.RefreshClients()
 
@@ -260,8 +387,11 @@ func benchmark(b *testing.B, testFunc func(testing.TB, string) error, pN, sN int
 	b.StopTimer()
 	b.ReportAllocs()
 
-	server, cleanup := setupServer(b, true, opts...)
+	server, cleanup, err := setupServer(b, true, opts...)
 	defer cleanup()
+	if err != nil {
+		b.Fatal(err)
+	}
 
 	addr := "https://localhost:42069"
 	if server.Config.Insecure {
@@ -307,7 +437,7 @@ func runBenchmark(b *testing.B, addr string, testFunc func(testing.TB, string) e
 	}
 }
 
-func setupServer(t testing.TB, nolog bool, opts ...mhttp.Option) (*mhttp.ServerHTTP, func()) {
+func setupServer(t testing.TB, nolog bool, opts ...mhttp.Option) (*mhttp.ServerHTTP, func(), error) {
 	name := types.ServiceName("test-server")
 	lopts := []log.Option{}
 	if nolog {
@@ -316,9 +446,11 @@ func setupServer(t testing.TB, nolog bool, opts ...mhttp.Option) (*mhttp.ServerH
 		lopts = append(lopts, log.WithLevel(log.DebugLevel))
 	}
 
+	cancel := func() {}
+
 	logger, err := log.ProvideLogger(name, nil, lopts...)
 	if err != nil {
-		t.Fatalf("failed to setup logger: %v", err)
+		return nil, cancel, fmt.Errorf("failed to setup logger: %w", err)
 	}
 
 	h := new(handler.EchoHandler)
@@ -330,12 +462,12 @@ func setupServer(t testing.TB, nolog bool, opts ...mhttp.Option) (*mhttp.ServerH
 
 	cfg, err := mhttp.NewDefaultConfig(name, nil, opts...)
 	if err != nil {
-		t.Fatalf("failed to create config: %v", err)
+		return nil, cancel, fmt.Errorf("failed to create config: %w", err)
 	}
 
 	server, err := mhttp.ProvideServerHTTP("http-test", name, nil, logger, cfg)
 	if err != nil {
-		t.Fatalf("failed to provide http server: %v", err)
+		return nil, cancel, fmt.Errorf("failed to provide http server: %w", err)
 	}
 
 	cleanup := func() {
@@ -343,15 +475,15 @@ func setupServer(t testing.TB, nolog bool, opts ...mhttp.Option) (*mhttp.ServerH
 		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
-			t.Fatal("failed to stop", err)
+			t.Fatalf("failed to stop: %v", err)
 		}
 	}
 
 	if err := server.Start(); err != nil {
-		t.Fatal("failed to start", err)
+		return nil, cancel, fmt.Errorf("failed to start: %w", err)
 	}
 
-	return server, cleanup
+	return server, cleanup, nil
 }
 
 func makeRequests(t *testing.T, addr string, reqType thttp.ReqType) {
