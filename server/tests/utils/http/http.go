@@ -1,5 +1,5 @@
-// Package tests provides testing utilities.
-package tests
+// Package http provides testing utilities.
+package http
 
 import (
 	"bytes"

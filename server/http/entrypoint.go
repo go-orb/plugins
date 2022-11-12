@@ -15,12 +15,13 @@ import (
 	"fmt"
 	"net"
 
+	"golang.org/x/exp/slog"
+
 	"go-micro.dev/v5/codecs"
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/server"
 	"go-micro.dev/v5/types"
 	"go-micro.dev/v5/types/component"
-	"golang.org/x/exp/slog"
 
 	"github.com/go-micro/plugins/server/http/router/router"
 	mip "github.com/go-micro/plugins/server/http/utils/ip"
@@ -42,6 +43,10 @@ type ServerHTTP struct {
 	Config Config
 	Logger log.Logger
 
+	// router is not exported as you can't change the router after server creation.
+	// The router here is merely a reference to the router that is used in the servers
+	// themselves. You can fetch the router with the getter, and register handlers,
+	// or mount other routers.
 	router router.Router
 	codecs map[string]codecs.Marshaler
 
@@ -54,11 +59,11 @@ type ServerHTTP struct {
 	started bool
 }
 
-// ProviderServerHTTP creates a new entrypoint for a single address. You can create
+// ProvideServerHTTP creates a new entrypoint for a single address. You can create
 // multiple entrypoints for multiple addresses and ports. One entrypoint
 // can serve a HTTP1, HTTP2 and HTTP3 server. If you enable HTTP3 it will listen
 // on both TCP and UDP on the same port.
-func ProviderServerHTTP(name string, service types.ServiceName, data types.ConfigData, logger log.Logger, c any, options ...Option) (*ServerHTTP, error) {
+func ProvideServerHTTP(name string, service types.ServiceName, data types.ConfigData, logger log.Logger, c any, options ...Option) (*ServerHTTP, error) {
 	var err error
 
 	cfg, ok := c.(Config)
@@ -83,12 +88,12 @@ func ProviderServerHTTP(name string, service types.ServiceName, data types.Confi
 
 	router, err := cfg.NewRouter()
 	if err != nil {
-		return nil, fmt.Errorf("http server: create router (%s): %v", cfg.Router, err)
+		return nil, fmt.Errorf("http server: create router (%s): %w", cfg.Router, err)
 	}
 
 	codecs, err := cfg.NewCodecMap()
 	if err != nil {
-		return nil, fmt.Errorf("http server: create codec map: %v", err)
+		return nil, fmt.Errorf("http server: create codec map: %w", err)
 	}
 
 	logger, err = logger.WithComponent(server.ComponentType, Plugin, cfg.Logger.Plugin, cfg.Logger.Level)
@@ -128,46 +133,50 @@ func ProviderServerHTTP(name string, service types.ServiceName, data types.Confi
 }
 
 // Start will create the listeners and start the server on the entrypoint.
-func (e *ServerHTTP) Start() error {
-	if e.started {
+func (s *ServerHTTP) Start() error {
+	if s.started {
 		return nil
 	}
 
-	// TODO: register middlware and handlers
-
 	var err error
 
-	e.Logger.Debug("Starting all HTTP entrypoints")
+	s.Logger.Debug("Starting all HTTP entrypoints")
 
-	e.listenerTCP, err = mtcp.BuildListenerTCP(e.Config.Address, e.Config.TLS)
+	s.router.Use(s.Config.Middleware...)
+
+	for _, h := range s.Config.RegistrationFuncs {
+		h(s)
+	}
+
+	s.listenerTCP, err = mtcp.BuildListenerTCP(s.Config.Address, s.Config.TLS)
 	if err != nil {
 		return err
 	}
 
 	go func() {
-		if err = e.httpServer.Start(e.listenerTCP); err != nil {
-			e.Logger.Error("Failed to start HTTP server", err)
+		if err = s.httpServer.Start(s.listenerTCP); err != nil {
+			s.Logger.Error("Failed to start HTTP server", err)
 		}
 	}()
 
-	if !e.Config.HTTP3 {
-		e.started = true
+	if !s.Config.HTTP3 {
+		s.started = true
 		return nil
 	}
 
 	// Listen on the same UDP port as TCP for HTTP3
-	e.listenerUDP, err = mudp.BuildListenerUDP(e.Config.Address)
+	s.listenerUDP, err = mudp.BuildListenerUDP(s.Config.Address)
 	if err != nil {
 		return fmt.Errorf("failed to start UDP listener: %w", err)
 	}
 
 	go func() {
-		if err := e.http3Server.Start(e.listenerUDP); err != nil {
-			e.Logger.Error("Failed to start HTTP3 server", err)
+		if err := s.http3Server.Start(s.listenerUDP); err != nil {
+			s.Logger.Error("Failed to start HTTP3 server", err)
 		}
 	}()
 
-	e.started = true
+	s.started = true
 
 	return nil
 }
