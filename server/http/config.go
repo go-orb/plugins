@@ -367,6 +367,22 @@ func WithConfig(config Config) Option {
 	}
 }
 
+// WithRouter sets the router plguin name.
+func WithRouter(router string) Option {
+	return func(c *Config) {
+		c.Router = router
+	}
+}
+
+// WithCodecWhitelist sets the list of codecs allowed in the HTTP entrypoint.
+// If registered, any codecs set here will be imported into the server.
+// You still need to register the codec plugins by importing them.
+func WithCodecWhitelist(list []string) Option {
+	return func(c *Config) {
+		c.CodecWhitelist = list
+	}
+}
+
 // WithRegistrations appends a list of handler registration functions to the
 // server config.
 func WithRegistrations(funcs ...server.RegistrationFunc) Option {
