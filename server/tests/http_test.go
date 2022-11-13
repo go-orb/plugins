@@ -460,7 +460,7 @@ func setupServer(t testing.TB, nolog bool, opts ...mhttp.Option) (*mhttp.ServerH
 		),
 	)
 
-	cfg, err := mhttp.NewDefaultConfig(name, nil, opts...)
+	cfg, err := mhttp.NewConfig(name, nil, opts...)
 	if err != nil {
 		return nil, cancel, fmt.Errorf("failed to create config: %w", err)
 	}

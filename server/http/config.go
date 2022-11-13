@@ -145,11 +145,12 @@ type Config struct {
 	RegistrationFuncs []server.RegistrationFunc
 	// Middleware is a list of middleware to use.
 	Middleware []func(http.Handler) http.Handler
-	// TODO: parse list of handlers and middleares from yaml config
 	// Enabled dicates whether an entrypiont is enabled. This useful to dynamically
 	// disable entrypoints through config files.
 	Enabled bool `json:"enabled,omitempty" yaml:"enabled,omitempty"`
-	Logger  struct {
+	// Logger allows you to dynamically change the log level and plugin for a
+	// specific entrypoint.
+	Logger struct {
 		Level  slog.Level `json:"level,omitempty" yaml:"level,omitempty"` // TODO: change with custom level
 		Plugin string     `json:"plugin,omitempty" yaml:"plugin,omitempty"`
 	} `json:"logger" yaml:"logger"`
@@ -171,8 +172,8 @@ func (f *fileConfig) GetConfig(name string) (Config, error) {
 	return Config{}, errors.New("entrypoint config not found in file config list")
 }
 
-// NewDefaultConfig will create a new default config for the entrypoint.
-func NewDefaultConfig(service types.ServiceName, data types.ConfigData, options ...Option) (Config, error) {
+// NewConfig will create a new default config for the entrypoint.
+func NewConfig(service types.ServiceName, data types.ConfigData, options ...Option) (Config, error) {
 	cfg := Config{
 		Name:                 "http-" + uuid.NewString(),
 		Address:              DefaultAddress,
@@ -272,7 +273,10 @@ func parseFileConfig(service types.ServiceName, data types.ConfigData, cfg Confi
 	return cfg, nil
 }
 
-// WithName sets the entrypoint name.
+// WithName sets the entrypoint name. The default name is in the format of
+// http-<uuid>.
+// Setting a custom name allows you to dynamically reference the entrypoint in
+// the file config, and makes it easier to attribute the logs.
 func WithName(name string) Option {
 	return func(c *Config) {
 		c.Name = name

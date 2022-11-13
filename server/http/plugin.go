@@ -33,5 +33,5 @@ func pluginProvider(
 }
 
 func newDefaultConfig(service types.ServiceName, data types.ConfigData) (any, error) {
-	return NewDefaultConfig(service, data)
+	return NewConfig(service, data)
 }
