@@ -419,8 +419,6 @@ func WithEntrypoint(options ...Option) server.Option {
 		c.Templates[cfg.Name] = server.EntrypointTemplate{
 			Type:   Plugin,
 			Config: cfg,
-			// TODO: maybe remove this field.
-			Options: []server.EntrypointOption{},
 		}
 	}
 }

@@ -68,15 +68,10 @@ func ProvideServerHTTP(
 	service types.ServiceName,
 	data types.ConfigData,
 	logger log.Logger,
-	c any,
+	cfg Config,
 	options ...Option,
 ) (*ServerHTTP, error) {
 	var err error
-
-	cfg, ok := c.(Config)
-	if !ok {
-		return nil, ErrInvalidConfigType
-	}
 
 	cfg.ApplyOptions(options...)
 
