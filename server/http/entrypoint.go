@@ -68,37 +68,37 @@ func ProvideServerHTTP(
 	service types.ServiceName,
 	data types.ConfigData,
 	logger log.Logger,
-	cfg Config,
+	config Config,
 	options ...Option,
 ) (*ServerHTTP, error) {
 	var err error
 
-	cfg.ApplyOptions(options...)
+	config.ApplyOptions(options...)
 
 	// Name needs to be explicitly set, as the config may be inherited and contain
 	// a different name.
-	cfg.Name = name
+	config.Name = name
 
-	cfg, err = parseFileConfig(service, data, cfg)
+	config, err = parseFileConfig(service, data, config)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = mip.ValidateAddress(cfg.Address); err != nil {
+	if err = mip.ValidateAddress(config.Address); err != nil {
 		return nil, err
 	}
 
-	router, err := cfg.NewRouter()
+	router, err := config.NewRouter()
 	if err != nil {
-		return nil, fmt.Errorf("create router (%s): %w", cfg.Router, err)
+		return nil, fmt.Errorf("create router (%s): %w", config.Router, err)
 	}
 
-	codecs, err := cfg.NewCodecMap()
+	codecs, err := config.NewCodecMap()
 	if err != nil {
 		return nil, fmt.Errorf("create codec map: %w", err)
 	}
 
-	logger, err = logger.WithComponent(server.ComponentType, Plugin, cfg.Logger.Plugin, cfg.Logger.Level)
+	logger, err = logger.WithComponent(server.ComponentType, Plugin, config.Logger.Plugin, config.Logger.Level)
 	if err != nil {
 		return nil, fmt.Errorf("create %s (http) component logger: %w", name, err)
 	}
@@ -106,7 +106,7 @@ func ProvideServerHTTP(
 	logger = logger.With(slog.String("entrypoint", name))
 
 	entrypoint := ServerHTTP{
-		Config: cfg,
+		Config: config,
 		Logger: logger,
 		codecs: codecs,
 		router: router,
@@ -183,10 +183,6 @@ func (s *ServerHTTP) Start() error {
 	return nil
 }
 
-type stopper interface {
-	Stop(context.Context) error
-}
-
 // Stop will stop the HTTP server(s).
 func (s *ServerHTTP) Stop(ctx context.Context) error {
 	if !s.started {
@@ -208,6 +204,10 @@ func (s *ServerHTTP) Stop(ctx context.Context) error {
 			// Listener most likely already closed, just as a double check.
 			_ = s.listenerUDP.Close() //nolint:errcheck
 		}()
+	}
+
+	type stopper interface {
+		Stop(context.Context) error
 	}
 
 	go func(srv stopper, l net.Listener) {
@@ -269,7 +269,7 @@ func (s *ServerHTTP) setupTLS() (*tls.Config, error) {
 
 	// Generate self signed cert
 	if !s.Config.Insecure && s.Config.TLS == nil {
-		config, err = mtls.GenTlSConfig(s.Config.Address)
+		config, err = mtls.GenTLSConfig(s.Config.Address)
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate self signed certificate: %w", err)
 		}

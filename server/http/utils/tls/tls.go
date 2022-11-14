@@ -35,8 +35,8 @@ func LoadTLSConfig(certFile, keyFile string) (*tls.Config, error) {
 	return &config, nil
 }
 
-// GenTlSConfig creates a self signed certificate and returns it in a TSL config.
-func GenTlSConfig(addr ...string) (*tls.Config, error) {
+// GenTLSConfig creates a self signed certificate and returns it in a TSL config.
+func GenTLSConfig(addr ...string) (*tls.Config, error) {
 	hosts := make([]string, len(addr))
 
 	for _, addr := range addr {
@@ -65,7 +65,8 @@ func GenTlSConfig(addr ...string) (*tls.Config, error) {
 }
 
 // CertificateQuic generates a certificate for use with QUIC.
-// NOTE: this is redundant, was just here to test.
+// NOTE: this is redundant, was just here to test, might remove later, still
+// needs to check if its useful.
 func CertificateQuic() (tls.Certificate, error) {
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {

@@ -1,4 +1,4 @@
-// Package router ...
+// Package router provides an interface for the HTTP router (serve mux).
 package router
 
 import (
@@ -8,14 +8,10 @@ import (
 // NewRouterFunc can be used to create a new router.
 type NewRouterFunc func() Router
 
-// TODO: check all comments
-
 // The Router interface as found here is a copy of the Chi router interface.
 // It was selected for it's simplicity compliance with the stdlib.
-// Some methods were removded as they were considered unnecessary for go-micro.
+// Some methods were removed as they were considered unnecessary for go-micro.
 // If you are missing anything please open an issue.
-
-// TODO: proper comment
 
 // Router is a servermux.
 type Router interface { //nolint:interfacebloat
