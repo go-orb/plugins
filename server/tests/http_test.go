@@ -35,6 +35,7 @@ import (
 
 // TODO: for client, provide info on this error: 		t.Error("As:", errors.As(err, &x509.HostnameError{}))
 //       >> change URL to proper hostname
+
 // TODO: Provide context on unknown authority error for client x509.UnknownAuthorityError
 //       >> Self signed cert was used
 
