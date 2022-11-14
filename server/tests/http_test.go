@@ -209,7 +209,7 @@ func TestServerInvalidMessage(t *testing.T) {
 	// Broken json.
 	msg := `{"name": "Alex}`
 
-	req, err := http.NewRequest(http.MethodPost, addr, bytes.NewReader([]byte(msg))) //nolint:noctx
+	req, err := http.NewRequest(http.MethodPost, addr, bytes.NewReader([]byte(msg)))
 	if err != nil {
 		t.Fatalf("create POST request failed: %v", err)
 	}
