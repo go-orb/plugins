@@ -121,7 +121,7 @@ func (m *RegistryMDNS) Start() error {
 }
 
 // Stop the registry.
-func (m *RegistryMDNS) Stop() error {
+func (m *RegistryMDNS) Stop(ctx context.Context) error {
 	// TODO: do something here?
 	return nil
 }
