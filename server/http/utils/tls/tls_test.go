@@ -7,7 +7,7 @@ import (
 )
 
 func TestGenerateCertificate(t *testing.T) {
-	_, err := GenTlSConfig("localhost:8080")
+	_, err := GenTLSConfig("localhost:8080")
 	assert.NoError(t, err)
 
 	_, err = CertificateQuic()
