@@ -27,6 +27,7 @@ func (c *EchoHandler) Call(ctx context.Context, in *proto.CallRequest) (*proto.C
 		if _, err := rand.Reader.Read(msg); err != nil {
 			return nil, err
 		}
+
 		return &proto.CallResponse{Msg: "Hello " + in.Name, Payload: msg}, nil
 	default:
 		return &proto.CallResponse{Msg: "Hello " + in.Name}, nil

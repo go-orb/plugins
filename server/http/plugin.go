@@ -23,7 +23,6 @@ func pluginProvider(
 	logger log.Logger,
 	c any,
 ) (server.Entrypoint, error) {
-
 	cfg, ok := c.(Config)
 	if !ok {
 		return nil, ErrInvalidConfigType
