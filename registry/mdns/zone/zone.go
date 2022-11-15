@@ -63,7 +63,9 @@ func validateFQDN(s string) error {
 // check to ensure that the instance name does not conflict with other instance
 // names, and, if required, select a new name.  There may also be conflicting
 // hostName A/AAAA records.
-func NewMDNSService(instance, service, domain, hostName string, port int, ips []net.IP, txt []string) (*MDNSService, error) { //nolint:lll
+func NewMDNSService(
+	instance, service, domain, hostName string, port int, ips []net.IP, txt []string,
+) (*MDNSService, error) {
 	// Sanity check inputs
 	if instance == "" {
 		return nil, fmt.Errorf("missing service instance name")
