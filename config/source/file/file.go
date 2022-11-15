@@ -46,7 +46,7 @@ func (s *Source) Read(u *url.URL) source.Data {
 		Data: make(map[string]any),
 	}
 
-	path := u.Path
+	path := u.Host + u.Path
 	marshalers := codecs.Plugins.All()
 
 	if _, err := os.Stat(path); err == nil {
