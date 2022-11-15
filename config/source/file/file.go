@@ -49,28 +49,28 @@ func (s *Source) Read(u *url.URL) source.Data {
 	path := u.Path
 	marshalers := codecs.Plugins.All()
 
-	var decoder codecs.Marshaler
-
 	if _, err := os.Stat(path); err == nil {
-		// Get the marshaler from the extension.
-		pathExt := filepath.Ext(path)
+		result.Error = config.ErrFileNotFound
+		return result
+	}
 
-		for _, m := range marshalers {
-			for _, ext := range m.Exts() {
-				if pathExt == ext {
-					decoder = m
-					break
-				}
-			}
+	// Get the marshaler from the extension.
+	var (
+		pathExt = filepath.Ext(path)
+		decoder codecs.Marshaler
+	)
 
-			if decoder != nil {
+	for _, m := range marshalers {
+		for _, ext := range m.Exts() {
+			if pathExt == ext {
+				decoder = m
 				break
 			}
 		}
 	}
 
 	if decoder == nil {
-		result.Error = config.ErrNoSuchFile
+		result.Error = config.ErrCodecNotFound
 		return result
 	}
 
