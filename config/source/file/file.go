@@ -49,8 +49,8 @@ func (s *Source) Read(u *url.URL) source.Data {
 	path := u.Host + u.Path
 	marshalers := codecs.Plugins.All()
 
-	if _, err := os.Stat(path); err == nil {
-		result.Error = config.ErrFileNotFound
+	if _, err := os.Stat(path); err != nil {
+		result.Error = err
 		return result
 	}
 
