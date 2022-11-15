@@ -3,6 +3,7 @@ package http
 import (
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -350,15 +351,13 @@ func WithAllowH2C() Option {
 func WithDefaults(options ...Option) server.Option {
 	return func(c *server.Config) {
 		cfg, ok := c.Defaults[Plugin].(Config)
-		if ok {
-			for _, o := range options {
-				o(&cfg)
-			}
-
-			c.Defaults[Plugin] = cfg
+		if !ok {
+			// Should never happen.
+			panic(fmt.Errorf("http.WithDefaults received invalid type, not *server.Config, but '%T'", cfg))
 		}
-		// Should never happen.
-		panic("http.WithDefaults received invalid type, not *server.Config")
+
+		cfg.ApplyOptions(options...)
+		c.Defaults[Plugin] = cfg
 	}
 }
 
