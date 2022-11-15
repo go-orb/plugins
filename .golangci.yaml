@@ -68,6 +68,9 @@ linters-settings:
     # Default: 5
     max-distance: 26
     ignore-names:
+      - t
+      - req
+      - resp
       - err
       - id
       - ch
@@ -123,7 +126,7 @@ linters-settings:
   lll:
     # max line length, lines longer will be reported. Default is 120.
     # '\t' is counted as 1 character by default, and can be changed with the tab-width option
-    line-length: 120
+    line-length: 140
     # tab width in spaces. Default to 1.
     tab-width: 1
   unused:
@@ -236,6 +239,9 @@ issues:
         - cyclop
         - maintidx
         - gochecknoglobals
+        - goconst
+        - unparam
+
 
   # Independently from option `exclude` we use default exclude patterns,
   # it can be disabled by this option. To list all
