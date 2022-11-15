@@ -2,10 +2,13 @@
 package file
 
 import (
+	"fmt"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 
+	"github.com/google/uuid"
 	"go-micro.dev/v5/codecs"
 	"go-micro.dev/v5/config"
 	"go-micro.dev/v5/config/source"
@@ -94,4 +97,40 @@ func (s *Source) Read(u *url.URL) source.Data {
 	}
 
 	return result
+}
+
+// TempFile will take a byte sequence and write it to a temporary file. This
+// is useful if you want to parse a config from memory.
+//
+// If at any point an erro occurs, it will panic. It does not return the error
+// as the probability of one occurring is small, and now you can use it directly
+// within your config array definition.
+//
+// Example:
+//
+//	configSource := []config.Source{"config.yaml", file.TempFile(myConfig, "yaml")}
+func TempFile(data []byte, filetype string) *url.URL {
+	dir := os.TempDir()
+	filePath := path.Join(dir, "go-micro-config-"+uuid.NewString()+"."+filetype)
+
+	file, err := os.OpenFile(path.Clean(filePath), os.O_CREATE|os.O_RDWR, 0440)
+	if err != nil {
+		panic(fmt.Errorf("failed to create temporary config file '%s': %w", filePath, err))
+	}
+
+	_, err = file.Write(data)
+	if err != nil {
+		panic(fmt.Errorf("failed to write temporary config file '%s': %w", filePath, err))
+	}
+
+	file.Close() //nolint:errcheck,gosec
+
+	u := "file://" + filePath
+
+	url, err := url.Parse(u)
+	if err != nil {
+		panic(fmt.Errorf("failed to parse temporary config file as url '%s': %w", u, err))
+	}
+
+	return url
 }
