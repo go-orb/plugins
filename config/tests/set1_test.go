@@ -114,5 +114,5 @@ func TestSet1FailUnknown(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = config.Read([]*url.URL{u1, u2, u3}, []string{"app"})
-	require.Error(t, err, config.ErrNoSuchFile)
+	require.Error(t, err, config.ErrFileNotFound)
 }
