@@ -123,7 +123,7 @@ function run_linter() {
 	dirs=$1
 	failed="false"
 	for dir in "${dirs[@]}"; do
-		pushd "${dir}" >/dev/null
+		pushd "${dir}" >/dev/null || continue
 		print_msg "Running linter on ${dir}"
 
 		golangci-lint run --out-format github-actions -c "${cwd}/.golangci.yaml"
@@ -133,7 +133,7 @@ function run_linter() {
 			failed="true"
 		fi
 
-		popd >/dev/null
+		popd >/dev/null || continue
 	done
 
 	if [[ $failed == "true" ]]; then
@@ -205,7 +205,7 @@ function create_summary() {
 		# Install dependencies if required.
 		install_deps "${dir}"
 
-		pushd "${dir}" >/dev/null
+		pushd "${dir}" >/dev/null || continue
 		print_msg "Creating summary for $dir"
 
 		add_summary "\n### ${dir}\n"
@@ -214,13 +214,13 @@ function create_summary() {
 		go get -v -t -d ./...
 
 		go test $GO_TEST_FLAGS -json ./... |
-			tparse -notests -format=markdown >>$GITHUB_STEP_SUMMARY
+			tparse -notests -format=markdown >>"$GITHUB_STEP_SUMMARY"
 
 		if [[ $? -ne 0 ]]; then
 			failed="true"
 		fi
 
-		popd >/dev/null
+		popd >/dev/null || continue
 
 		# Kill all depdency processes.
 		kill_deps "${dir}"

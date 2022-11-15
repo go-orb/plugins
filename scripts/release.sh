@@ -36,13 +36,13 @@ function remove_prefix() {
 function check_if_changed() {
 	local pkg="$1"
 	local last_tag=$(git tag --list --sort='-creatordate' "${pkg}/*" | head -n1)
-	if [[ "${last_tag}" == "" ]]; then
-		echo -e "# No previous tag\n# Run:\ngh release create "${pkg}/v1.0.0" -n 'Initial release'"
+	if [[ ${last_tag} == "" ]]; then
+		echo -e "# No previous tag\n# Run:\ngh release create ""${pkg}/v1.0.0"" -n 'Initial release'"
 		return 1
 	fi
 
 	local changes="$(git --no-pager log "${last_tag}..HEAD" --format="%s" "${pkg}")"
-	if [[ "${#changes}" == "0" ]]; then
+	if [[ ${#changes} == "0" ]]; then
 		# echo "# No changes detected in package '${pkg}'"
 		return 1
 	fi
@@ -77,7 +77,7 @@ function release() {
 
 	# Increment minor version if "feat:" commit found, otherwise patch version
 	git --no-pager log "${last_tag}..HEAD" --format="%s" "${pkg}/*" | grep -q -E "^feat:"
-	if [[ "$?" == "0" ]]; then
+	if [[ $? == "0" ]]; then
 		local tmp_new_tag="$(printf "/%s" "${last_tag_split[@]}")/v$(increment_minor_version ${version})"
 		local new_tag=${tmp_new_tag:1}
 	else

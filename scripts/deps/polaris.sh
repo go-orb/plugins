@@ -19,7 +19,6 @@ echo "Downloading from '${package_url}'"
 # Downlaod ladtest release
 wget -q "${package_url}"
 
-
 # Unzip package
 unzip -o "*.linux.amd64.zip"
 
@@ -53,4 +52,3 @@ popd || exit 1
 export POLARIS_ADDR="127.0.0.1:8091"
 
 printf "\nPolaris installed successfully on ${POLARIS_ADDR}\n"
-
