@@ -13,6 +13,7 @@ use (
 	./config/tests
 	./log/json
 	./log/text
+	./registry/nats
 	./registry/mdns
 	./server/http
 	./server/tests
