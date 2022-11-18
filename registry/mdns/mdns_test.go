@@ -247,7 +247,9 @@ func TestWatcher(t *testing.T) {
 
 	w, err := r.Watch()
 	require.NoError(t, err, "failed to start registry watcher")
-	defer w.Stop()
+	defer func() {
+		w.Stop() //nolint:errcheck
+	}()
 
 	for _, service := range testDataWatcher {
 		require.NoError(t, r.Register(service), "failed to register service")
