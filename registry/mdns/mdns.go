@@ -39,7 +39,7 @@ type mdnsEntry struct {
 	node *server.Server
 }
 
-// This is here to make sure mdnsRegistry implements registry.Registry.
+// This is here to make sure RegistryMDNS implements registry.Registry.
 var _ registry.Registry = (*RegistryMDNS)(nil)
 
 // RegistryMDNS implements the registry interface. It runs a MDNS service registry.
@@ -626,16 +626,18 @@ func (m *mdnsWatcher) Next() (*registry.Result, error) {
 	}
 }
 
-func (m *mdnsWatcher) Stop() {
+func (m *mdnsWatcher) Stop() error {
 	select {
 	case <-m.exit:
-		return
+		return nil
 	default:
 		close(m.exit)
 		// remove self from the registry
 		m.registry.mtx.Lock()
 		delete(m.registry.watchers, m.id)
 		m.registry.mtx.Unlock()
+
+		return nil
 	}
 }
 
