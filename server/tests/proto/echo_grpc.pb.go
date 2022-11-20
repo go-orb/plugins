@@ -35,7 +35,7 @@ func NewStreamsClient(cc grpc.ClientConnInterface) StreamsClient {
 
 func (c *streamsClient) Call(ctx context.Context, in *CallRequest, opts ...grpc.CallOption) (*CallResponse, error) {
 	out := new(CallResponse)
-	err := c.cc.Invoke(ctx, "/echodicker.Streams/Call", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/echo.Streams/Call", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func _Streams_Call_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/echodicker.Streams/Call",
+		FullMethod: "/echo.Streams/Call",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StreamsServer).Call(ctx, req.(*CallRequest))
@@ -92,7 +92,7 @@ func _Streams_Call_Handler(srv interface{}, ctx context.Context, dec func(interf
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Streams_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "echodicker.Streams",
+	ServiceName: "echo.Streams",
 	HandlerType: (*StreamsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

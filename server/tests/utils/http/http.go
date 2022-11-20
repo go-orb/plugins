@@ -9,6 +9,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
@@ -320,7 +321,7 @@ func switchRequest(tb testing.TB, url, ct string, msg []byte, reqFunc ReqFunc, r
 
 func logResponse(tb testing.TB, resp *http.Response, body []byte) {
 	// only log if not benchmark
-	if t, ok := tb.(*testing.T); ok {
+	if t, ok := tb.(*testing.T); ok && len(os.Getenv("MICRO_DEBUG")) > 0 {
 		t.Logf(
 			"[%+v] Status: %v, \n\tProto: %v, ConentType: %v, Length: %v, \n\tTransferEncoding: %v, Uncompressed: %v, \n\tBody: %v",
 			resp.Request.Method, resp.Status, resp.Proto, resp.Header.Get("Content-Type"),

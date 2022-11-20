@@ -8,6 +8,7 @@ import (
 	"io"
 	"mime"
 	"net/http"
+	"net/url"
 	"sync"
 	"testing"
 	"time"
@@ -15,20 +16,29 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"go-micro.dev/v5/config"
 	"go-micro.dev/v5/log"
+	"go-micro.dev/v5/server"
 	"go-micro.dev/v5/types"
 
-	mhttp "github.com/go-micro/plugins/server/http"
 	thttp "github.com/go-micro/plugins/server/tests/utils/http"
+
+	mhttp "github.com/go-micro/plugins/server/http"
 
 	"github.com/go-micro/plugins/server/tests/handler"
 	"github.com/go-micro/plugins/server/tests/proto"
 
 	_ "github.com/go-micro/plugins/codecs/form"
+	_ "github.com/go-micro/plugins/codecs/json"
 	_ "github.com/go-micro/plugins/codecs/jsonpb"
 	_ "github.com/go-micro/plugins/codecs/proto"
+
+	_ "github.com/go-micro/plugins/codecs/yaml"
+	_ "github.com/go-micro/plugins/config/source/file"
 	_ "github.com/go-micro/plugins/log/text"
+
 	_ "github.com/go-micro/plugins/server/http/router/chi"
+	"github.com/go-micro/plugins/server/http/router/router"
 )
 
 // TODO: test get path params
@@ -136,7 +146,7 @@ func TestServerEntrypointsStarts(t *testing.T) {
 }
 
 func TestServerGzip(t *testing.T) {
-	_, cleanup, err := setupServer(t, false, mhttp.WithEnableGzip())
+	_, cleanup, err := setupServer(t, false, mhttp.WithGzip())
 	defer cleanup()
 	if err != nil {
 		t.Fatal(err)
@@ -312,6 +322,136 @@ func TestServerRequestSpecificContentType(t *testing.T) {
 	testCt("application/x-www-form-urlencoded")
 }
 
+func TestServerIntegration(t *testing.T) {
+	name := types.ServiceName("com.example.test")
+
+	logger, err := log.ProvideLogger(name, nil)
+	require.NoError(t, err, "failed to setup logger")
+
+	h := new(handler.EchoHandler)
+
+	srv, err := server.ProvideServer(name, nil, logger,
+		mhttp.WithEntrypoint(
+			mhttp.WithName("test-ep-1"),
+			mhttp.WithAddress(":48081"),
+			mhttp.WithHTTP3(),
+			mhttp.WithGzip(),
+			mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(h)),
+		),
+		mhttp.WithEntrypoint(
+			mhttp.WithName("test-ep-2"),
+			mhttp.WithAddress(":48082"),
+			mhttp.WithHTTP3(),
+			mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(h)),
+		),
+		mhttp.WithEntrypoint(
+			mhttp.WithName("test-ep-3"),
+			mhttp.WithAddress(":48083"),
+			mhttp.WithInsecure(),
+			mhttp.WithAllowH2C(),
+			mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(h)),
+		),
+	)
+	require.NoError(t, err, "failed to setup server")
+	require.NoError(t, srv.Start(), "failed to start server")
+
+	e, err := srv.GetEntrypoint("test-ep-1")
+	require.NoError(t, err, "failed to fetch entrypoint 1")
+	require.Equal(t, len(e.(*mhttp.ServerHTTP).Router().Routes()), 1, "number of routes not equal to 1")
+
+	_, err = srv.GetEntrypoint("test-ep-2")
+	require.NoError(t, err, "failed to fetch entrypoint 2")
+	_, err = srv.GetEntrypoint("fake")
+	require.Error(t, err, "fetching invalid entrypoint should fail")
+
+	makeRequests(t, "https://127.0.0.1:48081", thttp.TypeHTTP3)
+	makeRequests(t, "https://127.0.0.1:48082", thttp.TypeHTTP2)
+	makeRequests(t, "https://127.0.0.1:48083", thttp.TypeH2C)
+
+	require.NoError(t, srv.Stop(context.Background()), "failed to start server")
+}
+
+func TestServerFileConfig(t *testing.T) {
+	server.Handlers.Register("handler-1", func(_ any) {})
+	server.Handlers.Register("handler-2", func(_ any) {})
+	router.Middleware.Register("middleware-1", func(h http.Handler) http.Handler { return h })
+	router.Middleware.Register("middleware-2", func(h http.Handler) http.Handler { return h })
+	router.Middleware.Register("middleware-4", func(h http.Handler) http.Handler { return h })
+
+	name := types.ServiceName("com.example.test")
+
+	fURL, err := url.Parse("file://config/http.yaml")
+	t.Logf("%+v", fURL.RawPath)
+	require.NoError(t, err, "failed to parse file config url")
+
+	config, err := config.Read([]*url.URL{fURL}, nil)
+	require.NoError(t, err, "failed to read file config")
+
+	logger, err := log.ProvideLogger(name, nil)
+	require.NoError(t, err, "failed to setup logger")
+
+	h := new(handler.EchoHandler)
+	srv, err := server.ProvideServer(name, config, logger,
+		mhttp.WithEntrypoint(
+			mhttp.WithName("static-ep-1"),
+			mhttp.WithAddress(":48081"),
+			mhttp.WithHTTP3(),
+			mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(h)),
+		),
+		mhttp.WithEntrypoint(
+			mhttp.WithName("test-ep-5"),
+			mhttp.WithMiddleware("middleware-3", func(h http.Handler) http.Handler { return h }),
+		),
+	)
+	require.NoError(t, err, "failed to setup server")
+	require.NoError(t, srv.Start(), "failed to start server")
+
+	e, err := srv.GetEntrypoint("static-ep-1")
+	require.NoError(t, err, "failed to fetch entrypoint 1")
+	ep := e.(*mhttp.ServerHTTP) //nolint:errcheck
+	require.Equal(t, ":48081", ep.Config.Address)
+	require.Equal(t, true, ep.Config.HTTP3, "HTTP3 static ep 1")
+	require.Equal(t, true, ep.Config.Gzip, "Gzip static ep 1")
+	makeRequests(t, "https://localhost:48081", thttp.TypeHTTP3)
+
+	e, err = srv.GetEntrypoint("test-ep-1")
+	require.NoError(t, err, "failed to fetch entrypoint 1")
+	ep = e.(*mhttp.ServerHTTP) //nolint:errcheck
+	require.Equal(t, ":4512", ep.Config.Address, "Address ep 1")
+	require.Equal(t, true, ep.Config.HTTP3, "HTTP3")
+	makeRequests(t, "https://localhost:4512", thttp.TypeHTTP3)
+
+	e, err = srv.GetEntrypoint("test-ep-2")
+	require.NoError(t, err, "failed to fetch entrypoint 2")
+	ep = e.(*mhttp.ServerHTTP) //nolint:errcheck
+	require.Equal(t, ":4513", ep.Config.Address, "Address ep 2")
+	require.Equal(t, true, ep.Config.Insecure, "Insecure")
+	require.Equal(t, true, ep.Config.H2C, "H2C")
+	makeRequests(t, "https://localhost:4513", thttp.TypeH2C)
+
+	e, err = srv.GetEntrypoint("test-ep-3")
+	require.NoError(t, err, "failed to fetch entrypoint 3")
+	ep = e.(*mhttp.ServerHTTP) //nolint:errcheck
+	require.Equal(t, ":4514", ep.Config.Address, "Address ep 3")
+	require.Equal(t, true, ep.Config.HTTP3, "HTTP3")
+	require.Equal(t, true, ep.Config.H2C, "H2C")
+	require.Equal(t, true, ep.Config.Gzip, "Gzip")
+	makeRequests(t, "https://localhost:4514", thttp.TypeHTTP3)
+
+	_, err = srv.GetEntrypoint("test-ep-4")
+	require.Error(t, err, "should fail to fetch entrypoint 4")
+
+	e, err = srv.GetEntrypoint("test-ep-5")
+	require.NoError(t, err, "failed to fetch entrypoint 5")
+	ep = e.(*mhttp.ServerHTTP) //nolint:errcheck
+	require.Equal(t, ":4516", ep.Config.Address, "Address ep 5")
+	require.Equal(t, 3, len(ep.Config.RegistrationFuncs), "Registration len")
+	require.Equal(t, 4, len(ep.Config.Middleware), "Middleware len")
+	makeRequests(t, "https://localhost:4516", thttp.TypeHTTP2)
+
+	require.NoError(t, srv.Stop(context.Background()), "failed to start server")
+}
+
 func BenchmarkHTTPInsecureJSON16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
 		return thttp.TestPostRequestJSON(tb, addr, thttp.TypeInsecure)
@@ -405,6 +545,7 @@ func benchmark(b *testing.B, testFunc func(testing.TB, string) error, pN, sN int
 func runBenchmark(b *testing.B, addr string, testFunc func(testing.TB, string) error, pN, sN int) {
 	done := make(chan struct{})
 	errChan := make(chan error, 1)
+
 	var wg sync.WaitGroup
 
 	b.ResetTimer()
@@ -414,9 +555,11 @@ func runBenchmark(b *testing.B, addr string, testFunc func(testing.TB, string) e
 	go func() {
 		for i := 0; i < b.N; i++ {
 			thttp.RefreshClients()
+			// Run parallel requests.
 			for p := 0; p < pN; p++ {
 				wg.Add(1)
 				go func() {
+					// Run sequential requests.
 					for s := 0; s < sN; s++ {
 						if err := testFunc(b, addr); err != nil {
 							errChan <- err
@@ -456,17 +599,12 @@ func setupServer(t testing.TB, nolog bool, opts ...mhttp.Option) (*mhttp.ServerH
 
 	h := new(handler.EchoHandler)
 	opts = append(opts,
-		mhttp.WithRegistrations(
-			proto.RegisterFuncStreams(h),
-		),
+		mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(h)),
 	)
 
-	cfg, err := mhttp.NewConfig(name, nil, opts...)
-	if err != nil {
-		return nil, cancel, fmt.Errorf("failed to create config: %w", err)
-	}
+	cfg := mhttp.NewConfig(opts...)
 
-	server, err := mhttp.ProvideServerHTTP("http-test", name, nil, logger, cfg)
+	server, err := mhttp.ProvideServerHTTP(name, logger, *cfg)
 	if err != nil {
 		return nil, cancel, fmt.Errorf("failed to provide http server: %w", err)
 	}
@@ -488,11 +626,11 @@ func setupServer(t testing.TB, nolog bool, opts ...mhttp.Option) (*mhttp.ServerH
 }
 
 func makeRequests(t *testing.T, addr string, reqType thttp.ReqType) {
-	require.NoError(t, thttp.TestGetRequest(t, addr, reqType), "GET")
-	require.NoError(t, thttp.TestPostRequestJSON(t, addr, reqType), "POST JSON")
-	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/octet-stream", reqType), "POST Proto")
-	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/proto", reqType), "POST Proto")
-	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/x-proto", reqType), "POST Proto")
-	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/protobuf", reqType), "POST Proto")
-	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/x-protobuf", reqType), "POST Proto")
+	require.NoError(t, thttp.TestGetRequest(t, addr, reqType), fmt.Sprintf("%s: GET", addr))
+	require.NoError(t, thttp.TestPostRequestJSON(t, addr, reqType), fmt.Sprintf("%s: POST JSON", addr))
+	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/octet-stream", reqType), fmt.Sprintf("%s: POST Proto", addr))
+	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/proto", reqType), fmt.Sprintf("%s: POST Proto", addr))
+	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/x-proto", reqType), fmt.Sprintf("%s: POST Proto", addr))
+	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/protobuf", reqType), fmt.Sprintf("%s: POST Proto", addr))
+	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/x-protobuf", reqType), fmt.Sprintf("%s: POST Proto", addr))
 }

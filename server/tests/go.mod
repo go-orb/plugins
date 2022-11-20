@@ -4,8 +4,11 @@ go 1.19
 
 require (
 	github.com/go-micro/plugins/codecs/form v0.0.0-00010101000000-000000000000
+	github.com/go-micro/plugins/codecs/json v0.0.0-00010101000000-000000000000
 	github.com/go-micro/plugins/codecs/jsonpb v0.0.0-00010101000000-000000000000
 	github.com/go-micro/plugins/codecs/proto v0.0.0-00010101000000-000000000000
+	github.com/go-micro/plugins/codecs/yaml v0.0.0-00010101000000-000000000000
+	github.com/go-micro/plugins/config/source/file v0.0.0-00010101000000-000000000000
 	github.com/go-micro/plugins/log/text v0.0.0-00010101000000-000000000000
 	github.com/go-micro/plugins/server/http v0.0.0-00010101000000-000000000000
 	github.com/go-micro/plugins/server/tests v0.0.0-00010101000000-000000000000
@@ -26,16 +29,18 @@ require (
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/pprof v0.0.0-20221103000818-d260c55eee4c // indirect
-	github.com/google/uuid v1.1.2 // indirect
+	github.com/google/pprof v0.0.0-20221112000123-84eb7ad69597 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.13.0 // indirect
+	github.com/hashicorp/errwrap v1.0.0 // indirect
+	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/marten-seemann/qpack v0.3.0 // indirect
 	github.com/marten-seemann/qtls-go1-18 v0.1.3 // indirect
 	github.com/marten-seemann/qtls-go1-19 v0.1.1 // indirect
-	github.com/onsi/ginkgo/v2 v2.4.0 // indirect
+	github.com/onsi/ginkgo/v2 v2.5.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/crypto v0.1.0 // indirect
-	golang.org/x/exp v0.0.0-20221109205753-fc8884afc316 // indirect
+	golang.org/x/crypto v0.2.0 // indirect
+	golang.org/x/exp v0.0.0-20221111204811-129d8d6c17ab // indirect
 	golang.org/x/mod v0.7.0 // indirect
 	golang.org/x/sys v0.2.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
@@ -51,9 +56,13 @@ replace github.com/go-micro/plugins/codecs/proto => ../../codecs/proto
 
 replace github.com/go-micro/plugins/codecs/jsonpb => ../../codecs/jsonpb
 
+replace github.com/go-micro/plugins/codecs/json => ../../codecs/json
+
 replace github.com/go-micro/plugins/codecs/yaml => ../../codecs/yaml
 
 replace github.com/go-micro/plugins/codecs/form => ../../codecs/form
+
+replace github.com/go-micro/plugins/config/source/file => ../../config/source/file
 
 replace github.com/go-micro/plugins/log/text => ../../log/text
 

@@ -1,0 +1,37 @@
+com:
+  example:
+    test:
+      server:
+        http:
+          gzip: true
+          handlers:
+            - Streams
+          middleware:
+            - middleware-1
+            - middleware-2
+          entrypoints:
+            - name: test-ep-1
+              address: ":4512"
+              http3: true
+            - name: test-ep-2
+              address: ":4513"
+              insecure: true
+              h2c: true
+            - name: test-ep-3
+              address: ":4514"
+              inherit: test-ep-1
+              h2c: true
+              gzip: true
+            - name: test-ep-4
+              address: ":4515"
+              enabled: false
+            - name: test-ep-5
+              address: ":4516"
+              handlers:
+                - handler-1
+                - handler-2
+              middleware:
+                - middleware-1
+                - middleware-4
+
+    

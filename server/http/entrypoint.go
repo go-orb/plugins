@@ -64,49 +64,36 @@ type ServerHTTP struct {
 // can serve a HTTP1, HTTP2 and HTTP3 server. If you enable HTTP3 it will listen
 // on both TCP and UDP on the same port.
 func ProvideServerHTTP(
-	name string,
-	service types.ServiceName,
-	data types.ConfigData,
+	_ types.ServiceName,
 	logger log.Logger,
-	config Config,
+	cfg Config,
 	options ...Option,
 ) (*ServerHTTP, error) {
-	var err error
+	cfg.ApplyOptions(options...)
 
-	config.ApplyOptions(options...)
-
-	// Name needs to be explicitly set, as the config may be inherited and contain
-	// a different name.
-	config.Name = name
-
-	config, err = parseFileConfig(service, data, config)
-	if err != nil {
+	if err := mip.ValidateAddress(cfg.Address); err != nil {
 		return nil, err
 	}
 
-	if err = mip.ValidateAddress(config.Address); err != nil {
-		return nil, err
-	}
-
-	router, err := config.NewRouter()
+	router, err := cfg.NewRouter()
 	if err != nil {
-		return nil, fmt.Errorf("create router (%s): %w", config.Router, err)
+		return nil, fmt.Errorf("create router (%s): %w", cfg.Router, err)
 	}
 
-	codecs, err := config.NewCodecMap()
+	codecs, err := cfg.NewCodecMap()
 	if err != nil {
 		return nil, fmt.Errorf("create codec map: %w", err)
 	}
 
-	logger, err = logger.WithComponent(server.ComponentType, Plugin, config.Logger.Plugin, config.Logger.Level)
+	logger, err = logger.WithComponent(server.ComponentType, Plugin, cfg.Logger.Plugin, cfg.Logger.Level)
 	if err != nil {
-		return nil, fmt.Errorf("create %s (http) component logger: %w", name, err)
+		return nil, fmt.Errorf("create %s (http) component logger: %w", cfg.Name, err)
 	}
 
-	logger = logger.With(slog.String("entrypoint", name))
+	logger = logger.With(slog.String("entrypoint", cfg.Name))
 
 	entrypoint := ServerHTTP{
-		Config: config,
+		Config: cfg,
 		Logger: logger,
 		codecs: codecs,
 		router: router,
@@ -144,7 +131,9 @@ func (s *ServerHTTP) Start() error {
 
 	s.Logger.Debug("Starting all HTTP entrypoints")
 
-	s.router.Use(s.Config.Middleware...)
+	for _, middleware := range s.Config.Middleware {
+		s.router.Use(middleware)
+	}
 
 	for _, h := range s.Config.RegistrationFuncs {
 		h(s)

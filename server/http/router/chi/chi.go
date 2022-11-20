@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+
 	"github.com/go-micro/plugins/server/http/router/router"
 )
 
@@ -39,4 +40,28 @@ func (r *Router) Middlewares() []func(http.Handler) http.Handler {
 	m := r.Mux.Middlewares()
 
 	return []func(http.Handler) http.Handler(m)
+}
+
+// Routes returns a tree of registered routes.
+func (r *Router) Routes() []router.Route {
+	return getRoutes(r.Mux.Routes())
+}
+
+func getRoutes(routes []chi.Route) []router.Route {
+	out := make([]router.Route, 0, len(routes))
+
+	for _, route := range routes {
+		var subroutes []router.Route
+		if route.SubRoutes != nil {
+			subroutes = getRoutes(route.SubRoutes.Routes())
+		}
+
+		out = append(out, router.Route{
+			SubRoutes: subroutes,
+			Handlers:  route.Handlers,
+			Pattern:   route.Pattern,
+		})
+	}
+
+	return out
 }

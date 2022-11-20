@@ -8,6 +8,9 @@ import (
 // NewRouterFunc can be used to create a new router.
 type NewRouterFunc func() Router
 
+// Middlewares keeps track of a unique list of middleware for an HTTP server.
+type Middlewares map[string]func(http.Handler) http.Handler
+
 // The Router interface as found here is a copy of the Chi router interface.
 // It was selected for it's simplicity compliance with the stdlib.
 // Some methods were removed as they were considered unnecessary for go-micro.
@@ -59,7 +62,7 @@ type Router interface { //nolint:interfacebloat
 // used by the `docgen` subpackage to generation documentation for Routers.
 type Routes interface {
 	// Routes returns the routing tree in an easily traversable structure.
-	// Routes() []Route
+	Routes() []Route
 
 	// Middlewares returns the list of middlewares in use by the router.
 	Middlewares() []func(http.Handler) http.Handler
@@ -68,7 +71,7 @@ type Routes interface {
 // Route describes the details of a routing handler.
 // Handlers map key is an HTTP method.
 type Route struct {
-	SubRoutes Routes
+	SubRoutes []Route
 	Handlers  map[string]http.Handler
 	Pattern   string
 }

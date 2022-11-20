@@ -9,10 +9,8 @@ import (
 
 	"github.com/google/uuid"
 	"go-micro.dev/v5/codecs"
-	"go-micro.dev/v5/config"
 	"go-micro.dev/v5/server"
-	"go-micro.dev/v5/types"
-	"go-micro.dev/v5/util/slice"
+	"go-micro.dev/v5/util/slicemap"
 	"golang.org/x/exp/slog"
 
 	"github.com/go-micro/plugins/server/http/router/router"
@@ -63,8 +61,6 @@ var (
 	// registered, they will be included in the server's available codecs.
 	// If they are not registered, the server will not be able to handle these formats.
 	DefaultCodecWhitelist = []string{"proto", "jsonpb", "form", "xml"}
-	// DefaultEnabled dicates whether the entrypoint is enabled.
-	DefaultEnabled = true
 	// DefaultConfigSection is the section key used in config files used to
 	// configure the server options.
 	DefaultConfigSection = "http"
@@ -142,13 +138,10 @@ type Config struct {
 	// registered to the server upon startup. You can statically add handlers
 	// By using the fuctional server options. Optionally, you can dynamically
 	// add handlers by registering them to the Handlers global, and setting them
-	// explicitly in the config. TODO: implement
-	RegistrationFuncs []server.RegistrationFunc
+	// explicitly in the config.
+	RegistrationFuncs server.HandlerRegistrations `json:"handlers" yaml:"handlers"`
 	// Middleware is a list of middleware to use.
-	Middleware []func(http.Handler) http.Handler
-	// Enabled dicates whether an entrypiont is enabled. This useful to dynamically
-	// disable entrypoints through config files.
-	Enabled bool `json:"enabled,omitempty" yaml:"enabled,omitempty"`
+	Middleware router.Middlewares `json:"middleware" yaml:"middleware"`
 	// Logger allows you to dynamically change the log level and plugin for a
 	// specific entrypoint.
 	Logger struct {
@@ -157,24 +150,8 @@ type Config struct {
 	} `json:"logger" yaml:"logger"`
 }
 
-// fileConfig is used to parse the file configs.
-type fileConfig struct {
-	Entrypoints []Config `json:"entrypoints" yaml:"entrypoints"`
-}
-
-func (f *fileConfig) GetConfig(name string) (Config, error) {
-	for _, e := range f.Entrypoints {
-		if name == e.Name {
-			return e, nil
-		}
-	}
-
-	// This should never actually happen.
-	return Config{}, errors.New("entrypoint config not found in file config list")
-}
-
 // NewConfig will create a new default config for the entrypoint.
-func NewConfig(service types.ServiceName, data types.ConfigData, options ...Option) (Config, error) {
+func NewConfig(options ...Option) *Config {
 	cfg := Config{
 		Name:                 "http-" + uuid.NewString(),
 		Address:              DefaultAddress,
@@ -189,19 +166,23 @@ func NewConfig(service types.ServiceName, data types.ConfigData, options ...Opti
 		ReadTimeout:          DefaultReadTimeout,
 		WriteTimeout:         DefaultWriteTimeout,
 		IdleTimeout:          DefaultIdleimeout,
-		Enabled:              DefaultEnabled,
-		RegistrationFuncs:    make([]server.RegistrationFunc, 0, 5),
-		Middleware:           make([]func(http.Handler) http.Handler, 0, 10),
+		RegistrationFuncs:    make(server.HandlerRegistrations),
+		Middleware:           make(router.Middlewares),
 	}
 
 	cfg.ApplyOptions(options...)
 
-	sections := types.SplitServiceName(service)
-	if err := config.Parse(append(sections, DefaultConfigSection), data, &cfg); err != nil {
-		return cfg, err
-	}
+	return &cfg
+}
 
-	return cfg, nil
+// GetAddress returns the entrypoint address.
+func (c Config) GetAddress() string {
+	return c.Address
+}
+
+// Copy creates a copy of the entrypoint config.
+func (c Config) Copy() server.EntrypointConfig {
+	return &c
 }
 
 // ApplyOptions applies a set of options to the config.
@@ -221,7 +202,7 @@ func (c *Config) NewCodecMap() (codecs.Map, error) {
 	cm := make(codecs.Map, len(c.CodecWhitelist))
 
 	for name, codec := range codecs.Plugins.All() {
-		if slice.In(c.CodecWhitelist, name) {
+		if slicemap.In(c.CodecWhitelist, name) {
 			// One codec can support multiple mime types, we add all of them to the map.
 			for _, mime := range codec.ContentTypes() {
 				cm[mime] = codec
@@ -249,29 +230,6 @@ func (c *Config) NewRouter() (router.Router, error) {
 	}
 
 	return newRouter(), nil
-}
-
-// parseFileConfig applies the file config options to the config.
-func parseFileConfig(service types.ServiceName, data types.ConfigData, cfg Config) (Config, error) {
-	var err error
-
-	// We store the config we already have, and then overwrite the fields that
-	// have been provided in a file config.
-	fc := fileConfig{
-		Entrypoints: []Config{cfg},
-	}
-
-	sections := types.SplitServiceName(service)
-	if err = config.Parse(append(sections, DefaultConfigSection), data, &fc); err != nil {
-		return cfg, err
-	}
-
-	cfg, err = fc.GetConfig(cfg.Name)
-	if err != nil {
-		return cfg, err
-	}
-
-	return cfg, nil
 }
 
 // WithName sets the entrypoint name. The default name is in the format of
@@ -327,13 +285,13 @@ func WithDisableHTTP2() Option {
 	}
 }
 
-// WithEnableGzip enables gzip response compression server wide onall responses.
+// WithGzip enables gzip response compression server wide onall responses.
 // Only use this if your messages are sufficiently large. For small messages
 // the compute overhead is not worth the reduction in transport time.
 //
 // Alternatively, you can send a gzip compressed request, and the server
 // will send back a gzip compressed respponse.
-func WithEnableGzip() Option {
+func WithGzip() Option {
 	return func(c *Config) {
 		c.Gzip = true
 	}
@@ -350,7 +308,7 @@ func WithAllowH2C() Option {
 // WithDefaults sets default options to use on the creattion of new HTTP entrypoints.
 func WithDefaults(options ...Option) server.Option {
 	return func(c *server.Config) {
-		cfg, ok := c.Defaults[Plugin].(Config)
+		cfg, ok := c.Defaults[Plugin].(*Config)
 		if !ok {
 			// Should never happen.
 			panic(fmt.Errorf("http.WithDefaults received invalid type, not *server.Config, but '%T'", cfg))
@@ -386,19 +344,29 @@ func WithCodecWhitelist(list []string) Option {
 	}
 }
 
-// WithRegistrations appends a list of handler registration functions to the
-// server config.
-func WithRegistrations(funcs ...server.RegistrationFunc) Option {
+// WithRegistration adds a named registration function to the config.
+// The name set here allows you to dynamically add this handler to entrypoints
+// through a config.
+//
+// Registration functions are used to register handlers to a server.
+func WithRegistration(name string, registration server.RegistrationFunc) Option {
+	server.Handlers.Register(name, registration)
+
 	return func(c *Config) {
-		c.RegistrationFuncs = append(c.RegistrationFuncs, funcs...)
+		c.RegistrationFuncs[name] = registration
 	}
 }
 
 // WithMiddleware appends middlewares to the server.
 // You can use any standard Go HTTP middleware.
-func WithMiddleware(middlewares ...func(http.Handler) http.Handler) Option {
+//
+// Each middlware is uniquely identified with a name. The name provided here
+// can be used to dynamically add middlware to an entrypoint in a config.
+func WithMiddleware(name string, middleware func(http.Handler) http.Handler) Option {
+	router.Middleware.Register(name, middleware)
+
 	return func(c *Config) {
-		c.Middleware = append(c.Middleware, middlewares...)
+		c.Middleware[name] = middleware
 	}
 }
 
@@ -411,17 +379,14 @@ func WithEntrypoint(options ...Option) server.Option {
 			panic("no defaults for http entrypoint found")
 		}
 
-		cfg, ok := cfgAny.(Config)
-		if !ok {
-			// Should never happen, but just in case.
-			panic("default config for http entrypoint is not of type http.Config")
-		}
+		cfg := cfgAny.Copy().(*Config) //nolint:errcheck
 
 		cfg.ApplyOptions(options...)
 
 		c.Templates[cfg.Name] = server.EntrypointTemplate{
-			Type:   Plugin,
-			Config: cfg,
+			Enabled: true,
+			Type:    Plugin,
+			Config:  cfg,
 		}
 	}
 }

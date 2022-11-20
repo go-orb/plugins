@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package echodicker;
+package echo;
 
 import "google/api/annotations.proto";
 

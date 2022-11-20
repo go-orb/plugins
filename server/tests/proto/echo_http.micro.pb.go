@@ -16,13 +16,16 @@ import (
 	mhttp "github.com/go-micro/plugins/server/http"
 )
 
+// RegisterStreamsHTTPHandler registers the service to an HTTP server.
 func RegisterStreamsHTTPHandler(srv *mhttp.ServerHTTP, handler StreamsServer) {
 	r := srv.Router()
 	r.Get("/echo", mhttp.NewGRPCHandler(srv, handler.Call))
 	r.Post("/echo", mhttp.NewGRPCHandler(srv, handler.Call))
 }
 
-func RegisterFuncStreams(handler StreamsServer) server.RegistrationFunc {
+// RegisterStreamsHandler will return a registration function that can be
+// provided to entrypoints as a handler registration.
+func RegisterStreamsHandler(handler StreamsServer) server.RegistrationFunc {
 	return server.RegistrationFunc(func(s any) {
 		switch srv := any(s).(type) {
 		case *mhttp.ServerHTTP:

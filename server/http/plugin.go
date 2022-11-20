@@ -17,20 +17,18 @@ func init() {
 }
 
 func pluginProvider(
-	name string,
 	service types.ServiceName,
-	data types.ConfigData,
 	logger log.Logger,
 	c any,
 ) (server.Entrypoint, error) {
-	cfg, ok := c.(Config)
+	cfg, ok := c.(*Config)
 	if !ok {
 		return nil, ErrInvalidConfigType
 	}
 
-	return ProvideServerHTTP(name, service, data, logger, cfg)
+	return ProvideServerHTTP(service, logger, *cfg)
 }
 
-func newDefaultConfig(service types.ServiceName, data types.ConfigData) (any, error) {
-	return NewConfig(service, data)
+func newDefaultConfig() server.EntrypointConfig {
+	return NewConfig()
 }
