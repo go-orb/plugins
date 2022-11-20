@@ -8,8 +8,6 @@ import (
 
 //nolint:gochecknoglobals
 var httpTemplate = `
-{{$svrType := .ServiceType}}
-{{$svrName := .ServiceName}}
 import (
 	"google.golang.org/grpc"
 
@@ -17,19 +15,23 @@ import (
 
 	mhttp "github.com/go-micro/plugins/server/http"
 )
+{{range .Services}}
 
-func Register{{.ServiceType}}HTTPHandler(srv *mhttp.ServerHTTP, handler {{.ServiceType}}Server ) {
+// Register{{.Type}}HTTPHandler registers the service to an HTTP server.
+func Register{{.Type}}HTTPHandler(srv *mhttp.ServerHTTP, handler {{.Type}}Server ) {
 	r := srv.Router()
 	{{- range .Methods}}
 	r.{{.Method}}("{{.Path}}", mhttp.NewGRPCHandler(srv, handler.{{.Name}}))
 	{{- end}}
 }
 
-func RegisterFunc{{.ServiceType}}(handler {{.ServiceType}}Server) server.RegistrationFunc {
+// Register{{.Type}}Handler will return a registration function that can be 
+// provided to entrypoints as a handler registration.
+func Register{{.Type}}Handler(handler {{.Type}}Server) server.RegistrationFunc {
 	return server.RegistrationFunc(func(s any) {
 		switch srv := any(s).(type) {
 		case *mhttp.ServerHTTP:
-			Register{{.ServiceType}}HTTPHandler(srv, handler)
+			Register{{.Type}}HTTPHandler(srv, handler)
 		case grpc.ServiceRegistrar:
 			// RegisterStreamsgRPCHandler(srv, handler)
 		default:
@@ -37,24 +39,31 @@ func RegisterFunc{{.ServiceType}}(handler {{.ServiceType}}Server) server.Registr
 		}
 	})
 }
+{{- end}}
 `
 
-type serviceDesc struct {
-	ServiceType string // Greeter
-	ServiceName string // helloworld.Greeter
-	Metadata    string // api/helloworld/helloworld.proto
-	Methods     []*methodDesc
-	MethodSets  map[string]*methodDesc
+// protoFile is the object passed to the template.
+type protoFile struct {
+	Services []serviceDesc
 }
 
+// serviceDesc describes a service.
+type serviceDesc struct {
+	Type     string // Greeter
+	Name     string // helloworld.Greeter
+	Metadata string // api/helloworld/helloworld.proto
+	Methods  []methodDesc
+}
+
+// methodDesc describes a service method.
 type methodDesc struct {
-	// method
 	Name         string
 	OriginalName string // The parsed original name
 	Num          int
 	Request      string
 	Reply        string
-	// http_rule
+
+	// http_rule annotation properties.
 	Path         string
 	Method       string
 	HasVars      bool
@@ -63,20 +72,18 @@ type methodDesc struct {
 	ResponseBody string
 }
 
-func (s *serviceDesc) execute() string {
-	s.MethodSets = make(map[string]*methodDesc)
-	for _, m := range s.Methods {
-		s.MethodSets[m.Name] = m
-	}
+func (s *serviceDesc) AddMethod(method methodDesc) {
+	s.Methods = append(s.Methods, method)
+}
 
-	buf := new(bytes.Buffer)
-
+func (p protoFile) Render() string {
 	tmpl, err := template.New("http").Parse(strings.TrimSpace(httpTemplate))
 	if err != nil {
 		panic(err)
 	}
 
-	if err := tmpl.Execute(buf, s); err != nil {
+	buf := new(bytes.Buffer)
+	if err := tmpl.Execute(buf, p); err != nil {
 		panic(err)
 	}
 
