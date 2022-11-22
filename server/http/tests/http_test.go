@@ -21,12 +21,11 @@ import (
 	"go-micro.dev/v5/server"
 	"go-micro.dev/v5/types"
 
-	thttp "github.com/go-micro/plugins/server/tests/utils/http"
-
 	mhttp "github.com/go-micro/plugins/server/http"
 
-	"github.com/go-micro/plugins/server/tests/handler"
-	"github.com/go-micro/plugins/server/tests/proto"
+	"github.com/go-micro/plugins/server/http/tests/handler"
+	"github.com/go-micro/plugins/server/http/tests/proto"
+	thttp "github.com/go-micro/plugins/server/http/tests/utils/http"
 
 	_ "github.com/go-micro/plugins/codecs/form"
 	_ "github.com/go-micro/plugins/codecs/json"
