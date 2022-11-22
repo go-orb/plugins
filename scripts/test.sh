@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MICRO_VERSION="v4"
+MICRO_VERSION="."
 GO_TEST_FLAGS="-v -race -cover -bench=."
 
 RED='\033[0;31m'
