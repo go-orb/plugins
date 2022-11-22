@@ -80,15 +80,21 @@ func New(cfg Config, log log.Logger) *RegistryNATS {
 	}
 }
 
-// Start the registry.
+// Start the registry, no-op.
 func (n *RegistryNATS) Start() error {
-	// TODO: I think this should start something?
+	if _, err := n.getConn(); err != nil {
+		return fmt.Errorf("connect: %w", err)
+	}
+
 	return nil
 }
 
-// Stop the registry.
+// Stop the registry, no-op.
 func (n *RegistryNATS) Stop(ctx context.Context) error {
-	// TODO: do something here?
+	if !n.conn.IsClosed() {
+		n.conn.Close()
+	}
+
 	return nil
 }
 
@@ -277,9 +283,11 @@ func (n *RegistryNATS) query(s string, quorum int) ([]*registry.Service, error) 
 
 	sub, err := conn.Subscribe(inbox, func(msg *nats.Msg) {
 		var service *registry.Service
+
 		if err := json.Unmarshal(msg.Data, &service); err != nil {
 			return
 		}
+
 		timeout := time.After(time.Millisecond * time.Duration(n.config.Timeout))
 		select {
 		case response <- service:

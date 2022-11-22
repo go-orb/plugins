@@ -16,7 +16,7 @@ const name = "nats"
 //
 //nolint:gochecknoglobals
 var (
-	DefaultAddresses  = []string{}
+	DefaultAddresses  = []string{"nats://localhost:4222"}
 	DefaultQueryTopic = "micro.registry.nats.query"
 	DefaultWatchTopic = "micro.registry.nats.watch"
 )
@@ -69,12 +69,21 @@ func NewConfig(
 	return cfg, nil
 }
 
-// WithAddresses sets the NATS server addresses.
-func WithAddresses(n []string) registry.Option {
+// ApplyOptions applies a set of options to the config.
+func (c *Config) ApplyOptions(opts ...registry.Option) {
+	for _, o := range opts {
+		o(c)
+	}
+}
+
+// WithAddress sets the NATS server addresses.
+func WithAddress(n ...string) registry.Option {
 	return func(c registry.ConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
 			cfg.Addresses = n
+		} else {
+			panic(fmt.Sprintf("wrong type: %T", c))
 		}
 	}
 }
