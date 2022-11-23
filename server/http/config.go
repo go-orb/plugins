@@ -16,13 +16,13 @@ import (
 	"github.com/go-micro/plugins/server/http/router"
 )
 
-//nolint:gochecknoglobals
-var (
-	// TODO: revisit default address, probably use random addr
+const (
 	// DefaultAddress to use for new HTTP servers.
 	// If set to "random", the default, a random address will be selected,
 	// preferably on a private interface (XX subet). TODO: implement.
+	// TODO: revisit default address, probably use random addr.
 	DefaultAddress = "0.0.0.0:42069"
+
 	// DefaultInsecure will create an HTTP server without TLS, for insecure connections.
 	// Note: as a result you can only make insecure HTTP requests, and no HTTP2
 	// unless you set WithH2C.
@@ -31,24 +31,33 @@ var (
 	// this will result in unencrypted HTTP traffick. Really, it is even advised
 	// against using this in testing.
 	DefaultInsecure = false
+
 	// DefaultAllowH2C allows insecure, unencrypted traffick to HTTP2 servers.
 	// Don't use this, see the notes at DefaultInsecure for more details.
 	DefaultAllowH2C = false
+
 	// DefaultMaxConcurrentStreams for HTTP2.
 	DefaultMaxConcurrentStreams = 250
-	// HTTP2 dicates whether to also allow HTTP/2 connections.
+
+	// DefaultHTTP2 dicates whether to also allow HTTP/2 connections.
 	DefaultHTTP2 = true
-	// HTTP3 dicates whether to also start an HTTP/3.0 server.
+
+	// DefaultHTTP3 dicates whether to also start an HTTP/3.0 server.
 	DefaultHTTP3 = false
+
 	// DefaultRouter to use as serve mux. There's not really a reason to change this
 	// but if you really wanted to, you could.
 	DefaultRouter = "chi"
-	// DefaultReadTimeout, see net/http pkg for more details.
+
+	// DefaultReadTimeout see net/http pkg for more details.
 	DefaultReadTimeout = 5 * time.Second
-	// DefaultWriteTimeout, see net/http pkg for more details.
+
+	// DefaultWriteTimeout see net/http pkg for more details.
 	DefaultWriteTimeout = 5 * time.Second
-	// DefaultIdleimeout, see net/http pkg for more details.
-	DefaultIdleimeout = 5 * time.Second
+
+	// DefaultIdleTimeout see net/http pkg for more details.
+	DefaultIdleTimeout = 5 * time.Second
+
 	// DefaultEnableGzip enables gzip response compression server wide onall responses.
 	// Only use this if your messages are sufficiently large. For small messages
 	// the compute overhead is not worth the reduction in transport time.
@@ -56,15 +65,19 @@ var (
 	// Alternatively, you can send a gzip compressed request, and the server
 	// will send back a gzip compressed respponse.
 	DefaultEnableGzip = false
-	// DefaultCodecWhitelist is the default allowed list of codecs to be used for
-	// HTTP request encoding/decoding. This means that if any of these plugins are
-	// registered, they will be included in the server's available codecs.
-	// If they are not registered, the server will not be able to handle these formats.
-	DefaultCodecWhitelist = []string{"proto", "jsonpb", "form", "xml"}
+
 	// DefaultConfigSection is the section key used in config files used to
 	// configure the server options.
 	DefaultConfigSection = "http"
 )
+
+// DefaultCodecWhitelist is the default allowed list of codecs to be used for
+// HTTP request encoding/decoding. This means that if any of these plugins are
+// registered, they will be included in the server's available codecs.
+// If they are not registered, the server will not be able to handle these formats.
+func DefaultCodecWhitelist() []string {
+	return []string{"proto", "jsonpb", "form", "xml"}
+}
 
 // Errors.
 var (
@@ -81,8 +94,10 @@ type Option func(*Config)
 type Config struct {
 	// Name is the entrypoint name.
 	Name string `json:"name" yaml:"name"`
+
 	// Address to listen on.
 	Address string `json:"address" yaml:"address"`
+
 	// Insecure will create an HTTP server without TLS, for insecure connections.
 	// Note: as a result you can only make insecure HTTP1 requests, no HTTP2
 	// unless you set WithH2C.
@@ -91,16 +106,22 @@ type Config struct {
 	// this will result in unencrypted HTTP traffick. Really, it is even advised
 	// against using this in testing.
 	Insecure bool `json:"insecure" yaml:"insecure"`
+
 	// MaxConcurrentStreams for HTTP2.
 	MaxConcurrentStreams int `json:"maxConcurrentStreams" yaml:"maxConcurrentStreams"`
+
 	// TLS config, if none is provided a self-signed certificates will be generated.
 	TLS *tls.Config // TODO: how do add certs from config? add back cerfile/keyfile?
+
 	// H2C allows h2c connections; HTTP2 without TLS.
 	H2C bool `json:"h2c" yaml:"h2c"`
+
 	// HTTP2 dicates whether to also allow HTTP/2 connections. Defaults to true.
 	HTTP2 bool `json:"http2" yaml:"http2"`
+
 	// HTTP3 dicates whether to also start an HTTP/3.0 server. Defaults to false.
 	HTTP3 bool `json:"http3" yaml:"http3"`
+
 	// Gzip enables gzip response compression server wide onall responses.
 	// Only use this if your messages are sufficiently large. For small messages
 	// the compute overhead is not worth the reduction in transport time.
@@ -108,6 +129,7 @@ type Config struct {
 	// Alternatively, you can send a gzip compressed request, and the server
 	// will send back a gzip compressed respponse.
 	Gzip bool `json:"gzip" yaml:"gzip"`
+
 	// CodecWhitelist is the list of codec names that are allowed to be used
 	// with the HTTP server. This means that if registered, codecs in this list
 	// will be added to the server, allowing you to make RPC requests in that format.
@@ -117,31 +139,38 @@ type Config struct {
 	// want to add every codec plugin that has been registered to be automaically
 	// added to the server.
 	CodecWhitelist []string `json:"codecWhitelist" yaml:"codecWhitelist"`
+
 	// Router is the router plugin to use. Default is chi.
 	Router string `json:"router" yaml:"router"`
+
 	// ReadTimeout is the maximum duration for reading the entire
 	// request, including the body. A zero or negative value means
 	// there will be no timeout.
 	ReadTimeout time.Duration `json:"readTimeout" yaml:"readTimeout"`
+
 	// WriteTimeout is the maximum duration before timing out
 	// writes of the response. It is reset whenever a new
 	// request's header is read. Like ReadTimeout, it does not
 	// let Handlers make decisions on a per-request basis.
 	// A zero or negative value means there will be no timeout.
 	WriteTimeout time.Duration `json:"writeTimeout" yaml:"writeTimeout"`
+
 	// IdleTimeout is the maximum amount of time to wait for the
 	// next request when keep-alives are enabled. If IdleTimeout
 	// is zero, the value of ReadTimeout is used. If both are
 	// zero, there is no timeout.
 	IdleTimeout time.Duration `json:"idleTimeout" yaml:"idleTimeout"`
+
 	// RegistrationFuncs are all handler registration functions that will be
 	// registered to the server upon startup. You can statically add handlers
 	// By using the fuctional server options. Optionally, you can dynamically
 	// add handlers by registering them to the Handlers global, and setting them
 	// explicitly in the config.
 	RegistrationFuncs server.HandlerRegistrations `json:"handlers" yaml:"handlers"`
+
 	// Middleware is a list of middleware to use.
 	Middleware router.Middlewares `json:"middleware" yaml:"middleware"`
+
 	// Logger allows you to dynamically change the log level and plugin for a
 	// specific entrypoint.
 	Logger struct {
@@ -161,11 +190,11 @@ func NewConfig(options ...Option) *Config {
 		HTTP2:                DefaultHTTP2,
 		HTTP3:                DefaultHTTP3,
 		Gzip:                 DefaultEnableGzip,
-		CodecWhitelist:       DefaultCodecWhitelist,
+		CodecWhitelist:       DefaultCodecWhitelist(),
 		Router:               DefaultRouter,
 		ReadTimeout:          DefaultReadTimeout,
 		WriteTimeout:         DefaultWriteTimeout,
-		IdleTimeout:          DefaultIdleimeout,
+		IdleTimeout:          DefaultIdleTimeout,
 		RegistrationFuncs:    make(server.HandlerRegistrations),
 		Middleware:           make(router.Middlewares),
 	}
