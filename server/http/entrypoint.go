@@ -23,7 +23,7 @@ import (
 	"go-micro.dev/v5/types"
 	"go-micro.dev/v5/types/component"
 
-	"github.com/go-micro/plugins/server/http/router/router"
+	"github.com/go-micro/plugins/server/http/router"
 	mip "github.com/go-micro/plugins/server/http/utils/ip"
 	mtcp "github.com/go-micro/plugins/server/http/utils/tcp"
 	mtls "github.com/go-micro/plugins/server/http/utils/tls"

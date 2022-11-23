@@ -37,7 +37,7 @@ import (
 	_ "github.com/go-micro/plugins/log/text"
 
 	_ "github.com/go-micro/plugins/server/http/router/chi"
-	"github.com/go-micro/plugins/server/http/router/router"
+	"github.com/go-micro/plugins/server/http/router"
 )
 
 // TODO: test get path params

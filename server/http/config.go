@@ -13,7 +13,7 @@ import (
 	"go-micro.dev/v5/util/slicemap"
 	"golang.org/x/exp/slog"
 
-	"github.com/go-micro/plugins/server/http/router/router"
+	"github.com/go-micro/plugins/server/http/router"
 )
 
 //nolint:gochecknoglobals

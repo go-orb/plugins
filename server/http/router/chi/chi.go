@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-chi/chi"
 
-	"github.com/go-micro/plugins/server/http/router/router"
+	"github.com/go-micro/plugins/server/http/router"
 )
 
 var _ router.Router = (*Router)(nil)

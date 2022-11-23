@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-micro/plugins/server/http/router/router"
+	"github.com/go-micro/plugins/server/http/router"
 
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
