@@ -15,6 +15,7 @@ use (
 	./log/text
 	./registry/mdns
 	./registry/nats
+	./server/grpc
 	./server/http
 )
 
