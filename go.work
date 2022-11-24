@@ -13,8 +13,9 @@ use (
 	./config/tests
 	./log/json
 	./log/text
-	./registry/nats
 	./registry/mdns
+	./registry/nats
+	./server/grpc
 	./server/http
 	./server/tests
 )
