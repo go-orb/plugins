@@ -35,7 +35,6 @@ func (s *ServerGRPC) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 
 func (s *ServerGRPC) streamServerInterceptor() grpc.StreamServerInterceptor {
 	return func(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-
 		h := func(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 			return handler(srv, ss)
 		}
