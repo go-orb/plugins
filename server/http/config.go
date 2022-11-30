@@ -7,11 +7,13 @@ import (
 	"net/http"
 	"time"
 
+	"golang.org/x/exp/slog"
+
 	"github.com/google/uuid"
 	"go-micro.dev/v5/codecs"
 	"go-micro.dev/v5/server"
 	"go-micro.dev/v5/util/slicemap"
-	"golang.org/x/exp/slog"
+	mtls "go-micro.dev/v5/util/tls"
 
 	"github.com/go-micro/plugins/server/http/router"
 )
@@ -27,12 +29,12 @@ const (
 	// Note: as a result you can only make insecure HTTP requests, and no HTTP2
 	// unless you set WithH2C.
 	//
-	// WARNING: don't use this in production, unless you really know what you are doing.
-	// this will result in unencrypted HTTP traffick. Really, it is even advised
-	// against using this in testing.
+	// WARNING: don't use this in production, unless you really know what you are
+	// doing. this will result in unencrypted traffic. Really, it is even advised
+	// against using this in testing environments.
 	DefaultInsecure = false
 
-	// DefaultAllowH2C allows insecure, unencrypted traffick to HTTP2 servers.
+	// DefaultAllowH2C allows insecure, unencrypted traffic to HTTP2 servers.
 	// Don't use this, see the notes at DefaultInsecure for more details.
 	DefaultAllowH2C = false
 
@@ -93,25 +95,43 @@ type Option func(*Config)
 // Config provides options to the entrypoint.
 type Config struct {
 	// Name is the entrypoint name.
+	//
+	// The default name is 'http-<random uuid>'
 	Name string `json:"name" yaml:"name"`
 
 	// Address to listen on.
+	// TODO: implement this, and the address method.
+	// If no IP is provided, an interface will be selected automatically. Private
+	// interfaces are preferred, if none are found a public interface will be used.
+	//
+	// If no port is provided, a random port will be selected. To listen on a
+	// specific interface, but with a random port, you can use '<IP>:0'.
 	Address string `json:"address" yaml:"address"`
 
 	// Insecure will create an HTTP server without TLS, for insecure connections.
 	// Note: as a result you can only make insecure HTTP1 requests, no HTTP2
 	// unless you set WithH2C.
 	//
-	// WARNING: don't use this in production, unless you really know what you are doing.
-	// this will result in unencrypted HTTP traffick. Really, it is even advised
-	// against using this in testing.
+	// WARNING: don't use this in production, unless you really know what you are
+	// doing. this will result in unencrypted traffic. Really, it is even advised
+	// against using this in testing environments.
 	Insecure bool `json:"insecure" yaml:"insecure"`
 
-	// MaxConcurrentStreams for HTTP2.
-	MaxConcurrentStreams int `json:"maxConcurrentStreams" yaml:"maxConcurrentStreams"`
-
 	// TLS config, if none is provided a self-signed certificates will be generated.
-	TLS *tls.Config // TODO: how do add certs from config? add back cerfile/keyfile?
+	//
+	// You can load a tls config from yaml/json with the following options:
+	//
+	// ```yaml
+	// rootCAFiles:
+	//    - xxx
+	// clientCAFiles:
+	//    - xxx
+	// clientAuth: "none" | "request" | "require" |  "verify" | "require+verify"
+	// certificates:
+	//   - certFile: xxx
+	//     keyFile: xxx
+	// ```
+	TLS *mtls.Config `json:"tls" yaml:"tls"`
 
 	// H2C allows h2c connections; HTTP2 without TLS.
 	H2C bool `json:"h2c" yaml:"h2c"`
@@ -129,6 +149,9 @@ type Config struct {
 	// Alternatively, you can send a gzip compressed request, and the server
 	// will send back a gzip compressed respponse.
 	Gzip bool `json:"gzip" yaml:"gzip"`
+
+	// MaxConcurrentStreams for HTTP2.
+	MaxConcurrentStreams int `json:"maxConcurrentStreams" yaml:"maxConcurrentStreams"`
 
 	// CodecWhitelist is the list of codec names that are allowed to be used
 	// with the HTTP server. This means that if registered, codecs in this list
@@ -161,12 +184,13 @@ type Config struct {
 	// zero, there is no timeout.
 	IdleTimeout time.Duration `json:"idleTimeout" yaml:"idleTimeout"`
 
-	// RegistrationFuncs are all handler registration functions that will be
-	// registered to the server upon startup. You can statically add handlers
-	// By using the fuctional server options. Optionally, you can dynamically
-	// add handlers by registering them to the Handlers global, and setting them
-	// explicitly in the config.
-	RegistrationFuncs server.HandlerRegistrations `json:"handlers" yaml:"handlers"`
+	// HandlerRegistrations are all handler registration functions that will be
+	// registered to the server upon startup.
+	//
+	// You can statically add handlers by using the fuctional server options.
+	// Optionally, you can dynamically add handlers by registering them to the
+	// Handlers global, and setting them explicitly in the config.
+	HandlerRegistrations server.HandlerRegistrations `json:"handlers" yaml:"handlers"`
 
 	// Middleware is a list of middleware to use.
 	Middleware router.Middlewares `json:"middleware" yaml:"middleware"`
@@ -195,7 +219,7 @@ func NewConfig(options ...Option) *Config {
 		ReadTimeout:          DefaultReadTimeout,
 		WriteTimeout:         DefaultWriteTimeout,
 		IdleTimeout:          DefaultIdleTimeout,
-		RegistrationFuncs:    make(server.HandlerRegistrations),
+		HandlerRegistrations: make(server.HandlerRegistrations),
 		Middleware:           make(router.Middlewares),
 	}
 
@@ -262,7 +286,8 @@ func (c *Config) NewRouter() (router.Router, error) {
 }
 
 // WithName sets the entrypoint name. The default name is in the format of
-// http-<uuid>.
+// 'http-<uuid>'.
+//
 // Setting a custom name allows you to dynamically reference the entrypoint in
 // the file config, and makes it easier to attribute the logs.
 func WithName(name string) Option {
@@ -280,10 +305,10 @@ func WithAddress(address string) Option {
 	}
 }
 
-// WithTLSConfig sets a tls config.
-func WithTLSConfig(tlsConfig *tls.Config) Option {
+// WithTLS sets a tls config.
+func WithTLS(tlsConfig *tls.Config) Option {
 	return func(c *Config) {
-		c.TLS = tlsConfig
+		c.TLS = &mtls.Config{Config: tlsConfig}
 	}
 }
 
@@ -291,9 +316,9 @@ func WithTLSConfig(tlsConfig *tls.Config) Option {
 // Note: as a result you can only make insecure HTTP requests, and no HTTP2
 // unless you set WithH2C.
 //
-// WARNING: don't use this in production, unless you really know what you are doing.
-// this will result in unencrypted HTTP traffick. Really, it is even advised
-// against using this in testing.
+// WARNING: don't use this in production, unless you really know what you are
+// doing. this will result in unencrypted traffic. Really, it is even advised
+// against using this in testing environments.
 func WithInsecure() Option {
 	return func(c *Config) {
 		c.Insecure = true
@@ -334,26 +359,19 @@ func WithAllowH2C() Option {
 	}
 }
 
-// WithDefaults sets default options to use on the creattion of new HTTP entrypoints.
-func WithDefaults(options ...Option) server.Option {
-	return func(c *server.Config) {
-		cfg, ok := c.Defaults[Plugin].(*Config)
-		if !ok {
-			// Should never happen.
-			panic(fmt.Errorf("http.WithDefaults received invalid type, not *server.Config, but '%T'", cfg))
-		}
-
-		cfg.ApplyOptions(options...)
-		c.Defaults[Plugin] = cfg
-	}
-}
-
 // WithConfig will set replace the server config with config provided as argument.
 // Warning: any options applied previous to this option will be overwritten by
 // the contents of the config provided here.
 func WithConfig(config Config) Option {
 	return func(c *Config) {
 		*c = config
+	}
+}
+
+// WithMaxConcurrentStreams sets the concurrent streams limit for HTTP2.
+func WithMaxConcurrentStreams(value int) Option {
+	return func(c *Config) {
+		c.MaxConcurrentStreams = value
 	}
 }
 
@@ -373,6 +391,33 @@ func WithCodecWhitelist(list []string) Option {
 	}
 }
 
+// WithReadTimeout sets the maximum duration for reading the entire request,
+// including the body. A zero or negative value means there will be no timeout.
+func WithReadTimeout(timeout time.Duration) Option {
+	return func(c *Config) {
+		c.ReadTimeout = timeout
+	}
+}
+
+// WithWriteTimeout sets the maximum duration before timing out writes of the
+// response. It is reset whenever a new request's header is read. Like
+// ReadTimeout, it does not let Handlers make decisions on a per-request basis.
+// A zero or negative value means there will be no timeout.
+func WithWriteTimeout(timeout time.Duration) Option {
+	return func(c *Config) {
+		c.WriteTimeout = timeout
+	}
+}
+
+// IdleTimeout is the maximum amount of time to wait for the next request when
+// keep-alives are enabled. If IdleTimeout is zero, the value of ReadTimeout is
+// used. If both are zero, there is no timeout.
+func WithIdleTimeout(timeout time.Duration) Option {
+	return func(c *Config) {
+		c.IdleTimeout = timeout
+	}
+}
+
 // WithRegistration adds a named registration function to the config.
 // The name set here allows you to dynamically add this handler to entrypoints
 // through a config.
@@ -382,7 +427,7 @@ func WithRegistration(name string, registration server.RegistrationFunc) Option 
 	server.Handlers.Register(name, registration)
 
 	return func(c *Config) {
-		c.RegistrationFuncs[name] = registration
+		c.HandlerRegistrations[name] = registration
 	}
 }
 
@@ -396,6 +441,35 @@ func WithMiddleware(name string, middleware func(http.Handler) http.Handler) Opt
 
 	return func(c *Config) {
 		c.Middleware[name] = middleware
+	}
+}
+
+// WithLogLevel changes the log level from the inherited logger.
+func WithLogLevel(level slog.Level) Option {
+	return func(c *Config) {
+		c.Logger.Level = level
+	}
+}
+
+// WithLogPlugin changes the log level from the inherited logger.
+func WithLogPlugin(plugin string) Option {
+	return func(c *Config) {
+		c.Logger.Plugin = plugin
+	}
+}
+
+// WithDefaults sets default options to use on the creation of new HTTP entrypoints.
+func WithDefaults(options ...Option) server.Option {
+	return func(c *server.Config) {
+		cfg, ok := c.Defaults[Plugin].(*Config)
+		if !ok {
+			// Should never happen.
+			panic(fmt.Errorf("http.WithDefaults received invalid type, not *server.Config, but '%T'", cfg))
+		}
+
+		cfg.ApplyOptions(options...)
+
+		c.Defaults[Plugin] = cfg
 	}
 }
 
@@ -419,5 +493,3 @@ func WithEntrypoint(options ...Option) server.Option {
 		}
 	}
 }
-
-// TODO: other options and option comments

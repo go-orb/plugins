@@ -11,9 +11,8 @@ import (
 	"net/http"
 	"sync"
 
-	mip "github.com/go-micro/plugins/server/http/utils/ip"
-
 	"github.com/lucas-clemente/quic-go/http3"
+	"go-micro.dev/v5/util/addr"
 )
 
 // Errors returned by the HTTP3 server.
@@ -29,25 +28,24 @@ type http3server struct {
 }
 
 func (s *ServerHTTP) newHTTP3Server() (*http3server, error) {
-	port, err := mip.ParsePort(s.Config.Address)
+	port, err := addr.ParsePort(s.Config.Address)
 	if err != nil {
 		return nil, err
 	}
 
+	h2 := s.httpServer.Server
+
 	h3 := http3server{
 		getter: func(info *tls.ClientHelloInfo) (*tls.Config, error) {
-			return s.Config.TLS, nil
-			// return nil, ErrNoTLSConfig
+			return s.Config.TLS.Config, nil
 		},
 	}
-
-	h2 := s.httpServer.Server
 
 	h3.Server = &http3.Server{
 		Addr:      s.Config.Address,
 		Port:      port,
 		Handler:   h2.Handler,
-		TLSConfig: h3.prepareTLSConfig(s.Config.TLS),
+		TLSConfig: h3.prepareTLSConfig(s.Config.TLS.Config),
 	}
 
 	previousHandler := h2.Handler

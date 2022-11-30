@@ -53,7 +53,7 @@ func (s *ServerHTTP) newHTTPServer(router router.Router) (*httpServer, error) {
 	}
 
 	if !s.Config.Insecure && s.Config.TLS != nil {
-		server.TLSConfig = s.Config.TLS
+		server.TLSConfig = s.Config.TLS.Config
 	} else if !s.Config.Insecure && s.Config.TLS == nil {
 		return nil, ErrNoTLS
 	}

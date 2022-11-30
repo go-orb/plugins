@@ -25,7 +25,7 @@ import (
 
 	"github.com/go-micro/plugins/server/http/tests/handler"
 	"github.com/go-micro/plugins/server/http/tests/proto"
-	thttp "github.com/go-micro/plugins/server/http/tests/utils/http"
+	thttp "github.com/go-micro/plugins/server/http/tests/util/http"
 
 	_ "github.com/go-micro/plugins/codecs/form"
 	_ "github.com/go-micro/plugins/codecs/json"
@@ -36,8 +36,8 @@ import (
 	_ "github.com/go-micro/plugins/config/source/file"
 	_ "github.com/go-micro/plugins/log/text"
 
-	_ "github.com/go-micro/plugins/server/http/router/chi"
 	"github.com/go-micro/plugins/server/http/router"
+	_ "github.com/go-micro/plugins/server/http/router/chi"
 )
 
 // TODO: test get path params
@@ -124,17 +124,9 @@ func TestServerEntrypointsStarts(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := server.Start(); err != nil {
-		t.Fatal("failed to start", err)
-	}
-
-	if err := server.Start(); err != nil {
-		t.Fatal("failed to start", err)
-	}
-
-	if err := server.Start(); err != nil {
-		t.Fatal("failed to start", err)
-	}
+	assert.NoError(t, server.Start(), "start server 1")
+	assert.NoError(t, server.Start(), "start server 2")
+	assert.NoError(t, server.Start(), "start server 3")
 
 	addr = "https://" + addr
 	makeRequests(t, addr, thttp.TypeHTTP2)
@@ -192,7 +184,7 @@ func TestServerNoCodecs(t *testing.T) {
 }
 
 func TestServerNoTLS(t *testing.T) {
-	_, cleanup, err := setupServer(t, false, mhttp.WithTLSConfig(&tls.Config{}))
+	_, cleanup, err := setupServer(t, false, mhttp.WithTLS(&tls.Config{}))
 	defer cleanup()
 	t.Logf("expected error: %v", err)
 	require.Error(t, err, "setting an empty TLS config should return an error")
@@ -379,7 +371,7 @@ func TestServerFileConfig(t *testing.T) {
 
 	name := types.ServiceName("com.example.test")
 
-	fURL, err := url.Parse("file://config/http.yaml")
+	fURL, err := url.Parse("file://config/config.yaml")
 	t.Logf("%+v", fURL.RawPath)
 	require.NoError(t, err, "failed to parse file config url")
 
@@ -391,6 +383,7 @@ func TestServerFileConfig(t *testing.T) {
 
 	h := new(handler.EchoHandler)
 	srv, err := server.ProvideServer(name, config, logger,
+		// TODO: test defaults
 		mhttp.WithEntrypoint(
 			mhttp.WithName("static-ep-1"),
 			mhttp.WithAddress(":48081"),
@@ -444,7 +437,7 @@ func TestServerFileConfig(t *testing.T) {
 	require.NoError(t, err, "failed to fetch entrypoint 5")
 	ep = e.(*mhttp.ServerHTTP) //nolint:errcheck
 	require.Equal(t, ":4516", ep.Config.Address, "Address ep 5")
-	require.Equal(t, 3, len(ep.Config.RegistrationFuncs), "Registration len")
+	require.Equal(t, 3, len(ep.Config.HandlerRegistrations), "Registration len")
 	require.Equal(t, 4, len(ep.Config.Middleware), "Middleware len")
 	makeRequests(t, "https://localhost:4516", thttp.TypeHTTP2)
 

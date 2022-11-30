@@ -22,11 +22,11 @@ import (
 	"go-micro.dev/v5/server"
 	"go-micro.dev/v5/types"
 	"go-micro.dev/v5/types/component"
+	"go-micro.dev/v5/util/addr"
+	mtls "go-micro.dev/v5/util/tls"
 
 	"github.com/go-micro/plugins/server/http/router"
-	mip "github.com/go-micro/plugins/server/http/utils/ip"
 	mtcp "github.com/go-micro/plugins/server/http/utils/tcp"
-	mtls "github.com/go-micro/plugins/server/http/utils/tls"
 	mudp "github.com/go-micro/plugins/server/http/utils/udp"
 )
 
@@ -71,7 +71,14 @@ func ProvideServerHTTP(
 ) (*ServerHTTP, error) {
 	cfg.ApplyOptions(options...)
 
-	if err := mip.ValidateAddress(cfg.Address); err != nil {
+	var err error
+
+	cfg.Address, err = addr.GetAddress(cfg.Address)
+	if err != nil {
+		return nil, fmt.Errorf("http validate addr '%s': %w", cfg.Address, err)
+	}
+
+	if err := addr.ValidateAddress(cfg.Address); err != nil {
 		return nil, err
 	}
 
@@ -135,11 +142,11 @@ func (s *ServerHTTP) Start() error {
 		s.router.Use(middleware)
 	}
 
-	for _, h := range s.Config.RegistrationFuncs {
+	for _, h := range s.Config.HandlerRegistrations {
 		h(s)
 	}
 
-	s.listenerTCP, err = mtcp.BuildListenerTCP(s.Config.Address, s.Config.TLS)
+	s.listenerTCP, err = mtcp.BuildListenerTCP(s.Config.Address, s.Config.TLS.Config)
 	if err != nil {
 		return err
 	}
@@ -245,7 +252,7 @@ func (s *ServerHTTP) Router() router.Router {
 	return s.router
 }
 
-func (s *ServerHTTP) setupTLS() (*tls.Config, error) {
+func (s *ServerHTTP) setupTLS() (*mtls.Config, error) {
 	var (
 		config *tls.Config
 		err    error
@@ -264,5 +271,5 @@ func (s *ServerHTTP) setupTLS() (*tls.Config, error) {
 		}
 	}
 
-	return config, nil
+	return &mtls.Config{Config: config}, nil
 }
