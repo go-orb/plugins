@@ -131,7 +131,7 @@ type Config struct {
 	//   - certFile: xxx
 	//     keyFile: xxx
 	// ```
-	TLS *mtls.Config `json:"tls" yaml:"tls"`
+	TLS *mtls.Config `json:"tls,omitempty" yaml:"tls,omitempty"`
 
 	// H2C allows h2c connections; HTTP2 without TLS.
 	H2C bool `json:"h2c" yaml:"h2c"`
@@ -409,7 +409,7 @@ func WithWriteTimeout(timeout time.Duration) Option {
 	}
 }
 
-// IdleTimeout is the maximum amount of time to wait for the next request when
+// WithIdleTimeout is the maximum amount of time to wait for the next request when
 // keep-alives are enabled. If IdleTimeout is zero, the value of ReadTimeout is
 // used. If both are zero, there is no timeout.
 func WithIdleTimeout(timeout time.Duration) Option {

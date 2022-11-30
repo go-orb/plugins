@@ -146,7 +146,13 @@ func (s *ServerHTTP) Start() error {
 		h(s)
 	}
 
-	s.listenerTCP, err = mtcp.BuildListenerTCP(s.Config.Address, s.Config.TLS.Config)
+	var tlsConfig *tls.Config
+
+	if s.Config.TLS != nil {
+		tlsConfig = s.Config.TLS.Config
+	}
+
+	s.listenerTCP, err = mtcp.BuildListenerTCP(s.Config.Address, tlsConfig)
 	if err != nil {
 		return err
 	}
@@ -231,6 +237,15 @@ func (s *ServerHTTP) Register(register server.RegistrationFunc) {
 	register(s)
 }
 
+// Address returns the address the entrypoint is listening on.
+func (s *ServerHTTP) Address() string {
+	if s.listenerTCP != nil {
+		return s.listenerTCP.Addr().String()
+	}
+
+	return s.Config.Address
+}
+
 // String returns the entrypoint type; http.
 func (s *ServerHTTP) String() string {
 	return Plugin
@@ -253,18 +268,18 @@ func (s *ServerHTTP) Router() router.Router {
 }
 
 func (s *ServerHTTP) setupTLS() (*mtls.Config, error) {
+	// TLS already provided or not needed.
+	if s.Config.TLS != nil || s.Config.Insecure {
+		return s.Config.TLS, nil
+	}
+
 	var (
 		config *tls.Config
 		err    error
 	)
 
-	// TLS already provided
-	if s.Config.TLS != nil {
-		return s.Config.TLS, nil
-	}
-
-	// Generate self signed cert
-	if !s.Config.Insecure && s.Config.TLS == nil {
+	// Generate self signed cert.
+	if s.Config.TLS == nil {
 		config, err = mtls.GenTLSConfig(s.Config.Address)
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate self signed certificate: %w", err)
