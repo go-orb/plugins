@@ -34,5 +34,3 @@ com:
               middleware:
                 - middleware-1
                 - middleware-4
-
-    
