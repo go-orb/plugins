@@ -1,7 +1,7 @@
 go 1.19
 
 use (
-	../go-micro
+	../go-orb
 	./codecs/form
 	./codecs/json
 	./codecs/jsonpb
@@ -13,9 +13,11 @@ use (
 	./config/tests
 	./log/json
 	./log/text
+	./registry/consul
 	./registry/mdns
 	./registry/nats
 	./server/grpc
+	./registry/regutil
 	./server/http
 )
 

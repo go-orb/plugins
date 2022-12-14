@@ -127,7 +127,7 @@ func (m *RegistryMDNS) Stop(ctx context.Context) error {
 
 // String returns the plugin name.
 func (m *RegistryMDNS) String() string {
-	return name
+	return Name
 }
 
 // Type returns the component type.

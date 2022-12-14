@@ -41,7 +41,7 @@ func ProvideRegistryNATS(
 		return nil, fmt.Errorf("create nats registry config: %w", err)
 	}
 
-	logger, err = logger.WithComponent(registry.ComponentType, "nats", "", nil)
+	logger, err = logger.WithComponent(registry.ComponentType, Name, "", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func New(cfg Config, log log.Logger) *RegistryNATS {
 	}
 }
 
-// Start the registry, no-op.
+// Start the registry.
 func (n *RegistryNATS) Start() error {
 	if _, err := n.getConn(); err != nil {
 		return fmt.Errorf("connect: %w", err)
@@ -88,7 +88,7 @@ func (n *RegistryNATS) Start() error {
 	return nil
 }
 
-// Stop the registry, no-op.
+// Stop the registry.
 func (n *RegistryNATS) Stop(ctx context.Context) error {
 	if !n.conn.IsClosed() {
 		n.conn.Close()
@@ -99,7 +99,7 @@ func (n *RegistryNATS) Stop(ctx context.Context) error {
 
 // String returns the plugin name.
 func (n *RegistryNATS) String() string {
-	return name
+	return Name
 }
 
 // Type returns the component type.
