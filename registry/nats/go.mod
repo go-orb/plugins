@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/nats-io/nats.go v1.19.0
-	go-micro.dev/v4 v4.8.1
+	go-micro.dev/v5 v5.0.0-00010101000000-000000000000
 )
 
 require (

@@ -1,8 +1,11 @@
-package nats
+package consul
 
 import (
 	"crypto/tls"
 	"fmt"
+	"time"
+
+	consul "github.com/hashicorp/consul/api"
 
 	"go-micro.dev/v5/config"
 	"go-micro.dev/v5/config/source/cli"
@@ -11,15 +14,14 @@ import (
 )
 
 // Name provides the name of this registry.
-const Name = "nats"
+const Name = "consul"
 
 // Defaults.
 //
 //nolint:gochecknoglobals
 var (
-	DefaultAddresses  = []string{"nats://localhost:4222"}
-	DefaultQueryTopic = "micro.registry.nats.query"
-	DefaultWatchTopic = "micro.registry.nats.watch"
+	DefaultAddresses  = []string{"localhost:8300"}
+	DefaultAllowStale = true
 )
 
 func init() {
@@ -31,12 +33,12 @@ func init() {
 		cli.Usage("Registry addresses."),
 	))
 
-	if err := registry.Plugins.Add(Name, registry.ProviderFunc(ProvideRegistryNATS)); err != nil {
+	if err := registry.Plugins.Add(Name, registry.ProviderFunc(ProvideRegistryConsul)); err != nil {
 		panic(err)
 	}
 }
 
-// Config provides configuration for the NATS registry.
+// Config provides configuration for the consul registry.
 type Config struct {
 	registry.Config `yaml:",inline"`
 
@@ -44,10 +46,12 @@ type Config struct {
 	Secure    bool        `json:"secure,omitempty" yaml:"secure,omitempty"`
 	TLSConfig *tls.Config `json:"-" yaml:"-"`
 
-	Quorum int `json:"quorum,omitempty" yaml:"quorum,omitempty"`
+	Connect bool `json:"connect,omitempty" yaml:"connect,omitempty"`
 
-	QueryTopic string `json:"queryTopic,omitempty" yaml:"queryTopic,omitempty"`
-	WatchTopic string `json:"watchTopic,omitempty" yaml:"watchTopic,omitempty"`
+	ConsulConfig *consul.Config       `json:"-" yaml:"-"`
+	AllowStale   bool                 `json:"allowStale,omitempty" yaml:"allowStale,omitempty"`
+	QueryOptions *consul.QueryOptions `json:"-" yaml:"-"`
+	TCPCheck     time.Duration        `json:"tcpCheck,omitempty" yaml:"tcpCheck,omitempty"`
 }
 
 // NewConfig creates a new config object.
@@ -57,7 +61,8 @@ func NewConfig(
 	opts ...registry.Option,
 ) (Config, error) {
 	cfg := Config{
-		Config: registry.NewConfig(),
+		Config:     registry.NewConfig(),
+		AllowStale: DefaultAllowStale,
 	}
 
 	cfg.ApplyOptions(opts...)
@@ -109,32 +114,69 @@ func WithTLSConfig(n *tls.Config) registry.Option {
 	}
 }
 
-// WithQuorum sets the NATS quorum.
-func WithQuorum(n int) registry.Option {
+// WithConnect defines if services should be registered as Consul Connect services.
+func WithConnect(n bool) registry.Option {
 	return func(c registry.ConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.Quorum = n
+			cfg.Connect = n
 		}
 	}
 }
 
-// WithQueryTopic sets the NATS query topic.
-func WithQueryTopic(n string) registry.Option {
+// WithConsulConfig defines the consul config.
+func WithConsulConfig(n *consul.Config) registry.Option {
 	return func(c registry.ConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.QueryTopic = n
+			cfg.ConsulConfig = n
 		}
 	}
 }
 
-// WithWatchTopic sets the NATS watch topic.
-func WithWatchTopic(n string) registry.Option {
+// WithAllowStale sets whether any Consul server (non-leader) can service
+// a read. This allows for lower latency and higher throughput
+// at the cost of potentially stale data.
+// Works similar to Consul DNS Config option [1].
+// Defaults to true.
+//
+// [1] https://www.consul.io/docs/agent/options.html#allow_stale
+func WithAllowStale(n bool) registry.Option {
 	return func(c registry.ConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.WatchTopic = n
+			cfg.AllowStale = n
+		}
+	}
+}
+
+// WithQueryOptions specifies the QueryOptions to be used when calling
+// Consul. See `Consul API` for more information [1].
+//
+// [1] https://godoc.org/github.com/hashicorp/consul/api#QueryOptions
+func WithQueryOptions(n *consul.QueryOptions) registry.Option {
+	return func(c registry.ConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.QueryOptions = n
+		}
+	}
+}
+
+// WithTCPCheck will tell the service provider to check the service address
+// and port every `t` interval. It will enabled only if `t` is greater than 0.
+// See `TCP + Interval` for more information [1].
+//
+// [1] https://www.consul.io/docs/agent/checks.html
+func WithTCPCheck(t time.Duration) registry.Option {
+	return func(c registry.ConfigType) {
+		if t <= time.Duration(0) {
+			return
+		}
+
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.TCPCheck = t
 		}
 	}
 }
