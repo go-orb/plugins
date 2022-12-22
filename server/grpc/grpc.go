@@ -17,7 +17,6 @@ import (
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/server"
 	"go-micro.dev/v5/types"
-	"go-micro.dev/v5/types/component"
 	"go-micro.dev/v5/util/addr"
 	mnet "go-micro.dev/v5/util/net"
 	mtls "go-micro.dev/v5/util/tls"
@@ -208,7 +207,7 @@ func (s *ServerGRPC) Name() string {
 }
 
 // Type returns the component type.
-func (s *ServerGRPC) Type() component.Type {
+func (s *ServerGRPC) Type() string {
 	return server.ComponentType
 }
 
