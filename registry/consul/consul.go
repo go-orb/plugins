@@ -18,7 +18,6 @@ import (
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/registry"
 	"go-micro.dev/v5/types"
-	"go-micro.dev/v5/types/component"
 	mnet "go-micro.dev/v5/util/net"
 )
 
@@ -489,6 +488,6 @@ func (c *RegistryConsul) String() string {
 }
 
 // Type returns the component type.
-func (c *RegistryConsul) Type() component.Type {
+func (c *RegistryConsul) Type() string {
 	return registry.ComponentType
 }
