@@ -13,7 +13,6 @@ import (
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/registry"
 	"go-micro.dev/v5/types"
-	"go-micro.dev/v5/types/component"
 )
 
 // This is here to make sure RegistryNATS implements registry.Registry.
@@ -104,7 +103,7 @@ func (n *RegistryNATS) String() string {
 }
 
 // Type returns the component type.
-func (n *RegistryNATS) Type() component.Type {
+func (n *RegistryNATS) Type() string {
 	return registry.ComponentType
 }
 

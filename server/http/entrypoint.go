@@ -21,7 +21,6 @@ import (
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/server"
 	"go-micro.dev/v5/types"
-	"go-micro.dev/v5/types/component"
 	"go-micro.dev/v5/util/addr"
 	mtls "go-micro.dev/v5/util/tls"
 
@@ -257,7 +256,7 @@ func (s *ServerHTTP) Name() string {
 }
 
 // Type returns the component type.
-func (s *ServerHTTP) Type() component.Type {
+func (s *ServerHTTP) Type() string {
 	return server.ComponentType
 }
 

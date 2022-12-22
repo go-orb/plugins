@@ -24,7 +24,6 @@ import (
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/registry"
 	"go-micro.dev/v5/types"
-	"go-micro.dev/v5/types/component"
 )
 
 type mdnsTxt struct {
@@ -132,7 +131,7 @@ func (m *RegistryMDNS) String() string {
 }
 
 // Type returns the component type.
-func (m *RegistryMDNS) Type() component.Type {
+func (m *RegistryMDNS) Type() string {
 	return registry.ComponentType
 }
 
