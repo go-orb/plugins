@@ -10,11 +10,18 @@ import (
 	"testing"
 	"time"
 
+<<<<<<< HEAD
 	"golang.org/x/exp/slog"
 
 	log "github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
+=======
+	log "go-micro.dev/v5/log"
+	"go-micro.dev/v5/registry"
+	"go-micro.dev/v5/types"
+	"golang.org/x/exp/slog"
+>>>>>>> bec1f48 (feat(registry/nats): add support for schemes)
 
 	_ "github.com/go-orb/plugins/log/text"
 
@@ -29,9 +36,8 @@ type environment struct {
 	serviceOne registry.Service
 	serviceTwo registry.Service
 
-	nodeOne   registry.Node
-	nodeTwo   registry.Node
-	nodeThree registry.Node
+	nodeOne registry.Node
+	nodeTwo registry.Node
 }
 
 var e environment
@@ -56,7 +62,7 @@ func TestMain(m *testing.M) {
 		logger.Info("starting NATS server", slog.Int("attempt", i))
 
 		// start the NATS with JetStream server
-		addr, cleanup, err = natsServer(clusterName)
+		addr, cleanup, err = natsServer(clusterName, logger)
 		if err != nil {
 			log.Error("failed to setup NATS server", err, slog.Int("attempt", i))
 			continue
@@ -103,8 +109,10 @@ func TestMain(m *testing.M) {
 	e.serviceTwo.Nodes = []*registry.Node{&e.nodeOne, &e.nodeTwo}
 
 	e.nodeOne.ID = "one"
+	e.nodeOne.Scheme = "http"
+
 	e.nodeTwo.ID = "two"
-	e.nodeThree.ID = "three"
+	e.nodeTwo.Scheme = "grpc"
 
 	if err := e.registryOne.Register(&e.serviceOne); err != nil {
 		log.Error("while test registering serviceOne", err)
@@ -136,7 +144,7 @@ func getFreeLocalhostAddress() string {
 	return l.Addr().String()
 }
 
-func natsServer(clustername string) (string, func(), error) {
+func natsServer(clustername string, logger log.Logger) (string, func(), error) {
 	addr := getFreeLocalhostAddress()
 	host := strings.Split(addr, ":")[0]
 	port, _ := strconv.Atoi(strings.Split(addr, ":")[1]) //nolint:errcheck
@@ -156,7 +164,7 @@ func natsServer(clustername string) (string, func(), error) {
 	}
 
 	server.SetLoggerV2(
-		NewLogWrapper(),
+		NewLogWrapper(logger),
 		false, false, false,
 	)
 
@@ -190,16 +198,19 @@ func natsServer(clustername string) (string, func(), error) {
 		_ = os.RemoveAll(natsdir) //nolint:errcheck
 	}
 
-	slog.Info("NATS server started")
+	logger.Info("started NATS server")
 
 	return addr, cleanup, nil
 }
 
-func NewLogWrapper() *LogWrapper {
-	return &LogWrapper{}
+func NewLogWrapper(logger log.Logger) *LogWrapper {
+	return &LogWrapper{
+		logger: logger,
+	}
 }
 
 type LogWrapper struct {
+	logger log.Logger
 }
 
 // Noticef logs a notice statement.
@@ -208,23 +219,25 @@ func (l *LogWrapper) Noticef(format string, v ...interface{}) {
 
 // Warnf logs a warning statement.
 func (l *LogWrapper) Warnf(format string, v ...interface{}) {
-	slog.Warn(fmt.Sprintf(format+"\n", v...))
+	l.logger.Warn(format, v...)
 }
 
 // Fatalf logs a fatal statement.
 func (l *LogWrapper) Fatalf(format string, v ...interface{}) {
-	slog.Error(fmt.Sprintf(format+"\n", v...), nil)
+	l.logger.Error(format, nil, v...)
 }
 
 // Errorf logs an error statement.
 func (l *LogWrapper) Errorf(format string, v ...interface{}) {
-	slog.Error(fmt.Sprintf(format+"\n", v...), nil)
+	l.logger.Error(format, nil, v...)
 }
 
 // Debugf logs a debug statement.
 func (l *LogWrapper) Debugf(format string, v ...interface{}) {
+	l.logger.Debug(format, v...)
 }
 
 // Tracef logs a trace statement.
 func (l *LogWrapper) Tracef(format string, v ...interface{}) {
+	l.logger.Trace(format, v...)
 }
