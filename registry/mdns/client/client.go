@@ -29,15 +29,13 @@ type ServiceEntry struct {
 	TTL        int
 	Type       uint16
 
-	Addr net.IP // @Deprecated
-
 	hasTXT bool
 	sent   bool
 }
 
 // complete is used to check if we have all the info we need.
 func (s *ServiceEntry) complete() bool {
-	return (len(s.AddrV4) > 0 || len(s.AddrV6) > 0 || len(s.Addr) > 0) && s.Port != 0 && s.hasTXT
+	return (len(s.AddrV4) > 0 || len(s.AddrV6) > 0) && s.Port != 0 && s.hasTXT
 }
 
 // QueryParam is used to customize how a Lookup is performed.
@@ -488,8 +486,8 @@ func (c *client) recv(l *net.UDPConn, msgCh chan *dns.Msg) {
 	}
 }
 
-// ensureName is used to ensure the named node is in progress.
-func ensureName(inprogress map[string]*ServiceEntry, name string, typ uint16) *ServiceEntry {
+// entryFromMap is used to get or create a entry from/into the map inprogress.
+func entryFromMap(inprogress map[string]*ServiceEntry, name string, typ uint16) *ServiceEntry {
 	if inp, ok := inprogress[name]; ok {
 		return inp
 	}
@@ -504,12 +502,6 @@ func ensureName(inprogress map[string]*ServiceEntry, name string, typ uint16) *S
 	return inp
 }
 
-// alias is used to setup an alias between two entries.
-func alias(inprogress map[string]*ServiceEntry, src, dst string, typ uint16) {
-	srcEntry := ensureName(inprogress, src, typ)
-	inprogress[dst] = srcEntry
-}
-
 func messageToEntry(m *dns.Msg, inprogress map[string]*ServiceEntry) *ServiceEntry {
 	var inp *ServiceEntry
 
@@ -518,18 +510,19 @@ func messageToEntry(m *dns.Msg, inprogress map[string]*ServiceEntry) *ServiceEnt
 		switch dnsAnswer := answer.(type) {
 		case *dns.PTR:
 			// Create new entry for this
-			inp = ensureName(inprogress, dnsAnswer.Ptr, dnsAnswer.Hdr.Rrtype)
+			inp = entryFromMap(inprogress, dnsAnswer.Ptr, dnsAnswer.Hdr.Rrtype)
 			if inp.complete() {
 				continue
 			}
 		case *dns.SRV:
 			// Check for a target mismatch
 			if dnsAnswer.Target != dnsAnswer.Hdr.Name {
-				alias(inprogress, dnsAnswer.Hdr.Name, dnsAnswer.Target, dnsAnswer.Hdr.Rrtype)
+				srcEntry := entryFromMap(inprogress, dnsAnswer.Hdr.Name, dnsAnswer.Hdr.Rrtype)
+				inprogress[dnsAnswer.Target] = srcEntry
 			}
 
 			// Get the port
-			inp = ensureName(inprogress, dnsAnswer.Hdr.Name, dnsAnswer.Hdr.Rrtype)
+			inp = entryFromMap(inprogress, dnsAnswer.Hdr.Name, dnsAnswer.Hdr.Rrtype)
 			if inp.complete() {
 				continue
 			}
@@ -538,7 +531,7 @@ func messageToEntry(m *dns.Msg, inprogress map[string]*ServiceEntry) *ServiceEnt
 			inp.Port = int(dnsAnswer.Port)
 		case *dns.TXT:
 			// Pull out the txt
-			inp = ensureName(inprogress, dnsAnswer.Hdr.Name, dnsAnswer.Hdr.Rrtype)
+			inp = entryFromMap(inprogress, dnsAnswer.Hdr.Name, dnsAnswer.Hdr.Rrtype)
 			if inp.complete() {
 				continue
 			}
@@ -548,21 +541,19 @@ func messageToEntry(m *dns.Msg, inprogress map[string]*ServiceEntry) *ServiceEnt
 			inp.hasTXT = true
 		case *dns.A:
 			// Pull out the IP
-			inp = ensureName(inprogress, dnsAnswer.Hdr.Name, dnsAnswer.Hdr.Rrtype)
+			inp = entryFromMap(inprogress, dnsAnswer.Hdr.Name, dnsAnswer.Hdr.Rrtype)
 			if inp.complete() {
 				continue
 			}
 
-			inp.Addr = dnsAnswer.A // @Deprecated
 			inp.AddrV4 = dnsAnswer.A
 		case *dns.AAAA:
 			// Pull out the IP
-			inp = ensureName(inprogress, dnsAnswer.Hdr.Name, dnsAnswer.Hdr.Rrtype)
+			inp = entryFromMap(inprogress, dnsAnswer.Hdr.Name, dnsAnswer.Hdr.Rrtype)
 			if inp.complete() {
 				continue
 			}
 
-			inp.Addr = dnsAnswer.AAAA // @Deprecated
 			inp.AddrV6 = dnsAnswer.AAAA
 		}
 

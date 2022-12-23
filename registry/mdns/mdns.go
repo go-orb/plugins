@@ -138,9 +138,9 @@ func (m *RegistryMDNS) Type() string {
 // Register registes a service's nodes to the registry.
 func (m *RegistryMDNS) Register(service *registry.Service, opts ...registry.RegisterOption) error {
 	m.Lock()
-	defer m.Unlock()
-
 	entries, ok := m.services[service.Name]
+	m.Unlock()
+
 	// first entry, create wildcard used for list queries
 	if !ok {
 		s, err := zone.NewMDNSService(
@@ -168,7 +168,9 @@ func (m *RegistryMDNS) Register(service *registry.Service, opts ...registry.Regi
 	entries, err := m.registerNodes(service, entries)
 
 	// Save
+	m.Lock()
 	m.services[service.Name] = entries
+	m.Unlock()
 
 	return err
 }
@@ -199,12 +201,17 @@ func (m *RegistryMDNS) registerNodes(service *registry.Service, entries []*mdnsE
 		}
 
 		// encode the scheme with the metadata if not already given.
+<<<<<<< HEAD
 		if node.Metadata == nil {
 			node.Metadata = make(map[string]string)
 		}
 
 		if _, ok := node.Metadata[metaSchemeKey]; !ok {
 			node.Metadata[metaSchemeKey] = node.Scheme
+=======
+		if _, ok := node.Metadata["scheme"]; !ok {
+			node.Metadata["scheme"] = node.Scheme
+>>>>>>> 1c6a9e3 (feat(registry/mdns): add support for registering schemes)
 		}
 
 		txt, err := encode(&mdnsTxt{
@@ -328,10 +335,13 @@ func (m *RegistryMDNS) GetService(service string, opts ...registry.GetOption) ([
 	<-done
 
 	// Create list and return
-	services := make([]*registry.Service, 0, len(serviceMap))
+	services := make([]*registry.Service, len(serviceMap))
+
+	var i int
 
 	for _, service := range serviceMap {
-		services = append(services, service)
+		services[i] = service
+		i++
 	}
 
 	return services, nil
@@ -391,11 +401,18 @@ func (m *RegistryMDNS) getService(
 				continue
 			}
 
-			service.Nodes = append(service.Nodes, &registry.Node{
+			rNode := &registry.Node{
 				ID:       strings.TrimSuffix(entry.Name, "."+params.Service+"."+params.Domain+"."),
 				Address:  addr,
 				Metadata: txt.Metadata,
-			})
+			}
+
+			// Fetch the scheme back from the metadata.
+			if scheme, ok := rNode.Metadata["scheme"]; ok {
+				rNode.Scheme = scheme
+			}
+
+			service.Nodes = append(service.Nodes, rNode)
 
 			serviceMap[txt.Version] = service
 		case <-params.Context.Done():
@@ -615,8 +632,6 @@ func (m *mdnsWatcher) Next() (*registry.Result, error) {
 				addr = net.JoinHostPort(entry.AddrV4.String(), fmt.Sprint(entry.Port))
 			case len(entry.AddrV6) > 0:
 				addr = net.JoinHostPort(entry.AddrV6.String(), fmt.Sprint(entry.Port))
-			default:
-				addr = entry.Addr.String()
 			}
 
 			rNode := &registry.Node{

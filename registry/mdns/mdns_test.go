@@ -11,15 +11,69 @@ import (
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
 
-<<<<<<< Updated upstream
-	_ "github.com/go-micro/plugins/log/text"
-	"github.com/go-micro/plugins/registry/tests"
-=======
 	_ "github.com/go-orb/plugins/log/text"
->>>>>>> Stashed changes
 )
 
 var (
+	testData = []*registry.Service{
+		{
+			Name:    "test1",
+			Version: "1.0.1",
+			Nodes: []*registry.Node{
+				{
+					ID:      "test1-1",
+					Address: "10.0.0.1:10001",
+					Scheme:  "http",
+					Metadata: map[string]string{
+						"foo": "bar",
+					},
+				},
+			},
+		},
+		{
+			Name:    "test2",
+			Version: "1.0.2",
+			Nodes: []*registry.Node{
+				{
+					ID:      "test2-1",
+					Address: "10.0.0.2:10002",
+					Scheme:  "grpc",
+					Metadata: map[string]string{
+						"foo2": "bar2",
+					},
+				},
+			},
+		},
+		{
+			Name:    "test3",
+			Version: "1.0.3",
+			Nodes: []*registry.Node{
+				{
+					ID:      "test3-1",
+					Address: "10.0.0.3:10003",
+					Scheme:  "frpc",
+					Metadata: map[string]string{
+						"foo3": "bar3",
+					},
+				},
+			},
+		},
+		{
+			Name:    "test4",
+			Version: "1.0.4",
+			Nodes: []*registry.Node{
+				{
+					ID:      "test4-1",
+					Address: "[::]:10004",
+					Scheme:  "drpc",
+					Metadata: map[string]string{
+						"foo4": "bar4",
+					},
+				},
+			},
+		},
+	}
+
 	testDataEncoding = []*mdnsTxt{
 		{
 			Version: "1.0.0",
@@ -53,6 +107,7 @@ var (
 				{
 					ID:      "test1-1",
 					Address: "10.0.0.1:10001",
+					Scheme:  "http",
 					Metadata: map[string]string{
 						"foo": "bar",
 					},
@@ -66,6 +121,7 @@ var (
 				{
 					ID:      "test2-1",
 					Address: "10.0.0.2:10002",
+					Scheme:  "grpc",
 					Metadata: map[string]string{
 						"foo2": "bar2",
 					},
@@ -79,6 +135,7 @@ var (
 				{
 					ID:      "test3-1",
 					Address: "10.0.0.3:10003",
+					Scheme:  "frpc",
 					Metadata: map[string]string{
 						"foo3": "bar3",
 					},
@@ -92,6 +149,7 @@ var (
 				{
 					ID:      "test4-1",
 					Address: "[::]:10004",
+					Scheme:  "drpc",
 					Metadata: map[string]string{
 						"foo4": "bar4",
 					},
@@ -109,9 +167,27 @@ func TestMain(m *testing.M) {
 	}
 
 	cfg, err := NewConfig(types.ServiceName("test.service"), nil)
-	if err != nil {
-		logger.Error("failed to create registry config", err)
-		os.Exit(1)
+	require.NoError(t, err, "failed to create registry config")
+
+	r := New(cfg, l)
+	require.NoError(t, r.Start(), "failed to start")
+
+	for _, service := range testData {
+		require.NoError(t, r.Register(service), "failed to register service")
+
+		// Assure service has been registered properly.
+		var s []*registry.Service
+		s, err = r.GetService(service.Name)
+		require.NoError(t, err, "failed fetch services")
+		require.Equal(t, len(s), 1, "registry should only contain one registered service")
+		require.Equal(t, s[0].Name, service.Name, "service name does not match")
+		require.Equal(t, s[0].Version, service.Version, "service version does not match")
+		require.Equal(t, len(s[0].Nodes), 1, "service should only contain one node")
+
+		node := s[0].Nodes[0]
+		require.Equal(t, node.ID, service.Nodes[0].ID, "node ID does not match")
+		require.Equal(t, node.Address, service.Nodes[0].Address, "node address does not match")
+		require.Equal(t, node.Scheme, service.Nodes[0].Scheme, "node scheme does not match")
 	}
 
 	r := New(cfg, logger)
@@ -162,11 +238,10 @@ func TestWatcher(t *testing.T) {
 		require.Equal(t, expected.Version, actual.Version, "service version not equal")
 		require.Equal(t, 1, len(actual.Nodes), "expected only 1 node")
 
-		expectedNode := expected.Nodes[0]
-		actualNode := actual.Nodes[0]
-		require.Equal(t, expectedNode.ID, actualNode.ID, "node IDs not equal")
-		require.Equal(t, expectedNode.Address, actualNode.Address, "node addresses not equal")
-		require.Equal(t, expectedNode.Scheme, actualNode.Scheme, "node scheme does not equal")
+		node := s.Nodes[0]
+		require.Equal(t, node.ID, service.Nodes[0].ID, "node IDs not equal")
+		require.Equal(t, node.Address, service.Nodes[0].Address, "node addresses not equal")
+		require.Equal(t, node.Scheme, service.Nodes[0].Scheme, "node scheme does not equal")
 	}
 
 	// New registry
