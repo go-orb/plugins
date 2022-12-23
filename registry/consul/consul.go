@@ -463,22 +463,25 @@ func New(cfg Config, logger log.Logger) *RegistryConsul {
 	// set the config
 	cRegistry.consulConfig = config
 
-	// remove client
+	// remove the client
 	cRegistry.client = nil
-
-	// setup the client
-	cRegistry.Client()
 
 	return cRegistry
 }
 
 // Start the registry.
 func (c *RegistryConsul) Start() error {
+	// setup the client
+	c.Client()
+
 	return nil
 }
 
 // Stop the registry.
 func (c *RegistryConsul) Stop(ctx context.Context) error {
+	// remove the client
+	c.client = nil
+
 	return nil
 }
 
