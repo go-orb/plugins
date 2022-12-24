@@ -1,8 +1,9 @@
 package mdns
 
 import (
+	"context"
+	"os"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -11,64 +12,10 @@ import (
 	"go-micro.dev/v5/types"
 
 	_ "github.com/go-micro/plugins/log/text"
+	"github.com/go-micro/plugins/registry/tests"
 )
 
 var (
-	testData = []*registry.Service{
-		{
-			Name:    "test1",
-			Version: "1.0.1",
-			Nodes: []*registry.Node{
-				{
-					ID:      "test1-1",
-					Address: "10.0.0.1:10001",
-					Metadata: map[string]string{
-						"foo": "bar",
-					},
-				},
-			},
-		},
-		{
-			Name:    "test2",
-			Version: "1.0.2",
-			Nodes: []*registry.Node{
-				{
-					ID:      "test2-1",
-					Address: "10.0.0.2:10002",
-					Metadata: map[string]string{
-						"foo2": "bar2",
-					},
-				},
-			},
-		},
-		{
-			Name:    "test3",
-			Version: "1.0.3",
-			Nodes: []*registry.Node{
-				{
-					ID:      "test3-1",
-					Address: "10.0.0.3:10003",
-					Metadata: map[string]string{
-						"foo3": "bar3",
-					},
-				},
-			},
-		},
-		{
-			Name:    "test4",
-			Version: "1.0.4",
-			Nodes: []*registry.Node{
-				{
-					ID:      "test4-1",
-					Address: "[::]:10004",
-					Metadata: map[string]string{
-						"foo4": "bar4",
-					},
-				},
-			},
-		},
-	}
-
 	testDataEncoding = []*mdnsTxt{
 		{
 			Version: "1.0.0",
@@ -150,57 +97,38 @@ var (
 	}
 )
 
-func TestMDNS(t *testing.T) {
-	l, err := log.New(log.NewConfig())
-	require.NoError(t, err, "failed to create logger")
+func TestMain(m *testing.M) {
+	logger, err := log.New(log.NewConfig())
+	if err != nil {
+		log.Error("failed to create logger", err)
+		os.Exit(1)
+	}
 
 	cfg, err := NewConfig(types.ServiceName("test.service"), nil)
-	require.NoError(t, err, "failed to create registry config")
-
-	r := New(cfg, l)
-	require.NoError(t, r.Start(), "failed to start")
-
-	for _, service := range testData {
-		require.NoError(t, r.Register(service), "failed to register service")
-
-		// Assure service has been registered properly.
-		var s []*registry.Service
-		s, err = r.GetService(service.Name)
-		require.NoError(t, err, "failed fetch services")
-		require.Equal(t, len(s), 1, "registry should only contain one registered service")
-		require.Equal(t, s[0].Name, service.Name, "service name does not match")
-		require.Equal(t, s[0].Version, service.Version, "service version does not match")
-		require.Equal(t, len(s[0].Nodes), 1, "service should only contain one node")
-
-		node := s[0].Nodes[0]
-		require.Equal(t, node.ID, service.Nodes[0].ID, "node ID does not match")
-		require.Equal(t, node.Address, service.Nodes[0].Address, "node address does not match")
+	if err != nil {
+		logger.Error("failed to create registry config", err)
+		os.Exit(1)
 	}
 
-	services, err := r.ListServices()
-	require.NoError(t, err, "failed to list services")
-
-	for _, service := range testData {
-		var seen bool
-		for _, s := range services {
-			if s.Name == service.Name {
-				seen = true
-				break
-			}
-		}
-
-		// Assure service is present in registry.
-		require.Equal(t, seen, true,
-			"service not found in listed services, it has not been registered properly: "+service.Name)
-
-		// Deregister and give the registry time to process.
-		require.NoError(t, r.Deregister(service), "failed to deregister service: "+service.Name)
-		time.Sleep(time.Millisecond * 100)
-
-		// Assure service has deregistered properly.
-		s, _ := r.GetService(service.Name) //nolint:errcheck
-		require.GreaterOrEqual(t, 0, len(s), "service count should be 0, as all services should be deregistered")
+	r := New(cfg, logger)
+	if err := r.Start(); err != nil {
+		logger.Error("failed to start", err)
+		os.Exit(1)
 	}
+
+	tests.CreateSuite(logger, []registry.Registry{r}, 0, 0)
+	tests.Suite.Setup()
+
+	result := m.Run()
+
+	tests.Suite.TearDown()
+
+	if err := r.Stop(context.Background()); err != nil {
+		logger.Error("failed to stop", err)
+		os.Exit(1)
+	}
+
+	os.Exit(result)
 }
 
 func TestEncoding(t *testing.T) {
@@ -224,15 +152,17 @@ func TestEncoding(t *testing.T) {
 }
 
 func TestWatcher(t *testing.T) {
-	testFn := func(service, s *registry.Service) {
-		require.NotEqual(t, s, nil, "expected result, got nil: "+service.Name)
-		require.Equal(t, s.Name, service.Name, "service name not equal")
-		require.Equal(t, s.Version, service.Version, "service version not equal")
-		require.Equal(t, len(s.Nodes), 1, "expected only 1 node")
+	testFn := func(expected, actual *registry.Service) {
+		require.NotEqual(t, actual, nil, "expected result, got nil: "+expected.Name)
+		require.Equal(t, expected.Name, actual.Name, "service name not equal")
+		require.Equal(t, expected.Version, actual.Version, "service version not equal")
+		require.Equal(t, 1, len(actual.Nodes), "expected only 1 node")
 
-		node := s.Nodes[0]
-		require.Equal(t, node.ID, service.Nodes[0].ID, "node IDs not equal")
-		require.Equal(t, node.Address, service.Nodes[0].Address, "node addresses not equal")
+		expectedNode := expected.Nodes[0]
+		actualNode := actual.Nodes[0]
+		require.Equal(t, expectedNode.ID, actualNode.ID, "node IDs not equal")
+		require.Equal(t, expectedNode.Address, actualNode.Address, "node addresses not equal")
+		require.Equal(t, expectedNode.Scheme, actualNode.Scheme, "node scheme does not equal")
 	}
 
 	// New registry
@@ -286,4 +216,29 @@ func TestWatcher(t *testing.T) {
 			break
 		}
 	}
+}
+
+// TODO(rene): These tests fail, I think because there's no remote MDNS, we need to fix this!
+func TestRegister(t *testing.T) {
+	tests.Suite.TestRegister(t)
+}
+
+func TestDeregister(t *testing.T) {
+	tests.Suite.TestDeregister(t)
+}
+
+func TestGetServiceAllRegistries(t *testing.T) {
+	tests.Suite.TestGetServiceAllRegistries(t)
+}
+
+func TestGetServiceWithNoNodes(t *testing.T) {
+	tests.Suite.TestGetServiceWithNoNodes(t)
+}
+
+func BenchmarkGetService(b *testing.B) {
+	tests.Suite.BenchmarkGetService(b)
+}
+
+func BenchmarkGetServiceWithNoNodes(b *testing.B) {
+	tests.Suite.BenchmarkGetServiceWithNoNodes(b)
 }

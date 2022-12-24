@@ -9,7 +9,11 @@ import (
 	"go-micro.dev/v5/types"
 )
 
-const name = "mdns"
+// metaSchemeKey is the key to use to store the scheme in metadata.
+const metaSchemeKey = "_md_scheme_"
+
+// Name provides the name of this registry.
+const Name = "mdns"
 
 // Defaults.
 //
@@ -27,12 +31,12 @@ func init() {
 		cli.Usage("Registry domain."),
 	))
 
-	if err := registry.Plugins.Add(name, registry.ProviderFunc(ProvideRegistryMDNS)); err != nil {
+	if err := registry.Plugins.Add(Name, registry.ProviderFunc(ProvideRegistryMDNS)); err != nil {
 		panic(err)
 	}
 }
 
-// Config provides configuration for the MDNS registry.
+// Config provides configuration for the mDNS registry.
 type Config struct {
 	registry.Config `yaml:",inline"`
 
@@ -49,6 +53,8 @@ func NewConfig(
 		Config: registry.NewConfig(),
 	}
 
+	cfg.Config.Timeout = 500
+
 	cfg.ApplyOptions(opts...)
 
 	sections := types.SplitServiceName(serviceName)
@@ -59,7 +65,7 @@ func NewConfig(
 	return cfg, nil
 }
 
-// WithDomain sets the MDNS domain.
+// WithDomain sets the mDNS domain.
 func WithDomain(domain string) registry.Option {
 	return func(c registry.ConfigType) {
 		cfg, ok := c.(*Config)

@@ -10,7 +10,8 @@ import (
 	"go-micro.dev/v5/types"
 )
 
-const name = "nats"
+// Name provides the name of this registry.
+const Name = "nats"
 
 // Defaults.
 //
@@ -30,12 +31,12 @@ func init() {
 		cli.Usage("Registry addresses."),
 	))
 
-	if err := registry.Plugins.Add(name, registry.ProviderFunc(ProvideRegistryNATS)); err != nil {
+	if err := registry.Plugins.Add(Name, registry.ProviderFunc(ProvideRegistryNATS)); err != nil {
 		panic(err)
 	}
 }
 
-// Config provides configuration for the MDNS registry.
+// Config provides configuration for the NATS registry.
 type Config struct {
 	registry.Config `yaml:",inline"`
 

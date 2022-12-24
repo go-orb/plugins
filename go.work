@@ -13,8 +13,11 @@ use (
 	./config/tests
 	./log/json
 	./log/text
+	./registry/consul
 	./registry/mdns
 	./registry/nats
+	./registry/regutil
+	./registry/tests
 	./server/http
 )
 
