@@ -114,7 +114,7 @@ func (cw *consulWatcher) serviceHandler(idx uint64, data interface{}) { //nolint
 		svc.Nodes = append(svc.Nodes, &registry.Node{
 			ID:       id,
 			Address:  net.JoinHostPort(address, fmt.Sprint(entry.Service.Port)),
-			Metadata: decodeMetadata(entry.Service.Tags),
+			Metadata: entry.Service.Meta,
 		})
 	}
 

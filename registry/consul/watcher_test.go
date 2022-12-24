@@ -10,7 +10,7 @@ import (
 func TestHealthyServiceHandler(t *testing.T) {
 	watcher := newWatcher()
 	serviceEntry := newServiceEntry(
-		"node-name", "node-address", "service-name", "v1.0.0",
+		"node-name", "node-address", "service-name", "v1.0.0", "http",
 		[]*api.HealthCheck{
 			newHealthCheck("node-name", "service-name", "passing"),
 		},
@@ -26,7 +26,7 @@ func TestHealthyServiceHandler(t *testing.T) {
 func TestUnhealthyServiceHandler(t *testing.T) {
 	watcher := newWatcher()
 	serviceEntry := newServiceEntry(
-		"node-name", "node-address", "service-name", "v1.0.0",
+		"node-name", "node-address", "service-name", "v1.0.0", "grpc",
 		[]*api.HealthCheck{
 			newHealthCheck("node-name", "service-name", "critical"),
 		},
@@ -42,7 +42,7 @@ func TestUnhealthyServiceHandler(t *testing.T) {
 func TestUnhealthyNodeServiceHandler(t *testing.T) {
 	watcher := newWatcher()
 	serviceEntry := newServiceEntry(
-		"node-name", "node-address", "service-name", "v1.0.0",
+		"node-name", "node-address", "service-name", "v1.0.0", "frpc",
 		[]*api.HealthCheck{
 			newHealthCheck("node-name", "service-name", "passing"),
 			newHealthCheck("node-name", "serfHealth", "critical"),
@@ -73,9 +73,10 @@ func newHealthCheck(node, name, status string) *api.HealthCheck {
 	}
 }
 
-func newServiceEntry(node, address, name, version string, checks []*api.HealthCheck) *api.ServiceEntry {
+func newServiceEntry(node, address, name, version, scheme string, checks []*api.HealthCheck) *api.ServiceEntry {
+	md := map[string]string{metaSchemeKey: scheme}
 	return &api.ServiceEntry{
-		Node: &api.Node{Node: node, Address: name},
+		Node: &api.Node{Node: node, Address: address, Meta: md},
 		Service: &api.AgentService{
 			Service: name,
 			Address: address,

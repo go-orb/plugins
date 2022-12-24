@@ -13,6 +13,9 @@ import (
 	"go-micro.dev/v5/types"
 )
 
+// metaSchemeKey is the key to use to store the scheme in metadata.
+const metaSchemeKey = "_md_scheme_"
+
 // Name provides the name of this registry.
 const Name = "consul"
 
@@ -20,7 +23,7 @@ const Name = "consul"
 //
 //nolint:gochecknoglobals
 var (
-	DefaultAddresses  = []string{"localhost:8300"}
+	DefaultAddresses  = []string{"localhost:8500"}
 	DefaultAllowStale = true
 )
 
@@ -82,7 +85,7 @@ func (c *Config) ApplyOptions(opts ...registry.Option) {
 	}
 }
 
-// WithAddress sets the NATS server addresses.
+// WithAddress sets the Consul server addresses.
 func WithAddress(n ...string) registry.Option {
 	return func(c registry.ConfigType) {
 		cfg, ok := c.(*Config)
@@ -94,7 +97,7 @@ func WithAddress(n ...string) registry.Option {
 	}
 }
 
-// WithSecure defines if we want a secure connection to nats.
+// WithSecure defines if we want a secure connection to Consul.
 func WithSecure(n bool) registry.Option {
 	return func(c registry.ConfigType) {
 		cfg, ok := c.(*Config)

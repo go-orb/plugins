@@ -204,6 +204,8 @@ func (s *Server) Shutdown() error {
 		return err
 	}
 
+	s.wg.Wait()
+
 	var gerr error
 
 	if s.ipv4List != nil {
@@ -217,8 +219,6 @@ func (s *Server) Shutdown() error {
 			gerr = fmt.Errorf("close IPv4 UDP connection: %w", err)
 		}
 	}
-
-	s.wg.Wait()
 
 	return gerr
 }

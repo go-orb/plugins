@@ -9,6 +9,9 @@ import (
 	"go-micro.dev/v5/types"
 )
 
+// metaSchemeKey is the key to use to store the scheme in metadata.
+const metaSchemeKey = "_md_scheme_"
+
 // Name provides the name of this registry.
 const Name = "mdns"
 
@@ -49,6 +52,8 @@ func NewConfig(
 	cfg := Config{
 		Config: registry.NewConfig(),
 	}
+
+	cfg.Config.Timeout = 500
 
 	cfg.ApplyOptions(opts...)
 
