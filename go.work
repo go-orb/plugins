@@ -17,6 +17,7 @@ use (
 	./registry/mdns
 	./registry/nats
 	./registry/regutil
+	./registry/tests
 	./server/http
 )
 

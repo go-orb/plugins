@@ -157,8 +157,7 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 	}
 
 	// encode the tags
-	tags := encodeMetadata(node.Metadata)
-	tags = append(tags, encodeEndpoints(service.Endpoints)...)
+	tags := encodeEndpoints(service.Endpoints)
 	tags = append(tags, encodeVersion(service.Version)...)
 
 	var check *consul.AgentServiceCheck
@@ -195,6 +194,10 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 		return err
 	}
 
+	if node.Metadata == nil {
+		node.Metadata = make(map[string]string)
+	}
+
 	// register the service
 	asr := &consul.AgentServiceRegistration{
 		ID:      node.ID,
@@ -204,6 +207,11 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 		Address: host,
 		Meta:    node.Metadata,
 		Check:   check,
+	}
+
+	// Add the scheme to metadata if required
+	if _, ok := asr.Meta[metaSchemeKey]; !ok {
+		asr.Meta[metaSchemeKey] = node.Scheme
 	}
 
 	// Specify consul connect
@@ -233,6 +241,8 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 }
 
 // GetService returns a service from the registry.
+//
+//nolint:funlen
 func (c *RegistryConsul) GetService(name string, opts ...registry.GetOption) ([]*registry.Service, error) {
 	var (
 		rsp []*consul.ServiceEntry
@@ -297,11 +307,18 @@ func (c *RegistryConsul) GetService(name string, opts ...registry.GetOption) ([]
 			continue
 		}
 
-		svc.Nodes = append(svc.Nodes, &registry.Node{
+		rNode := &registry.Node{
 			ID:       id,
 			Address:  mnet.HostPort(address, service.Service.Port),
-			Metadata: decodeMetadata(service.Service.Tags),
-		})
+			Metadata: service.Service.Meta,
+		}
+
+		// Extract the scheme from Metadata
+		if scheme, ok := rNode.Metadata[metaSchemeKey]; ok {
+			rNode.Scheme = scheme
+		}
+
+		svc.Nodes = append(svc.Nodes, rNode)
 	}
 
 	services := []*registry.Service{}
