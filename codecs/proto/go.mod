@@ -1,10 +1,10 @@
-module github.com/go-micro/plugins/codecs/proto
+module github.com/go-orb/plugins/codecs/proto
 
-go 1.18
+go 1.20
 
 require (
-	go-micro.dev/v5 v5.0.0-00010101000000-000000000000
-	google.golang.org/protobuf v1.28.1
+	github.com/go-orb/go-orb v0.0.1
+	google.golang.org/protobuf v1.31.0
 )
 
-require github.com/google/go-cmp v0.5.9 // indirect
+require golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df // indirect

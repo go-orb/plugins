@@ -10,21 +10,31 @@ import (
 	"testing"
 	"time"
 
-<<<<<<< Updated upstream
-	_ "github.com/go-micro/plugins/log/text"
-	"github.com/go-micro/plugins/registry/tests"
+	"golang.org/x/exp/slog"
+
+	log "github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
+	"github.com/go-orb/go-orb/types"
+
+	_ "github.com/go-orb/plugins/log/text"
 
 	nserver "github.com/nats-io/nats-server/v2/server"
-
-	log "go-micro.dev/v5/log"
-	"go-micro.dev/v5/registry"
-	"go-micro.dev/v5/types"
-
-	"golang.org/x/exp/slog"
-=======
-	"github.com/go-orb/go-orb/registry"
->>>>>>> Stashed changes
 )
+
+type environment struct {
+	registryOne   registry.Registry
+	registryTwo   registry.Registry
+	registryThree registry.Registry
+
+	serviceOne registry.Service
+	serviceTwo registry.Service
+
+	nodeOne   registry.Node
+	nodeTwo   registry.Node
+	nodeThree registry.Node
+}
+
+var e environment
 
 func TestMain(m *testing.M) {
 	logger, err := log.New(log.NewConfig())
@@ -38,10 +48,6 @@ func TestMain(m *testing.M) {
 		cleanup func()
 		addr    string
 		started bool
-
-		regOne   registry.Registry
-		regTwo   registry.Registry
-		regThree registry.Registry
 	)
 
 	// Sometimes the nats server has isssues with starting, so we attempt 5
@@ -50,7 +56,7 @@ func TestMain(m *testing.M) {
 		logger.Info("starting NATS server", slog.Int("attempt", i))
 
 		// start the NATS with JetStream server
-		addr, cleanup, err = natsServer(clusterName, logger)
+		addr, cleanup, err = natsServer(clusterName)
 		if err != nil {
 			log.Error("failed to setup NATS server", err, slog.Int("attempt", i))
 			continue
@@ -61,20 +67,20 @@ func TestMain(m *testing.M) {
 			log.Error("failed to create config", err)
 		}
 
-		regOne = New(cfg, logger)
-		if err := regOne.Start(); err != nil {
+		e.registryOne = New(cfg, logger)
+		if err := e.registryOne.Start(); err != nil {
 			log.Error("failed to connect registry one to NATS server", err, slog.Int("attempt", i))
 			continue
 		}
 
-		regTwo = New(cfg, logger)
-		if err := regTwo.Start(); err != nil {
+		e.registryTwo = New(cfg, logger)
+		if err := e.registryOne.Start(); err != nil {
 			log.Error("failed to connect registry two to NATS server", err, slog.Int("attempt", i))
 			continue
 		}
 
-		regThree = New(cfg, logger)
-		if err := regThree.Start(); err != nil {
+		e.registryThree = New(cfg, logger)
+		if err := e.registryOne.Start(); err != nil {
 			log.Error("failed to connect registry three to NATS server", err, slog.Int("attempt", i))
 			continue
 		}
@@ -88,32 +94,50 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	tests.CreateSuite(logger, []registry.Registry{regOne, regTwo, regThree}, 0, 0)
-	tests.Suite.Setup()
+	e.serviceOne.Name = "one"
+	e.serviceOne.Version = "default"
+	e.serviceOne.Nodes = []*registry.Node{&e.nodeOne}
+
+	e.serviceTwo.Name = "two"
+	e.serviceTwo.Version = "default"
+	e.serviceTwo.Nodes = []*registry.Node{&e.nodeOne, &e.nodeTwo}
+
+	e.nodeOne.ID = "one"
+	e.nodeTwo.ID = "two"
+	e.nodeThree.ID = "three"
+
+	if err := e.registryOne.Register(&e.serviceOne); err != nil {
+		log.Error("while test registering serviceOne", err)
+	}
+
+	if err := e.registryOne.Register(&e.serviceTwo); err != nil {
+		log.Error("while test registering serviceTwo", err)
+	}
 
 	result := m.Run()
 
-	tests.Suite.TearDown()
+	if err := e.registryOne.Deregister(&e.serviceOne); err != nil {
+		log.Error("while test deregistering serviceOne", err)
+	}
+
+	if err := e.registryOne.Deregister(&e.serviceTwo); err != nil {
+		log.Error("while test deregistering serviceTwo", err)
+	}
 
 	cleanup()
 
 	os.Exit(result)
 }
 
-func getFreeLocalhostAddress() (string, error) {
-	l, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		return "", err
-	}
-
-	return l.Addr().String(), l.Close()
+//nolint:errcheck
+func getFreeLocalhostAddress() string {
+	l, _ := net.Listen("tcp", "127.0.0.1:0")
+	defer l.Close()
+	return l.Addr().String()
 }
 
-func natsServer(clustername string, logger log.Logger) (string, func(), error) {
-	addr, err := getFreeLocalhostAddress()
-	if err != nil {
-		return "", nil, err
-	}
+func natsServer(clustername string) (string, func(), error) {
+	addr := getFreeLocalhostAddress()
 	host := strings.Split(addr, ":")[0]
 	port, _ := strconv.Atoi(strings.Split(addr, ":")[1]) //nolint:errcheck
 
@@ -132,7 +156,7 @@ func natsServer(clustername string, logger log.Logger) (string, func(), error) {
 	}
 
 	server.SetLoggerV2(
-		NewLogWrapper(logger),
+		NewLogWrapper(),
 		false, false, false,
 	)
 
@@ -166,19 +190,16 @@ func natsServer(clustername string, logger log.Logger) (string, func(), error) {
 		_ = os.RemoveAll(natsdir) //nolint:errcheck
 	}
 
-	logger.Info("NATS server started")
+	slog.Info("NATS server started")
 
 	return addr, cleanup, nil
 }
 
-func NewLogWrapper(logger log.Logger) *LogWrapper {
-	return &LogWrapper{
-		logger: logger,
-	}
+func NewLogWrapper() *LogWrapper {
+	return &LogWrapper{}
 }
 
 type LogWrapper struct {
-	logger log.Logger
 }
 
 // Noticef logs a notice statement.
@@ -187,49 +208,23 @@ func (l *LogWrapper) Noticef(format string, v ...interface{}) {
 
 // Warnf logs a warning statement.
 func (l *LogWrapper) Warnf(format string, v ...interface{}) {
-	l.logger.Warn(format, v...)
+	slog.Warn(fmt.Sprintf(format+"\n", v...))
 }
 
 // Fatalf logs a fatal statement.
 func (l *LogWrapper) Fatalf(format string, v ...interface{}) {
-	l.logger.Error(format, nil, v...)
+	slog.Error(fmt.Sprintf(format+"\n", v...), nil)
 }
 
 // Errorf logs an error statement.
 func (l *LogWrapper) Errorf(format string, v ...interface{}) {
-	l.logger.Error(format, nil, v...)
+	slog.Error(fmt.Sprintf(format+"\n", v...), nil)
 }
 
 // Debugf logs a debug statement.
 func (l *LogWrapper) Debugf(format string, v ...interface{}) {
-	l.logger.Debug(format, v...)
 }
 
 // Tracef logs a trace statement.
 func (l *LogWrapper) Tracef(format string, v ...interface{}) {
-	l.logger.Trace(format, v...)
-}
-
-func TestRegister(t *testing.T) {
-	tests.Suite.TestRegister(t)
-}
-
-func TestDeregister(t *testing.T) {
-	tests.Suite.TestDeregister(t)
-}
-
-func TestGetServiceAllRegistries(t *testing.T) {
-	tests.Suite.TestGetServiceAllRegistries(t)
-}
-
-func TestGetServiceWithNoNodes(t *testing.T) {
-	tests.Suite.TestGetServiceWithNoNodes(t)
-}
-
-func BenchmarkGetService(b *testing.B) {
-	tests.Suite.BenchmarkGetService(b)
-}
-
-func BenchmarkGetServiceWithNoNodes(b *testing.B) {
-	tests.Suite.BenchmarkGetServiceWithNoNodes(b)
 }

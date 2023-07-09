@@ -3,15 +3,18 @@ package mdns
 import (
 	"fmt"
 
-	"go-micro.dev/v5/config"
-	"go-micro.dev/v5/config/source/cli"
-	"go-micro.dev/v5/registry"
-	"go-micro.dev/v5/types"
+	"github.com/go-orb/go-orb/config"
+	"github.com/go-orb/go-orb/config/source/cli"
+	"github.com/go-orb/go-orb/registry"
+	"github.com/go-orb/go-orb/types"
 )
 
+<<<<<<< Updated upstream
 // metaSchemeKey is the key to use to store the scheme in metadata.
 const metaSchemeKey = "_md_scheme_"
 
+=======
+>>>>>>> Stashed changes
 // Name provides the name of this registry.
 const Name = "mdns"
 

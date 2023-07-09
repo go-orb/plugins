@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/go-micro/plugins/registry/mdns/zone"
+	"github.com/go-orb/plugins/registry/mdns/zone"
 	"github.com/miekg/dns"
 )
 

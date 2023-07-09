@@ -15,15 +15,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-micro/plugins/registry/mdns/client"
-	"github.com/go-micro/plugins/registry/mdns/dns"
-	"github.com/go-micro/plugins/registry/mdns/server"
-	"github.com/go-micro/plugins/registry/mdns/zone"
+	"github.com/go-orb/plugins/registry/mdns/client"
+	"github.com/go-orb/plugins/registry/mdns/dns"
+	"github.com/go-orb/plugins/registry/mdns/server"
+	"github.com/go-orb/plugins/registry/mdns/zone"
 
+	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
+	"github.com/go-orb/go-orb/types"
 	"github.com/google/uuid"
-	"go-micro.dev/v5/log"
-	"go-micro.dev/v5/registry"
-	"go-micro.dev/v5/types"
 )
 
 type mdnsTxt struct {

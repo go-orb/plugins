@@ -232,7 +232,7 @@ function create_summary() {
 	fi
 }
 
-git clone https://github.com/go-orb/go-micro ../go-micro
+git clone https://github.com/go-orb/go-orb ../go-orb
 
 case $1 in
 "lint")

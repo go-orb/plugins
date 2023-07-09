@@ -15,10 +15,18 @@ import (
 
 	consul "github.com/hashicorp/consul/api"
 	hash "github.com/mitchellh/hashstructure"
+<<<<<<< Updated upstream
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/registry"
 	"go-micro.dev/v5/types"
 	mnet "go-micro.dev/v5/util/net"
+=======
+	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
+	"github.com/go-orb/go-orb/types"
+	"github.com/go-orb/go-orb/types/component"
+	mnet "github.com/go-orb/go-orb/util/net"
+>>>>>>> Stashed changes
 )
 
 // This is here to make sure RegistryConsul implements registry.Registry.
@@ -157,7 +165,12 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 	}
 
 	// encode the tags
+<<<<<<< Updated upstream
 	tags := encodeEndpoints(service.Endpoints)
+=======
+	tags := encodeMetadata(node.Metadata)
+	tags = append(tags, encodeEndpoints(service.Endpoints)...)
+>>>>>>> Stashed changes
 	tags = append(tags, encodeVersion(service.Version)...)
 
 	var check *consul.AgentServiceCheck
@@ -194,10 +207,13 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 		return err
 	}
 
+<<<<<<< Updated upstream
 	if node.Metadata == nil {
 		node.Metadata = make(map[string]string)
 	}
 
+=======
+>>>>>>> Stashed changes
 	// register the service
 	asr := &consul.AgentServiceRegistration{
 		ID:      node.ID,
@@ -209,11 +225,14 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 		Check:   check,
 	}
 
+<<<<<<< Updated upstream
 	// Add the scheme to metadata if required
 	if _, ok := asr.Meta[metaSchemeKey]; !ok {
 		asr.Meta[metaSchemeKey] = node.Scheme
 	}
 
+=======
+>>>>>>> Stashed changes
 	// Specify consul connect
 	if c.config.Connect {
 		asr.Connect = &consul.AgentServiceConnect{
@@ -241,8 +260,11 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 }
 
 // GetService returns a service from the registry.
+<<<<<<< Updated upstream
 //
 //nolint:funlen
+=======
+>>>>>>> Stashed changes
 func (c *RegistryConsul) GetService(name string, opts ...registry.GetOption) ([]*registry.Service, error) {
 	var (
 		rsp []*consul.ServiceEntry
@@ -307,6 +329,7 @@ func (c *RegistryConsul) GetService(name string, opts ...registry.GetOption) ([]
 			continue
 		}
 
+<<<<<<< Updated upstream
 		rNode := &registry.Node{
 			ID:       id,
 			Address:  mnet.HostPort(address, service.Service.Port),
@@ -319,6 +342,13 @@ func (c *RegistryConsul) GetService(name string, opts ...registry.GetOption) ([]
 		}
 
 		svc.Nodes = append(svc.Nodes, rNode)
+=======
+		svc.Nodes = append(svc.Nodes, &registry.Node{
+			ID:       id,
+			Address:  mnet.HostPort(address, service.Service.Port),
+			Metadata: decodeMetadata(service.Service.Tags),
+		})
+>>>>>>> Stashed changes
 	}
 
 	services := []*registry.Service{}
@@ -480,25 +510,40 @@ func New(cfg Config, logger log.Logger) *RegistryConsul {
 	// set the config
 	cRegistry.consulConfig = config
 
+<<<<<<< Updated upstream
 	// remove the client
 	cRegistry.client = nil
 
+=======
+	// remove client
+	cRegistry.client = nil
+
+	// setup the client
+	cRegistry.Client()
+
+>>>>>>> Stashed changes
 	return cRegistry
 }
 
 // Start the registry.
 func (c *RegistryConsul) Start() error {
+<<<<<<< Updated upstream
 	// setup the client
 	c.Client()
 
+=======
+>>>>>>> Stashed changes
 	return nil
 }
 
 // Stop the registry.
 func (c *RegistryConsul) Stop(ctx context.Context) error {
+<<<<<<< Updated upstream
 	// remove the client
 	c.client = nil
 
+=======
+>>>>>>> Stashed changes
 	return nil
 }
 
@@ -508,6 +553,10 @@ func (c *RegistryConsul) String() string {
 }
 
 // Type returns the component type.
+<<<<<<< Updated upstream
 func (c *RegistryConsul) Type() string {
+=======
+func (c *RegistryConsul) Type() component.Type {
+>>>>>>> Stashed changes
 	return registry.ComponentType
 }

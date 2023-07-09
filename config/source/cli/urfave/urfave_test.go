@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go-micro.dev/v5/config/source/cli"
+	"github.com/go-orb/go-orb/config/source/cli"
 )
 
 const (

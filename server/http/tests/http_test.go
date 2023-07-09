@@ -17,28 +17,28 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"go-micro.dev/v5/config"
-	"go-micro.dev/v5/log"
-	"go-micro.dev/v5/server"
-	"go-micro.dev/v5/types"
+	"github.com/go-orb/go-orb/config"
+	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/server"
+	"github.com/go-orb/go-orb/types"
 
-	mhttp "github.com/go-micro/plugins/server/http"
+	mhttp "github.com/go-orb/plugins/server/http"
 
-	"github.com/go-micro/plugins/server/http/tests/handler"
-	"github.com/go-micro/plugins/server/http/tests/proto"
-	thttp "github.com/go-micro/plugins/server/http/tests/util/http"
+	"github.com/go-orb/plugins/server/http/tests/handler"
+	"github.com/go-orb/plugins/server/http/tests/proto"
+	thttp "github.com/go-orb/plugins/server/http/tests/util/http"
 
-	_ "github.com/go-micro/plugins/codecs/form"
-	_ "github.com/go-micro/plugins/codecs/json"
-	_ "github.com/go-micro/plugins/codecs/jsonpb"
-	_ "github.com/go-micro/plugins/codecs/proto"
+	_ "github.com/go-orb/plugins/codecs/form"
+	_ "github.com/go-orb/plugins/codecs/json"
+	_ "github.com/go-orb/plugins/codecs/jsonpb"
+	_ "github.com/go-orb/plugins/codecs/proto"
 
-	_ "github.com/go-micro/plugins/codecs/yaml"
-	_ "github.com/go-micro/plugins/config/source/file"
-	_ "github.com/go-micro/plugins/log/text"
+	_ "github.com/go-orb/plugins/codecs/yaml"
+	_ "github.com/go-orb/plugins/config/source/file"
+	_ "github.com/go-orb/plugins/log/text"
 
-	"github.com/go-micro/plugins/server/http/router"
-	_ "github.com/go-micro/plugins/server/http/router/chi"
+	"github.com/go-orb/plugins/server/http/router"
+	_ "github.com/go-orb/plugins/server/http/router/chi"
 )
 
 // TODO: test get path params

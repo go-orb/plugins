@@ -7,12 +7,16 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"go-micro.dev/v5/log"
-	"go-micro.dev/v5/registry"
-	"go-micro.dev/v5/types"
+	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
+	"github.com/go-orb/go-orb/types"
 
+<<<<<<< Updated upstream
 	_ "github.com/go-micro/plugins/log/text"
 	"github.com/go-micro/plugins/registry/tests"
+=======
+	_ "github.com/go-orb/plugins/log/text"
+>>>>>>> Stashed changes
 )
 
 var (

@@ -1,11 +1,19 @@
+<<<<<<< Updated upstream
 module github.com/go-micro/plugins/registry/consul
+=======
+module github.com/go-orb/plugins/registry/consul
+>>>>>>> Stashed changes
 
 go 1.19
 
 require (
 	github.com/hashicorp/consul/api v1.9.0
 	github.com/mitchellh/hashstructure v1.1.0
+<<<<<<< Updated upstream
 	go-micro.dev/v5 v5.0.0-00010101000000-000000000000
+=======
+	github.com/go-orb/go-orb v0.0.1 
+>>>>>>> Stashed changes
 )
 
 require (

@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	// 	"github.com/go-micro/plugins/registry/mdns/client"
-	"github.com/go-micro/plugins/registry/mdns/server"
-	"github.com/go-micro/plugins/registry/mdns/zone"
+	// 	"github.com/go-orb/plugins/registry/mdns/client"
+	"github.com/go-orb/plugins/registry/mdns/server"
+	"github.com/go-orb/plugins/registry/mdns/zone"
 )
 
 func makeService(t *testing.T) *zone.MDNSService {

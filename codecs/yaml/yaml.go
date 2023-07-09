@@ -4,7 +4,7 @@ package yaml
 import (
 	"io"
 
-	"go-micro.dev/v5/codecs"
+	"github.com/go-orb/go-orb/codecs"
 
 	"gopkg.in/yaml.v3"
 )

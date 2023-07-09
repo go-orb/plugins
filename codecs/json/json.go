@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"go-micro.dev/v5/codecs"
+	"github.com/go-orb/go-orb/codecs"
 )
 
 var _ codecs.Marshaler = (*JSON)(nil)

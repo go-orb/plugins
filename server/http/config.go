@@ -9,13 +9,13 @@ import (
 
 	"golang.org/x/exp/slog"
 
+	"github.com/go-orb/go-orb/codecs"
+	"github.com/go-orb/go-orb/server"
+	"github.com/go-orb/go-orb/util/slicemap"
+	mtls "github.com/go-orb/go-orb/util/tls"
 	"github.com/google/uuid"
-	"go-micro.dev/v5/codecs"
-	"go-micro.dev/v5/server"
-	"go-micro.dev/v5/util/slicemap"
-	mtls "go-micro.dev/v5/util/tls"
 
-	"github.com/go-micro/plugins/server/http/router"
+	"github.com/go-orb/plugins/server/http/router"
 )
 
 const (

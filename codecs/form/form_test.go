@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	"go-micro.dev/v5/codecs"
+	"github.com/go-orb/go-orb/codecs"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -13,7 +13,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/go-micro/plugins/codecs/form/testdata"
+	"github.com/go-orb/plugins/codecs/form/testdata"
 )
 
 type LoginRequest struct {

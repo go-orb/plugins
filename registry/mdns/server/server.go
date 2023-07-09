@@ -9,13 +9,13 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/go-orb/go-orb/log"
 	"github.com/miekg/dns"
-	"go-micro.dev/v5/log"
 	"golang.org/x/net/ipv4"
 	"golang.org/x/net/ipv6"
 
-	"github.com/go-micro/plugins/registry/mdns/util"
-	"github.com/go-micro/plugins/registry/mdns/zone"
+	"github.com/go-orb/plugins/registry/mdns/util"
+	"github.com/go-orb/plugins/registry/mdns/zone"
 )
 
 // mDNS Groups.

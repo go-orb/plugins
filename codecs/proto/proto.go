@@ -5,7 +5,7 @@ import (
 	"errors"
 	"io"
 
-	"go-micro.dev/v5/codecs"
+	"github.com/go-orb/go-orb/codecs"
 	"google.golang.org/protobuf/proto"
 )
 

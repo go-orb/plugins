@@ -4,7 +4,7 @@ package text
 import (
 	"os"
 
-	"go-micro.dev/v5/log"
+	"github.com/go-orb/go-orb/log"
 	"golang.org/x/exp/slog"
 )
 

@@ -18,8 +18,8 @@ import (
 	"golang.org/x/net/http2"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/go-micro/plugins/server/http/headers"
-	pb "github.com/go-micro/plugins/server/http/tests/proto"
+	"github.com/go-orb/plugins/server/http/headers"
+	pb "github.com/go-orb/plugins/server/http/tests/proto"
 )
 
 // ReqType set the HTTP request type to make.

@@ -1,14 +1,14 @@
-module github.com/go-micro/plugins/server/http
+module github.com/go-orb/plugins/server/http
 
 go 1.19
 
 require (
 	github.com/go-chi/chi v1.5.4
+	github.com/go-orb/go-orb v0.0.1
 	github.com/google/uuid v1.3.0
 	github.com/lucas-clemente/quic-go v0.31.1
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.8.1
-	go-micro.dev/v5 v5.0.0-00010101000000-000000000000
+	github.com/stretchr/testify v1.8.3
 	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
 	golang.org/x/net v0.12.0
 	google.golang.org/genproto v0.0.0-20230706204954-ccb25ca9f130
@@ -39,7 +39,3 @@ require (
 	golang.org/x/tools v0.11.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230706204954-ccb25ca9f130 // indirect
 )
-
-replace github.com/go-micro/plugins/server/http => ./
-
-replace go-micro.dev/v5 => ../../../go-micro/

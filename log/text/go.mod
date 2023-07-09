@@ -1,8 +1,8 @@
-module github.com/go-micro/plugins/log/text
+module github.com/go-orb/plugins/log/text
 
-go 1.18
+go 1.20
 
 require (
-	go-micro.dev/v5 v5.0.0-00010101000000-000000000000
-	golang.org/x/exp v0.0.0-20221106115401-f9659909a136
+	github.com/go-orb/go-orb v0.0.1
+	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
 )

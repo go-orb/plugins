@@ -7,7 +7,11 @@ import (
 	"encoding/json"
 	"io"
 
+<<<<<<< Updated upstream
 	"go-micro.dev/v5/registry"
+=======
+	"github.com/go-orb/go-orb/registry"
+>>>>>>> Stashed changes
 )
 
 func encode(buf []byte) string {
@@ -102,6 +106,68 @@ func decodeEndpoints(tags []string) []*registry.Endpoint {
 	return endpoint
 }
 
+<<<<<<< Updated upstream
+=======
+func encodeMetadata(input map[string]string) []string {
+	var tags []string
+
+	for k, v := range input {
+		if b, err := json.Marshal(map[string]string{
+			k: v,
+		}); err == nil {
+			// new encoding
+			tags = append(tags, "t-"+encode(b))
+		}
+	}
+
+	return tags
+}
+
+func decodeMetadata(tags []string) map[string]string {
+	result := make(map[string]string)
+
+	var ver byte
+
+	for _, tag := range tags {
+		if len(tag) == 0 || tag[0] != 't' {
+			continue
+		}
+
+		// check version
+		if ver > 0 && tag[1] != ver {
+			continue
+		}
+
+		var (
+			kv  map[string]string
+			buf []byte
+		)
+
+		// Old encoding was plain
+		if tag[1] == '=' {
+			buf = []byte(tag[2:])
+		}
+
+		// New encoding is hex
+		if tag[1] == '-' {
+			buf = decode(tag[2:])
+		}
+
+		// Now unmarshal
+		if err := json.Unmarshal(buf, &kv); err == nil {
+			for k, v := range kv {
+				result[k] = v
+			}
+		}
+
+		// set version
+		ver = tag[1]
+	}
+
+	return result
+}
+
+>>>>>>> Stashed changes
 func encodeVersion(v string) []string {
 	return []string{"v-" + encode([]byte(v))}
 }

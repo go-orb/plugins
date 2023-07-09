@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	examplepb "github.com/go-micro/plugins/codecs/proto/testdata"
+	examplepb "github.com/go-orb/plugins/codecs/proto/testdata"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

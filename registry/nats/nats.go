@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/nats-io/nats.go"
-	"go-micro.dev/v5/log"
-	"go-micro.dev/v5/registry"
-	"go-micro.dev/v5/types"
+	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
+	"github.com/go-orb/go-orb/types"
 )
 
 // This is here to make sure RegistryNATS implements registry.Registry.

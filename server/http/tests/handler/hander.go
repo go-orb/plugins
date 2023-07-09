@@ -6,7 +6,7 @@ import (
 	"crypto/rand"
 	"errors"
 
-	"github.com/go-micro/plugins/server/http/tests/proto"
+	"github.com/go-orb/plugins/server/http/tests/proto"
 )
 
 var _ proto.StreamsServer = (*EchoHandler)(nil)

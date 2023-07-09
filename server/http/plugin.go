@@ -1,9 +1,9 @@
 package http
 
 import (
-	"go-micro.dev/v5/log"
-	"go-micro.dev/v5/server"
-	"go-micro.dev/v5/types"
+	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/server"
+	"github.com/go-orb/go-orb/types"
 )
 
 func init() {

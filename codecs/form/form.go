@@ -14,7 +14,7 @@ import (
 	"github.com/go-playground/form/v4"
 	"google.golang.org/protobuf/proto"
 
-	"go-micro.dev/v5/codecs"
+	"github.com/go-orb/go-orb/codecs"
 )
 
 var _ codecs.Marshaler = (*Form)(nil)

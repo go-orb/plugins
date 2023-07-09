@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	examplepb "github.com/go-micro/plugins/codecs/proto/testdata"
+	examplepb "github.com/go-orb/plugins/codecs/proto/testdata"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
 	"github.com/google/go-cmp/cmp"

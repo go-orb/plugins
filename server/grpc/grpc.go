@@ -14,12 +14,21 @@ import (
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
+<<<<<<< HEAD
 	"go-micro.dev/v5/log"
 	"go-micro.dev/v5/server"
 	"go-micro.dev/v5/types"
 	"go-micro.dev/v5/util/addr"
 	mnet "go-micro.dev/v5/util/net"
 	mtls "go-micro.dev/v5/util/tls"
+=======
+	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/server"
+	"github.com/go-orb/go-orb/types"
+	"github.com/go-orb/go-orb/util/addr"
+	mnet "github.com/go-orb/go-orb/util/net"
+	mtls "github.com/go-orb/go-orb/util/tls"
+>>>>>>> 3191204 (feat: update to go-orb/go-orb)
 )
 
 var _ server.Entrypoint = (*ServerGRPC)(nil)

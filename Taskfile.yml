@@ -1,19 +1,25 @@
-version: "3"
+version: '3'
+
+env:
+  PROCS: 12
 
 tasks:
   tidy:
-    desc: Run "go mod tidy -go=1.19" in all packages
+    desc: Run "go mod tidy -go=1.20" in all packages
     cmds:
-      - find . -name 'go.mod' -exec /bin/bash -c 'pushd `dirname $1`; go mod tidy -go=1.19; popd' '_' {} \;
+      - find . -name 'go.mod' -print0 | xargs -0 -n1 -P ${PROCS} -- /bin/bash -c 'pushd `dirname $1`; go mod tidy -go=1.20; popd' '_'
   update:
     desc: Run "go get -u ./..." in all packages
     cmds:
-      - find . -name 'go.mod' -exec /bin/bash -c 'pushd `dirname $1`; go get -u ./...; popd' '_' {} \;
+      - find . -name 'go.mod' -print0 | xargs -0 -n1 -P ${PROCS} -- /bin/bash -c 'pushd `dirname $1`; go get -u ./...; popd' '_'
   test:
     desc: Run "go test ./..." in all packages
     cmds:
-      - find . -name 'go.mod' -exec /bin/bash -c 'pushd `dirname $1`; go test ./...; popd' '_' {} \;
+      - find . -name 'go.mod' -print0 | xargs -0 -n1 -P ${PROCS} -- /bin/bash -c 'pushd `dirname $1`; go test ./...; popd' '_'
   workuse:
     desc: Add all plugins to go.work
     cmds:
       - go work use $(find . -name 'go.mod' -printf "%h\n")
+  worksync:
+    cmds:
+      - go work sync

@@ -7,6 +7,7 @@ import (
 
 	consul "github.com/hashicorp/consul/api"
 
+<<<<<<< Updated upstream
 	"go-micro.dev/v5/config"
 	"go-micro.dev/v5/config/source/cli"
 	"go-micro.dev/v5/registry"
@@ -16,6 +17,14 @@ import (
 // metaSchemeKey is the key to use to store the scheme in metadata.
 const metaSchemeKey = "_md_scheme_"
 
+=======
+	"github.com/go-orb/go-orb/config"
+	"github.com/go-orb/go-orb/config/source/cli"
+	"github.com/go-orb/go-orb/registry"
+	"github.com/go-orb/go-orb/types"
+)
+
+>>>>>>> Stashed changes
 // Name provides the name of this registry.
 const Name = "consul"
 
@@ -23,7 +32,11 @@ const Name = "consul"
 //
 //nolint:gochecknoglobals
 var (
+<<<<<<< Updated upstream
 	DefaultAddresses  = []string{"localhost:8500"}
+=======
+	DefaultAddresses  = []string{"localhost:8300"}
+>>>>>>> Stashed changes
 	DefaultAllowStale = true
 )
 
@@ -85,7 +98,11 @@ func (c *Config) ApplyOptions(opts ...registry.Option) {
 	}
 }
 
+<<<<<<< Updated upstream
 // WithAddress sets the Consul server addresses.
+=======
+// WithAddress sets the NATS server addresses.
+>>>>>>> Stashed changes
 func WithAddress(n ...string) registry.Option {
 	return func(c registry.ConfigType) {
 		cfg, ok := c.(*Config)
@@ -97,7 +114,11 @@ func WithAddress(n ...string) registry.Option {
 	}
 }
 
+<<<<<<< Updated upstream
 // WithSecure defines if we want a secure connection to Consul.
+=======
+// WithSecure defines if we want a secure connection to nats.
+>>>>>>> Stashed changes
 func WithSecure(n bool) registry.Option {
 	return func(c registry.ConfigType) {
 		cfg, ok := c.(*Config)

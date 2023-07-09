@@ -1,7 +1,7 @@
-module github.com/go-micro/plugins/registry/regutil
+module github.com/go-orb/plugins/registry/regutil
 
-go 1.19
+go 1.20
 
-require (
-    go-micro.dev/v5 v5.0.0-00010101000000-000000000000
-)
+require github.com/go-orb/go-orb v0.0.1
+
+require golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df // indirect

@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-micro/plugins/registry/mdns/server"
-	"github.com/go-micro/plugins/registry/mdns/util"
+	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/plugins/registry/mdns/server"
+	"github.com/go-orb/plugins/registry/mdns/util"
 	"github.com/miekg/dns"
-	"go-micro.dev/v5/log"
 	"golang.org/x/net/ipv4"
 	"golang.org/x/net/ipv6"
 )

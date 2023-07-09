@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"go-micro.dev/v5/util/container"
+	"github.com/go-orb/go-orb/util/container"
 	"gopkg.in/yaml.v3"
 )
 
