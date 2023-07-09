@@ -16,65 +16,6 @@ import (
 )
 
 var (
-	testData = []*registry.Service{
-		{
-			Name:    "test1",
-			Version: "1.0.1",
-			Nodes: []*registry.Node{
-				{
-					ID:      "test1-1",
-					Address: "10.0.0.1:10001",
-					Scheme:  "http",
-					Metadata: map[string]string{
-						"foo": "bar",
-					},
-				},
-			},
-		},
-		{
-			Name:    "test2",
-			Version: "1.0.2",
-			Nodes: []*registry.Node{
-				{
-					ID:      "test2-1",
-					Address: "10.0.0.2:10002",
-					Scheme:  "grpc",
-					Metadata: map[string]string{
-						"foo2": "bar2",
-					},
-				},
-			},
-		},
-		{
-			Name:    "test3",
-			Version: "1.0.3",
-			Nodes: []*registry.Node{
-				{
-					ID:      "test3-1",
-					Address: "10.0.0.3:10003",
-					Scheme:  "frpc",
-					Metadata: map[string]string{
-						"foo3": "bar3",
-					},
-				},
-			},
-		},
-		{
-			Name:    "test4",
-			Version: "1.0.4",
-			Nodes: []*registry.Node{
-				{
-					ID:      "test4-1",
-					Address: "[::]:10004",
-					Scheme:  "drpc",
-					Metadata: map[string]string{
-						"foo4": "bar4",
-					},
-				},
-			},
-		},
-	}
-
 	testDataEncoding = []*mdnsTxt{
 		{
 			Version: "1.0.0",

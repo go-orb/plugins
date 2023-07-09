@@ -3,10 +3,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-orb/go-orb v0.0.0-20230709054753-fbffd5a3e495 h1:cKTedDUq5fnUi3WLh85DfoHmj/6oL1jjAdKomxHmOqk=
 github.com/go-orb/go-orb v0.0.0-20230709054753-fbffd5a3e495/go.mod h1:fwPp6+c4/ZvI6ZdY9twDeOyNCITNawZ7RLui5xz3oOA=
-github.com/go-orb/go-orb v0.0.1 h1:eUwQ1QvXOgGbq1jMBTpGoYcZuhmbwW8o8TWACiX5gRA=
-github.com/go-orb/go-orb v0.0.1/go.mod h1:4SGQcv8YgWKezsbEwhkENiRkiqKjueSxsRJyaCP37vY=
-github.com/go-orb/go-orb v0.0.2-0.20230709044748-c35b916bd589 h1:U6NP0SbieEuqH0m538ElP5QkwudDxy3KM57LJqY4URQ=
-github.com/go-orb/go-orb v0.0.2-0.20230709044748-c35b916bd589/go.mod h1:fwPp6+c4/ZvI6ZdY9twDeOyNCITNawZ7RLui5xz3oOA=
+github.com/go-orb/go-orb v0.0.0-20230709074211-24bbbfc1a933 h1:7tevdI2a/ug8xedcAhPaqXFMA9IUI6oowzRzdolMtWw=
+github.com/go-orb/go-orb v0.0.0-20230709074211-24bbbfc1a933/go.mod h1:fwPp6+c4/ZvI6ZdY9twDeOyNCITNawZ7RLui5xz3oOA=
 github.com/google/go-cmp v0.2.0/go.mod h1:oXzfMopK8JAjlY9xF4vHSVASa0yLyX7SntLO5aqRK0M=
 github.com/google/subcommands v1.0.1/go.mod h1:ZjhPrFU+Olkh9WazFPsl27BQ4UPiG37m3yTrtFlrHVk=
 github.com/google/subcommands v1.2.0 h1:vWQspBTo2nEqTUFita5/KeEWlUL8kQObDFbub/EN9oE=

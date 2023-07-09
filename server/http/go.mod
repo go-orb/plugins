@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/go-chi/chi v1.5.4
-	github.com/go-orb/go-orb v0.0.0-20230709054753-fbffd5a3e495
+	github.com/go-orb/go-orb v0.0.0-20230709074211-24bbbfc1a933
 	github.com/google/uuid v1.3.0
 	github.com/lucas-clemente/quic-go v0.31.1
 	github.com/pkg/errors v0.9.1

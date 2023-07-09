@@ -5,7 +5,7 @@ go 1.20
 replace github.com/go-orb/plugins/codecs/proto => ../proto
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230709054753-fbffd5a3e495
+	github.com/go-orb/go-orb v0.0.0-20230709074211-24bbbfc1a933
 	github.com/go-playground/form/v4 v4.2.0
 	google.golang.org/protobuf v1.31.0
 )
