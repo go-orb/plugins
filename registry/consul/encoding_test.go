@@ -4,11 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-<<<<<<< Updated upstream
 	"github.com/go-orb/go-orb/registry"
-=======
-	"github.com/go-orb/go-orb/registry"
->>>>>>> Stashed changes
 )
 
 func TestEncodingEndpoints(t *testing.T) {

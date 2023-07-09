@@ -5,17 +5,10 @@ import (
 	"net"
 	"sync"
 
-<<<<<<< Updated upstream
-	"github.com/go-orb/plugins/registry/regutil"
-	"github.com/hashicorp/consul/api"
-	"github.com/hashicorp/consul/api/watch"
-	"github.com/go-orb/go-orb/registry"
-=======
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/plugins/registry/regutil"
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/api/watch"
->>>>>>> Stashed changes
 )
 
 var _ registry.Watcher = (*consulWatcher)(nil)
@@ -121,11 +114,7 @@ func (cw *consulWatcher) serviceHandler(idx uint64, data interface{}) { //nolint
 		svc.Nodes = append(svc.Nodes, &registry.Node{
 			ID:       id,
 			Address:  net.JoinHostPort(address, fmt.Sprint(entry.Service.Port)),
-<<<<<<< Updated upstream
 			Metadata: entry.Service.Meta,
-=======
-			Metadata: decodeMetadata(entry.Service.Tags),
->>>>>>> Stashed changes
 		})
 	}
 

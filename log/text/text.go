@@ -20,10 +20,10 @@ func init() {
 
 // NewHandlerstdout writes text to stdout.
 func NewHandlerstdout(level slog.Leveler) (slog.Handler, error) {
-	return slog.HandlerOptions{Level: level}.NewTextHandler(os.Stdout), nil
+	return slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level}), nil
 }
 
 // NewHandlerStderr writes text to stderr.
 func NewHandlerStderr(level slog.Leveler) (slog.Handler, error) {
-	return slog.HandlerOptions{Level: level}.NewTextHandler(os.Stderr), nil
+	return slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: level}), nil
 }

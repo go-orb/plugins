@@ -2,7 +2,7 @@
 pushd registry/consul/test/bin/linux_amd64 || exit 1
 
 if [ ! -x consul ]; then
-    wget -q -O consul.zip https://releases.hashicorp.com/consul/1.14.3/consul_1.14.3_linux_amd64.zip
+    wget -q -O consul.zip https://releases.hashicorp.com/consul/1.16.0/consul_1.16.0_linux_amd64.zip
     unzip consul.zip
 fi
 

@@ -583,9 +583,9 @@ func setupServer(t testing.TB, nolog bool, opts ...mhttp.Option) (*mhttp.ServerH
 	name := types.ServiceName("test-server")
 	lopts := []log.Option{}
 	if nolog {
-		lopts = append(lopts, log.WithLevel(log.ErrorLevel))
+		lopts = append(lopts, log.WithLevel(log.LevelError))
 	} else {
-		lopts = append(lopts, log.WithLevel(log.DebugLevel))
+		lopts = append(lopts, log.WithLevel(log.LevelDebug))
 	}
 
 	cancel := func() {}

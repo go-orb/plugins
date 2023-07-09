@@ -97,14 +97,14 @@ func TestConsul_GetService_WithHealthyServiceNodes(t *testing.T) {
 	// warning is still seen as healthy, critical is not
 	svcs := []*consul.ServiceEntry{
 		newServiceEntry(
-			"node-name-1", "node-address-1", "service-name", "v1.0.0",
+			"node-name-1", "node-address-1", "service-name", "v1.0.0", "http",
 			[]*consul.HealthCheck{
 				newHealthCheck("node-name-1", "service-name", "passing"),
 				newHealthCheck("node-name-1", "service-name", "warning"),
 			},
 		),
 		newServiceEntry(
-			"node-name-2", "node-address-2", "service-name", "v1.0.0",
+			"node-name-2", "node-address-2", "service-name", "v1.0.0", "grpc",
 			[]*consul.HealthCheck{
 				newHealthCheck("node-name-2", "service-name", "passing"),
 				newHealthCheck("node-name-2", "service-name", "warning"),
@@ -137,14 +137,14 @@ func TestConsul_GetService_WithUnhealthyServiceNode(t *testing.T) {
 	// warning is still seen as healthy, critical is not
 	svcs := []*consul.ServiceEntry{
 		newServiceEntry(
-			"node-name-1", "node-address-1", "service-name", "v1.0.0",
+			"node-name-1", "node-address-1", "service-name", "v1.0.0", "http",
 			[]*consul.HealthCheck{
 				newHealthCheck("node-name-1", "service-name", "passing"),
 				newHealthCheck("node-name-1", "service-name", "warning"),
 			},
 		),
 		newServiceEntry(
-			"node-name-2", "node-address-2", "service-name", "v1.0.0",
+			"node-name-2", "node-address-2", "service-name", "v1.0.0", "grpc",
 			[]*consul.HealthCheck{
 				newHealthCheck("node-name-2", "service-name", "passing"),
 				newHealthCheck("node-name-2", "service-name", "critical"),
@@ -177,14 +177,14 @@ func TestConsul_GetService_WithUnhealthyServiceNodes(t *testing.T) {
 	// warning is still seen as healthy, critical is not
 	svcs := []*consul.ServiceEntry{
 		newServiceEntry(
-			"node-name-1", "node-address-1", "service-name", "v1.0.0",
+			"node-name-1", "node-address-1", "service-name", "v1.0.0", "http",
 			[]*consul.HealthCheck{
 				newHealthCheck("node-name-1", "service-name", "passing"),
 				newHealthCheck("node-name-1", "service-name", "critical"),
 			},
 		),
 		newServiceEntry(
-			"node-name-2", "node-address-2", "service-name", "v1.0.0",
+			"node-name-2", "node-address-2", "service-name", "v1.0.0", "grpc",
 			[]*consul.HealthCheck{
 				newHealthCheck("node-name-2", "service-name", "passing"),
 				newHealthCheck("node-name-2", "service-name", "critical"),

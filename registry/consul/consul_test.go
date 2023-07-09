@@ -6,10 +6,10 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/hashicorp/consul/sdk/testutil"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
+	"github.com/hashicorp/consul/sdk/testutil"
 
 	_ "github.com/go-orb/plugins/log/text"
 	"github.com/go-orb/plugins/registry/tests"

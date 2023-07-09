@@ -168,32 +168,9 @@ func TestMain(m *testing.M) {
 	}
 
 	cfg, err := NewConfig(types.ServiceName("test.service"), nil)
-	require.NoError(t, err, "failed to create registry config")
-
-	r := New(cfg, l)
-	require.NoError(t, r.Start(), "failed to start")
-
-	for _, service := range testData {
-		require.NoError(t, r.Register(service), "failed to register service")
-
-		// Assure service has been registered properly.
-		var s []*registry.Service
-		s, err = r.GetService(service.Name)
-		require.NoError(t, err, "failed fetch services")
-		require.Equal(t, len(s), 1, "registry should only contain one registered service")
-		require.Equal(t, s[0].Name, service.Name, "service name does not match")
-		require.Equal(t, s[0].Version, service.Version, "service version does not match")
-		require.Equal(t, len(s[0].Nodes), 1, "service should only contain one node")
-
-		node := s[0].Nodes[0]
-		require.Equal(t, node.ID, service.Nodes[0].ID, "node ID does not match")
-		require.Equal(t, node.Address, service.Nodes[0].Address, "node address does not match")
-		require.Equal(t, node.Scheme, service.Nodes[0].Scheme, "node scheme does not match")
-	}
-
 	r := New(cfg, logger)
-	if err := r.Start(); err != nil {
-		logger.Error("failed to start", err)
+	if err != nil {
+		logger.Error("failed to create registry config", err)
 		os.Exit(1)
 	}
 
@@ -239,10 +216,10 @@ func TestWatcher(t *testing.T) {
 		require.Equal(t, expected.Version, actual.Version, "service version not equal")
 		require.Equal(t, 1, len(actual.Nodes), "expected only 1 node")
 
-		node := s.Nodes[0]
-		require.Equal(t, node.ID, service.Nodes[0].ID, "node IDs not equal")
-		require.Equal(t, node.Address, service.Nodes[0].Address, "node addresses not equal")
-		require.Equal(t, node.Scheme, service.Nodes[0].Scheme, "node scheme does not equal")
+		node := expected.Nodes[0]
+		require.Equal(t, node.ID, actual.Nodes[0].ID, "node IDs not equal")
+		require.Equal(t, node.Address, actual.Nodes[0].Address, "node addresses not equal")
+		require.Equal(t, node.Scheme, actual.Nodes[0].Scheme, "node scheme does not equal")
 	}
 
 	// New registry

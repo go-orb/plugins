@@ -8,11 +8,7 @@ import (
 	"io"
 	"time"
 
-<<<<<<< HEAD
 	"github.com/go-orb/plugins/server/grpc/tests/proto"
-=======
-	"github.com/go-orb/plugins/server/grpc/tests/proto"
->>>>>>> 3191204 (feat: update to go-orb/go-orb)
 	"golang.org/x/exp/slog"
 )
 

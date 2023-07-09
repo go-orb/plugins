@@ -20,10 +20,10 @@ func init() {
 
 // NewHandlerStdout writes json to stdout.
 func NewHandlerStdout(level slog.Leveler) (slog.Handler, error) {
-	return slog.HandlerOptions{Level: level}.NewJSONHandler(os.Stdout), nil
+	return slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: level}), nil
 }
 
 // NewHandlerStderr writes json to stderr.
 func NewHandlerStderr(level slog.Leveler) (slog.Handler, error) {
-	return slog.HandlerOptions{Level: level}.NewJSONHandler(os.Stderr), nil
+	return slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: level}), nil
 }

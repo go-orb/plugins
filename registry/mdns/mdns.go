@@ -201,17 +201,12 @@ func (m *RegistryMDNS) registerNodes(service *registry.Service, entries []*mdnsE
 		}
 
 		// encode the scheme with the metadata if not already given.
-<<<<<<< HEAD
 		if node.Metadata == nil {
 			node.Metadata = make(map[string]string)
 		}
 
 		if _, ok := node.Metadata[metaSchemeKey]; !ok {
 			node.Metadata[metaSchemeKey] = node.Scheme
-=======
-		if _, ok := node.Metadata["scheme"]; !ok {
-			node.Metadata["scheme"] = node.Scheme
->>>>>>> 1c6a9e3 (feat(registry/mdns): add support for registering schemes)
 		}
 
 		txt, err := encode(&mdnsTxt{

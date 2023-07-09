@@ -2,11 +2,7 @@
 package regutil
 
 import (
-<<<<<<< Updated upstream
 	"github.com/go-orb/go-orb/registry"
-=======
-	"github.com/go-orb/go-orb/registry"
->>>>>>> Stashed changes
 )
 
 func addNodes(old, neu []*registry.Node) []*registry.Node {
