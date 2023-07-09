@@ -11,22 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 
-<<<<<<< HEAD
-	"go-micro.dev/v5/config"
-	"go-micro.dev/v5/log"
-	"go-micro.dev/v5/server"
-	"go-micro.dev/v5/types"
-	mtls "go-micro.dev/v5/util/tls"
-
-	mgrpc "github.com/go-micro/plugins/server/grpc"
-	"github.com/go-micro/plugins/server/grpc/tests/handler"
-	"github.com/go-micro/plugins/server/grpc/tests/proto"
-	tgrpc "github.com/go-micro/plugins/server/grpc/tests/util/grpc"
-
-	_ "github.com/go-micro/plugins/codecs/yaml"
-	_ "github.com/go-micro/plugins/config/source/file"
-	_ "github.com/go-micro/plugins/log/text"
-=======
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/server"
@@ -41,7 +25,6 @@ import (
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	_ "github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/text"
->>>>>>> 3191204 (feat: update to go-orb/go-orb)
 )
 
 func init() {

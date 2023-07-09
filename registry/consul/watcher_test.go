@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/consul/api"
 <<<<<<< Updated upstream
-	"go-micro.dev/v5/registry"
+	"github.com/go-orb/go-orb/registry"
 =======
 	"github.com/go-orb/go-orb/registry"
 >>>>>>> Stashed changes

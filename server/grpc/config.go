@@ -11,9 +11,9 @@ import (
 	"google.golang.org/grpc"
 
 <<<<<<< HEAD
-	"go-micro.dev/v5/server"
-	"go-micro.dev/v5/util/matcher"
-	mtls "go-micro.dev/v5/util/tls"
+	"github.com/go-orb/go-orb/server"
+	"github.com/go-orb/go-orb/util/matcher"
+	mtls "github.com/go-orb/go-orb/util/tls"
 =======
 	"github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/util/matcher"

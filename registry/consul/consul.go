@@ -16,10 +16,10 @@ import (
 	consul "github.com/hashicorp/consul/api"
 	hash "github.com/mitchellh/hashstructure"
 <<<<<<< Updated upstream
-	"go-micro.dev/v5/log"
-	"go-micro.dev/v5/registry"
-	"go-micro.dev/v5/types"
-	mnet "go-micro.dev/v5/util/net"
+	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
+	"github.com/go-orb/go-orb/types"
+	mnet "github.com/go-orb/go-orb/util/net"
 =======
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"

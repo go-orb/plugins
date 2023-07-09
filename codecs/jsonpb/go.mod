@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/go-orb/go-orb v0.0.1
-	github.com/go-orb/plugins/codecs/proto v0.0.0-00010101000000-000000000000
+	github.com/go-orb/plugins/codecs/proto v0.0.0
 	github.com/google/go-cmp v0.5.9
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
 	google.golang.org/protobuf v1.31.0

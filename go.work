@@ -10,12 +10,12 @@ use (
 	./config/source/cli/urfave
 	./config/source/file
 	./config/source/http
+	./config/tests
 	./log/json
 	./log/text
 	./registry/consul
 	./registry/mdns
 	./registry/nats
-	./server/grpc
 	./registry/regutil
 	./registry/tests
 	./server/grpc

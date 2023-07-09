@@ -12,6 +12,7 @@ import (
 	"github.com/go-orb/go-orb/types"
 
 	_ "github.com/go-orb/plugins/log/text"
+	"github.com/go-orb/plugins/registry/tests"
 )
 
 var (

@@ -8,7 +8,7 @@ import (
 	"io"
 
 <<<<<<< Updated upstream
-	"go-micro.dev/v5/registry"
+	"github.com/go-orb/go-orb/registry"
 =======
 	"github.com/go-orb/go-orb/registry"
 >>>>>>> Stashed changes

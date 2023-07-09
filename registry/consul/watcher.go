@@ -6,10 +6,10 @@ import (
 	"sync"
 
 <<<<<<< Updated upstream
-	"github.com/go-micro/plugins/registry/regutil"
+	"github.com/go-orb/plugins/registry/regutil"
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/api/watch"
-	"go-micro.dev/v5/registry"
+	"github.com/go-orb/go-orb/registry"
 =======
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/plugins/registry/regutil"

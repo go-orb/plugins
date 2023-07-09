@@ -15,10 +15,10 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 <<<<<<< HEAD
-	"go-micro.dev/v5/log"
+	"github.com/go-orb/go-orb/log"
 
-	mgrpc "github.com/go-micro/plugins/server/grpc"
-	"github.com/go-micro/plugins/server/grpc/tests/proto"
+	mgrpc "github.com/go-orb/plugins/server/grpc"
+	"github.com/go-orb/plugins/server/grpc/tests/proto"
 =======
 	"github.com/go-orb/go-orb/log"
 

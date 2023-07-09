@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/registry/mdns
 go 1.20
 
 require (
-	github.com/go-orb/plugins/log/text v0.0.0-00010101000000-000000000000
+	github.com/go-orb/plugins/log/text v0.0.0
 	github.com/google/uuid v1.3.0
 	github.com/miekg/dns v1.1.50
 	github.com/stretchr/testify v1.8.3

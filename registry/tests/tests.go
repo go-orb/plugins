@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"go-micro.dev/v5/log"
-	"go-micro.dev/v5/registry"
+	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
 	"golang.org/x/exp/slog"
 )
 

@@ -4,9 +4,9 @@ go 1.18
 
 require (
 	github.com/go-orb/go-orb v0.0.1 
-	github.com/go-orb/plugins/config/source/cli/urfave v0.0.1
-	github.com/go-orb/plugins/config/source/file v0.0.1
-	github.com/go-orb/plugins/config/source/http v0.0.1
+	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0
+	github.com/go-orb/plugins/config/source/file v0.0.0
+	github.com/go-orb/plugins/config/source/http v0.0.0
 	github.com/stretchr/testify v1.8.0
 )
 
