@@ -1,6 +1,6 @@
-# go-micro.dev/v5 -> plugins
+# github.com/go-orb/go-orb -> plugins
 
-This repo contains plugins for [go-micro.dev/v5](https://github.com/go-orb/go-micro).
+This repo contains plugins for [github.com/go-orb/go-orb](https://github.com/go-orb/go-orb).
 
 ## WIP
 

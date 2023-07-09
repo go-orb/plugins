@@ -1,5 +1,7 @@
 module github.com/go-orb/plugins/config/source/http
 
-go 1.18
+go 1.20
 
-require go-micro.dev/v5 v5.0.0-00010101000000-000000000000
+require github.com/go-orb/go-orb v0.0.1
+
+require golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df // indirect

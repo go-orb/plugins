@@ -10,8 +10,8 @@ import (
 
 	"golang.org/x/exp/slog"
 
-	"github.com/go-micro/plugins/server/http/headers"
-	"github.com/go-micro/plugins/server/http/utils/header"
+	"github.com/go-orb/plugins/server/http/headers"
+	"github.com/go-orb/plugins/server/http/utils/header"
 )
 
 // TODO: decode body now also does content type setting, maybe separate that out

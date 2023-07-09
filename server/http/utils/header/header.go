@@ -5,9 +5,9 @@ import (
 	"mime"
 	"strings"
 
-	"go-micro.dev/v5/codecs"
+	"github.com/go-orb/go-orb/codecs"
 
-	"github.com/go-micro/plugins/server/http/headers"
+	"github.com/go-orb/plugins/server/http/headers"
 )
 
 // GetContentType parses the content type from the header value.

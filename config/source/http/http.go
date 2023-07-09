@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"go-micro.dev/v5/codecs"
-	"go-micro.dev/v5/config/source"
-	"go-micro.dev/v5/log"
+	"github.com/go-orb/go-orb/codecs"
+	"github.com/go-orb/go-orb/config/source"
+	"github.com/go-orb/go-orb/log"
 )
 
 func init() {

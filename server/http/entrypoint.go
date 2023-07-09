@@ -17,16 +17,16 @@ import (
 
 	"golang.org/x/exp/slog"
 
-	"go-micro.dev/v5/codecs"
-	"go-micro.dev/v5/log"
-	"go-micro.dev/v5/server"
-	"go-micro.dev/v5/types"
-	"go-micro.dev/v5/util/addr"
-	mtls "go-micro.dev/v5/util/tls"
+	"github.com/go-orb/go-orb/codecs"
+	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/server"
+	"github.com/go-orb/go-orb/types"
+	"github.com/go-orb/go-orb/util/addr"
+	mtls "github.com/go-orb/go-orb/util/tls"
 
-	"github.com/go-micro/plugins/server/http/router"
-	mtcp "github.com/go-micro/plugins/server/http/utils/tcp"
-	mudp "github.com/go-micro/plugins/server/http/utils/udp"
+	"github.com/go-orb/plugins/server/http/router"
+	mtcp "github.com/go-orb/plugins/server/http/utils/tcp"
+	mudp "github.com/go-orb/plugins/server/http/utils/udp"
 )
 
 var _ server.Entrypoint = (*ServerHTTP)(nil)

@@ -12,11 +12,11 @@ import (
 
 	"golang.org/x/exp/slog"
 
-	log "go-micro.dev/v5/log"
-	"go-micro.dev/v5/registry"
-	"go-micro.dev/v5/types"
+	log "github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
+	"github.com/go-orb/go-orb/types"
 
-	_ "github.com/go-micro/plugins/log/text"
+	_ "github.com/go-orb/plugins/log/text"
 
 	nserver "github.com/nats-io/nats-server/v2/server"
 )

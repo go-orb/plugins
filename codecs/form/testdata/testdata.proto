@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/go-micro/plugins/codecs/form/testdata;testdata";
+option go_package = "github.com/go-orb/plugins/codecs/form/testdata;testdata";
 
 package testproto;
 

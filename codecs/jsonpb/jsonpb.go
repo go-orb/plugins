@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"go-micro.dev/v5/codecs"
+	"github.com/go-orb/go-orb/codecs"
 )
 
 var _ codecs.Marshaler = (*JSONPb)(nil)

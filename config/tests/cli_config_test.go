@@ -5,12 +5,12 @@ import (
 	"os"
 	"testing"
 
-	_ "github.com/go-micro/plugins/codecs/json"
-	_ "github.com/go-micro/plugins/config/source/cli/urfave"
+	_ "github.com/go-orb/plugins/codecs/json"
+	_ "github.com/go-orb/plugins/config/source/cli/urfave"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go-micro.dev/v5/config"
-	"go-micro.dev/v5/config/source/cli"
+	"github.com/go-orb/go-orb/config"
+	"github.com/go-orb/go-orb/config/source/cli"
 )
 
 func TestCliConfig(t *testing.T) {

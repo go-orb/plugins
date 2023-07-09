@@ -1,12 +1,12 @@
-module github.com/go-micro/plugins/config/tests
+module github.com/go-orb/plugins/config/tests
 
 go 1.18
 
 require (
-	go-micro.dev/v5 v5.0.0-00010101000000-000000000000
-	github.com/go-micro/plugins/config/source/cli/urfave v0.0.1-00010101000000-000000000000
-	github.com/go-micro/plugins/config/source/file v0.0.1-00010101000000-000000000000
-	github.com/go-micro/plugins/config/source/http v0.0.1-00010101000000-000000000000
+	github.com/go-orb/go-orb v0.0.1 
+	github.com/go-orb/plugins/config/source/cli/urfave v0.0.1
+	github.com/go-orb/plugins/config/source/file v0.0.1
+	github.com/go-orb/plugins/config/source/http v0.0.1
 	github.com/stretchr/testify v1.8.0
 )
 

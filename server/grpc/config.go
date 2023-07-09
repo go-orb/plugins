@@ -10,9 +10,15 @@ import (
 	"golang.org/x/exp/slog"
 	"google.golang.org/grpc"
 
+<<<<<<< HEAD
 	"go-micro.dev/v5/server"
 	"go-micro.dev/v5/util/matcher"
 	mtls "go-micro.dev/v5/util/tls"
+=======
+	"github.com/go-orb/go-orb/server"
+	"github.com/go-orb/go-orb/util/matcher"
+	mtls "github.com/go-orb/go-orb/util/tls"
+>>>>>>> 3191204 (feat: update to go-orb/go-orb)
 )
 
 var _ (server.EntrypointConfig) = (*Config)(nil)

@@ -7,7 +7,7 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "./testdata;github.com/go-micro/plugins/codecs/proto/testdata";
+option go_package = "./testdata;github.com/go-orb/plugins/codecs/proto/testdata";
 
 // SimpleMessage represents a simple message sent to the Echo service.
 message SimpleMessage { string id = 1; }

@@ -11,9 +11,9 @@ var httpTemplate = `
 import (
 	"google.golang.org/grpc"
 
-	"go-micro.dev/v5/server"
+	"github.com/go-orb/go-orb/server"
 
-	mhttp "github.com/go-micro/plugins/server/http"
+	mhttp "github.com/go-orb/plugins/server/http"
 )
 {{range .Services}}
 

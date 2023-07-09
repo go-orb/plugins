@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/urfave/cli/v2"
-	oCli "go-micro.dev/v5/config/source/cli"
+	oCli "github.com/go-orb/go-orb/config/source/cli"
 )
 
 func init() {

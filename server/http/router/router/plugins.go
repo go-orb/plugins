@@ -1,6 +1,6 @@
 package router
 
-import "go-micro.dev/v5/util/container"
+import "github.com/go-orb/go-orb/util/container"
 
 // Plugins is the registry for Logger plugins.
 var Plugins = container.NewMap[NewRouterFunc]() //nolint:gochecknoglobals

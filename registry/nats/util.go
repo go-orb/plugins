@@ -1,7 +1,7 @@
 package nats
 
 import (
-	"go-micro.dev/v5/registry"
+	"github.com/go-orb/go-orb/registry"
 )
 
 func cp(current []*registry.Service) []*registry.Service {

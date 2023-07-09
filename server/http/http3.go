@@ -12,7 +12,7 @@ import (
 	"sync"
 
 	"github.com/lucas-clemente/quic-go/http3"
-	"go-micro.dev/v5/util/addr"
+	"github.com/go-orb/go-orb/util/addr"
 )
 
 // Errors returned by the HTTP3 server.

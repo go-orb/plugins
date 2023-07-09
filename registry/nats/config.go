@@ -4,13 +4,14 @@ import (
 	"crypto/tls"
 	"fmt"
 
-	"go-micro.dev/v5/config"
-	"go-micro.dev/v5/config/source/cli"
-	"go-micro.dev/v5/registry"
-	"go-micro.dev/v5/types"
+	"github.com/go-orb/go-orb/config"
+	"github.com/go-orb/go-orb/config/source/cli"
+	"github.com/go-orb/go-orb/registry"
+	"github.com/go-orb/go-orb/types"
 )
 
-const name = "nats"
+// Name provides the name of this registry.
+const Name = "nats"
 
 // Defaults.
 //
@@ -30,12 +31,12 @@ func init() {
 		cli.Usage("Registry addresses."),
 	))
 
-	if err := registry.Plugins.Add(name, registry.ProviderFunc(ProvideRegistryNATS)); err != nil {
+	if err := registry.Plugins.Add(Name, registry.ProviderFunc(ProvideRegistryNATS)); err != nil {
 		panic(err)
 	}
 }
 
-// Config provides configuration for the MDNS registry.
+// Config provides configuration for the NATS registry.
 type Config struct {
 	registry.Config `yaml:",inline"`
 

@@ -15,15 +15,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-micro/plugins/registry/mdns/client"
-	"github.com/go-micro/plugins/registry/mdns/dns"
-	"github.com/go-micro/plugins/registry/mdns/server"
-	"github.com/go-micro/plugins/registry/mdns/zone"
+	"github.com/go-orb/plugins/registry/mdns/client"
+	"github.com/go-orb/plugins/registry/mdns/dns"
+	"github.com/go-orb/plugins/registry/mdns/server"
+	"github.com/go-orb/plugins/registry/mdns/zone"
 
+	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
+	"github.com/go-orb/go-orb/types"
 	"github.com/google/uuid"
-	"go-micro.dev/v5/log"
-	"go-micro.dev/v5/registry"
-	"go-micro.dev/v5/types"
 )
 
 type mdnsTxt struct {
@@ -127,7 +127,7 @@ func (m *RegistryMDNS) Stop(ctx context.Context) error {
 
 // String returns the plugin name.
 func (m *RegistryMDNS) String() string {
-	return name
+	return Name
 }
 
 // Type returns the component type.
@@ -173,6 +173,7 @@ func (m *RegistryMDNS) Register(service *registry.Service, opts ...registry.Regi
 	return err
 }
 
+//nolint:funlen
 func (m *RegistryMDNS) registerNodes(service *registry.Service, entries []*mdnsEntry) ([]*mdnsEntry, error) {
 	var gerr error
 
@@ -195,6 +196,15 @@ func (m *RegistryMDNS) registerNodes(service *registry.Service, entries []*mdnsE
 		} else {
 			// Doesn't exist
 			entry = &mdnsEntry{}
+		}
+
+		// encode the scheme with the metadata if not already given.
+		if node.Metadata == nil {
+			node.Metadata = make(map[string]string)
+		}
+
+		if _, ok := node.Metadata[metaSchemeKey]; !ok {
+			node.Metadata[metaSchemeKey] = node.Scheme
 		}
 
 		txt, err := encode(&mdnsTxt{
@@ -295,8 +305,6 @@ func (m *RegistryMDNS) Deregister(service *registry.Service, opts ...registry.De
 func (m *RegistryMDNS) GetService(service string, opts ...registry.GetOption) ([]*registry.Service, error) {
 	serviceMap := make(map[string]*registry.Service)
 	entries := make(chan *client.ServiceEntry, 10)
-	done := make(chan bool)
-
 	params := client.DefaultParams(service)
 
 	// Set context with timeout
@@ -308,6 +316,7 @@ func (m *RegistryMDNS) GetService(service string, opts ...registry.GetOption) ([
 	params.Entries = entries
 	params.Domain = m.config.Domain
 
+	done := make(chan bool)
 	go m.getService(service, params, serviceMap, entries, done)
 
 	// Execute the query
@@ -559,6 +568,7 @@ func (m *RegistryMDNS) watch() {
 	}
 }
 
+//nolint:gocognit
 func (m *mdnsWatcher) Next() (*registry.Result, error) {
 	for {
 		select {
@@ -609,11 +619,17 @@ func (m *mdnsWatcher) Next() (*registry.Result, error) {
 				addr = entry.Addr.String()
 			}
 
-			service.Nodes = append(service.Nodes, &registry.Node{
+			rNode := &registry.Node{
 				ID:       strings.TrimSuffix(entry.Name, suffix),
 				Address:  addr,
 				Metadata: txt.Metadata,
-			})
+			}
+
+			if _, ok := rNode.Metadata[metaSchemeKey]; ok {
+				rNode.Scheme = rNode.Metadata[metaSchemeKey]
+			}
+
+			service.Nodes = append(service.Nodes, rNode)
 
 			return &registry.Result{
 				Action:  action,
