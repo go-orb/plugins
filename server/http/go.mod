@@ -5,6 +5,13 @@ go 1.20
 require (
 	github.com/go-chi/chi v1.5.4
 	github.com/go-orb/go-orb v0.0.0-20230709080055-9c340136e7d1
+	github.com/go-orb/plugins/codecs/form v0.0.0-20230709081439-ab0ce6463c52
+	github.com/go-orb/plugins/codecs/json v0.0.0-20230709081439-ab0ce6463c52
+	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20230709081439-ab0ce6463c52
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20230709081439-ab0ce6463c52
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230709081439-ab0ce6463c52
+	github.com/go-orb/plugins/config/source/file v0.0.0-20230709081439-ab0ce6463c52
+	github.com/go-orb/plugins/log/text v0.0.0-20230709081439-ab0ce6463c52
 	github.com/google/uuid v1.3.0
 	github.com/lucas-clemente/quic-go v0.31.1
 	github.com/pkg/errors v0.9.1
@@ -27,11 +34,13 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/kr/text v0.2.0 // indirect
 	github.com/marten-seemann/qpack v0.3.0 // indirect
 	github.com/marten-seemann/qtls-go1-18 v0.1.4 // indirect
 	github.com/marten-seemann/qtls-go1-19 v0.1.2 // indirect
 	github.com/onsi/ginkgo/v2 v2.11.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
+	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	golang.org/x/crypto v0.11.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect

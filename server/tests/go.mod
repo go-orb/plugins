@@ -4,6 +4,8 @@ go 1.20
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20230709080055-9c340136e7d1
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230709081439-ab0ce6463c52
+	github.com/go-orb/plugins/config/source/file v0.0.0-20230709081439-ab0ce6463c52
 	github.com/google/uuid v1.3.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df

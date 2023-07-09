@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/go-orb/go-orb v0.0.0-20230709080055-9c340136e7d1
 	github.com/go-orb/plugins/log/text v0.0.0-20230709063950-8342f9783f18
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20230709074538-c1e9cf0e8481
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20230709081439-ab0ce6463c52
 	github.com/go-orb/plugins/registry/tests v0.0.0-20230709063950-8342f9783f18
 	github.com/hashicorp/consul/api v1.22.0
 	github.com/hashicorp/consul/sdk v0.14.0
