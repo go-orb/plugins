@@ -14,17 +14,10 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 
-<<<<<<< HEAD
 	"github.com/go-orb/go-orb/log"
 
 	mgrpc "github.com/go-orb/plugins/server/grpc"
 	"github.com/go-orb/plugins/server/grpc/tests/proto"
-=======
-	"github.com/go-orb/go-orb/log"
-
-	mgrpc "github.com/go-orb/plugins/server/grpc"
-	"github.com/go-orb/plugins/server/grpc/tests/proto"
->>>>>>> 3191204 (feat: update to go-orb/go-orb)
 )
 
 // SetupServer will create a gRPC test server.

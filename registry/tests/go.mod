@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/go-orb/go-orb v0.0.1
-	github.com/stretchr/testify v1.8.3
+	github.com/stretchr/testify v1.8.4
 	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
 )
 

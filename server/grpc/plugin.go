@@ -3,17 +3,10 @@ package grpc
 import (
 	"errors"
 
-<<<<<<< HEAD
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/container"
-=======
-	"github.com/go-orb/go-orb/log"
-	"github.com/go-orb/go-orb/server"
-	"github.com/go-orb/go-orb/types"
-	"github.com/go-orb/go-orb/util/container"
->>>>>>> 3191204 (feat: update to go-orb/go-orb)
 	"google.golang.org/grpc"
 )
 
