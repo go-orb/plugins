@@ -8,11 +8,11 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/google/uuid"
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/config/source"
 	"github.com/go-orb/go-orb/log"
+	"github.com/google/uuid"
 )
 
 func init() {
@@ -113,7 +113,7 @@ func TempFile(data []byte, filetype string) *url.URL {
 	dir := os.TempDir()
 	filePath := path.Join(dir, "go-micro-config-"+uuid.NewString()+"."+filetype)
 
-	file, err := os.OpenFile(path.Clean(filePath), os.O_CREATE|os.O_RDWR, 0440)
+	file, err := os.OpenFile(path.Clean(filePath), os.O_CREATE|os.O_RDWR, 0400)
 	if err != nil {
 		panic(fmt.Errorf("failed to create temporary config file '%s': %w", filePath, err))
 	}

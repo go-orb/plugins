@@ -78,7 +78,7 @@ func newTransport(config *tls.Config) *http.Transport {
 }
 
 // Deregister deregisters a service within the registry.
-func (c *RegistryConsul) Deregister(s *registry.Service, opts ...registry.DeregisterOption) error {
+func (c *RegistryConsul) Deregister(s *registry.Service, _ ...registry.DeregisterOption) error {
 	if len(s.Nodes) == 0 {
 		return errors.New("require at least one node")
 	}
@@ -243,7 +243,7 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 // GetService returns a service from the registry.
 //
 //nolint:funlen
-func (c *RegistryConsul) GetService(name string, opts ...registry.GetOption) ([]*registry.Service, error) {
+func (c *RegistryConsul) GetService(name string, _ ...registry.GetOption) ([]*registry.Service, error) {
 	var (
 		rsp []*consul.ServiceEntry
 		err error
@@ -330,7 +330,7 @@ func (c *RegistryConsul) GetService(name string, opts ...registry.GetOption) ([]
 }
 
 // ListServices lists services within the registry.
-func (c *RegistryConsul) ListServices(opts ...registry.ListOption) ([]*registry.Service, error) {
+func (c *RegistryConsul) ListServices(_ ...registry.ListOption) ([]*registry.Service, error) {
 	rsp, _, err := c.Client().Catalog().Services(c.queryOptions)
 	if err != nil {
 		return nil, err
@@ -411,7 +411,7 @@ func ProvideRegistryConsul(
 }
 
 // New creates a new consul registry.
-func New(cfg Config, logger log.Logger) *RegistryConsul {
+func New(cfg Config, _ log.Logger) *RegistryConsul {
 	cRegistry := &RegistryConsul{
 		config:      cfg,
 		register:    make(map[string]uint64),
@@ -495,7 +495,7 @@ func (c *RegistryConsul) Start() error {
 }
 
 // Stop the registry.
-func (c *RegistryConsul) Stop(ctx context.Context) error {
+func (c *RegistryConsul) Stop(_ context.Context) error {
 	// remove the client
 	c.client = nil
 

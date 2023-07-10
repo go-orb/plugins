@@ -30,13 +30,8 @@
               {
                 "name": "test-ep-6",
                 "address": ":4516",
-                "handlers": [
-                  "handler-1",
-                  "handler-2"
-                ],
-                "middleware": [
-                  "middleware-1"
-                ]
+                "handlers": ["handler-1", "handler-2"],
+                "middleware": ["middleware-1"]
               }
             ]
           }

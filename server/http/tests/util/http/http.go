@@ -115,11 +115,7 @@ func TestGetRequest(t testing.TB, addr string, reqT ReqType) error {
 		return err
 	}
 
-	if err := checkJSONResponse(body, testName); err != nil {
-		return err
-	}
-
-	return nil
+	return checkJSONResponse(body, testName)
 }
 
 // TestPostRequestJSON makes a POST request to the echo endpoint.
@@ -137,11 +133,7 @@ func TestPostRequestJSON(t testing.TB, addr string, reqT ReqType) error {
 		return err
 	}
 
-	if err := checkJSONResponse(body, testName); err != nil {
-		return err
-	}
-
-	return nil
+	return checkJSONResponse(body, testName)
 }
 
 // TestPostRequestProto makes a POST request to the echo endpoint.
@@ -160,11 +152,7 @@ func TestPostRequestProto(t testing.TB, addr, ct string, reqT ReqType) error {
 		return err
 	}
 
-	if err := checkProtoResponse(body, name); err != nil {
-		return err
-	}
-
-	return nil
+	return checkProtoResponse(body, name)
 }
 
 // TestTLSProto temporary test stuff.

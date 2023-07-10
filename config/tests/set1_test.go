@@ -4,9 +4,9 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/go-orb/go-orb/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/go-orb/go-orb/config"
 
 	_ "github.com/go-orb/plugins/codecs/json"
 	_ "github.com/go-orb/plugins/codecs/yaml"

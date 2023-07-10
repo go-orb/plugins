@@ -10,7 +10,7 @@ echo "Downloading Polaris"
 
 # Find latest release
 package_url=$(curl -s "https://api.github.com/repos/${ORG}/${REPO}/releases/latest" |
-	grep "https://github.com/polarismesh/polaris/releases/download" | grep "standalone" | grep "$OS" | grep "$ARCH" |
+	grep "https://github.com/polarismesh/polaris/releases/download" | grep "standalone" | grep "${OS}" | grep "${ARCH}" |
 	cut -d : -f 2,3 |
 	tr -d '\"[:space:]')
 
@@ -23,7 +23,7 @@ wget -q "${package_url}"
 unzip -o "*.linux.amd64.zip"
 
 package_name=$(find . -maxdepth 1 -name "polaris*" -type d)
-if [ ! -d "${package_name}" ]; then
+if [[ ! -d ${package_name} ]]; then
 	echo "${package_name} doesn't exist"
 	exit 1
 fi
@@ -40,7 +40,7 @@ sleep 5
 
 # Check if port open
 if ! nc -z "127.0.0.1" "${PORT}"; then
-	echo "Failed to find a service running on $PORT"
+	echo "Failed to find a service running on ${PORT}"
 
 	# Echo netstat
 	netstat -tulpn | grep -i polaris

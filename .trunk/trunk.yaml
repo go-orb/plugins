@@ -1,5 +1,7 @@
 version: 0.1
 actions:
+  disabled:
+    - git-lfs
   enabled:
     - trunk-announce
     - trunk-cache-prune
@@ -8,23 +10,31 @@ actions:
     - trunk-upgrade-available
 runtimes:
   enabled:
-    - go@1.19.4
-    - node@16.14.2
+    - python@3.10.8
+    - go@1.19.5
+    - node@18.12.1
 lint:
   enabled:
-    - actionlint@1.6.22
-    - markdownlint@0.32.2
-    - shellcheck@0.9.0
-    - shfmt@3.5.0
+    - checkov@2.3.316
+    - osv-scanner@1.3.4
+    - trivy@0.43.1
+    - trufflehog@3.43.0
+    - yamllint@1.32.0
+    - actionlint@1.6.25
+    - markdownlint@0.35.0
     - git-diff-check
-    - gitleaks@8.15.2
-    - gofmt@1.19.4
-    - golangci-lint@1.50.1
-    - prettier@2.8.1
+    - gitleaks@8.17.0
+    - gofmt@1.20.4
+    - golangci-lint@1.53.3
+    - prettier@3.0.0
+  disabled:
+    - gokart
+    - shellcheck
+    - shfmt
 cli:
-  version: 1.2.1
+  version: 1.11.1
 plugins:
   sources:
     - id: trunk
-      ref: v0.0.8
+      ref: v0.0.21
       uri: https://github.com/trunk-io/plugins

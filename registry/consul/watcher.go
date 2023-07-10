@@ -61,7 +61,7 @@ func newConsulWatcher(cr *RegistryConsul, opts ...registry.WatchOption) (*consul
 	return cw, nil
 }
 
-func (cw *consulWatcher) serviceHandler(idx uint64, data interface{}) { //nolint:funlen,gocognit,gocyclo
+func (cw *consulWatcher) serviceHandler(_ uint64, data interface{}) { //nolint:funlen,gocognit,gocyclo
 	entries, ok := data.([]*api.ServiceEntry)
 	if !ok {
 		return
@@ -197,7 +197,7 @@ func (cw *consulWatcher) serviceHandler(idx uint64, data interface{}) { //nolint
 	cw.Unlock()
 }
 
-func (cw *consulWatcher) handle(idx uint64, data interface{}) {
+func (cw *consulWatcher) handle(_ uint64, data interface{}) {
 	services, ok := data.(map[string][]string)
 	if !ok {
 		return

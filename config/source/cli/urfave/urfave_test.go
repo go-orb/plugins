@@ -3,9 +3,9 @@ package urfave
 import (
 	"testing"
 
+	"github.com/go-orb/go-orb/config/source/cli"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/go-orb/go-orb/config/source/cli"
 )
 
 const (

@@ -17,7 +17,7 @@ type EchoHandler struct {
 }
 
 // Call implements the call method.
-func (c *EchoHandler) Call(ctx context.Context, in *proto.CallRequest) (*proto.CallResponse, error) {
+func (c *EchoHandler) Call(_ context.Context, in *proto.CallRequest) (*proto.CallResponse, error) {
 	switch in.Name {
 	case "error":
 		return nil, errors.New("you asked for an error, here you go")

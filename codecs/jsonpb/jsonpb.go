@@ -5,8 +5,8 @@ package jsonpb
 import (
 	"io"
 
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/go-orb/go-orb/codecs"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
 
 var _ codecs.Marshaler = (*JSONPb)(nil)

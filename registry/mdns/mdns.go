@@ -27,10 +27,10 @@ import (
 )
 
 type mdnsTxt struct {
-	Service   string
-	Version   string
-	Endpoints []*registry.Endpoint
-	Metadata  map[string]string
+	Service   string               `json:"service"`
+	Version   string               `json:"version"`
+	Endpoints []*registry.Endpoint `json:"endpoints"`
+	Metadata  map[string]string    `json:"metadata"`
 }
 
 type mdnsEntry struct {
@@ -120,7 +120,7 @@ func (m *RegistryMDNS) Start() error {
 }
 
 // Stop the registry.
-func (m *RegistryMDNS) Stop(ctx context.Context) error {
+func (m *RegistryMDNS) Stop(_ context.Context) error {
 	// TODO: do something here?
 	return nil
 }
@@ -136,7 +136,7 @@ func (m *RegistryMDNS) Type() string {
 }
 
 // Register registes a service's nodes to the registry.
-func (m *RegistryMDNS) Register(service *registry.Service, opts ...registry.RegisterOption) error {
+func (m *RegistryMDNS) Register(service *registry.Service, _ ...registry.RegisterOption) error {
 	m.Lock()
 	entries, ok := m.services[service.Name]
 	m.Unlock()
@@ -195,10 +195,10 @@ func (m *RegistryMDNS) registerNodes(service *registry.Service, entries []*mdnsE
 		// Already registered, continue
 		if seen {
 			continue
-		} else {
-			// Doesn't exist
-			entry = &mdnsEntry{}
 		}
+
+		// Doesn't exist
+		entry = &mdnsEntry{}
 
 		// encode the scheme with the metadata if not already given.
 		if node.Metadata == nil {
@@ -261,7 +261,7 @@ func (m *RegistryMDNS) registerNodes(service *registry.Service, entries []*mdnsE
 }
 
 // Deregister a service from the registry.
-func (m *RegistryMDNS) Deregister(service *registry.Service, opts ...registry.DeregisterOption) error {
+func (m *RegistryMDNS) Deregister(service *registry.Service, _ ...registry.DeregisterOption) error {
 	m.Lock()
 	defer m.Unlock()
 
@@ -304,7 +304,7 @@ func (m *RegistryMDNS) Deregister(service *registry.Service, opts ...registry.De
 }
 
 // GetService fetches a service from the registry.
-func (m *RegistryMDNS) GetService(service string, opts ...registry.GetOption) ([]*registry.Service, error) {
+func (m *RegistryMDNS) GetService(service string, _ ...registry.GetOption) ([]*registry.Service, error) {
 	serviceMap := make(map[string]*registry.Service)
 	entries := make(chan *client.ServiceEntry, 10)
 	params := client.DefaultParams(service)
@@ -418,7 +418,7 @@ func (m *RegistryMDNS) getService(
 }
 
 // ListServices fetches all services in the registry.
-func (m *RegistryMDNS) ListServices(opts ...registry.ListOption) ([]*registry.Service, error) {
+func (m *RegistryMDNS) ListServices(_ ...registry.ListOption) ([]*registry.Service, error) {
 	serviceMap := make(map[string]bool)
 	entries := make(chan *client.ServiceEntry, 10)
 	done := make(chan bool)

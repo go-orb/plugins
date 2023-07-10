@@ -2,7 +2,7 @@
 app:
   registry:
     enabled: true
-    plugin: "nats"
+    plugin: nats
     timeout: 600
     secure: false
     addresses:

@@ -11,8 +11,8 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/lucas-clemente/quic-go/http3"
 	"github.com/go-orb/go-orb/util/addr"
+	"github.com/lucas-clemente/quic-go/http3"
 )
 
 // Errors returned by the HTTP3 server.

@@ -17,12 +17,12 @@ import (
 )
 
 type LoginRequest struct {
-	Username string `json:"username,omitempty" form:"username"`
+	Username string `json:"username,omitempty" form:"username,omitempty"`
 	Password string `json:"password,omitempty" form:"password,omitempty"`
 }
 
 type TestModel struct {
-	ID   int32  `json:"id" form:"id"`
+	ID   int32  `json:"id"   form:"id"`
 	Name string `json:"name" form:"name"`
 }
 

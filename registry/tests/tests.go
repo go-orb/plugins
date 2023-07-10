@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/exp/slog"
 )
 

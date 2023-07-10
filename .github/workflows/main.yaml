@@ -2,7 +2,8 @@ name: Unit Tests
 on:
   push:
     branches:
-      - "main"
+      - main
+permissions: read-all
 jobs:
   golangci:
     name: Lint

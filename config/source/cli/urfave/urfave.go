@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
+	oCli "github.com/go-orb/go-orb/config/source/cli"
 	"github.com/hashicorp/go-multierror"
 	"github.com/urfave/cli/v2"
-	oCli "github.com/go-orb/go-orb/config/source/cli"
 )
 
 func init() {

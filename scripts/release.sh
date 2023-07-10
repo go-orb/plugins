@@ -60,13 +60,13 @@ function release() {
 		return 1
 	fi
 
-	cat $CHANGELOG_TEMPLATE >$CHANGELOG_FILE
+	cat "${CHANGELOG_TEMPLATE}" >"${CHANGELOG_FILE}"
 
 	local last_tag=$(git tag --list --sort='-creatordate' "${pkg}/*" | head -n1)
 
 	# Create changelog file
 	git log "${last_tag}..HEAD" --format="%s" "${pkg}" |
-		xargs -d'\n' -I{} bash -c "echo \"  * {}\" >> $CHANGELOG_FILE"
+		xargs -d'\n' -I{} bash -c "echo \"  * {}\" >> ${CHANGELOG_FILE}"
 
 	declare -a last_tag_split=(${last_tag//\// })
 
@@ -78,10 +78,10 @@ function release() {
 	# Increment minor version if "feat:" commit found, otherwise patch version
 	git --no-pager log "${last_tag}..HEAD" --format="%s" "${pkg}/*" | grep -q -E "^feat:"
 	if [[ $? == "0" ]]; then
-		local tmp_new_tag="$(printf "/%s" "${last_tag_split[@]}")/v$(increment_minor_version ${version})"
+		local tmp_new_tag="$(printf "/%s" "${last_tag_split[@]}")/v$(increment_minor_version "${version}")"
 		local new_tag=${tmp_new_tag:1}
 	else
-		local tmp_new_tag="$(printf "/%s" "${last_tag_split[@]}")/v$(increment_patch_version ${version})"
+		local tmp_new_tag="$(printf "/%s" "${last_tag_split[@]}")/v$(increment_patch_version "${version}")"
 		local new_tag=${tmp_new_tag:1}
 	fi
 
@@ -108,7 +108,7 @@ function release_specific() {
 		if echo "${pkg}" | grep -q "\*"; then
 			while read -r p; do
 				release "$(remove_prefix "${p}")"
-			done < <(find $pkg -name 'go.mod' -printf "%h\n")
+			done < <(find "${pkg}" -name 'go.mod' -printf "%h\n")
 		else
 			release "${pkg}"
 		fi

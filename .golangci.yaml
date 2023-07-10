@@ -58,7 +58,7 @@ output:
 # all available settings of specific linters
 linters-settings:
   wsl:
-    allow-cuddle-with-calls: ["Lock", "RLock", "defer"]
+    allow-cuddle-with-calls: [Lock, RLock, defer]
   funlen:
     lines: 80
     statements: 60
@@ -212,6 +212,12 @@ linters:
     - rowserrcheck # generics
     - sqlclosecheck # generics
     - wastedassign # generics
+
+    # Not configured yet
+    - depguard
+
+    # Don't like it
+    - tagalign
 
 issues:
   # List of regexps of issue texts to exclude, empty list by default.

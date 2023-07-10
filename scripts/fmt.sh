@@ -2,12 +2,12 @@
 
 version=$1
 
-if [ "$version" = "" ]; then
+if [[ ${version} == "" ]]; then
 	version='*'
 fi
 
-for d in $(find "$version" -name 'go.mod'); do
-	pushd $(dirname "$d")
+for d in $(find "${version}" -name 'go.mod'); do
+	pushd $(dirname "${d}")
 	go fmt
 	go mod tidy
 	popd
