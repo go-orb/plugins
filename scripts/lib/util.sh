@@ -1,11 +1,8 @@
 ## bash
-GO_TEST_FLAGS="-v -race -cover -bench=."
-
 RED='\033[0;31m'
 NC='\033[0m'
 GREEN='\033[0;32m'
 BAR="-------------------------------------------------------------------------------"
-HAS_DEPS=("polaris" "consul")
 
 export RICHGO_FORCE_COLOR="true"
 # export IN_TRAVIS_CI="true"

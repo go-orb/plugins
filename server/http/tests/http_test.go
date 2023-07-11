@@ -61,7 +61,7 @@ func TestServerSimple(t *testing.T) {
 	srv, cleanup, err := setupServer(t, false, mhttp.WithInsecure())
 	defer cleanup()
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 
 	addr := fmt.Sprintf("http://%s", srv.Address())
@@ -73,7 +73,7 @@ func TestServerHTTPS(t *testing.T) {
 	srv, cleanup, err := setupServer(t, false, mhttp.WithDisableHTTP2())
 	defer cleanup()
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 
 	addr := fmt.Sprintf("https://%s", srv.Address())
@@ -85,7 +85,7 @@ func TestServerHTTP2(t *testing.T) {
 	srv, cleanup, err := setupServer(t, false)
 	defer cleanup()
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 
 	addr := fmt.Sprintf("https://%s", srv.Address())
@@ -100,7 +100,7 @@ func TestServerH2c(t *testing.T) {
 	)
 	defer cleanup()
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 
 	addr := fmt.Sprintf("http://%s", srv.Address())
@@ -108,38 +108,50 @@ func TestServerH2c(t *testing.T) {
 	makeRequests(t, addr, thttp.TypeH2C)
 }
 
-func TestServerHTTP3(t *testing.T) {
-	// To fix warning about buf size run: sysctl -w net.core.rmem_max=2500000
+func TestServerHTTP3Twice(t *testing.T) {
+	// To fix warning about buf size run:
+	// - sysctl -w net.core.rmem_max=2500000
+	// - sysctl -w net.core.wmem_max=2500000
 	srv, cleanup, err := setupServer(t, false,
 		mhttp.WithHTTP3(),
 	)
-	defer cleanup()
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 
 	addr := fmt.Sprintf("https://%s", srv.Address())
-
 	makeRequests(t, addr, thttp.TypeHTTP3)
+	cleanup()
+
+	// Second run to check if setup/cleanup works
+	srv, cleanup, err = setupServer(t, false,
+		mhttp.WithHTTP3(),
+	)
+	if err != nil {
+		require.NoError(t, err)
+	}
+
+	addr = fmt.Sprintf("https://%s", srv.Address())
+	makeRequests(t, addr, thttp.TypeHTTP3)
+	cleanup()
 }
 
 func TestServerEntrypointsStarts(t *testing.T) {
 	addr := "localhost:45451"
 	server, cleanup, err := setupServer(t, false, mhttp.WithAddress(addr))
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
+	defer cleanup()
 
-	assert.NoError(t, server.Start(), "start server 1")
-	assert.NoError(t, server.Start(), "start server 2")
-	assert.NoError(t, server.Start(), "start server 3")
+	require.NoError(t, server.Start(), "start server 1")
+	require.NoError(t, server.Start(), "start server 2")
+	require.NoError(t, server.Start(), "start server 3")
 
 	addr = fmt.Sprintf("https://%s", addr)
 
 	makeRequests(t, addr, thttp.TypeHTTP2)
 
-	cleanup()
-	cleanup()
 	cleanup()
 }
 
@@ -147,7 +159,7 @@ func TestServerGzip(t *testing.T) {
 	srv, cleanup, err := setupServer(t, false, mhttp.WithGzip())
 	defer cleanup()
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 
 	addr := fmt.Sprintf("https://%s", srv.Address())
@@ -158,48 +170,62 @@ func TestServerGzip(t *testing.T) {
 func TestServerInvalidContentType(t *testing.T) {
 	srv, cleanup, err := setupServer(t, false)
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
-
 	defer cleanup()
 
 	addr := fmt.Sprintf("https://%s", srv.Address())
 
-	require.Error(t, thttp.TestPostRequestProto(t, addr, "application/abcdef", thttp.TypeHTTP2), "POST Proto")
-	require.Error(t, thttp.TestPostRequestProto(t, addr, "yadayadayada", thttp.TypeHTTP2), "POST Proto")
+	require.ErrorContains(
+		t,
+		thttp.TestPostRequestProto(t, addr, "application/abcdef", thttp.TypeHTTP2),
+		"Post request failed",
+		"POST Proto",
+	)
+	require.ErrorContains(
+		t,
+		thttp.TestPostRequestProto(t, addr, "yadayadayada", thttp.TypeHTTP2),
+		"Post request failed",
+		"POST Proto",
+	)
 }
 
 func TestServerNoRouter(t *testing.T) {
-	_, cleanup, err := setupServer(t, false, mhttp.WithRouter("invalid-router"))
+	_, cleanup, err := setupServer(t, false, mhttp.WithRouter(""))
 	defer cleanup()
-	t.Logf("expected error: %v", mhttp.ErrRouterNotFound)
-	require.Error(t, err, "setting an empty router should return an error")
+	require.ErrorIs(t, err, mhttp.ErrNoRouter, "setting an empty router should return an error")
+
+	_, cleanup, err = setupServer(t, false, mhttp.WithRouter("invalid-router"))
+	defer cleanup()
+	require.ErrorIs(t, err, mhttp.ErrRouterNotFound, "setting an invalid router should return an error")
 }
 
 func TestServerNoCodecs(t *testing.T) {
 	_, cleanup, err := setupServer(t, false, mhttp.WithCodecWhitelist([]string{}))
 	defer cleanup()
-	t.Logf("expected error: %v", err)
-	require.Error(t, err, "setting an empty codec whitelist should return an error")
+	require.ErrorIs(t, err, mhttp.ErrEmptyCodecWhitelist, "setting an empty codec whitelist should return an error")
 
 	_, cleanup, err = setupServer(t, false, mhttp.WithCodecWhitelist([]string{"abc", "def"}))
 	defer cleanup()
-	t.Logf("expected error: %v", err)
-	require.Error(t, err, "setting an empty codec whitelist should return an error")
+	require.ErrorIs(t, err, mhttp.ErrNoMatchingCodecs, "setting an empty codec whitelist should return an error")
 }
 
 func TestServerNoTLS(t *testing.T) {
 	_, cleanup, err := setupServer(t, false, mhttp.WithTLS(&tls.Config{}))
 	defer cleanup()
-	t.Logf("expected error: %v", err)
-	require.Error(t, err, "setting an empty TLS config should return an error")
+	require.ErrorContains(
+		t,
+		err,
+		"tls: neither Certificates, GetCertificate, nor GetConfigForClient set in Config",
+		"setting an empty TLS config should return an error",
+	)
 }
 
 func TestServerInvalidMessage(t *testing.T) {
 	srv, cleanup, err := setupServer(t, false)
 	defer cleanup()
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 
 	thttp.RefreshClients()
@@ -235,7 +261,7 @@ func TestServerErrorRPC(t *testing.T) {
 	srv, cleanup, err := setupServer(t, false)
 	defer cleanup()
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 
 	thttp.RefreshClients()
@@ -254,23 +280,22 @@ func TestServerErrorRPC(t *testing.T) {
 	resp, err := thttp.HTTP2Client.Do(req)
 	assert.NoError(t, err)
 	body, err := io.ReadAll(resp.Body)
-	assert.NoError(t, err)
-
-	t.Logf("expected error: %v", string(body))
-	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode, string(body))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Close connection
 	_, err = io.Copy(io.Discard, resp.Body)
-	assert.NoError(t, err)
-	assert.NoError(t, resp.Body.Close())
+	require.NoError(t, err)
+	require.NoError(t, resp.Body.Close())
+
+	require.Equal(t, http.StatusInternalServerError, resp.StatusCode, string(body))
+	require.NoError(t, err)
 }
 
 func TestServerRequestSpecificContentType(t *testing.T) {
 	srv, cleanup, err := setupServer(t, false)
 	defer cleanup()
 	if err != nil {
-		t.Fatal(err)
+		require.NoError(t, err)
 	}
 
 	thttp.RefreshClients()
@@ -343,7 +368,7 @@ func TestServerIntegration(t *testing.T) {
 		),
 	)
 	require.NoError(t, err, "failed to setup server")
-	require.NoError(t, srv.Start(), "failed to start server")
+	require.NoError(t, srv.Start(), "failed to start the server")
 
 	e, err := srv.GetEntrypoint("test-ep-1")
 	require.NoError(t, err, "failed to fetch entrypoint 1")
@@ -361,7 +386,7 @@ func TestServerIntegration(t *testing.T) {
 	_, err = srv.GetEntrypoint("fake")
 	require.Error(t, err, "fetching invalid entrypoint should fail")
 
-	require.NoError(t, srv.Stop(context.Background()), "failed to start server")
+	require.NoError(t, srv.Stop(context.Background()), "failed to stop the server")
 }
 
 func TestServerFileConfig(t *testing.T) {
@@ -608,12 +633,12 @@ func setupServer(t testing.TB, nolog bool, opts ...mhttp.Option) (*mhttp.ServerH
 		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
-			t.Fatalf("failed to stop: %v", err)
+			require.NoError(t, err, "failed to stop")
 		}
 	}
 
 	if err := server.Start(); err != nil {
-		return nil, cancel, fmt.Errorf("failed to start: %w", err)
+		return nil, cancel, err
 	}
 
 	return server, cleanup, nil

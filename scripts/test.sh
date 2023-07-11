@@ -2,9 +2,12 @@
 
 export SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+GO_TEST_FLAGS="-v -race -cover -bench=."
 MICRO_VERSION="."
 
-source ${SCRIPT_DIR}/lib/util.sh
+HAS_DEPS=("polaris" "consul")
+
+source "${SCRIPT_DIR}/lib/util.sh"
 
 
 # Install dependencies, usually servers.
@@ -133,7 +136,7 @@ function run_test() {
 		go get -v -t -d ./...
 
 		# Run tests.
-		$(go env GOPATH)/bin/richgo test ./... ${GO_TEST_FLAGS}
+		GOMAXPROCS=1 $(go env GOPATH)/bin/richgo test ./... ${GO_TEST_FLAGS}
 
 		# Keep track of exit code.
 		if [[ $? -ne 0 ]]; then

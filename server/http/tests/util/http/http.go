@@ -142,7 +142,7 @@ func TestPostRequestProto(t testing.TB, addr, ct string, reqT ReqType) error {
 
 	msg, err := proto.Marshal(&pb.CallRequest{Name: name})
 	if err != nil {
-		t.Fatal(err)
+		return err
 	}
 
 	addr += "/echo"

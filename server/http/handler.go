@@ -18,7 +18,7 @@ func NewGRPCHandler[Tin any, Tout any](srv *ServerHTTP, f func(context.Context, 
 		in := new(Tin)
 
 		if _, err := srv.decodeBody(w, r, in); err != nil {
-			srv.Logger.Error("failed to decode body", err)
+			srv.Logger.Error("failed to decode body", "error", err)
 			WriteError(w, err)
 
 			return
@@ -26,14 +26,14 @@ func NewGRPCHandler[Tin any, Tout any](srv *ServerHTTP, f func(context.Context, 
 
 		out, err := f(r.Context(), in)
 		if err != nil {
-			srv.Logger.Error("RPC request failed", err)
+			srv.Logger.Error("RPC request failed", "error", err)
 			WriteError(w, err)
 
 			return
 		}
 
 		if err := srv.encodeBody(w, r, out); err != nil {
-			srv.Logger.Error("failed to encode body", err)
+			srv.Logger.Error("failed to encode body", "error", err)
 			WriteError(w, err)
 
 			return

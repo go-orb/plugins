@@ -62,7 +62,7 @@ func (s *ServerHTTP) newHTTP3Server() (*http3server, error) {
 }
 
 func (h3 *http3server) Start(l net.PacketConn) error {
-	if err := h3.Serve(l); err != nil && errors.Is(err, http.ErrServerClosed) {
+	if err := h3.Serve(l); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
 

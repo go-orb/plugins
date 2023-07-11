@@ -158,7 +158,7 @@ func (s *ServerHTTP) Start() error {
 
 	go func() {
 		if err = s.httpServer.Start(s.listenerTCP); err != nil {
-			s.Logger.Error("Failed to start HTTP server", err)
+			s.Logger.Error("Failed to start HTTP server: %w", err)
 		}
 	}()
 
@@ -175,7 +175,7 @@ func (s *ServerHTTP) Start() error {
 
 	go func() {
 		if err := s.http3Server.Start(s.listenerUDP); err != nil {
-			s.Logger.Error("Failed to start HTTP3 server", err)
+			s.Logger.Error("Failed to start HTTP3 server", "error", err)
 		}
 	}()
 
