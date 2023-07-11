@@ -195,7 +195,14 @@ function create_summary() {
 	fi
 }
 
-[ ! -d ../go-orb ] && git clone https://github.com/go-orb/go-orb ../go-orb
+if [[ ! -d ../go-orb ]]; then
+	git clone https://github.com/go-orb/go-orb ../go-orb
+	pushd .. >/dev/null
+	go mod init testci.com/test
+	go work init .
+	go work use $(find . -name 'go.mod' -printf "%h\n") || true
+	popd >/dev/null
+fi
 
 case $1 in
 "lint")

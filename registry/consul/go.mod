@@ -3,9 +3,9 @@ module github.com/go-orb/plugins/registry/consul
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230709080055-9c340136e7d1
+	github.com/go-orb/go-orb v0.0.0-20230709084536-48ca79fd6450
 	github.com/go-orb/plugins/log/text v0.0.0-20230709063950-8342f9783f18
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20230710224414-25d56c58173f
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20230711230520-aa8eefbacb19
 	github.com/go-orb/plugins/registry/tests v0.0.0-20230709063950-8342f9783f18
 	github.com/hashicorp/consul/api v1.22.0
 	github.com/hashicorp/consul/sdk v0.14.0
@@ -33,7 +33,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df // indirect
+	golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

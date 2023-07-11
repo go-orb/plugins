@@ -1,8 +1,8 @@
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/go-orb/go-orb v0.0.0-20230709080055-9c340136e7d1 h1:3I8/GVty/ZRVQ/cT/wKHBQjD2Yy8NbvFErvhqyZ5Hk0=
-github.com/go-orb/go-orb v0.0.0-20230709080055-9c340136e7d1/go.mod h1:bCxW/NJWhXJVsUtgVPzwj6vdxQ1DUb/bnYv1WsMgbBA=
+github.com/go-orb/go-orb v0.0.0-20230709084536-48ca79fd6450 h1:HCBsqZPFBGLy9m7qOak29YJKFCncyenaXkChMhwt264=
+github.com/go-orb/go-orb v0.0.0-20230709084536-48ca79fd6450/go.mod h1:fu/xA3W6+/gMUsZ7MSnklrTs9rHvzFSlaeMpuOBF0bY=
 github.com/go-orb/plugins/log/text v0.0.0-20230709063950-8342f9783f18 h1:amUHAcSJkxKTcuiPGUeWxd/tizBzSJCSEjcxHaVmX5A=
 github.com/go-orb/plugins/log/text v0.0.0-20230709063950-8342f9783f18/go.mod h1:wuuiJzbdS9q7rkQ79X1sQGCE1UQcEy+Ow7p5Xh4jlu0=
 github.com/go-orb/plugins/registry/tests v0.0.0-20230709063950-8342f9783f18 h1:3ym5UuTzgZ8v1DxCVsBx54LHum5MCkcizomQZ3CYU2g=
@@ -25,8 +25,8 @@ github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/f
 github.com/rogpeppe/go-internal v1.11.0 h1:cWPaGQEPrBb5/AsnsZesgZZ9yb1OQ+GOISoDNXVBh4M=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
-golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df h1:UA2aFVmmsIlefxMk29Dp2juaUSth8Pyn3Tq5Y5mJGME=
-golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df/go.mod h1:FXUEEKJgO7OQYeo8N01OfiKP8RXMtf6e8aTskBGqWdc=
+golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb h1:xIApU0ow1zwMa2uL1VDNeQlNVFTWMQxZUZCMDy0Q4Us=
+golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb/go.mod h1:FXUEEKJgO7OQYeo8N01OfiKP8RXMtf6e8aTskBGqWdc=
 golang.org/x/mod v0.12.0 h1:rmsUpXtvNzj340zd98LZ4KntptpfRHwpFOHG188oHXc=
 golang.org/x/mod v0.12.0/go.mod h1:iBbtSCu2XBx23ZKBPSOrRkjjQPZFPuis4dIYUhu/chs=
 golang.org/x/net v0.12.0 h1:cfawfvKITfUsFCeJIHJrbSxpeu/E81khclypR0GVT50=

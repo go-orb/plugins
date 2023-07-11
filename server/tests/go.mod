@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/server/tests
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230709080055-9c340136e7d1
+	github.com/go-orb/go-orb v0.0.0-20230709084536-48ca79fd6450
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230709081439-ab0ce6463c52
 	github.com/go-orb/plugins/config/source/file v0.0.0-20230709081439-ab0ce6463c52
 	github.com/google/uuid v1.3.0

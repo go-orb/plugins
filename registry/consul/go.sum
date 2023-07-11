@@ -30,12 +30,12 @@ github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2
 github.com/go-kit/kit v0.9.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9GBnD5lWE=
 github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V4qmtdjCk=
-github.com/go-orb/go-orb v0.0.0-20230709080055-9c340136e7d1 h1:3I8/GVty/ZRVQ/cT/wKHBQjD2Yy8NbvFErvhqyZ5Hk0=
-github.com/go-orb/go-orb v0.0.0-20230709080055-9c340136e7d1/go.mod h1:bCxW/NJWhXJVsUtgVPzwj6vdxQ1DUb/bnYv1WsMgbBA=
+github.com/go-orb/go-orb v0.0.0-20230709084536-48ca79fd6450 h1:HCBsqZPFBGLy9m7qOak29YJKFCncyenaXkChMhwt264=
+github.com/go-orb/go-orb v0.0.0-20230709084536-48ca79fd6450/go.mod h1:fu/xA3W6+/gMUsZ7MSnklrTs9rHvzFSlaeMpuOBF0bY=
 github.com/go-orb/plugins/log/text v0.0.0-20230709063950-8342f9783f18 h1:amUHAcSJkxKTcuiPGUeWxd/tizBzSJCSEjcxHaVmX5A=
 github.com/go-orb/plugins/log/text v0.0.0-20230709063950-8342f9783f18/go.mod h1:wuuiJzbdS9q7rkQ79X1sQGCE1UQcEy+Ow7p5Xh4jlu0=
-github.com/go-orb/plugins/registry/regutil v0.0.0-20230710224414-25d56c58173f h1:NfFbbcfTxccSMdTd8fGpirQ6al3d4xEAeTazRqIjpt4=
-github.com/go-orb/plugins/registry/regutil v0.0.0-20230710224414-25d56c58173f/go.mod h1:H2oFuSkdl6e/xfrMMvkRGSRn6htRA9fk+Rg+hY9mCOc=
+github.com/go-orb/plugins/registry/regutil v0.0.0-20230711230520-aa8eefbacb19 h1:pktQ1kPwRDrsHwrLWzGr6LAovAqcj2CU41g3y54WJYE=
+github.com/go-orb/plugins/registry/regutil v0.0.0-20230711230520-aa8eefbacb19/go.mod h1:k2M2KDSQ1y6uf/pykSyxRHshttjnNz0R9EHqzsl6RrE=
 github.com/go-orb/plugins/registry/tests v0.0.0-20230709063950-8342f9783f18 h1:3ym5UuTzgZ8v1DxCVsBx54LHum5MCkcizomQZ3CYU2g=
 github.com/go-orb/plugins/registry/tests v0.0.0-20230709063950-8342f9783f18/go.mod h1:xtqWrghif2xC5nA+jFZU9bsJDNh5sOyWmGn+gu0EvBo=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
@@ -178,8 +178,8 @@ github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926/go.mod h1:9ESjWnEqri
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20190923035154-9ee001bba392/go.mod h1:/lpIB1dKB+9EgE3H3cr1v9wB50oz8l4C4h62xy7jSTY=
-golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df h1:UA2aFVmmsIlefxMk29Dp2juaUSth8Pyn3Tq5Y5mJGME=
-golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df/go.mod h1:FXUEEKJgO7OQYeo8N01OfiKP8RXMtf6e8aTskBGqWdc=
+golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb h1:xIApU0ow1zwMa2uL1VDNeQlNVFTWMQxZUZCMDy0Q4Us=
+golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb/go.mod h1:FXUEEKJgO7OQYeo8N01OfiKP8RXMtf6e8aTskBGqWdc=
 golang.org/x/mod v0.12.0 h1:rmsUpXtvNzj340zd98LZ4KntptpfRHwpFOHG188oHXc=
 golang.org/x/net v0.0.0-20181114220301-adae6a3d119a/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3/go.mod h1:t9HGtf8HONx5eT2rtn7q6eTqICYqUVnKs3thJo3Qplg=
