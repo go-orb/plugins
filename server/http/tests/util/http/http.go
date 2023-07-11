@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lucas-clemente/quic-go/http3"
 	"github.com/pkg/errors"
+	"github.com/quic-go/quic-go/http3"
 	"golang.org/x/net/http2"
 	"google.golang.org/protobuf/proto"
 

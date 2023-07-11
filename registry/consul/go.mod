@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/go-orb/go-orb v0.0.0-20230709080055-9c340136e7d1
 	github.com/go-orb/plugins/log/text v0.0.0-20230709063950-8342f9783f18
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20230709081439-ab0ce6463c52
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20230710224414-25d56c58173f
 	github.com/go-orb/plugins/registry/tests v0.0.0-20230709063950-8342f9783f18
 	github.com/hashicorp/consul/api v1.22.0
 	github.com/hashicorp/consul/sdk v0.14.0
@@ -25,9 +25,10 @@ require (
 	github.com/hashicorp/go-version v1.2.1 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/serf v0.10.1 // indirect
+	github.com/kr/pretty v0.3.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
-	github.com/miekg/dns v1.1.50 // indirect
+	github.com/miekg/dns v1.1.55 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

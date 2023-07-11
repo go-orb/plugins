@@ -12,7 +12,7 @@ if [[ -z ${gomicro_version} ]]; then
 fi
 
 for d in $(find "${version}" -name 'go.mod'); do
-	pushd $(dirname "${d}")
+	pushd "$(dirname "${d}")"
 	go get go-micro.dev/v4@"${gomicro_version}"
 	go mod tidy
 	popd

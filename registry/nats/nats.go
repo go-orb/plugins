@@ -89,7 +89,7 @@ func (n *RegistryNATS) Start() error {
 }
 
 // Stop the registry.
-func (n *RegistryNATS) Stop(ctx context.Context) error {
+func (n *RegistryNATS) Stop(_ context.Context) error {
 	if !n.conn.IsClosed() {
 		n.conn.Close()
 	}
@@ -345,7 +345,7 @@ loop:
 }
 
 // Register registers a service within the registry.
-func (n *RegistryNATS) Register(s *registry.Service, opts ...registry.RegisterOption) error {
+func (n *RegistryNATS) Register(s *registry.Service, _ ...registry.RegisterOption) error {
 	if err := n.register(s); err != nil {
 		return err
 	}
@@ -365,7 +365,7 @@ func (n *RegistryNATS) Register(s *registry.Service, opts ...registry.RegisterOp
 
 // Deregister deregisters a service within the registry.
 func (n *RegistryNATS) Deregister(
-	service *registry.Service, opts ...registry.DeregisterOption,
+	service *registry.Service, _ ...registry.DeregisterOption,
 ) error {
 	if err := n.deregister(service); err != nil {
 		return err
@@ -385,7 +385,7 @@ func (n *RegistryNATS) Deregister(
 }
 
 // GetService returns a service from the registry.
-func (n *RegistryNATS) GetService(s string, opts ...registry.GetOption) ([]*registry.Service, error) {
+func (n *RegistryNATS) GetService(s string, _ ...registry.GetOption) ([]*registry.Service, error) {
 	services, err := n.query(s, n.config.Quorum)
 	if err != nil {
 		return nil, err
@@ -395,7 +395,7 @@ func (n *RegistryNATS) GetService(s string, opts ...registry.GetOption) ([]*regi
 }
 
 // ListServices lists services within the registry.
-func (n *RegistryNATS) ListServices(opts ...registry.ListOption) ([]*registry.Service, error) {
+func (n *RegistryNATS) ListServices(_ ...registry.ListOption) ([]*registry.Service, error) {
 	s, err := n.query("", 0)
 	if err != nil {
 		return nil, err

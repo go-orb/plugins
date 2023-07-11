@@ -159,7 +159,7 @@ func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, fiel
 	return nil
 }
 
-//nolint:funlen,gocycle,gocyclo,cyclop
+//nolint:funlen,gocyclo,cyclop
 func parseField(fieldDesc protoreflect.FieldDescriptor, value string) (protoreflect.Value, error) {
 	switch fieldDesc.Kind() {
 	case protoreflect.BoolKind:

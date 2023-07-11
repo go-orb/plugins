@@ -178,7 +178,7 @@ type LogWrapper struct {
 }
 
 // Noticef logs a notice statement.
-func (l *LogWrapper) Noticef(format string, v ...interface{}) {
+func (l *LogWrapper) Noticef(_ string, _ ...interface{}) {
 }
 
 // Warnf logs a warning statement.

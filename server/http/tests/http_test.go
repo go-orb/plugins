@@ -157,10 +157,11 @@ func TestServerGzip(t *testing.T) {
 
 func TestServerInvalidContentType(t *testing.T) {
 	srv, cleanup, err := setupServer(t, false)
-	defer cleanup()
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	defer cleanup()
 
 	addr := fmt.Sprintf("https://%s", srv.Address())
 
@@ -169,14 +170,9 @@ func TestServerInvalidContentType(t *testing.T) {
 }
 
 func TestServerNoRouter(t *testing.T) {
-	_, cleanup, err := setupServer(t, false, mhttp.WithRouter(""))
+	_, cleanup, err := setupServer(t, false, mhttp.WithRouter("invalid-router"))
 	defer cleanup()
-	t.Logf("expected error: %v", err)
-	require.Error(t, err, "setting an empty router should return an error")
-
-	_, cleanup, err = setupServer(t, false, mhttp.WithRouter("invalid-router"))
-	defer cleanup()
-	t.Logf("expected error: %v", err)
+	t.Logf("expected error: %v", mhttp.ErrRouterNotFound)
 	require.Error(t, err, "setting an empty router should return an error")
 }
 

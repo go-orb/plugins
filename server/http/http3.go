@@ -12,7 +12,7 @@ import (
 	"sync"
 
 	"github.com/go-orb/go-orb/util/addr"
-	"github.com/lucas-clemente/quic-go/http3"
+	"github.com/quic-go/quic-go/http3"
 )
 
 // Errors returned by the HTTP3 server.
@@ -51,7 +51,7 @@ func (s *ServerHTTP) newHTTP3Server() (*http3server, error) {
 	previousHandler := h2.Handler
 
 	h2.Handler = http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		if err := h3.SetQuicHeaders(rw.Header()); err != nil {
+		if err := h3.Server.SetQuicHeaders(rw.Header()); err != nil {
 			s.Logger.Error("Failed to set HTTP3 headers", err)
 		}
 
@@ -70,7 +70,7 @@ func (h3 *http3server) Start(l net.PacketConn) error {
 }
 
 func (h3 *http3server) Stop(_ context.Context) error {
-	// TODO: use e.Server.CloseGracefully() when available.
+	// TODO: use h3.CloseGracefully() when available.
 	return h3.Close()
 }
 
