@@ -114,29 +114,48 @@ function get_dirs() {
 
 # Run GoLangCi Linters.
 function run_linter() {
-	curl -sSfL "https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh" | sh -s -- -b $(go env GOPATH)/bin
+	[[ -e $(go env GOPATH)/bin/golangci-lint ]] || curl -sSfL "https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh" | sh -s -- -b $(go env GOPATH)/bin
 
-	echo
-	golangci-lint --version
+	$(go env GOPATH)/bin/golangci-lint --version
 
-	cwd=$(pwd)
 	dirs=$1
-	failed="false"
-	for dir in "${dirs[@]}"; do
-		pushd "${dir}" >/dev/null || continue
+
+	outfile="$(mktemp)"
+	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /bin/bash -c '
+		function print_msg() {
+			printf "\n\n${GREEN}${BAR}${NC}\n"
+			printf "${GREEN}| > ${1}${NC}\n"
+			printf "${GREEN}${BAR}${NC}\n\n"
+			sleep 1
+		}
+
+		cwd=$(pwd)
+		dir=$1;
+		if ! pushd "${dir}" >/dev/null; then
+			echo "::error:: pushd ${dir}"
+			exit 1
+		fi
 		print_msg "Running linter on ${dir}"
 
-		golangci-lint run --out-format github-actions -c "${cwd}/.golangci.yaml"
+		$(go env GOPATH)/bin/golangci-lint run --out-format github-actions -c "${cwd}/.golangci.yaml"
 
 		# Keep track of exit code of linter
 		if [[ $? -ne 0 ]]; then
-			failed="true"
+			echo "::error:: lint ${dir}"
 		fi
 
-		popd >/dev/null || continue
-	done
+		if ! popd >/dev/null; then
+			echo "::error:: ${dir}"
+			exit 1
+		fi
 
-	if [[ ${failed} == "true" ]]; then
+		echo "${dir} ok"
+		exit 0
+	' '_' 1>>"${outfile}" 2>&1
+
+	cat ${outfile}
+
+	if grep "::error::" ${outfile}; then
 		add_summary "## Autofix Linting Issues"
 		add_summary "The linter can sometimes autofix some of the issues, if it is supported."
 		add_summary "\`\`\`bash\ncd <your plugin>\ngolangci-lint run -c <go-orb/plugins dir>/.golangci.yaml --fix\n\`\`\`"
@@ -173,7 +192,7 @@ function run_test() {
 		go get -v -t -d ./...
 
 		# Run tests.
-		richgo test ./... ${GO_TEST_FLAGS}
+		$(go env GOPATH)/bin/richgo test ./... ${GO_TEST_FLAGS}
 
 		# Keep track of exit code.
 		if [[ $? -ne 0 ]]; then
@@ -232,7 +251,7 @@ function create_summary() {
 	fi
 }
 
-git clone https://github.com/go-orb/go-orb ../go-orb
+[ ! -d ../go-orb ] && git clone https://github.com/go-orb/go-orb ../go-orb
 
 case $1 in
 "lint")
