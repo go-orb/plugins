@@ -1,49 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+export SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 MICRO_VERSION="."
-GO_TEST_FLAGS="-v -race -cover -bench=."
 
-RED='\033[0;31m'
-NC='\033[0m'
-GREEN='\033[0;32m'
-BAR="-------------------------------------------------------------------------------"
-HAS_DEPS=("polaris" "consul")
+source ${SCRIPT_DIR}/lib/util.sh
 
-export RICHGO_FORCE_COLOR="true"
-# export IN_TRAVIS_CI="true"
-# export TRAVIS="true"
-
-# Print a green colored message to the screen.
-function print_msg() {
-	printf "\n\n${GREEN}${BAR}${NC}\n"
-	printf "${GREEN}| > ${1}${NC}\n"
-	printf "${GREEN}${BAR}${NC}\n\n"
-	sleep 1
-}
-
-# Print a red colored message to the screen.
-function print_red() {
-	printf "\n\n${RED}${BAR}${NC}\n"
-	printf "${RED}| > ${1}${NC}\n"
-	printf "${RED}${BAR}${NC}\n\n"
-	sleep 1
-}
-
-# Print the contents of the directory array.
-function print_list() {
-	dirs=$1
-
-	print_msg "Found ${#dirs[@]} directories to test"
-	echo "Changed dirs:"
-	printf '%s \n' "${dirs[@]}"
-	printf '\n\n'
-	sleep 1
-}
-
-# Add a job summary to GitHub Actions.
-function add_summary() {
-	printf "${1}\n" >>"${GITHUB_STEP_SUMMARY}"
-}
 
 # Install dependencies, usually servers.
 #
@@ -119,51 +81,30 @@ function run_linter() {
 	$(go env GOPATH)/bin/golangci-lint --version
 
 	dirs=$1
+	cwd=$(dirname "${SCRIPT_DIR}/..")
 
-	outfile="$(mktemp)"
 	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /bin/bash -c '
-		function print_msg() {
-			printf "\n\n${GREEN}${BAR}${NC}\n"
-			printf "${GREEN}| > ${1}${NC}\n"
-			printf "${GREEN}${BAR}${NC}\n\n"
-			sleep 1
+		source ${SCRIPT_DIR}/lib/util.sh
+
+		function run_lint() {
+			print_msg "Running linter on ${1}"
+
+			if ! cd "${1}"; then
+				echo "::error cd ${1}"
+				exit 1
+			fi
+
+			$(go env GOPATH)/bin/golangci-lint run --out-format github-actions -c "${2}/.golangci.yaml"
+
+			# Keep track of exit code of linter
+			if [[ $? -ne 0 ]]; then
+				echo "::error lint ${1}"
+				exit 1
+			fi
 		}
 
-		cwd=$(pwd)
-		dir=$1;
-		if ! pushd "${dir}" >/dev/null; then
-			echo "::error:: pushd ${dir}"
-			exit 1
-		fi
-		print_msg "Running linter on ${dir}"
-
-		$(go env GOPATH)/bin/golangci-lint run --out-format github-actions -c "${cwd}/.golangci.yaml"
-
-		# Keep track of exit code of linter
-		if [[ $? -ne 0 ]]; then
-			echo "::error:: lint ${dir}"
-		fi
-
-		if ! popd >/dev/null; then
-			echo "::error:: ${dir}"
-			exit 1
-		fi
-
-		echo "${dir} ok"
-		exit 0
-	' '_' 1>>"${outfile}" 2>&1
-
-	cat ${outfile}
-
-	if grep "::error::" ${outfile}; then
-		add_summary "## Autofix Linting Issues"
-		add_summary "The linter can sometimes autofix some of the issues, if it is supported."
-		add_summary "\`\`\`bash\ncd <your plugin>\ngolangci-lint run -c <go-orb/plugins dir>/.golangci.yaml --fix\n\`\`\`"
-		print_red "Linter failed"
-		exit 1
-	else
-		print_msg "Linter found no issues"
-	fi
+		printf "%s\n" "$(run_lint $1 $(dirname "${SCRIPT_DIR}") 2>&1)"
+	' '_'
 }
 
 # Run Unit tests with RichGo for pretty output.
