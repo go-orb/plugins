@@ -201,6 +201,7 @@ if [[ ! -d ../go-orb ]]; then
 	go mod init testci.com/test
 	go work init .
 	go work use $(find . -name 'go.mod' -printf "%h\n") || true
+	go work sync
 	popd >/dev/null
 fi
 
