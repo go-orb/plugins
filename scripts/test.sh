@@ -2,6 +2,9 @@
 
 export SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+# Run all tests/benchmarks with a single cpu core.
+export GOMAXPROCS=1
+
 GO_TEST_FLAGS="-v -race -cover -bench=."
 MICRO_VERSION="."
 
@@ -136,7 +139,7 @@ function run_test() {
 		go get -v -t -d ./...
 
 		# Run tests.
-		GOMAXPROCS=1 $(go env GOPATH)/bin/richgo test ./... ${GO_TEST_FLAGS}
+		$(go env GOPATH)/bin/richgo test ./... ${GO_TEST_FLAGS}
 
 		# Keep track of exit code.
 		if [[ $? -ne 0 ]]; then
@@ -176,7 +179,7 @@ function create_summary() {
 		# Download all modules.
 		go get -v -t -d ./...
 
-		go test "${GO_TEST_FLAGS}" -json ./... |
+		go test ./... "${GO_TEST_FLAGS}" -json |
 			tparse -notests -format=markdown >>"${GITHUB_STEP_SUMMARY}"
 
 		if [[ $? -ne 0 ]]; then
