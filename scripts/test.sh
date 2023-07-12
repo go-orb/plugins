@@ -179,7 +179,7 @@ function create_summary() {
 		# Download all modules.
 		go get -v -t -d ./...
 
-		go test ./... "${GO_TEST_FLAGS}" -json |
+		go test ./... ${GO_TEST_FLAGS} -json |
 			tparse -notests -format=markdown >>"${GITHUB_STEP_SUMMARY}"
 
 		if [[ $? -ne 0 ]]; then
