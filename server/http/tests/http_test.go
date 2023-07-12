@@ -127,14 +127,14 @@ func TestServerHTTP3Twice(t *testing.T) {
 	time.Sleep(time.Second)
 
 	// Second run to check if setup/cleanup works
-	srv, cleanup, err = setupServer(t, false,
+	_, cleanup, err = setupServer(t, false,
 		mhttp.WithHTTP3(),
 	)
 	if err != nil {
 		require.NoError(t, err)
 	}
 
-	addr = fmt.Sprintf("https://%s", srv.Address())
+	addr = "https://localhost:42069"
 	makeRequests(t, addr, thttp.TypeHTTP3)
 	cleanup()
 }
@@ -154,8 +154,6 @@ func TestServerEntrypointsStarts(t *testing.T) {
 	addr = fmt.Sprintf("https://%s", addr)
 
 	makeRequests(t, addr, thttp.TypeHTTP2)
-
-	cleanup()
 }
 
 func TestServerGzip(t *testing.T) {
@@ -393,6 +391,8 @@ func TestServerIntegration(t *testing.T) {
 }
 
 func TestServerFileConfig(t *testing.T) {
+	thttp.RefreshClients()
+
 	server.Handlers.Register("handler-1", func(_ any) {})
 	server.Handlers.Register("handler-2", func(_ any) {})
 	router.Middleware.Register("middleware-1", func(h http.Handler) http.Handler { return h })
