@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20230709084536-48ca79fd6450
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20230709063950-8342f9783f18
+	github.com/go-orb/plugins/codecs/proto v0.0.0
 	github.com/google/go-cmp v0.5.9
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
 	google.golang.org/protobuf v1.31.0
@@ -21,3 +21,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98 // indirect
 	google.golang.org/grpc v1.56.2 // indirect
 )
+
+replace github.com/go-orb/plugins/codecs/proto => ../proto

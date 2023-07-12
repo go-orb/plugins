@@ -5,12 +5,13 @@ go 1.20
 require (
 	github.com/go-chi/chi v1.5.4
 	github.com/go-orb/go-orb v0.0.0-20230709084536-48ca79fd6450
-	github.com/go-orb/plugins/codecs/form v0.0.0-20230709081439-ab0ce6463c52
-	github.com/go-orb/plugins/codecs/json v0.0.0-20230709081439-ab0ce6463c52
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20230709081439-ab0ce6463c52
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230709081439-ab0ce6463c52
-	github.com/go-orb/plugins/config/source/file v0.0.0-20230709081439-ab0ce6463c52
-	github.com/go-orb/plugins/log/text v0.0.0-20230709081439-ab0ce6463c52
+	github.com/go-orb/plugins/codecs/form v0.0.0
+	github.com/go-orb/plugins/codecs/json v0.0.0
+	github.com/go-orb/plugins/codecs/jsonpb v0.0.0
+	github.com/go-orb/plugins/codecs/proto v0.0.0
+	github.com/go-orb/plugins/codecs/yaml v0.0.0
+	github.com/go-orb/plugins/config/source/file v0.0.0
+	github.com/go-orb/plugins/log/text v0.0.0
 	github.com/google/uuid v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/quic-go/quic-go v0.36.1
@@ -37,9 +38,8 @@ require (
 	github.com/onsi/ginkgo/v2 v2.11.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect
-	github.com/quic-go/qtls-go1-19 v0.3.2 // indirect
-	github.com/quic-go/qtls-go1-20 v0.2.2 // indirect
-	github.com/rogpeppe/go-internal v1.11.0 // indirect
+	github.com/quic-go/qtls-go1-19 v0.3.2 // indirect; v0.3.2 required by quic-go@v0.36.1
+	github.com/quic-go/qtls-go1-20 v0.2.2 // indirect; v0.2.2 required by quic-go@v0.36.1
 	golang.org/x/crypto v0.11.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
@@ -47,4 +47,14 @@ require (
 	golang.org/x/tools v0.11.0 // indirect
 	google.golang.org/genproto v0.0.0-20230711160842-782d3b101e98 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98 // indirect
+)
+
+replace (
+	github.com/go-orb/plugins/codecs/form => ../../codecs/form
+	github.com/go-orb/plugins/codecs/json => ../../codecs/json
+	github.com/go-orb/plugins/codecs/jsonpb => ../../codecs/jsonpb
+	github.com/go-orb/plugins/codecs/proto => ../../codecs/proto
+	github.com/go-orb/plugins/codecs/yaml => ../../codecs/yaml
+	github.com/go-orb/plugins/config/source/file => ../../config/source/file
+	github.com/go-orb/plugins/log/text => ../../log/text
 )

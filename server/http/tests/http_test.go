@@ -123,6 +123,9 @@ func TestServerHTTP3Twice(t *testing.T) {
 	makeRequests(t, addr, thttp.TypeHTTP3)
 	cleanup()
 
+	// Sleep a bit to let cleanup release the port
+	time.Sleep(time.Second)
+
 	// Second run to check if setup/cleanup works
 	srv, cleanup, err = setupServer(t, false,
 		mhttp.WithHTTP3(),
@@ -527,6 +530,22 @@ func BenchmarkHTTP2Proto16(b *testing.B) {
 	benchmark(b, testFunc, 16, 1)
 }
 
+func BenchmarkH2CJSON16(b *testing.B) {
+	testFunc := func(tb testing.TB, addr string) error {
+		return thttp.TestPostRequestJSON(tb, addr, thttp.TypeHTTP2)
+	}
+
+	benchmark(b, testFunc, 16, 1, mhttp.WithAllowH2C(), mhttp.WithInsecure())
+}
+
+func BenchmarkH2CProto16(b *testing.B) {
+	testFunc := func(tb testing.TB, addr string) error {
+		return thttp.TestPostRequestProto(tb, addr, "application/octet-stream", thttp.TypeHTTP2)
+	}
+
+	benchmark(b, testFunc, 16, 1, mhttp.WithAllowH2C(), mhttp.WithInsecure())
+}
+
 func BenchmarkHTTP3JSON16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
 		return thttp.TestPostRequestJSON(tb, addr, thttp.TypeHTTP3)
@@ -535,7 +554,7 @@ func BenchmarkHTTP3JSON16(b *testing.B) {
 	benchmark(b, testFunc, 16, 1, mhttp.WithHTTP3())
 }
 
-func BenchmarkHTTP3PROTO16(b *testing.B) {
+func BenchmarkHTTP3Proto16(b *testing.B) {
 	testFunc := func(tb testing.TB, addr string) error {
 		return thttp.TestPostRequestProto(tb, addr, "application/octet-stream", thttp.TypeHTTP3)
 	}
@@ -553,9 +572,9 @@ func benchmark(b *testing.B, testFunc func(testing.TB, string) error, pN, sN int
 		b.Fatal(err)
 	}
 
-	addr := "https://localhost:42069"
+	addr := "https://" + server.Address()
 	if server.Config.Insecure {
-		addr = "http://localhost:42069"
+		addr = "http://" + server.Address()
 	}
 
 	runBenchmark(b, addr, testFunc, pN, sN)
