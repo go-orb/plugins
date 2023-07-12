@@ -39,7 +39,7 @@ const (
 	DefaultAllowH2C = false
 
 	// DefaultMaxConcurrentStreams for HTTP2.
-	DefaultMaxConcurrentStreams = 250
+	DefaultMaxConcurrentStreams = 512
 
 	// DefaultHTTP2 dicates whether to also allow HTTP/2 connections.
 	DefaultHTTP2 = true
