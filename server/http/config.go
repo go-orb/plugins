@@ -71,6 +71,10 @@ const (
 	// DefaultConfigSection is the section key used in config files used to
 	// configure the server options.
 	DefaultConfigSection = "http"
+
+	// DefaultMaxHeaderBytes is the maximum size to parse from a client's
+	// HTTP request headers.
+	DefaultMaxHeaderBytes = 1024 * 64
 )
 
 // DefaultCodecWhitelist is the default allowed list of codecs to be used for
@@ -153,6 +157,10 @@ type Config struct {
 	// MaxConcurrentStreams for HTTP2.
 	MaxConcurrentStreams int `json:"maxConcurrentStreams" yaml:"maxConcurrentStreams"`
 
+	// MaxHeaderBytes is the maximum size to parse from a client's
+	// HTTP request headers.
+	MaxHeaderBytes int `json:"maxHeaderBytes" yaml:"maxHeaderBytes"`
+
 	// CodecWhitelist is the list of codec names that are allowed to be used
 	// with the HTTP server. This means that if registered, codecs in this list
 	// will be added to the server, allowing you to make RPC requests in that format.
@@ -210,6 +218,7 @@ func NewConfig(options ...Option) *Config {
 		Address:              DefaultAddress,
 		Insecure:             DefaultInsecure,
 		MaxConcurrentStreams: DefaultMaxConcurrentStreams,
+		MaxHeaderBytes:       DefaultMaxHeaderBytes,
 		H2C:                  DefaultAllowH2C,
 		HTTP2:                DefaultHTTP2,
 		HTTP3:                DefaultHTTP3,

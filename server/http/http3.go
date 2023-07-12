@@ -5,13 +5,12 @@ package http
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"net"
 	"net/http"
-	"sync"
+	"sync/atomic"
 
-	"github.com/go-orb/go-orb/util/addr"
+	"github.com/quic-go/quic-go"
 	"github.com/quic-go/quic-go/http3"
 )
 
@@ -23,48 +22,40 @@ var (
 type http3server struct {
 	*http3.Server
 
-	lock   sync.RWMutex
-	getter func(info *tls.ClientHelloInfo) (*tls.Config, error)
+	s *ServerHTTP
 }
 
-func (s *ServerHTTP) newHTTP3Server() (*http3server, error) {
-	port, err := addr.ParsePort(s.Config.Address)
-	if err != nil {
-		return nil, err
-	}
-
-	h2 := s.httpServer.Server
-
+func (s *ServerHTTP) newHTTP3Server() *http3server {
 	h3 := http3server{
-		getter: func(info *tls.ClientHelloInfo) (*tls.Config, error) {
-			return s.Config.TLS.Config, nil
-		},
+		s: s,
 	}
 
 	h3.Server = &http3.Server{
-		Addr:      s.Config.Address,
-		Port:      port,
-		Handler:   h2.Handler,
-		TLSConfig: h3.prepareTLSConfig(s.Config.TLS.Config),
+		Handler:        s,
+		TLSConfig:      s.Config.TLS.Config,
+		MaxHeaderBytes: s.Config.MaxHeaderBytes,
+
+		// TODO: remove this config when draft versions are no longer supported (we have no need to support drafts)
+		QuicConfig: &quic.Config{
+			Versions: []quic.VersionNumber{quic.Version1, quic.Version2},
+		},
 	}
 
-	previousHandler := h2.Handler
-
-	h2.Handler = http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		if req.ProtoMajor < 3 {
-			if err := h3.Server.SetQuicHeaders(rw.Header()); err != nil {
-				s.Logger.Error("Failed to set HTTP3 headers", err)
-			}
-		}
-
-		previousHandler.ServeHTTP(rw, req)
-	})
-
-	return &h3, nil
+	return &h3
 }
 
-func (h3 *http3server) Start(l net.PacketConn) error {
-	if err := h3.Serve(l); err != nil && !errors.Is(err, http.ErrServerClosed) {
+func (h3 *http3server) Start() error {
+	h3ln, err := quic.ListenEarly(h3.s.listenerUDP, http3.ConfigureTLSConfig(h3.s.Config.TLS.Config), &quic.Config{
+		Allow0RTT: true,
+		RequireAddressValidation: func(clientAddr net.Addr) bool {
+			return atomic.LoadInt64(&h3.s.activeRequests) > int64(h3.s.Config.MaxConcurrentStreams)
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	if err := h3.ServeListener(h3ln); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
 
@@ -74,21 +65,4 @@ func (h3 *http3server) Start(l net.PacketConn) error {
 func (h3 *http3server) Stop(_ context.Context) error {
 	// TODO: use h3.CloseGracefully() when available.
 	return h3.Close()
-}
-
-func (h3 *http3server) getGetConfigForClient(info *tls.ClientHelloInfo) (*tls.Config, error) {
-	h3.lock.RLock()
-	defer h3.lock.RUnlock()
-
-	return h3.getter(info)
-}
-
-func (h3 *http3server) prepareTLSConfig(c *tls.Config) *tls.Config {
-	if c == nil {
-		c = new(tls.Config)
-	}
-
-	c.GetConfigForClient = h3.getGetConfigForClient
-
-	return c
 }

@@ -14,6 +14,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+	"net/http"
 
 	"golang.org/x/exp/slog"
 
@@ -46,8 +47,9 @@ type ServerHTTP struct {
 	// The router here is merely a reference to the router that is used in the servers
 	// themselves. You can fetch the router with the getter, and register handlers,
 	// or mount other routers.
-	router router.Router
-	codecs map[string]codecs.Marshaler
+	router  router.Router
+	handler http.Handler
+	codecs  map[string]codecs.Marshaler
 
 	httpServer  *httpServer
 	http3Server *http3server
@@ -56,6 +58,8 @@ type ServerHTTP struct {
 	listenerTCP net.Listener
 
 	started bool
+
+	activeRequests int64 // accessed atomically
 }
 
 // ProvideServerHTTP creates a new entrypoint for a single address. You can create
@@ -119,10 +123,7 @@ func ProvideServerHTTP(
 		return &entrypoint, nil
 	}
 
-	entrypoint.http3Server, err = entrypoint.newHTTP3Server()
-	if err != nil {
-		return nil, fmt.Errorf("failed to create HTTP3 server: %w", err)
-	}
+	entrypoint.http3Server = entrypoint.newHTTP3Server()
 
 	return &entrypoint, nil
 }
@@ -174,7 +175,7 @@ func (s *ServerHTTP) Start() error {
 	}
 
 	go func() {
-		if err := s.http3Server.Start(s.listenerUDP); err != nil {
+		if err := s.http3Server.Start(); err != nil {
 			s.Logger.Error("Failed to start HTTP3 server", "error", err)
 		}
 	}()

@@ -11,10 +11,12 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/go-orb/plugins/server/http/router"
 
+	"golang.org/x/exp/slog"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
@@ -31,19 +33,21 @@ type httpServer struct {
 }
 
 func (s *ServerHTTP) newHTTPServer(router router.Router) (*httpServer, error) {
-	handler, ok := router.(http.Handler)
+	var ok bool
+	s.handler, ok = router.(http.Handler)
+
 	if !ok {
 		return nil, ErrRouterHandlerInterface
 	}
 
 	if s.Config.H2C {
-		handler = h2c.NewHandler(handler, &http2.Server{
+		s.handler = h2c.NewHandler(s.handler, &http2.Server{
 			MaxConcurrentStreams: uint32(s.Config.MaxConcurrentStreams),
 		})
 	}
 
 	server := http.Server{
-		Handler:           handler,
+		Handler:           s,
 		ReadTimeout:       s.Config.ReadTimeout,
 		WriteTimeout:      s.Config.WriteTimeout,
 		IdleTimeout:       s.Config.IdleTimeout,
@@ -90,4 +94,34 @@ func (s *httpServer) Stop(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (s *ServerHTTP) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+	resp.Header().Set("Server", "go-orb")
+
+	// advertise HTTP/3, if enabled
+	if s.http3Server != nil {
+		// keep track of active requests for QUIC transport purposes
+		atomic.AddInt64(&s.activeRequests, 1)
+		defer atomic.AddInt64(&s.activeRequests, -1)
+
+		if req.ProtoMajor < 3 {
+			err := s.http3Server.SetQuicHeaders(resp.Header())
+			if err != nil {
+				s.Logger.Error("setting HTTP/3 Alt-Svc header", "error", err)
+			}
+		}
+	}
+
+	// reject very long methods; probably a mistake or an attack
+	if len(req.Method) > 32 {
+		s.Logger.Warn("rejecting request with long method",
+			slog.String("method_trunc", req.Method[:32]),
+			slog.String("remote_addr", req.RemoteAddr))
+		resp.WriteHeader(http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	s.handler.ServeHTTP(resp, req)
 }

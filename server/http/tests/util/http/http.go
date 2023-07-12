@@ -48,11 +48,8 @@ var (
 	httpInsecureClient *http.Client
 	http1Client        *http.Client
 	HTTP2Client        *http.Client
-	// TODO: As long as https://github.com/lucas-clemente/quic-go/issues/765
-	//       exists, the client cannot be re-used.
-	//nolint:unused
-	http3Client   *http.Client
-	httpH2CClient *http.Client
+	http3Client        *http.Client
+	httpH2CClient      *http.Client
 )
 
 func init() {
@@ -290,16 +287,7 @@ func switchRequest(tb testing.TB, url, ct string, msg []byte, reqFunc ReqFunc, r
 	case TypeHTTP2:
 		body, err = reqFunc(tb, url, ct, msg, HTTP2Client)
 	case TypeHTTP3:
-		// Required because of issue quic-go#765
-		client := http.Client{
-			Transport: &http3.RoundTripper{
-				TLSClientConfig: &tls.Config{
-					//nolint:gosec
-					InsecureSkipVerify: true,
-				},
-			},
-		}
-		body, err = reqFunc(tb, url, ct, msg, &client)
+		body, err = reqFunc(tb, url, ct, msg, http3Client)
 	case TypeH2C:
 		body, err = reqFunc(tb, url, ct, msg, httpH2CClient)
 	}

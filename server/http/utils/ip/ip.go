@@ -7,6 +7,7 @@ import (
 	"net"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -65,4 +66,35 @@ func ParsePort(address string) (int, error) {
 	}
 
 	return p, nil
+}
+
+// trunk-ignore(golangci-lint/gochecknoglobals): .
+var networkTypesHTTP3 = map[string]string{
+	"unix": "unixgram",
+	"tcp4": "udp4",
+	"tcp6": "udp6",
+}
+
+// RegisterNetworkHTTP3 registers a mapping from non-HTTP/3 network to HTTP/3
+// network. This should be called during init() and will panic if the network
+// type is standard, reserved, or already registered.
+//
+// EXPERIMENTAL: Subject to change.
+func RegisterNetworkHTTP3(originalNetwork, h3Network string) {
+	if _, ok := networkTypesHTTP3[strings.ToLower(originalNetwork)]; ok {
+		panic("network type " + originalNetwork + " is already registered")
+	}
+
+	networkTypesHTTP3[originalNetwork] = h3Network
+}
+
+// GetHTTP3Network maps tcp -> udp.
+func GetHTTP3Network(originalNetwork string) string {
+	h3Network, ok := networkTypesHTTP3[strings.ToLower(originalNetwork)]
+	if !ok {
+		// TODO: Maybe a better default is to not enable HTTP/3 if we do not know the network?
+		return "udp"
+	}
+
+	return h3Network
 }
