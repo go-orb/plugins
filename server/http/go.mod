@@ -8,7 +8,7 @@ require (
 	github.com/go-orb/plugins/codecs/form v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/codecs/json v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20230713091520-67e7b5a34489
-	github.com/go-orb/plugins/codecs/proto v0.0.0
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/config/source/file v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/log/text v0.0.0-20230713091520-67e7b5a34489

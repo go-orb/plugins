@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/registry/consul
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230711233331-5357e6329daa-20230711233331-5357e6329daa
+	github.com/go-orb/go-orb v0.0.0-20230711233331-5357e6329daa
 	github.com/go-orb/plugins/log/text v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/registry/regutil v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/registry/tests v0.0.0-20230713091520-67e7b5a34489
