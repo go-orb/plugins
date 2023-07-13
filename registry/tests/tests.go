@@ -1,4 +1,4 @@
-// Package tests contains common tests for go-micro.dev registries.
+// Package tests contains common tests for go-orb registries.
 package tests
 
 import (

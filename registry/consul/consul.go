@@ -1,4 +1,4 @@
-// Package consul provides the consul registry for go-micro.
+// Package consul provides the consul registry for go-orb.
 package consul
 
 import (
@@ -24,7 +24,7 @@ import (
 // This is here to make sure RegistryConsul implements registry.Registry.
 var _ registry.Registry = (*RegistryConsul)(nil)
 
-// RegistryConsul is the consul registry for go-micro.
+// RegistryConsul is the consul registry for go-orb.
 type RegistryConsul struct {
 	Address []string
 

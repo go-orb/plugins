@@ -1,4 +1,4 @@
-// Package grpc provides a gRPC entrypoint for go-micro.
+// Package grpc provides a gRPC entrypoint for go-orb.
 package grpc
 
 import (

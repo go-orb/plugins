@@ -21,7 +21,7 @@ This will add replace statements to all go.mod's in this repo.
 **Before** a git commit you have to:
 
 ```bash
-go-task mod-unreplace
+go-task mod-dropreplace
 ```
 
 We do not accept commit's with a "replace" line outside of "github.com/go-orb/plugins/".
@@ -39,4 +39,4 @@ To prevent import cycles it's not allowed to import in github.com/go-orb/go-orb 
 
 ## License
 
-go-micro is Apache 2.0 licensed.
+go-orb is Apache 2.0 licensed same as go-micro.

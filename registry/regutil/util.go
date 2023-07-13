@@ -1,4 +1,4 @@
-// Package regutil provides utility functions for go-micro.
+// Package regutil provides utility functions for go-orb.
 package regutil
 
 import (

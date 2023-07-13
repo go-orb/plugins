@@ -13,7 +13,7 @@ type Middlewares map[string]func(http.Handler) http.Handler
 
 // The Router interface as found here is a copy of the Chi router interface.
 // It was selected for it's simplicity compliance with the stdlib.
-// Some methods were removed as they were considered unnecessary for go-micro.
+// Some methods were removed as they were considered unnecessary for go-orb.
 // If you are missing anything please open an issue.
 
 // Router is a servermux.
