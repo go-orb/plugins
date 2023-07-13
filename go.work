@@ -1,0 +1,23 @@
+go 1.20
+
+use (
+	./codecs/form
+	./codecs/json
+	./codecs/jsonpb
+	./codecs/proto
+	./codecs/yaml
+	./config/source/cli/urfave
+	./config/source/file
+	./config/source/http
+	./config/tests
+	./log/json
+	./log/text
+	./registry/consul
+	./registry/mdns
+	./registry/nats
+	./registry/regutil
+	./registry/tests
+	./server/grpc
+	./server/http
+	./server/tests
+)

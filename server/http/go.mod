@@ -25,11 +25,6 @@ require (
 )
 
 require (
-	github.com/google/subcommands v1.2.0 // indirect
-	github.com/google/wire v0.5.0 // indirect
-)
-
-require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/go-playground/form/v4 v4.2.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
@@ -52,3 +47,17 @@ require (
 	google.golang.org/genproto v0.0.0-20230711160842-782d3b101e98 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98 // indirect
 )
+
+replace github.com/go-orb/plugins/codecs/form => ../../codecs/form
+
+replace github.com/go-orb/plugins/codecs/json => ../../codecs/json
+
+replace github.com/go-orb/plugins/codecs/jsonpb => ../../codecs/jsonpb
+
+replace github.com/go-orb/plugins/codecs/proto => ../../codecs/proto
+
+replace github.com/go-orb/plugins/codecs/yaml => ../../codecs/yaml
+
+replace github.com/go-orb/plugins/config/source/file => ../../config/source/file
+
+replace github.com/go-orb/plugins/log/text => ../../log/text

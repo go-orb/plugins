@@ -31,12 +31,6 @@ github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9
 github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V4qmtdjCk=
 github.com/go-orb/go-orb v0.0.0-20230711233331-5357e6329daa h1:j1HTUWXNFSxgePXbQSpvIuuSppTtbxh37/ki5GPnDTs=
 github.com/go-orb/go-orb v0.0.0-20230711233331-5357e6329daa/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
-github.com/go-orb/plugins/log/text v0.0.0-20230713091520-67e7b5a34489 h1:sPlZoAqMzNoB7lkEUmJIb4MwN5eukX54icO778qXtTM=
-github.com/go-orb/plugins/log/text v0.0.0-20230713091520-67e7b5a34489/go.mod h1:xNbIIfswu4gWZlo7FEvjAEKWLfZW2xAh5Dud+p8XSTw=
-github.com/go-orb/plugins/registry/regutil v0.0.0-20230713091520-67e7b5a34489 h1:1LkvKj62g4mlXdOXeWBRL+lDv+N2fQK2v6QJKg0P3e4=
-github.com/go-orb/plugins/registry/regutil v0.0.0-20230713091520-67e7b5a34489/go.mod h1:ZEZYDb3yg+UXZyXEhKMcjJ9rW0Ae83/T4AbMK2/DhXI=
-github.com/go-orb/plugins/registry/tests v0.0.0-20230713091520-67e7b5a34489 h1:09PWHl0w0G2MphOzBOFlf9bNOiCgCqgDzqUOMWqMEXk=
-github.com/go-orb/plugins/registry/tests v0.0.0-20230713091520-67e7b5a34489/go.mod h1:coFDlNQJ1wBbjuVLAMFp+XeqvSX4/+1m8hlXegffPaU=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=

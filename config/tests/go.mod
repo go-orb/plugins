@@ -18,7 +18,6 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/urfave/cli/v2 v2.25.7 // indirect
@@ -26,3 +25,13 @@ require (
 	golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/go-orb/plugins/codecs/json => ../../codecs/json
+
+replace github.com/go-orb/plugins/codecs/yaml => ../../codecs/yaml
+
+replace github.com/go-orb/plugins/config/source/cli/urfave => ../source/cli/urfave
+
+replace github.com/go-orb/plugins/config/source/file => ../source/file
+
+replace github.com/go-orb/plugins/config/source/http => ../source/http

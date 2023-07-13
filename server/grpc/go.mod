@@ -19,7 +19,6 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/sanity-io/litter v1.5.5 // indirect
 	golang.org/x/net v0.12.0 // indirect
@@ -28,3 +27,9 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/go-orb/plugins/codecs/yaml => ../../codecs/yaml
+
+replace github.com/go-orb/plugins/config/source/file => ../../config/source/file
+
+replace github.com/go-orb/plugins/log/text => ../../log/text
