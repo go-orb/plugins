@@ -8,6 +8,24 @@ This project is a work in progress, please do not use yet!
 
 ## Development
 
+### go.mod replacements
+
+When you work on packages that require changes in other plugins or changes on the core you will need:
+
+```bash
+go-task mod-replace
+```
+
+This will add replace statements to all go.mod's in this repo.
+
+**Before** a git commit you have to:
+
+```bash
+go-task mod-unreplace
+```
+
+We do not accept commit's with a "replace" line outside of "github.com/go-orb/plugins/".
+
 ### Quirks
 
 #### github.com/go-orb/go-orb is not allowed to import plugins from here
