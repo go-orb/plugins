@@ -2,8 +2,14 @@ github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ3
 github.com/davecgh/go-spew v0.0.0-20161028175848-04cdfd42973b/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/go-orb/go-orb v0.0.0-20230709084536-48ca79fd6450 h1:HCBsqZPFBGLy9m7qOak29YJKFCncyenaXkChMhwt264=
-github.com/go-orb/go-orb v0.0.0-20230709084536-48ca79fd6450/go.mod h1:fu/xA3W6+/gMUsZ7MSnklrTs9rHvzFSlaeMpuOBF0bY=
+github.com/go-orb/go-orb v0.0.0-20230711233331-5357e6329daa h1:j1HTUWXNFSxgePXbQSpvIuuSppTtbxh37/ki5GPnDTs=
+github.com/go-orb/go-orb v0.0.0-20230711233331-5357e6329daa/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
+github.com/go-orb/plugins/codecs/yaml v0.0.0-20230713091520-67e7b5a34489 h1:0d9Zu+CXtV7yGIDXddhZt+z43Br68vzZPhi+K/OCL5E=
+github.com/go-orb/plugins/codecs/yaml v0.0.0-20230713091520-67e7b5a34489/go.mod h1:nR+mh4EAFyMMYOwE/5uE6uSL5P1iGymt655yERqYID4=
+github.com/go-orb/plugins/config/source/file v0.0.0-20230713091520-67e7b5a34489 h1:USf77PT5Ud3eVHuPRenylGXE9pJQZlDIG7yaVA0HGIQ=
+github.com/go-orb/plugins/config/source/file v0.0.0-20230713091520-67e7b5a34489/go.mod h1:UuclqcrsNGU83JTVpgs0KgQ7AVc0O043/ZBU7u4Rbyw=
+github.com/go-orb/plugins/log/text v0.0.0-20230713091520-67e7b5a34489 h1:sPlZoAqMzNoB7lkEUmJIb4MwN5eukX54icO778qXtTM=
+github.com/go-orb/plugins/log/text v0.0.0-20230713091520-67e7b5a34489/go.mod h1:xNbIIfswu4gWZlo7FEvjAEKWLfZW2xAh5Dud+p8XSTw=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/golang/protobuf v1.5.3 h1:KhyjKVUg7Usr/dYsdSqoFveMYd5ko72D+zANwlG1mmg=
 github.com/golang/protobuf v1.5.3/go.mod h1:XVQd3VNwM+JqD3oG2Ue2ip4fOMUkwXdXDdiuN0vRsmY=

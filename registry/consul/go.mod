@@ -3,10 +3,10 @@ module github.com/go-orb/plugins/registry/consul
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230709084536-48ca79fd6450
-	github.com/go-orb/plugins/log/text v0.0.0
-	github.com/go-orb/plugins/registry/regutil v0.0.0
-	github.com/go-orb/plugins/registry/tests v0.0.0
+	github.com/go-orb/go-orb v0.0.0-20230711233331-5357e6329daa-20230711233331-5357e6329daa
+	github.com/go-orb/plugins/log/text v0.0.0-20230713091520-67e7b5a34489
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20230713091520-67e7b5a34489
+	github.com/go-orb/plugins/registry/tests v0.0.0-20230713091520-67e7b5a34489
 	github.com/hashicorp/consul/api v1.22.0
 	github.com/hashicorp/consul/sdk v0.14.0
 	github.com/mitchellh/hashstructure v1.1.0
@@ -36,10 +36,4 @@ require (
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
-
-replace (
-	github.com/go-orb/plugins/log/text => ../../log/text
-	github.com/go-orb/plugins/registry/regutil => ../regutil
-	github.com/go-orb/plugins/registry/tests => ../tests
 )

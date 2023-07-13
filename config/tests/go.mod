@@ -3,12 +3,12 @@ module github.com/go-orb/plugins/config/tests
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230709084536-48ca79fd6450
-	github.com/go-orb/plugins/codecs/json v0.0.0
-	github.com/go-orb/plugins/codecs/yaml v0.0.0
-	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0
-	github.com/go-orb/plugins/config/source/file v0.0.0
-	github.com/go-orb/plugins/config/source/http v0.0.0
+	github.com/go-orb/go-orb v0.0.0-20230711233331-5357e6329daa
+	github.com/go-orb/plugins/codecs/json v0.0.0-20230713091520-67e7b5a34489
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230713091520-67e7b5a34489
+	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20230713091520-67e7b5a34489
+	github.com/go-orb/plugins/config/source/file v0.0.0-20230713091520-67e7b5a34489
+	github.com/go-orb/plugins/config/source/http v0.0.0-20230713091520-67e7b5a34489
 	github.com/stretchr/testify v1.8.4
 )
 
@@ -25,12 +25,4 @@ require (
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
-
-replace (
-	github.com/go-orb/plugins/codecs/json => ../../codecs/json
-	github.com/go-orb/plugins/codecs/yaml => ../../codecs/yaml
-	github.com/go-orb/plugins/config/source/cli/urfave => ../source/cli/urfave
-	github.com/go-orb/plugins/config/source/file => ../source/file
-	github.com/go-orb/plugins/config/source/http => ../source/http
 )

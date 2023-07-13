@@ -198,6 +198,10 @@ function create_summary() {
 	fi
 }
 
+if [[ ! -d ../go-orb ]]; then
+	git clone https://github.com/go-orb/go-orb ../go-orb
+fi
+
 case $1 in
 "lint")
 	dirs=($(get_dirs "${2}"))

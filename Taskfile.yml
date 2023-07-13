@@ -1,0 +1,65 @@
+version: "3"
+
+env:
+  PROCS:
+    sh: nproc
+  GOMAXPROCS: 1
+#  GOSUMDB: off
+#  GOPROXY: direct
+
+tasks:
+  runall:
+    desc: Run a command in all packages
+    cmds:
+      - find . -mindepth 2 -name 'go.mod' -print0 | xargs -0 -n1 -P ${PROCS} -- /bin/bash -c 'pushd `dirname $1`; {{.CLI_ARGS}}; popd >/dev/null' '_'
+
+  run:
+    desc: Run a command in a directory
+    cmds:
+      - pushd {{index (splitArgs .CLI_ARGS) 0}}; {{index (splitArgs .CLI_ARGS) 1}}; popd >/dev/null
+    vars:
+      DIRECTORY: splitArgs
+
+  ###########################
+  # Runall helpers
+  ###########################
+  tidy:
+    desc: Run "go mod tidy -go=1.20" in all packages
+    cmds:
+      - task: runall
+        vars:
+          CLI_ARGS: go mod tidy -go=1.20
+  fmt:
+    desc: Run "go fmt" in all packages
+    cmds:
+      - task: runall
+        vars:
+          CLI_ARGS: go fmt
+
+  update:
+    desc: Run "go get -u ./..." in all packages
+    cmds:
+      - task: runall
+        vars:
+          CLI_ARGS: go get -u ./...
+  test:
+    desc: Run "go test ./..." in all packages
+    cmds:
+      - task: runall
+        vars:
+          CLI_ARGS: go test ./...
+
+  ###########################
+  # Others
+  ###########################
+  mod-replace:
+    desc: Replace "github.com/go-orb/* v0.0.0" with the current working directory
+    cmds:
+      - find . -mindepth 2 -name 'go.mod' -printf "%h\0" | xargs -0 -n1 -- ./scripts/mod-replace.sh
+      - task: tidy
+
+  mod-dropreplace:
+    desc: Drop all "github.com/go-orb/*" replaces
+    cmds:
+      - find  . -mindepth 2 -name 'go.mod' -printf "%h\0" | xargs -0 -n1 -- ./scripts/mod-dropreplace.sh
+      - task: tidy

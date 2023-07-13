@@ -3,9 +3,9 @@ module github.com/go-orb/plugins/registry/nats
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230709084536-48ca79fd6450
-	github.com/go-orb/plugins/log/text v0.0.0
-	github.com/go-orb/plugins/registry/tests v0.0.0
+	github.com/go-orb/go-orb v0.0.0-20230711233331-5357e6329daa
+	github.com/go-orb/plugins/log/text v0.0.0-20230713091520-67e7b5a34489
+	github.com/go-orb/plugins/registry/tests v0.0.0-20230713091520-67e7b5a34489
 	github.com/nats-io/nats-server/v2 v2.9.19
 	github.com/nats-io/nats.go v1.27.1
 	golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb
@@ -27,9 +27,4 @@ require (
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
-
-replace (
-	github.com/go-orb/plugins/log/text => ../../log/text
-	github.com/go-orb/plugins/registry/tests => ../tests
 )

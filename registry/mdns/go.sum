@@ -1,8 +1,12 @@
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/go-orb/go-orb v0.0.0-20230709084536-48ca79fd6450 h1:HCBsqZPFBGLy9m7qOak29YJKFCncyenaXkChMhwt264=
-github.com/go-orb/go-orb v0.0.0-20230709084536-48ca79fd6450/go.mod h1:fu/xA3W6+/gMUsZ7MSnklrTs9rHvzFSlaeMpuOBF0bY=
+github.com/go-orb/go-orb v0.0.0-20230711233331-5357e6329daa h1:j1HTUWXNFSxgePXbQSpvIuuSppTtbxh37/ki5GPnDTs=
+github.com/go-orb/go-orb v0.0.0-20230711233331-5357e6329daa/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
+github.com/go-orb/plugins/log/text v0.0.0-20230713091520-67e7b5a34489 h1:sPlZoAqMzNoB7lkEUmJIb4MwN5eukX54icO778qXtTM=
+github.com/go-orb/plugins/log/text v0.0.0-20230713091520-67e7b5a34489/go.mod h1:xNbIIfswu4gWZlo7FEvjAEKWLfZW2xAh5Dud+p8XSTw=
+github.com/go-orb/plugins/registry/tests v0.0.0-20230713091520-67e7b5a34489 h1:09PWHl0w0G2MphOzBOFlf9bNOiCgCqgDzqUOMWqMEXk=
+github.com/go-orb/plugins/registry/tests v0.0.0-20230713091520-67e7b5a34489/go.mod h1:coFDlNQJ1wBbjuVLAMFp+XeqvSX4/+1m8hlXegffPaU=
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
