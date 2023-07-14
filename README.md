@@ -6,6 +6,10 @@ This repo contains plugins for [github.com/go-orb/go-orb](https://github.com/go-
 
 This project is a work in progress, please do not use yet!
 
+## Community
+
+- Chat with us on [Discord](https://discord.gg/sggGS389qb)
+
 ## Development
 
 ### go.mod replacements
