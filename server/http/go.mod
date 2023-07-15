@@ -38,7 +38,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect
 	github.com/quic-go/qtls-go1-19 v0.3.2 // indirect; v0.3.2 required by quic-go@v0.36.1
-	github.com/quic-go/qtls-go1-20 v0.3.0 // indirect; v0.2.2 required by quic-go@v0.36.1
+	github.com/quic-go/qtls-go1-20 v0.2.2 // indirect; v0.2.2 required by quic-go@v0.36.1
 	golang.org/x/crypto v0.11.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
