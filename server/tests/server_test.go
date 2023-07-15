@@ -263,17 +263,17 @@ func TestStartStopError(t *testing.T) {
 	require.Error(t, err, "stop should fail")
 }
 
-func setupServer(opts ...server.Option) (server.MicroServer, error) {
+func setupServer(opts ...server.Option) (server.Server, error) {
 	var service types.ServiceName = "test-service"
 
 	logger, err := log.ProvideLogger(service, nil)
 	if err != nil {
-		return server.MicroServer{}, fmt.Errorf("failed to setup logger: %w", err)
+		return server.Server{}, fmt.Errorf("failed to setup logger: %w", err)
 	}
 
 	srv, err := server.ProvideServer(service, nil, logger, opts...)
 	if err != nil {
-		return server.MicroServer{}, fmt.Errorf("failed to setup server: %w", err)
+		return server.Server{}, fmt.Errorf("failed to setup server: %w", err)
 	}
 
 	return srv, nil

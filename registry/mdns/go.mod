@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/registry/mdns
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230711233331-5357e6329daa
+	github.com/go-orb/go-orb v0.0.0-20230714131405-cb8d9dfee72f
 	github.com/go-orb/plugins/log/text v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/registry/tests v0.0.0-20230713091520-67e7b5a34489
 	github.com/google/uuid v1.3.0
@@ -15,7 +15,7 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb // indirect
+	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
 	golang.org/x/tools v0.11.0 // indirect

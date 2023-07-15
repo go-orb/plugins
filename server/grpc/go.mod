@@ -3,13 +3,13 @@ module github.com/go-orb/plugins/server/grpc
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230711233331-5357e6329daa
+	github.com/go-orb/go-orb v0.0.0-20230714131405-cb8d9dfee72f
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/config/source/file v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/log/text v0.0.0-20230713091520-67e7b5a34489
 	github.com/google/uuid v1.3.0
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb
+	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
 	google.golang.org/grpc v1.56.2
 	google.golang.org/protobuf v1.31.0
 )
