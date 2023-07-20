@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+
+	"github.com/go-orb/go-orb/util/orberrors"
 )
 
 // Errors.
@@ -43,7 +45,11 @@ func NewGRPCHandler[Tin any, Tout any](srv *ServerHTTP, f func(context.Context, 
 
 // WriteError returns an error response to the HTTP request.
 func WriteError(w http.ResponseWriter, err error) {
-	// TODO: proper error handling
-	w.WriteHeader(http.StatusInternalServerError)
-	fmt.Fprint(w, err.Error())
+	if err == nil {
+		return
+	}
+
+	orbe := orberrors.From(err)
+	w.WriteHeader(orbe.Code)
+	fmt.Fprintf(w, orbe.Error())
 }
