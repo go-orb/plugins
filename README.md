@@ -32,9 +32,9 @@ We do not accept commit's with a "replace" line outside of "github.com/go-orb/pl
 
 ### Quirks
 
-#### github.com/go-orb/go-orb is not allowed to import plugins from here
+#### github.com/go-orb/go-orb is not allowed to import plugins
 
-To prevent import cycles it's not allowed to import in github.com/go-orb/go-orb plugins from here.
+To prevent import cycles it's not allowed to import plugins in github.com/go-orb/go-orb.
 
 ## Authors
 
