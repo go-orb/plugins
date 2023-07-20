@@ -22,10 +22,8 @@ import (
 	mtls "github.com/go-orb/go-orb/util/tls"
 )
 
+// Interface guard.
 var _ server.Entrypoint = (*ServerGRPC)(nil)
-
-// Plugin name.
-const Plugin = "grpc"
 
 // ServerGRPC is an entrypoint with a gRPC server.
 type ServerGRPC struct {

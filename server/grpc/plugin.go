@@ -10,6 +10,9 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Plugin name.
+const Plugin = "grpc"
+
 func init() {
 	if err := server.Plugins.Add(Plugin, pluginProvider); err != nil {
 		panic(err)
