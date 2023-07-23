@@ -35,12 +35,12 @@ func CreateSuite(logger log.Logger, registries []registry.Registry, updateTime t
 		serviceOffset: serviceOffset,
 	}
 
-	r.nodes = append(r.nodes, &registry.Node{ID: "node0-http", Address: "10.0.0.10:1234", Scheme: "http"})
-	r.nodes = append(r.nodes, &registry.Node{ID: "node0-grpc", Address: "10.0.0.10:1234", Scheme: "grpc"})
-	r.nodes = append(r.nodes, &registry.Node{ID: "node0-frpc", Address: "10.0.0.10:1234", Scheme: "frpc"})
-	r.nodes = append(r.nodes, &registry.Node{ID: "node1-http", Address: "10.0.0.11:1234", Scheme: "http"})
-	r.nodes = append(r.nodes, &registry.Node{ID: "node1-grpc", Address: "10.0.0.11:1234", Scheme: "grpc"})
-	r.nodes = append(r.nodes, &registry.Node{ID: "node1-frpc", Address: "10.0.0.11:1234", Scheme: "frpc"})
+	r.nodes = append(r.nodes, &registry.Node{ID: "node0-http", Address: "10.0.0.10:1234", Transport: "http"})
+	r.nodes = append(r.nodes, &registry.Node{ID: "node0-grpc", Address: "10.0.0.10:1234", Transport: "grpc"})
+	r.nodes = append(r.nodes, &registry.Node{ID: "node0-frpc", Address: "10.0.0.10:1234", Transport: "frpc"})
+	r.nodes = append(r.nodes, &registry.Node{ID: "node1-http", Address: "10.0.0.11:1234", Transport: "http"})
+	r.nodes = append(r.nodes, &registry.Node{ID: "node1-grpc", Address: "10.0.0.11:1234", Transport: "grpc"})
+	r.nodes = append(r.nodes, &registry.Node{ID: "node1-frpc", Address: "10.0.0.11:1234", Transport: "frpc"})
 
 	r.services = append(r.services, &registry.Service{Name: "micro.test.svc.0", Version: "v1", Nodes: []*registry.Node{r.nodes[0]}})
 	r.services = append(r.services, &registry.Service{Name: "micro.test.svc.1", Version: "v1", Nodes: []*registry.Node{r.nodes[1]}})

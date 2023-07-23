@@ -3,11 +3,11 @@ module github.com/go-orb/plugins/registry/nats
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230720003256-0e0a2491dc1e
+	github.com/go-orb/go-orb v0.0.0-20230723100102-e6b748900de2
 	github.com/go-orb/plugins/log/text v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/registry/tests v0.0.0-20230713091520-67e7b5a34489
 	github.com/nats-io/nats-server/v2 v2.9.19
-	github.com/nats-io/nats.go v1.27.1
+	github.com/nats-io/nats.go v1.28.0
 	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
 )
 

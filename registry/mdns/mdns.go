@@ -75,15 +75,15 @@ func ProvideRegistryMDNS(
 	data types.ConfigData,
 	logger log.Logger,
 	opts ...registry.Option,
-) (*registry.MicroRegistry, error) {
+) (registry.Wire, error) {
 	cfg, err := NewConfig(name, data, opts...)
 	if err != nil {
-		return nil, fmt.Errorf("create mdns registry config: %w", err)
+		return registry.Wire{}, fmt.Errorf("create mdns registry config: %w", err)
 	}
 
 	logger, err = logger.WithComponent(registry.ComponentType, "mdns", "", nil)
 	if err != nil {
-		return nil, err
+		return registry.Wire{}, err
 	}
 
 	cfg.Logger = logger
@@ -91,7 +91,7 @@ func ProvideRegistryMDNS(
 	// Return the new registry.
 	reg := New(cfg, logger)
 
-	return &registry.MicroRegistry{Registry: reg}, nil
+	return registry.Wire{Registry: reg}, nil
 }
 
 // New creates a new mdns registry. This functions should rarely be called manually.
@@ -200,13 +200,13 @@ func (m *RegistryMDNS) registerNodes(service *registry.Service, entries []*mdnsE
 		// Doesn't exist
 		entry = &mdnsEntry{}
 
-		// encode the scheme with the metadata if not already given.
+		// encode the Transport with the metadata if not already given.
 		if node.Metadata == nil {
 			node.Metadata = make(map[string]string)
 		}
 
-		if _, ok := node.Metadata[metaSchemeKey]; !ok {
-			node.Metadata[metaSchemeKey] = node.Scheme
+		if _, ok := node.Metadata[metaTransportKey]; !ok {
+			node.Metadata[metaTransportKey] = node.Transport
 		}
 
 		txt, err := encode(&mdnsTxt{
@@ -402,9 +402,9 @@ func (m *RegistryMDNS) getService(
 				Metadata: txt.Metadata,
 			}
 
-			// Fetch the scheme back from the metadata.
-			if scheme, ok := rNode.Metadata["scheme"]; ok {
-				rNode.Scheme = scheme
+			// Fetch the Transport back from the metadata.
+			if Transport, ok := rNode.Metadata["Transport"]; ok {
+				rNode.Transport = Transport
 			}
 
 			service.Nodes = append(service.Nodes, rNode)
@@ -635,8 +635,8 @@ func (m *mdnsWatcher) Next() (*registry.Result, error) {
 				Metadata: txt.Metadata,
 			}
 
-			if _, ok := rNode.Metadata[metaSchemeKey]; ok {
-				rNode.Scheme = rNode.Metadata[metaSchemeKey]
+			if _, ok := rNode.Metadata[metaTransportKey]; ok {
+				rNode.Transport = rNode.Metadata[metaTransportKey]
 			}
 
 			service.Nodes = append(service.Nodes, rNode)

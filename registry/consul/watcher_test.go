@@ -74,7 +74,7 @@ func newHealthCheck(node, name, status string) *api.HealthCheck {
 }
 
 func newServiceEntry(node, address, name, version, scheme string, checks []*api.HealthCheck) *api.ServiceEntry {
-	md := map[string]string{metaSchemeKey: scheme}
+	md := map[string]string{metaTransportKey: scheme}
 	return &api.ServiceEntry{
 		Node: &api.Node{Node: node, Address: address, Meta: md},
 		Service: &api.AgentService{

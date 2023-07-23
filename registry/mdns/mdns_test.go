@@ -47,9 +47,9 @@ var (
 			Version: "1.0.1",
 			Nodes: []*registry.Node{
 				{
-					ID:      "test1-1",
-					Address: "10.0.0.1:10001",
-					Scheme:  "http",
+					ID:        "test1-1",
+					Address:   "10.0.0.1:10001",
+					Transport: "http",
 					Metadata: map[string]string{
 						"foo": "bar",
 					},
@@ -61,9 +61,9 @@ var (
 			Version: "1.0.2",
 			Nodes: []*registry.Node{
 				{
-					ID:      "test2-1",
-					Address: "10.0.0.2:10002",
-					Scheme:  "grpc",
+					ID:        "test2-1",
+					Address:   "10.0.0.2:10002",
+					Transport: "grpc",
 					Metadata: map[string]string{
 						"foo2": "bar2",
 					},
@@ -75,9 +75,9 @@ var (
 			Version: "1.0.3",
 			Nodes: []*registry.Node{
 				{
-					ID:      "test3-1",
-					Address: "10.0.0.3:10003",
-					Scheme:  "frpc",
+					ID:        "test3-1",
+					Address:   "10.0.0.3:10003",
+					Transport: "frpc",
 					Metadata: map[string]string{
 						"foo3": "bar3",
 					},
@@ -89,9 +89,9 @@ var (
 			Version: "1.0.4",
 			Nodes: []*registry.Node{
 				{
-					ID:      "test4-1",
-					Address: "[::]:10004",
-					Scheme:  "drpc",
+					ID:        "test4-1",
+					Address:   "[::]:10004",
+					Transport: "drpc",
 					Metadata: map[string]string{
 						"foo4": "bar4",
 					},
@@ -160,7 +160,7 @@ func TestWatcher(t *testing.T) {
 		node := expected.Nodes[0]
 		require.Equal(t, node.ID, actual.Nodes[0].ID, "node IDs not equal")
 		require.Equal(t, node.Address, actual.Nodes[0].Address, "node addresses not equal")
-		require.Equal(t, node.Scheme, actual.Nodes[0].Scheme, "node scheme does not equal")
+		require.Equal(t, node.Transport, actual.Nodes[0].Transport, "node Transport does not equal")
 	}
 
 	// New registry

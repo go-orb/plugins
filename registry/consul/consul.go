@@ -210,8 +210,8 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 	}
 
 	// Add the scheme to metadata if required
-	if _, ok := asr.Meta[metaSchemeKey]; !ok {
-		asr.Meta[metaSchemeKey] = node.Scheme
+	if _, ok := asr.Meta[metaTransportKey]; !ok {
+		asr.Meta[metaTransportKey] = node.Transport
 	}
 
 	// Specify consul connect
@@ -313,9 +313,9 @@ func (c *RegistryConsul) GetService(name string, _ ...registry.GetOption) ([]*re
 			Metadata: service.Service.Meta,
 		}
 
-		// Extract the scheme from Metadata
-		if scheme, ok := rNode.Metadata[metaSchemeKey]; ok {
-			rNode.Scheme = scheme
+		// Extract the transport from Metadata
+		if transport, ok := rNode.Metadata[metaTransportKey]; ok {
+			rNode.Transport = transport
 		}
 
 		svc.Nodes = append(svc.Nodes, rNode)
@@ -391,15 +391,15 @@ func ProvideRegistryConsul(
 	data types.ConfigData,
 	logger log.Logger,
 	opts ...registry.Option,
-) (*registry.MicroRegistry, error) {
+) (registry.Wire, error) {
 	cfg, err := NewConfig(name, data, opts...)
 	if err != nil {
-		return nil, fmt.Errorf("create consul registry config: %w", err)
+		return registry.Wire{}, fmt.Errorf("create consul registry config: %w", err)
 	}
 
 	logger, err = logger.WithComponent(registry.ComponentType, Name, "", nil)
 	if err != nil {
-		return nil, err
+		return registry.Wire{}, err
 	}
 
 	cfg.Logger = logger
@@ -407,7 +407,7 @@ func ProvideRegistryConsul(
 	// Return the new registry.
 	reg := New(cfg, logger)
 
-	return &registry.MicroRegistry{Registry: reg}, nil
+	return registry.Wire{Registry: reg}, nil
 }
 
 // New creates a new consul registry.

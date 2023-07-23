@@ -49,6 +49,14 @@ tasks:
         vars:
           CLI_ARGS: go test ./...
 
+  bench:
+    desc: Run "go test ./... -v -bench=." in all packages
+    cmds:
+      - task: runall
+        vars:
+          PROCS: 1
+          CLI_ARGS: go test ./... -v -bench=.
+
   ###########################
   # Others
   ###########################

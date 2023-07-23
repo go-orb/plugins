@@ -35,15 +35,15 @@ func ProvideRegistryNATS(
 	data types.ConfigData,
 	logger log.Logger,
 	opts ...registry.Option,
-) (*registry.MicroRegistry, error) {
+) (registry.Wire, error) {
 	cfg, err := NewConfig(name, data, opts...)
 	if err != nil {
-		return nil, fmt.Errorf("create nats registry config: %w", err)
+		return registry.Wire{}, fmt.Errorf("create nats registry config: %w", err)
 	}
 
 	logger, err = logger.WithComponent(registry.ComponentType, Name, "", nil)
 	if err != nil {
-		return nil, err
+		return registry.Wire{}, err
 	}
 
 	cfg.Logger = logger
@@ -51,7 +51,7 @@ func ProvideRegistryNATS(
 	// Return the new registry.
 	reg := New(cfg, logger)
 
-	return &registry.MicroRegistry{Registry: reg}, nil
+	return registry.Wire{Registry: reg}, nil
 }
 
 // New creates a new NATS registry. This functions should rarely be called manually.

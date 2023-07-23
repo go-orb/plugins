@@ -9,8 +9,8 @@ import (
 	"github.com/go-orb/go-orb/types"
 )
 
-// metaSchemeKey is the key to use to store the scheme in metadata.
-const metaSchemeKey = "_md_scheme_"
+// metaTransportKey is the key to use to store the scheme in metadata.
+const metaTransportKey = "_md_scheme_"
 
 // Name provides the name of this registry.
 const Name = "mdns"

@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/go-chi/chi v1.5.4
-	github.com/go-orb/go-orb v0.0.0-20230720003256-0e0a2491dc1e
+	github.com/go-orb/go-orb v0.0.0-20230723100102-e6b748900de2
 	github.com/go-orb/plugins/codecs/form v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/codecs/json v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20230713091520-67e7b5a34489
@@ -14,11 +14,11 @@ require (
 	github.com/go-orb/plugins/log/text v0.0.0-20230713091520-67e7b5a34489
 	github.com/google/uuid v1.3.0
 	github.com/pkg/errors v0.9.1
-	github.com/quic-go/quic-go v0.36.2
+	github.com/quic-go/quic-go v0.37.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
 	golang.org/x/net v0.12.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20230717213848-3f92550aa753
+	google.golang.org/genproto/googleapis/api v0.0.0-20230720185612-659f7aaaa771
 	google.golang.org/grpc v1.56.2
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -37,15 +37,14 @@ require (
 	github.com/onsi/ginkgo/v2 v2.11.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect
-	github.com/quic-go/qtls-go1-19 v0.3.2 // indirect; v0.3.2 required by quic-go@v0.36.1
-	github.com/quic-go/qtls-go1-20 v0.2.2 // indirect; v0.2.2 required by quic-go@v0.36.1
+	github.com/quic-go/qtls-go1-20 v0.3.0 // indirect
 	golang.org/x/crypto v0.11.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
 	golang.org/x/text v0.11.0 // indirect
 	golang.org/x/tools v0.11.0 // indirect
-	google.golang.org/genproto v0.0.0-20230717213848-3f92550aa753 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230717213848-3f92550aa753 // indirect
+	google.golang.org/genproto v0.0.0-20230720185612-659f7aaaa771 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230720185612-659f7aaaa771 // indirect
 )
 
 replace github.com/go-orb/plugins/codecs/form => ../../codecs/form

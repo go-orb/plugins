@@ -1,7 +1,7 @@
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
-github.com/go-orb/go-orb v0.0.0-20230720003256-0e0a2491dc1e h1:2E9cMUjm2BPmckCwuUpYzE/H10F1hO8cenEcy3QIsgk=
-github.com/go-orb/go-orb v0.0.0-20230720003256-0e0a2491dc1e/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
+github.com/go-orb/go-orb v0.0.0-20230723100102-e6b748900de2 h1:gBHxlLygZ7ym+IyupBoO9ZRKpZHdZf7nXj/JYtbWCMs=
+github.com/go-orb/go-orb v0.0.0-20230723100102-e6b748900de2/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
 github.com/kr/text v0.2.0/go.mod h1:eLer722TekiGuMkidMxC/pM04lWEeraHUUmBw8l2grE=

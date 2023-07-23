@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/config/tests
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230720003256-0e0a2491dc1e
+	github.com/go-orb/go-orb v0.0.0-20230723100102-e6b748900de2
 	github.com/go-orb/plugins/codecs/json v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20230713091520-67e7b5a34489
