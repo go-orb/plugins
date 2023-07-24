@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e; set -o pipefail
 
 export SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 export ORB_ROOT=$(realpath "${SCRIPT_DIR}/..")
@@ -46,44 +45,19 @@ function run_linter() {
 	$(go env GOPATH)/bin/golangci-lint --version
 
 	dirs=$1
-	cwd=$(dirname "${SCRIPT_DIR}/..")
-	failed="false"
+	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /usr/bin/env bash "${SCRIPT_DIR}/lib/lint.sh"
+	rc=$?
 
-	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /usr/bin/env bash -c '
-		set -e; set -o pipefail
-		source ${SCRIPT_DIR}/lib/util.sh
-
-		function run() {
-			print_header "Running linter on ${1}"
-
-			if ! cd "${1}"; then
-				echo "::error cd ${1}"
-				exit 1
-			fi
-
-			$(go env GOPATH)/bin/golangci-lint run --out-format github-actions -c "${2}/.golangci.yaml"
-
-			# Keep track of exit code of linter
-			if [[ $? -ne 0 ]]; then
-				echo "::error lint ${1}"
-				exit 1
-			fi
-		}
-
-		printf "%s\n" "$(run $1 "${ORB_ROOT}" 2>&1)"
-	' '_' || failed="true"
-
-	if [[ ${failed} == "true" ]]; then
-		print_red "Tests failed"
-		exit 1
+	if [[ "${rc}" != "0" ]]; then
+		print_red_header "Lint failed"
+	else
+		print_header "Lint OK"
 	fi
 }
 
 # Run Unit tests with RichGo for pretty output.
 function run_test() {
-	cwd=$(pwd)
 	dirs=$1
-	failed="false"
 
 	print_header "Downloading go dependencies..."
 
@@ -93,42 +67,12 @@ function run_test() {
 		bash -c "cd ${dir}; go mod tidy &>/dev/null"
 	done
 
-	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /usr/bin/env bash -c '
-		set -e; set -o pipefail
-		source ${SCRIPT_DIR}/lib/util.sh
-
-		function run() {
-			dir="${1}"
-
-			print_header "Running unit tests for ${dir}"
-
-			# Install dependencies if required.
-			pre_test "${dir}"
-
-			pushd "${dir}" >/dev/null || exit
-
-			# Download all modules.
-			go get -v -t -d ./...
-
-			# Run tests.
-			$(go env GOPATH)/bin/richgo test ./... ${ORB_GO_TEST_FLAGS}
-
-			# Keep track of exit code.
-			if [[ $? -ne 0 ]]; then
-				failed="true"
-			fi
-
-			popd >/dev/null || exit
-
-			# Kill all depdency processes.
-			post_test "${dir}"
-		}
-
-		printf "%s\n" "$(run $1 "${ORB_ROOT}" 2>&1)"
-	' '_'
+	dirs=$1
+	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /usr/bin/env bash "${SCRIPT_DIR}/lib/test.sh"
+	rc=$?
 
 	if [[ $? != 0 ]]; then
-		print_red "Tests failed"
+		print_red_header "Tests failed"
 		exit 1
 	fi
 }
@@ -159,16 +103,19 @@ function create_summary() {
 
 		if [[ $? -ne 0 ]]; then
 			failed="true"
+			print_red_msg "Failed"
 		fi
 
 		popd >/dev/null || continue
 
 		# Kill all depdency processes.
 		post_test "${dir}"
+
+		print_red_msg "Succeded"
 	done
 
 	if [[ ${failed} == "true" ]]; then
-		print_red "Tests failed"
+		print_red_header "Tests failed"
 		exit 1
 	fi
 }
@@ -180,14 +127,14 @@ fi
 case $1 in
 "lint")
 	read -a dirs <<< $(get_dirs "${@:2}")
-	[[ ${#dirs[@]} -eq 0 ]] && print_red "No changed Go files detected" && exit 0
+	[[ ${#dirs[@]} -eq 0 ]] && print_red_header "No changed Go files detected" && exit 0
 
 	print_list "${dirs[@]}"
 	run_linter "${dirs[@]}"
 	;;
 "test")
 	read -a dirs <<< $(get_dirs "${@:2}")
-	[[ ${#dirs[@]} -eq 0 ]] && print_red "No changed Go files detected" && exit 0
+	[[ ${#dirs[@]} -eq 0 ]] && print_red_header "No changed Go files detected" && exit 0
 
 	print_list "${dirs[@]}"
 
@@ -195,7 +142,7 @@ case $1 in
 	;;
 "summary")
 	read -a dirs <<< $(get_dirs "${@:2}")
-	[[ ${#dirs[@]} -eq 0 ]] && print_red "No changed Go files detected" && exit 0
+	[[ ${#dirs[@]} -eq 0 ]] && print_red_header "No changed Go files detected" && exit 0
 
 	print_list "${dirs[@]}"
 	create_summary "${dirs[@]}"

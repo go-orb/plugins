@@ -12,6 +12,10 @@ function print_msg() {
 	printf "${GREEN} > ${1}${NC}\n"
 }
 
+function print_red_msg() {
+	printf "${RED} > ${1}${NC}\n"
+}
+
 # Print a green colored message to the screen.
 function print_header() {
 	printf "\n\n${GREEN}${BAR}${NC}\n"
@@ -21,7 +25,7 @@ function print_header() {
 }
 
 # Print a red colored message to the screen.
-function print_red() {
+function print_red_header() {
 	printf "\n\n${RED}${BAR}${NC}\n"
 	printf "${RED}| > ${1}${NC}\n"
 	printf "${RED}${BAR}${NC}\n\n"

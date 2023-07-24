@@ -11,8 +11,10 @@ GOARCH=$(go env GOARCH)
 VERSION=$(get_latest_gh_release nats-io/nats-server)
 ZIPFILE="nats-server-${VERSION}-${GOOS}-${GOARCH}"
 
-mkdir -p test/bin/${GOOS}_${GOARCH}
-pushd test/bin/${GOOS}_${GOARCH}
+WORKDIR="$(realpath "${SCRIPT_DIR}/..")/test/bin/${GOOS}_${GOARCH}"
+
+mkdir -p "${WORKDIR}"
+pushd "${WORKDIR}"
 
 if [[ ! -x nats-server ]]; then
     print_msg "Downloading NATS ${VERSION}"
