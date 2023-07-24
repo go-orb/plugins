@@ -48,7 +48,7 @@ function pre_test() {
 	fi
 
 	print_msg "Executing pre test for ${1}"
-	${ORB_ROOT}/${1}/scripts/pre_test.sh
+	${1}/scripts/pre_test.sh
 	return $?
 }
 
@@ -60,7 +60,7 @@ function post_test() {
 	fi
 
 	print_msg "Executing post test for ${1}"
-	${ORB_ROOT}/${1}/scripts/post_test.sh
+	${1}/scripts/post_test.sh
 	return $?
 }
 

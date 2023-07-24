@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e; set -o pipefail
 
 export SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 export ORB_ROOT=$(realpath "${SCRIPT_DIR}/..")
@@ -31,8 +32,10 @@ function find_all() {
 function get_dirs() {
 	if [[ $1 == "all" ]]; then
 		find_all
-	else
+	elif [[ $1 == "changes" ]]; then
 		find_changes
+	else
+		echo ${@}
 	fi
 }
 
@@ -47,6 +50,7 @@ function run_linter() {
 	failed="false"
 
 	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /usr/bin/env bash -c '
+		set -e; set -o pipefail
 		source ${SCRIPT_DIR}/lib/util.sh
 
 		function run() {
@@ -81,7 +85,7 @@ function run_test() {
 	dirs=$1
 	failed="false"
 
-	print_header "Downloading dependencies..."
+	print_header "Downloading go dependencies..."
 
 	go install github.com/kyoh86/richgo@latest
 
@@ -90,6 +94,7 @@ function run_test() {
 	done
 
 	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /usr/bin/env bash -c '
+		set -e; set -o pipefail
 		source ${SCRIPT_DIR}/lib/util.sh
 
 		function run() {
@@ -120,9 +125,9 @@ function run_test() {
 		}
 
 		printf "%s\n" "$(run $1 "${ORB_ROOT}" 2>&1)"
-	' '_' || failed="true"
+	' '_'
 
-	if [[ ${failed} == "true" ]]; then
+	if [[ $? != 0 ]]; then
 		print_red "Tests failed"
 		exit 1
 	fi
@@ -174,14 +179,14 @@ fi
 
 case $1 in
 "lint")
-	dirs=($(get_dirs "${2}"))
+	read -a dirs <<< $(get_dirs "${@:2}")
 	[[ ${#dirs[@]} -eq 0 ]] && print_red "No changed Go files detected" && exit 0
 
 	print_list "${dirs[@]}"
 	run_linter "${dirs[@]}"
 	;;
 "test")
-	dirs=($(get_dirs "${2}"))
+	read -a dirs <<< $(get_dirs "${@:2}")
 	[[ ${#dirs[@]} -eq 0 ]] && print_red "No changed Go files detected" && exit 0
 
 	print_list "${dirs[@]}"
@@ -189,7 +194,7 @@ case $1 in
 	run_test "${dirs[@]}"
 	;;
 "summary")
-	dirs=($(get_dirs "${2}"))
+	read -a dirs <<< $(get_dirs "${@:2}")
 	[[ ${#dirs[@]} -eq 0 ]] && print_red "No changed Go files detected" && exit 0
 
 	print_list "${dirs[@]}"
