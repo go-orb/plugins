@@ -1,59 +1,15 @@
 #!/usr/bin/env bash
 
 export SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+export ORB_ROOT=$(realpath "${SCRIPT_DIR}/..")
 
 # Run all tests/benchmarks with a single cpu core.
 export GOMAXPROCS=1
 
-GO_TEST_FLAGS="-v -race -cover -bench=."
-MICRO_VERSION="."
-
-HAS_DEPS=("polaris" "consul" "nats")
+export ORB_GO_TEST_FLAGS="-v -race -cover"
 
 source "${SCRIPT_DIR}/lib/util.sh"
 
-
-# Install dependencies, usually servers.
-#
-# Can can be used to run an script needed to complete tests.
-#
-# To run a script add it to the HAS_DEPS variable, e.g.: ("redis" "nats").
-# And make sure to add a script to deps/<name>.sh
-function install_deps() {
-	for dep in "${HAS_DEPS[@]}"; do
-		if grep -q "${dep}" <<<"${1}"; then
-			script="scripts/deps/${dep}.sh"
-
-			# Check if script exists
-			if [[ -f ${script} ]]; then
-				echo "Installing depencies for ${dep}"
-				bash "${script}"
-				echo "${dep}"
-				return 0
-			fi
-		fi
-	done
-}
-
-# Kill all PIDs of setups.
-function kill_deps() {
-	for dep in "${HAS_DEPS[@]}"; do
-		if grep -q "${dep}" <<<"${1}"; then
-			# Itterate over all PIDs and kill them.
-			pids=($(pgrep "${dep}"))
-			if [[ ${#pids[@]} -ne 0 ]]; then
-				echo "Killing:"
-			fi
-
-			for dep_pid in "${pids[@]}"; do
-				ps -aux | grep -v "grep" | grep "${dep_pid}"
-
-				kill "${dep_pid}"
-				return 0
-			done
-		fi
-	done
-}
 
 # Find directories that contain changes.
 function find_changes() {
@@ -61,14 +17,14 @@ function find_changes() {
 	changes=($(git diff --name-only origin/main | xargs -d'\n' -I{} dirname {} | sort -u))
 
 	# Filter out directories without go.mod files.
-	changes=($(find "${changes[@]}" -maxdepth 1 -name 'go.mod' -printf '%h\n'))
+	changes=($(find "${changes[@]}" -maxdepth 1 -name 'go.mod' -printf '%h\n' 2>/dev/null))
 
 	echo "${changes[@]}"
 }
 
 # Find all go directories.
 function find_all() {
-	find "${MICRO_VERSION}" -name 'go.mod' -printf '%h\n'
+	find "${ORB_ROOT}" -name 'go.mod' -printf '%h\n'
 }
 
 # Get the dir list based on command type.
@@ -88,12 +44,13 @@ function run_linter() {
 
 	dirs=$1
 	cwd=$(dirname "${SCRIPT_DIR}/..")
+	failed="false"
 
-	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /bin/bash -c '
+	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /usr/bin/env bash -c '
 		source ${SCRIPT_DIR}/lib/util.sh
 
-		function run_lint() {
-			print_msg "Running linter on ${1}"
+		function run() {
+			print_header "Running linter on ${1}"
 
 			if ! cd "${1}"; then
 				echo "::error cd ${1}"
@@ -109,8 +66,13 @@ function run_linter() {
 			fi
 		}
 
-		printf "%s\n" "$(run_lint $1 $(dirname "${SCRIPT_DIR}") 2>&1)"
-	' '_'
+		printf "%s\n" "$(run $1 "${ORB_ROOT}" 2>&1)"
+	' '_' || failed="true"
+
+	if [[ ${failed} == "true" ]]; then
+		print_red "Tests failed"
+		exit 1
+	fi
 }
 
 # Run Unit tests with RichGo for pretty output.
@@ -119,7 +81,7 @@ function run_test() {
 	dirs=$1
 	failed="false"
 
-	print_msg "Downloading dependencies..."
+	print_header "Downloading dependencies..."
 
 	go install github.com/kyoh86/richgo@latest
 
@@ -127,30 +89,38 @@ function run_test() {
 		bash -c "cd ${dir}; go mod tidy &>/dev/null"
 	done
 
-	for dir in "${dirs[@]}"; do
-		print_msg "Running unit tests for ${dir}"
+	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /usr/bin/env bash -c '
+		source ${SCRIPT_DIR}/lib/util.sh
 
-		# Install dependencies if required.
-		install_deps "${dir}"
+		function run() {
+			dir="${1}"
 
-		pushd "${dir}" >/dev/null || exit
+			print_header "Running unit tests for ${dir}"
 
-		# Download all modules.
-		go get -v -t -d ./...
+			# Install dependencies if required.
+			pre_test "${dir}"
 
-		# Run tests.
-		$(go env GOPATH)/bin/richgo test ./... ${GO_TEST_FLAGS}
+			pushd "${dir}" >/dev/null || exit
 
-		# Keep track of exit code.
-		if [[ $? -ne 0 ]]; then
-			failed="true"
-		fi
+			# Download all modules.
+			go get -v -t -d ./...
 
-		popd >/dev/null || exit
+			# Run tests.
+			$(go env GOPATH)/bin/richgo test ./... ${ORB_GO_TEST_FLAGS}
 
-		# Kill all depdency processes.
-		kill_deps "${dir}"
-	done
+			# Keep track of exit code.
+			if [[ $? -ne 0 ]]; then
+				failed="true"
+			fi
+
+			popd >/dev/null || exit
+
+			# Kill all depdency processes.
+			post_test "${dir}"
+		}
+
+		printf "%s\n" "$(run $1 "${ORB_ROOT}" 2>&1)"
+	' '_' || failed="true"
 
 	if [[ ${failed} == "true" ]]; then
 		print_red "Tests failed"
@@ -169,10 +139,10 @@ function create_summary() {
 	failed="false"
 	for dir in "${dirs[@]}"; do
 		# Install dependencies if required.
-		install_deps "${dir}"
+		pre_test "${dir}"
 
 		pushd "${dir}" >/dev/null || continue
-		print_msg "Creating summary for ${dir}"
+		print_header "Creating summary for ${dir}"
 
 		add_summary "\n### ${dir}\n"
 
@@ -189,7 +159,7 @@ function create_summary() {
 		popd >/dev/null || continue
 
 		# Kill all depdency processes.
-		kill_deps "${dir}"
+		post_test "${dir}"
 	done
 
 	if [[ ${failed} == "true" ]]; then
