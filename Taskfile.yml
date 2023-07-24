@@ -50,7 +50,7 @@ tasks:
           CLI_ARGS: go test ./...
 
   bench:
-    desc: Run "go test ./... -v -bench=." in all packages
+    desc: Run "go test ./... -v -benchmem -bench=." in all packages
     cmds:
       - task: runall
         vars:

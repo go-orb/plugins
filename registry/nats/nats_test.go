@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -12,8 +14,7 @@ import (
 
 	_ "github.com/go-orb/plugins/log/text"
 	"github.com/go-orb/plugins/registry/tests"
-
-	nserver "github.com/nats-io/nats-server/v2/server"
+	"github.com/pkg/errors"
 
 	log "github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
@@ -28,11 +29,7 @@ func TestMain(m *testing.M) {
 		log.Error("while creating a logger", err)
 	}
 
-	clusterName := "gomicro-registry-test-cluster"
-
 	var (
-		cleanup func()
-		addr    string
 		started bool
 
 		regOne   registry.Registry
@@ -40,18 +37,17 @@ func TestMain(m *testing.M) {
 		regThree registry.Registry
 	)
 
+	logger.Info("starting NATS server")
+
+	// start the NATS with JetStream server
+	addr, cleanup, err := natsServer()
+	if err != nil {
+		log.Error("failed to setup NATS server", err)
+	}
+
 	// Sometimes the nats server has isssues with starting, so we attempt 5
 	// times.
 	for i := 0; i < 5; i++ {
-		logger.Info("starting NATS server", slog.Int("attempt", i))
-
-		// start the NATS with JetStream server
-		addr, cleanup, err = natsServer(clusterName, logger)
-		if err != nil {
-			log.Error("failed to setup NATS server", err, slog.Int("attempt", i))
-			continue
-		}
-
 		cfg, err := NewConfig(types.ServiceName("test.service"), nil, WithAddress(addr))
 		if err != nil {
 			log.Error("failed to create config", err)
@@ -60,23 +56,22 @@ func TestMain(m *testing.M) {
 		regOne = New(cfg, logger)
 		if err := regOne.Start(); err != nil {
 			log.Error("failed to connect registry one to NATS server", err, slog.Int("attempt", i))
+
+			time.Sleep(time.Second)
 			continue
 		}
 
 		regTwo = New(cfg, logger)
 		if err := regTwo.Start(); err != nil {
 			log.Error("failed to connect registry two to NATS server", err, slog.Int("attempt", i))
-			continue
 		}
 
 		regThree = New(cfg, logger)
 		if err := regThree.Start(); err != nil {
 			log.Error("failed to connect registry three to NATS server", err, slog.Int("attempt", i))
-			continue
 		}
 
 		started = true
-		break
 	}
 
 	if !started {
@@ -91,7 +86,9 @@ func TestMain(m *testing.M) {
 
 	tests.Suite.TearDown()
 
-	cleanup()
+	if err := cleanup(); err != nil {
+		log.Error("Stopping nats failed", err)
+	}
 
 	os.Exit(result)
 }
@@ -105,7 +102,7 @@ func getFreeLocalhostAddress() (string, error) {
 	return l.Addr().String(), l.Close()
 }
 
-func natsServer(clustername string, logger log.Logger) (string, func(), error) {
+func natsServer() (string, func() error, error) {
 	addr, err := getFreeLocalhostAddress()
 	if err != nil {
 		return "", nil, err
@@ -113,56 +110,36 @@ func natsServer(clustername string, logger log.Logger) (string, func(), error) {
 	host := strings.Split(addr, ":")[0]
 	port, _ := strconv.Atoi(strings.Split(addr, ":")[1]) //nolint:errcheck
 
-	opts := &nserver.Options{
-		Host:       host,
-		TLSTimeout: 180,
-		Port:       port,
-		Cluster: nserver.ClusterOpts{
-			Name: clustername,
-		},
-	}
-
-	server, err := nserver.NewServer(opts)
+	natsCmd, err := filepath.Abs(filepath.Join("./test/bin/", runtime.GOOS+"_"+runtime.GOARCH, "nats-server"))
 	if err != nil {
-		return "", nil, fmt.Errorf("nats new server: %w", err)
+		return addr, nil, err
 	}
 
-	server.SetLoggerV2(
-		NewLogWrapper(logger),
-		false, false, false,
-	)
-
-	tmpdir := os.TempDir()
-	natsdir := filepath.Join(tmpdir, "nats-js-tests")
-	jsConf := &nserver.JetStreamConfig{
-		StoreDir: natsdir,
+	args := []string{"--addr", host, "--port", fmt.Sprint(port), "-js"}
+	cmd := exec.Command(natsCmd, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Start(); err != nil {
+		return addr, nil, errors.Wrap(err, "failed starting command")
 	}
 
-	// first start NATS
-	go server.Start()
-
-	time.Sleep(time.Second)
-
-	// second start JetStream
-	if err = server.EnableJetStream(jsConf); err != nil {
-		server.Shutdown()
-		return "", nil, fmt.Errorf("enable jetstream: %w", err)
-	}
-
-	time.Sleep(2 * time.Second)
-
-	// This fixes some issues where tests fail because directory cleanup fails
-	cleanup := func() {
-		server.Shutdown()
-
-		contents, _ := filepath.Glob(natsdir + "/*") //nolint:errcheck
-		for _, item := range contents {
-			_ = os.RemoveAll(item) //nolint:errcheck
+	cleanup := func() error {
+		if cmd.Process == nil {
+			return nil
 		}
-		_ = os.RemoveAll(natsdir) //nolint:errcheck
-	}
 
-	logger.Info("NATS server started")
+		if runtime.GOOS == "windows" {
+			if err := cmd.Process.Kill(); err != nil {
+				return errors.Wrap(err, "failed to kill nats server")
+			}
+		} else { // interrupt is not supported in windows
+			if err := cmd.Process.Signal(os.Interrupt); err != nil {
+				return errors.Wrap(err, "failed to kill nats server")
+			}
+		}
+
+		return nil
+	}
 
 	return addr, cleanup, nil
 }

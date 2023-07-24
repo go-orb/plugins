@@ -8,7 +8,7 @@ export GOMAXPROCS=1
 GO_TEST_FLAGS="-v -race -cover -bench=."
 MICRO_VERSION="."
 
-HAS_DEPS=("polaris" "consul")
+HAS_DEPS=("polaris" "consul" "nats")
 
 source "${SCRIPT_DIR}/lib/util.sh"
 

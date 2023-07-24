@@ -149,7 +149,7 @@ func (n *RegistryNATS) getConn() (*nats.Conn, error) {
 
 	c, err := opts.Connect()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", n.config.Addresses[0], err)
 	}
 
 	n.conn = c
