@@ -391,15 +391,15 @@ func ProvideRegistryConsul(
 	data types.ConfigData,
 	logger log.Logger,
 	opts ...registry.Option,
-) (registry.Wire, error) {
+) (registry.Type, error) {
 	cfg, err := NewConfig(name, data, opts...)
 	if err != nil {
-		return registry.Wire{}, fmt.Errorf("create consul registry config: %w", err)
+		return registry.Type{}, fmt.Errorf("create consul registry config: %w", err)
 	}
 
 	logger, err = logger.WithComponent(registry.ComponentType, Name, "", nil)
 	if err != nil {
-		return registry.Wire{}, err
+		return registry.Type{}, err
 	}
 
 	cfg.Logger = logger
@@ -407,7 +407,7 @@ func ProvideRegistryConsul(
 	// Return the new registry.
 	reg := New(cfg, logger)
 
-	return registry.Wire{Registry: reg}, nil
+	return registry.Type{Registry: reg}, nil
 }
 
 // New creates a new consul registry.

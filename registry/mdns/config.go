@@ -31,9 +31,7 @@ func init() {
 		cli.Usage("Registry domain."),
 	))
 
-	if err := registry.Plugins.Add(Name, registry.ProviderFunc(ProvideRegistryMDNS)); err != nil {
-		panic(err)
-	}
+	registry.Plugins.Register(Name, ProvideRegistryMDNS)
 }
 
 // Config provides configuration for the mDNS registry.
