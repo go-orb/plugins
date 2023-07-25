@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/go-chi/chi v1.5.4
-	github.com/go-orb/go-orb v0.0.0-20230725190534-6e856aec238f
+	github.com/go-orb/go-orb v0.0.0-20230725195416-0c865f140784
 	github.com/go-orb/plugins/codecs/form v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20230713091520-67e7b5a34489
@@ -31,7 +31,7 @@ require (
 	github.com/google/pprof v0.0.0-20230705174524-200ffdc848b8 // indirect
 	github.com/google/subcommands v1.2.0 // indirect
 	github.com/google/wire v0.5.0 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/onsi/ginkgo/v2 v2.11.0 // indirect

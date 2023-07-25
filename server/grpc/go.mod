@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/server/grpc
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230725190534-6e856aec238f
+	github.com/go-orb/go-orb v0.0.0-20230725195416-0c865f140784
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/config/source/file v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/log/slog v0.0.0-20230713091520-67e7b5a34489

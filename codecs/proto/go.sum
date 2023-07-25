@@ -1,6 +1,8 @@
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/go-orb/go-orb v0.0.0-20230725190534-6e856aec238f h1:keyrNkoMz1MQzi0xUlL/86w1LpmwghhSTFjEZxUuxiU=
 github.com/go-orb/go-orb v0.0.0-20230725190534-6e856aec238f/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
+github.com/go-orb/go-orb v0.0.0-20230725195416-0c865f140784 h1:oFCwwDurkWD3vQsSInU8fJGOnVdduR5HJuxVIzlWjmA=
+github.com/go-orb/go-orb v0.0.0-20230725195416-0c865f140784/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
