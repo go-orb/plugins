@@ -1,9 +1,6 @@
 go 1.20
 
 use (
-	./client/def
-	./client/def/transport/h2c
-	./client/tests
 	./codecs/form
 	./codecs/jsonpb
 	./codecs/proto
