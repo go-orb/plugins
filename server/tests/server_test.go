@@ -5,18 +5,19 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"os"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/exp/slog"
 
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	"github.com/go-orb/plugins/config/source/file"
+	_ "github.com/go-orb/plugins/log/slog"
+	_ "github.com/go-orb/plugins/registry/mdns"
 
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/container"
@@ -26,7 +27,6 @@ func init() {
 	server.Plugins.Register("mock", NewEntrypointMock)
 	server.Plugins.Register("mock-two", NewEntrypointMock)
 	server.NewDefaults.Register("mock", NewDefaultMockConfig)
-	log.Plugins.Register("textstderr", NewHandlerStderr)
 }
 
 var configFile = `---
@@ -130,11 +130,15 @@ func TestMockConfigFile(t *testing.T) {
 	require.NoError(t, err, "failed to read config data")
 
 	var service types.ServiceName = "com.example.test-service"
+	version := types.ServiceVersion("v1.0.0")
 
-	logger, err := log.ProvideLogger(service, nil)
+	logger, err := log.New()
 	require.NoError(t, err, "failed to setup logger")
 
-	srv, err := server.ProvideServer(service, data, logger,
+	reg, err := registry.ProvideRegistry(service, version, nil, logger)
+	require.NoError(t, err, "failed to setup the registry")
+
+	srv, err := server.ProvideServer(service, data, logger, reg,
 		WithMockDefaults(WithTest(t)),
 		WithMockEntrypoint(
 			WithMockName("static-ep-1"),
@@ -186,10 +190,13 @@ func TestMockConfigFile(t *testing.T) {
 	// Test Service Two, all entrypoints disabled.
 	service = "com.example.another-test-two"
 
-	logger, err = log.ProvideLogger(service, nil)
-	require.NoError(t, err, "failed to setup logger")
+	logger, err = log.New()
+	require.NoError(t, err, "failed to setup the logger")
 
-	srv, err = server.ProvideServer(service, data, logger, WithMockDefaults(WithTest(t)))
+	reg, err = registry.ProvideRegistry(service, version, nil, logger)
+	require.NoError(t, err, "failed to setup the registry")
+
+	srv, err = server.ProvideServer(service, data, logger, reg, WithMockDefaults(WithTest(t)))
 	require.NoError(t, err, "failed to setup server")
 	require.NoError(t, srv.Start(), "failed to start server")
 
@@ -206,10 +213,10 @@ func TestMockConfigFile(t *testing.T) {
 	}
 
 	for _, service := range shouldError {
-		logger, err = log.ProvideLogger(service, nil)
+		logger, err = log.New()
 		require.NoError(t, err, "failed to setup logger")
 
-		srv, err = server.ProvideServer(service, data, logger, WithMockDefaults(WithTest(t)))
+		srv, err = server.ProvideServer(service, data, logger, reg, WithMockDefaults(WithTest(t)))
 		t.Logf("expected error: %v", err)
 		require.Error(t, err, "should fail to setup server for "+service)
 	}
@@ -265,13 +272,19 @@ func TestStartStopError(t *testing.T) {
 
 func setupServer(opts ...server.Option) (server.Server, error) {
 	var service types.ServiceName = "test-service"
+	version := types.ServiceVersion("v1.0.0")
 
-	logger, err := log.ProvideLogger(service, nil)
+	logger, err := log.New()
 	if err != nil {
 		return server.Server{}, fmt.Errorf("failed to setup logger: %w", err)
 	}
 
-	srv, err := server.ProvideServer(service, nil, logger, opts...)
+	reg, err := registry.ProvideRegistry(service, version, nil, logger)
+	if err != nil {
+		return server.Server{}, fmt.Errorf("failed to setup registry: %w", err)
+	}
+
+	srv, err := server.ProvideServer(service, nil, logger, reg, opts...)
 	if err != nil {
 		return server.Server{}, fmt.Errorf("failed to setup server: %w", err)
 	}
@@ -324,6 +337,7 @@ func (c ConfigMock) Copy() server.EntrypointConfig {
 func NewEntrypointMock(
 	_ types.ServiceName,
 	_ log.Logger,
+	_ registry.Type,
 	c any,
 ) (server.Entrypoint, error) {
 	cfg, ok := c.(*ConfigMock)
@@ -499,9 +513,4 @@ func WithMockDefaults(opts ...MockOption) server.Option {
 		cfg.ApplyOptions(opts...)
 		c.Defaults["mock"] = cfg
 	}
-}
-
-// NewHandlerStderr writes text to stderr.
-func NewHandlerStderr(level slog.Leveler) (slog.Handler, error) {
-	return slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: level}), nil
 }

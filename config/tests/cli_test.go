@@ -11,7 +11,6 @@ import (
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/config/source/cli"
 
-	_ "github.com/go-orb/plugins/codecs/json"
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	_ "github.com/go-orb/plugins/config/source/cli/urfave"
 )

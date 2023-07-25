@@ -17,6 +17,7 @@ import (
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
 	mnet "github.com/go-orb/go-orb/util/net"
+	"github.com/google/uuid"
 	consul "github.com/hashicorp/consul/api"
 	hash "github.com/mitchellh/hashstructure"
 )
@@ -26,9 +27,14 @@ var _ registry.Registry = (*RegistryConsul)(nil)
 
 // RegistryConsul is the consul registry for go-orb.
 type RegistryConsul struct {
-	Address []string
+	Address        []string
+	serviceName    string
+	serviceVersion string
 
 	config Config
+	logger log.Logger
+
+	id string
 
 	client       *consul.Client
 	consulConfig *consul.Config
@@ -75,6 +81,27 @@ func newTransport(config *tls.Config) *http.Transport {
 	})
 
 	return t
+}
+
+// ServiceName returns the configured name of this service.
+func (c *RegistryConsul) ServiceName() string {
+	return c.serviceName
+}
+
+// ServiceVersion returns the configured version of this service.
+func (c *RegistryConsul) ServiceVersion() string {
+	return c.serviceVersion
+}
+
+// NodeID returns the ID of this service node in the registry.
+func (c *RegistryConsul) NodeID() string {
+	if c.id != "" {
+		return c.id
+	}
+
+	c.id = c.serviceName + "-" + uuid.New().String()
+
+	return c.id
 }
 
 // Deregister deregisters a service within the registry.
@@ -388,32 +415,28 @@ func (c *RegistryConsul) Client() *consul.Client {
 // ProvideRegistryConsul creates a new Consul registry.
 func ProvideRegistryConsul(
 	name types.ServiceName,
-	data types.ConfigData,
+	version types.ServiceVersion,
+	datas types.ConfigData,
 	logger log.Logger,
 	opts ...registry.Option,
 ) (registry.Type, error) {
-	cfg, err := NewConfig(name, data, opts...)
+	cfg, err := NewConfig(name, datas, opts...)
 	if err != nil {
 		return registry.Type{}, fmt.Errorf("create consul registry config: %w", err)
 	}
 
-	logger, err = logger.WithComponent(registry.ComponentType, Name, "", nil)
-	if err != nil {
-		return registry.Type{}, err
-	}
-
-	cfg.Logger = logger
-
 	// Return the new registry.
-	reg := New(cfg, logger)
+	reg := New(string(name), string(version), cfg, logger)
 
 	return registry.Type{Registry: reg}, nil
 }
 
 // New creates a new consul registry.
-func New(cfg Config, _ log.Logger) *RegistryConsul {
+func New(serviceName string, serviceVersion string, cfg Config, logger log.Logger) *RegistryConsul {
 	cRegistry := &RegistryConsul{
+		serviceName: serviceName,
 		config:      cfg,
+		logger:      logger,
 		register:    make(map[string]uint64),
 		lastChecked: make(map[string]time.Time),
 		queryOptions: &consul.QueryOptions{

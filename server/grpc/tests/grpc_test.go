@@ -13,6 +13,7 @@ import (
 
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/types"
 	mtls "github.com/go-orb/go-orb/util/tls"
@@ -24,11 +25,12 @@ import (
 
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	_ "github.com/go-orb/plugins/config/source/file"
-	_ "github.com/go-orb/plugins/log/text"
+	_ "github.com/go-orb/plugins/log/slog"
+	_ "github.com/go-orb/plugins/registry/mdns"
 )
 
 func init() {
-	server.Handlers.Register("Streams",
+	server.Handlers.Set("Streams",
 		server.NewRegistrationFunc[grpc.ServiceRegistrar, proto.StreamsServer](
 			proto.RegisterStreamsServer,
 			new(handler.EchoHandler),
@@ -132,11 +134,15 @@ func TestGrpcStartStop(t *testing.T) {
 
 func TestGrpcIntegration(t *testing.T) {
 	name := types.ServiceName("com.example.test")
+	version := types.ServiceVersion("v1.0.0")
 
 	logger, err := log.ProvideLogger(name, nil)
 	require.NoError(t, err, "failed to setup logger")
 
-	srv, err := server.ProvideServer(name, nil, logger,
+	reg, err := registry.ProvideRegistry(name, version, nil, logger)
+	require.NoError(t, err, "failed to setup the registry")
+
+	srv, err := server.ProvideServer(name, nil, logger, reg,
 		mgrpc.WithDefaults(
 			mgrpc.WithGRPCReflection(false),
 			mgrpc.WithInsecure(true),
@@ -197,15 +203,16 @@ func TestServerFileConfig(t *testing.T) {
 		counterS1 atomic.Int64
 	)
 
-	server.Handlers.Register("handler-1", func(_ any) {})
-	server.Handlers.Register("handler-2", func(_ any) {})
-	mgrpc.UnaryInterceptors.Register("middleware-1", tgrpc.NewUnaryMiddlware(&counter1))
-	mgrpc.UnaryInterceptors.Register("middleware-2", tgrpc.NewUnaryMiddlware(&counter2))
-	mgrpc.UnaryInterceptors.Register("middleware-3", tgrpc.NewUnaryMiddlware(&counter3))
-	mgrpc.UnaryInterceptors.Register("middleware-4", tgrpc.NewUnaryMiddlware(&counter4))
-	mgrpc.StreamInterceptors.Register("middleware-S1", tgrpc.NewStreamMiddleware(&counterS1))
+	server.Handlers.Set("handler-1", func(_ any) {})
+	server.Handlers.Set("handler-2", func(_ any) {})
+	mgrpc.UnaryInterceptors.Set("middleware-1", tgrpc.NewUnaryMiddlware(&counter1))
+	mgrpc.UnaryInterceptors.Set("middleware-2", tgrpc.NewUnaryMiddlware(&counter2))
+	mgrpc.UnaryInterceptors.Set("middleware-3", tgrpc.NewUnaryMiddlware(&counter3))
+	mgrpc.UnaryInterceptors.Set("middleware-4", tgrpc.NewUnaryMiddlware(&counter4))
+	mgrpc.StreamInterceptors.Set("middleware-S1", tgrpc.NewStreamMiddleware(&counterS1))
 
 	name := types.ServiceName("com.example.test")
+	version := types.ServiceVersion("v1.0.0")
 
 	fURL, err := url.Parse("file://config/config.yaml")
 	require.NoError(t, err, "failed to parse file config url")
@@ -218,7 +225,10 @@ func TestServerFileConfig(t *testing.T) {
 	logger, err := log.ProvideLogger(name, nil)
 	require.NoError(t, err, "failed to setup logger")
 
-	srv, err := server.ProvideServer(name, config, logger,
+	reg, err := registry.ProvideRegistry(name, version, nil, logger)
+	require.NoError(t, err, "failed to setup the registry")
+
+	srv, err := server.ProvideServer(name, config, logger, reg,
 		mgrpc.WithEntrypoint(
 			mgrpc.WithName("static-ep-1"),
 			mgrpc.WithAddress(":48081"),

@@ -11,12 +11,12 @@ import (
 	"github.com/go-orb/go-orb/types"
 	"github.com/hashicorp/consul/sdk/testutil"
 
-	_ "github.com/go-orb/plugins/log/text"
+	_ "github.com/go-orb/plugins/log/slog"
 	"github.com/go-orb/plugins/registry/tests"
 )
 
 func TestMain(m *testing.M) {
-	logger, err := log.New(log.NewConfig())
+	logger, err := log.New()
 	if err != nil {
 		log.Error("failed to create logger", err)
 		os.Exit(1)
@@ -35,7 +35,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	reg1 := New(cfg1, logger)
+	reg1 := New("", "", cfg1, logger)
 	if err := reg1.Start(); err != nil {
 		log.Error("failed to connect registry one to Consul server", err)
 		server.Stop() //nolint:errcheck
@@ -49,7 +49,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	reg2 := New(cfg2, logger)
+	reg2 := New("", "", cfg2, logger)
 	if err := reg2.Start(); err != nil {
 		log.Error("failed to connect registry two to Consul server", err)
 		server.Stop() //nolint:errcheck
@@ -63,7 +63,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	reg3 := New(cfg3, logger)
+	reg3 := New("", "", cfg3, logger)
 	if err := reg3.Start(); err != nil {
 		log.Error("failed to connect registry three to Consul server", err)
 		server.Stop() //nolint:errcheck

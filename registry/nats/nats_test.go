@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/go-orb/plugins/log/text"
+	_ "github.com/go-orb/plugins/log/slog"
 	"github.com/go-orb/plugins/registry/tests"
 	"github.com/pkg/errors"
 
@@ -24,7 +24,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	logger, err := log.New(log.NewConfig())
+	logger, err := log.New()
 	if err != nil {
 		log.Error("while creating a logger", err)
 	}
@@ -53,7 +53,7 @@ func TestMain(m *testing.M) {
 			log.Error("failed to create config", err)
 		}
 
-		regOne = New(cfg, logger)
+		regOne = New("", "", cfg, logger)
 		if err := regOne.Start(); err != nil {
 			log.Error("failed to connect registry one to NATS server", err, slog.Int("attempt", i))
 
@@ -61,12 +61,12 @@ func TestMain(m *testing.M) {
 			continue
 		}
 
-		regTwo = New(cfg, logger)
+		regTwo = New("", "", cfg, logger)
 		if err := regTwo.Start(); err != nil {
 			log.Error("failed to connect registry two to NATS server", err, slog.Int("attempt", i))
 		}
 
-		regThree = New(cfg, logger)
+		regThree = New("", "", cfg, logger)
 		if err := regThree.Start(); err != nil {
 			log.Error("failed to connect registry three to NATS server", err, slog.Int("attempt", i))
 		}

@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/container"
@@ -26,10 +27,10 @@ func init() {
 //nolint:gochecknoglobals
 var (
 	// UnaryInterceptors is a plugin container for unary interceptors middleware.
-	UnaryInterceptors = container.NewPlugins[grpc.UnaryServerInterceptor]()
+	UnaryInterceptors = container.NewMap[grpc.UnaryServerInterceptor]()
 
 	// StreamInterceptors is a plugin container for streaming interceptors middleware.
-	StreamInterceptors = container.NewPlugins[grpc.StreamServerInterceptor]()
+	StreamInterceptors = container.NewMap[grpc.StreamServerInterceptor]()
 )
 
 // Errors.
@@ -40,6 +41,7 @@ var (
 func pluginProvider(
 	service types.ServiceName,
 	logger log.Logger,
+	reg registry.Type,
 	c any,
 ) (server.Entrypoint, error) {
 	cfg, ok := c.(*Config)
@@ -47,7 +49,7 @@ func pluginProvider(
 		return nil, ErrInvalidConfigType
 	}
 
-	return ProvideServerGRPC(service, logger, *cfg)
+	return ProvideServerGRPC(service, logger, reg, *cfg)
 }
 
 func newDefaultConfig() server.EntrypointConfig {

@@ -433,7 +433,7 @@ func WithIdleTimeout(timeout time.Duration) Option {
 //
 // Registration functions are used to register handlers to a server.
 func WithRegistration(name string, registration server.RegistrationFunc) Option {
-	server.Handlers.Register(name, registration)
+	server.Handlers.Set(name, registration)
 
 	return func(c *Config) {
 		c.HandlerRegistrations[name] = registration
@@ -446,7 +446,7 @@ func WithRegistration(name string, registration server.RegistrationFunc) Option 
 // Each middlware is uniquely identified with a name. The name provided here
 // can be used to dynamically add middlware to an entrypoint in a config.
 func WithMiddleware(name string, middleware func(http.Handler) http.Handler) Option {
-	router.Middleware.Register(name, middleware)
+	router.Middleware.Set(name, middleware)
 
 	return func(c *Config) {
 		c.Middleware[name] = middleware

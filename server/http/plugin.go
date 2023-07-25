@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/types"
 )
@@ -19,6 +20,7 @@ func init() {
 func pluginProvider(
 	service types.ServiceName,
 	logger log.Logger,
+	reg registry.Type,
 	c any,
 ) (server.Entrypoint, error) {
 	cfg, ok := c.(*Config)
@@ -26,7 +28,7 @@ func pluginProvider(
 		return nil, ErrInvalidConfigType
 	}
 
-	return ProvideServerHTTP(service, logger, *cfg)
+	return ProvideServerHTTP(service, logger, reg, *cfg)
 }
 
 func newDefaultConfig() server.EntrypointConfig {

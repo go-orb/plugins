@@ -12,6 +12,7 @@ import (
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
+	"github.com/google/uuid"
 	"github.com/nats-io/nats.go"
 )
 
@@ -20,6 +21,10 @@ var _ registry.Registry = (*RegistryNATS)(nil)
 
 // RegistryNATS implements the registry interface. It runs a NATS service registry.
 type RegistryNATS struct {
+	serviceName    string
+	serviceVersion string
+	id             string
+
 	config Config
 	logger log.Logger
 
@@ -32,31 +37,25 @@ type RegistryNATS struct {
 // ProvideRegistryNATS creates a new NATS registry.
 func ProvideRegistryNATS(
 	name types.ServiceName,
-	data types.ConfigData,
+	version types.ServiceVersion,
+	datas types.ConfigData,
 	logger log.Logger,
 	opts ...registry.Option,
 ) (registry.Type, error) {
-	cfg, err := NewConfig(name, data, opts...)
+	cfg, err := NewConfig(name, datas, opts...)
 	if err != nil {
 		return registry.Type{}, fmt.Errorf("create nats registry config: %w", err)
 	}
 
-	logger, err = logger.WithComponent(registry.ComponentType, Name, "", nil)
-	if err != nil {
-		return registry.Type{}, err
-	}
-
-	cfg.Logger = logger
-
 	// Return the new registry.
-	reg := New(cfg, logger)
+	reg := New(string(name), string(version), cfg, logger)
 
 	return registry.Type{Registry: reg}, nil
 }
 
 // New creates a new NATS registry. This functions should rarely be called manually.
 // To create a new registry use ProvideRegistryNATS.
-func New(cfg Config, log log.Logger) *RegistryNATS {
+func New(serviceName string, serviceVersion string, cfg Config, log log.Logger) *RegistryNATS {
 	if cfg.Timeout == 0 {
 		cfg.Timeout = registry.DefaultTimeout
 	}
@@ -72,10 +71,12 @@ func New(cfg Config, log log.Logger) *RegistryNATS {
 	}
 
 	return &RegistryNATS{
-		config:    cfg,
-		logger:    log,
-		services:  make(map[string][]*registry.Service),
-		listeners: make(map[string]chan bool),
+		serviceName:    serviceName,
+		serviceVersion: serviceVersion,
+		config:         cfg,
+		logger:         log,
+		services:       make(map[string][]*registry.Service),
+		listeners:      make(map[string]chan bool),
 	}
 }
 
@@ -105,6 +106,27 @@ func (n *RegistryNATS) String() string {
 // Type returns the component type.
 func (n *RegistryNATS) Type() string {
 	return registry.ComponentType
+}
+
+// ServiceName returns the configured name of this service.
+func (n *RegistryNATS) ServiceName() string {
+	return n.serviceName
+}
+
+// ServiceVersion returns the configured version of this service.
+func (n *RegistryNATS) ServiceVersion() string {
+	return n.serviceVersion
+}
+
+// NodeID returns the ID of this service node in the registry.
+func (n *RegistryNATS) NodeID() string {
+	if n.id != "" {
+		return n.id
+	}
+
+	n.id = n.serviceName + "-" + uuid.New().String()
+
+	return n.id
 }
 
 func setAddrs(addrs []string) []string {

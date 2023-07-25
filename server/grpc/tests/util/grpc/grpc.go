@@ -15,6 +15,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
 
 	mgrpc "github.com/go-orb/plugins/server/grpc"
 	"github.com/go-orb/plugins/server/grpc/tests/proto"
@@ -24,12 +25,17 @@ import (
 func SetupServer(opts ...mgrpc.Option) (*mgrpc.ServerGRPC, func(t *testing.T), error) {
 	cfg := mgrpc.NewConfig()
 
-	logger, err := log.New(log.NewConfig())
+	logger, err := log.New()
 	if err != nil {
 		return nil, nil, fmt.Errorf("setup logger: %w", err)
 	}
 
-	srv, err := mgrpc.ProvideServerGRPC("", logger, *cfg, opts...)
+	reg, err := registry.ProvideRegistry("app", "v1.0.0", nil, logger)
+	if err != nil {
+		return nil, nil, fmt.Errorf("setup registry: %w", err)
+	}
+
+	srv, err := mgrpc.ProvideServerGRPC("", logger, reg, *cfg, opts...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("setup gRPC server: %w", err)
 	}

@@ -30,9 +30,9 @@ function find_all() {
 # Get the dir list based on command type.
 function get_dirs() {
 	if [[ $1 == "all" ]]; then
-		find_all
+		echo $(find_all)
 	elif [[ $1 == "changes" ]]; then
-		find_changes
+		echo $(find_changes)
 	else
 		echo ${@}
 	fi

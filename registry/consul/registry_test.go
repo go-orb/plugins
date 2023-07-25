@@ -13,7 +13,7 @@ import (
 	consul "github.com/hashicorp/consul/api"
 	"github.com/stretchr/testify/require"
 
-	_ "github.com/go-orb/plugins/log/text"
+	_ "github.com/go-orb/plugins/log/slog"
 )
 
 type mockRegistry struct {
@@ -61,13 +61,13 @@ func newConsulTestRegistry(t *testing.T, r *mockRegistry) (*RegistryConsul, func
 
 	go newMockServer(r, l)
 
-	logger, err := log.New(log.NewConfig())
+	logger, err := log.New()
 	require.NoError(t, err)
 
 	config, err := NewConfig(types.ServiceName("test.service"), nil, WithAddress(l.Addr().String()))
 	require.NoError(t, err)
 
-	cr := New(config, logger)
+	cr := New("", "", config, logger)
 	err = cr.Start()
 	require.NoError(t, err)
 

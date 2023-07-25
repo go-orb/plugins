@@ -237,7 +237,7 @@ func Listener(listener net.Listener) Option {
 //   - /myPkg.myService/Echo[1-9]
 //   - Echo$
 func WithUnaryInterceptor(name string, interceptor grpc.UnaryServerInterceptor, selector ...string) Option {
-	UnaryInterceptors.Register(name, interceptor)
+	UnaryInterceptors.Set(name, interceptor)
 
 	return func(s *Config) {
 		if len(selector) > 0 {
@@ -278,7 +278,7 @@ func WithStreamInterceptor(name string, interceptor grpc.StreamServerInterceptor
 //
 // Registration functions are used to register handlers to a server.
 func WithRegistration(name string, registration server.RegistrationFunc) Option {
-	server.Handlers.Register(name, registration)
+	server.Handlers.Set(name, registration)
 
 	return func(c *Config) {
 		c.HandlerRegistrations[name] = registration

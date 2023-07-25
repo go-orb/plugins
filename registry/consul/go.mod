@@ -3,10 +3,11 @@ module github.com/go-orb/plugins/registry/consul
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230725002816-6b0ffbf94b15
-	github.com/go-orb/plugins/log/text v0.0.0-20230713091520-67e7b5a34489
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20230724214504-23357a8c1042
+	github.com/go-orb/go-orb v0.0.0-20230725190534-6e856aec238f
+	github.com/go-orb/plugins/log/slog v0.0.0-20230713091520-67e7b5a34489
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20230725003158-93bc3eff9bfa
 	github.com/go-orb/plugins/registry/tests v0.0.0-20230713091520-67e7b5a34489
+	github.com/google/uuid v1.3.0
 	github.com/hashicorp/consul/api v1.23.0
 	github.com/hashicorp/consul/sdk v0.14.0
 	github.com/mitchellh/hashstructure v1.1.0
@@ -32,15 +33,13 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	golang.org/x/exp v0.0.0-20230724220655-d98519c11495 // indirect
+	golang.org/x/exp v0.0.0-20230725093048-515e97ebf090 // indirect
 	golang.org/x/sys v0.10.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/go-orb/plugins/log/text => ../../log/text
 
 replace github.com/go-orb/plugins/registry/regutil => ../regutil
 
 replace github.com/go-orb/plugins/registry/tests => ../tests
 
-replace github.com/go-orb/go-orb => ../../../go-orb
+replace github.com/go-orb/plugins/log/slog => ../../log/slog

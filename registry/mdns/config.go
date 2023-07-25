@@ -53,7 +53,10 @@ func NewConfig(
 
 	cfg.Config.Timeout = 500
 
-	cfg.ApplyOptions(opts...)
+	// Apply options.
+	for _, o := range opts {
+		o(&cfg)
+	}
 
 	sections := types.SplitServiceName(serviceName)
 	if err := config.Parse(append(sections, registry.ComponentType), datas, &cfg); err != nil {

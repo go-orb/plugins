@@ -17,6 +17,7 @@ cloud.google.com/go/baremetalsolution v1.1.1/go.mod h1:D1AV6xwOksJMV4OSlWHtWuFNZ
 cloud.google.com/go/batch v0.7.0/go.mod h1:vLZN95s6teRUqRQ4s3RLDsH8PvboqBK+rn1oevL159g=
 cloud.google.com/go/batch v1.3.1/go.mod h1:VguXeQKXIYaeeIYbuozUmBR13AfL4SJP7IltNPS+A4A=
 cloud.google.com/go/beyondcorp v0.6.1/go.mod h1:YhxDWw946SCbmcWo3fAhw3V4XZMSpQ/VYfcKGAEU8/4=
+cloud.google.com/go/beyondcorp v1.0.0/go.mod h1:YhxDWw946SCbmcWo3fAhw3V4XZMSpQ/VYfcKGAEU8/4=
 cloud.google.com/go/bigquery v1.52.0/go.mod h1:3b/iXjRQGU4nKa87cXeg6/gogLjO8C6PmuM8i5Bi/u4=
 cloud.google.com/go/billing v1.16.0/go.mod h1:y8vx09JSSJG02k5QxbycNRrN7FGZB6F3CAcgum7jvGA=
 cloud.google.com/go/binaryauthorization v1.6.1/go.mod h1:TKt4pa8xhowwffiBmbrbcxijJRZED4zrqnwZ1lKH51U=
@@ -129,8 +130,10 @@ github.com/go-orb/go-orb v0.0.0-20230711233331-5357e6329daa h1:j1HTUWXNFSxgePXbQ
 github.com/go-orb/go-orb v0.0.0-20230711233331-5357e6329daa/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
 github.com/go-orb/go-orb v0.0.0-20230720003256-0e0a2491dc1e h1:2E9cMUjm2BPmckCwuUpYzE/H10F1hO8cenEcy3QIsgk=
 github.com/go-orb/go-orb v0.0.0-20230720003256-0e0a2491dc1e/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
-github.com/go-orb/go-orb v0.0.0-20230723100102-e6b748900de2 h1:gBHxlLygZ7ym+IyupBoO9ZRKpZHdZf7nXj/JYtbWCMs=
 github.com/go-orb/go-orb v0.0.0-20230723100102-e6b748900de2/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
+github.com/go-orb/go-orb v0.0.0-20230725002816-6b0ffbf94b15 h1:mN6Dl/IdZa+pf2f6Q371cLDck9/a1A4yUB/9fksIYsc=
+github.com/go-orb/go-orb v0.0.0-20230725002816-6b0ffbf94b15/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
+github.com/go-orb/plugins/codecs/json v0.0.0-20230713091520-67e7b5a34489/go.mod h1:RJbZY1HZhLXBke+mtFXHwh0m/HpKqzHps4CnWgIGJ8U=
 github.com/golang/glog v1.1.0/go.mod h1:pfYeQZ3JWZoXTV5sFc986z3HTpwQs9At6P4ImfuP3NQ=
 github.com/google/btree v1.0.1/go.mod h1:xXMiIv4Fb/0kKde4SpL7qlzvu5cMJDRkFDxJfI9uaxA=
 github.com/google/go-cmp v0.2.0/go.mod h1:oXzfMopK8JAjlY9xF4vHSVASa0yLyX7SntLO5aqRK0M=
@@ -155,7 +158,9 @@ golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb/go.mod h1:FXUEEKJgO7OQYeo8N0
 golang.org/x/mod v0.8.0/go.mod h1:iBbtSCu2XBx23ZKBPSOrRkjjQPZFPuis4dIYUhu/chs=
 golang.org/x/mod v0.11.0/go.mod h1:iBbtSCu2XBx23ZKBPSOrRkjjQPZFPuis4dIYUhu/chs=
 golang.org/x/net v0.0.0-20190311183353-d8887717615a/go.mod h1:t9HGtf8HONx5eT2rtn7q6eTqICYqUVnKs3thJo3Qplg=
+golang.org/x/net v0.0.0-20190603091049-60506f45cf65/go.mod h1:HSz+uSET+XFnRR8LxR5pz3Of3rY3CfYBVs4xY44aLks=
 golang.org/x/net v0.10.0/go.mod h1:0qNGK6F8kojg2nk9dLZ2mShWaEBan6FAoqfSigmmuDg=
+golang.org/x/oauth2 v0.10.0/go.mod h1:kTpgurOux7LqtuxjuyZa4Gj2gdezIt/jQtGnNFfypQI=
 golang.org/x/sync v0.3.0/go.mod h1:FU7BRWz2tNW+3quACPkgCx/L+uEAv1htQ0V83Z9Rj+Y=
 golang.org/x/sys v0.1.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.3.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=

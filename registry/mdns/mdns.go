@@ -19,6 +19,7 @@ import (
 	"github.com/go-orb/plugins/registry/mdns/dns"
 	"github.com/go-orb/plugins/registry/mdns/server"
 	"github.com/go-orb/plugins/registry/mdns/zone"
+	"golang.org/x/exp/slog"
 
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
@@ -43,6 +44,10 @@ var _ registry.Registry = (*RegistryMDNS)(nil)
 
 // RegistryMDNS implements the registry interface. It runs a MDNS service registry.
 type RegistryMDNS struct {
+	serviceName    string
+	serviceVersion string
+	id             string
+
 	config Config
 	logger log.Logger
 
@@ -72,31 +77,25 @@ type mdnsWatcher struct {
 // ProvideRegistryMDNS creates a new MDNS registry.
 func ProvideRegistryMDNS(
 	name types.ServiceName,
-	data types.ConfigData,
+	version types.ServiceVersion,
+	datas types.ConfigData,
 	logger log.Logger,
 	opts ...registry.Option,
 ) (registry.Type, error) {
-	cfg, err := NewConfig(name, data, opts...)
+	cfg, err := NewConfig(name, datas, opts...)
 	if err != nil {
 		return registry.Type{}, fmt.Errorf("create mdns registry config: %w", err)
 	}
 
-	logger, err = logger.WithComponent(registry.ComponentType, "mdns", "", nil)
-	if err != nil {
-		return registry.Type{}, err
-	}
-
-	cfg.Logger = logger
-
 	// Return the new registry.
-	reg := New(cfg, logger)
+	reg := New(string(name), string(version), cfg, logger)
 
 	return registry.Type{Registry: reg}, nil
 }
 
 // New creates a new mdns registry. This functions should rarely be called manually.
 // To create a new registry use ProvideRegistryMDNS.
-func New(cfg Config, log log.Logger) *RegistryMDNS {
+func New(serviceName string, serviceVersion string, cfg Config, log log.Logger) *RegistryMDNS {
 	if cfg.Timeout == 0 {
 		cfg.Timeout = registry.DefaultTimeout
 	}
@@ -106,10 +105,12 @@ func New(cfg Config, log log.Logger) *RegistryMDNS {
 	}
 
 	return &RegistryMDNS{
-		config:   cfg,
-		logger:   log,
-		services: make(map[string][]*mdnsEntry),
-		watchers: make(map[string]*mdnsWatcher),
+		serviceName:    serviceName,
+		serviceVersion: serviceVersion,
+		config:         cfg,
+		logger:         log,
+		services:       make(map[string][]*mdnsEntry),
+		watchers:       make(map[string]*mdnsWatcher),
 	}
 }
 
@@ -133,6 +134,27 @@ func (m *RegistryMDNS) String() string {
 // Type returns the component type.
 func (m *RegistryMDNS) Type() string {
 	return registry.ComponentType
+}
+
+// ServiceName returns the configured name of this service.
+func (m *RegistryMDNS) ServiceName() string {
+	return m.serviceName
+}
+
+// ServiceVersion returns the configured version of this service.
+func (m *RegistryMDNS) ServiceVersion() string {
+	return m.serviceVersion
+}
+
+// NodeID returns the ID of this service node in the registry.
+func (m *RegistryMDNS) NodeID() string {
+	if m.id != "" {
+		return m.id
+	}
+
+	m.id = m.serviceName + "-" + uuid.New().String()
+
+	return m.id
 }
 
 // Register registes a service's nodes to the registry.
@@ -229,8 +251,6 @@ func (m *RegistryMDNS) registerNodes(service *registry.Service, entries []*mdnsE
 
 		port, _ := strconv.Atoi(pt) //nolint:errcheck
 
-		m.logger.Debug("[mdns] registry create new service with ip: %s for: %s", net.ParseIP(host).String(), host)
-
 		// we got here, new node
 		s, err := zone.NewMDNSService(
 			node.ID,
@@ -255,6 +275,11 @@ func (m *RegistryMDNS) registerNodes(service *registry.Service, entries []*mdnsE
 		entry.id = node.ID
 		entry.node = srv
 		entries = append(entries, entry)
+
+		m.logger.Debug("created new service",
+			slog.String("id", node.ID),
+			slog.String("address", node.Address),
+		)
 	}
 
 	return entries, gerr

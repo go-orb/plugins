@@ -12,10 +12,10 @@ import (
 )
 
 // Suite is a global to use in tests.
-var Suite *RegistryTests //nolint:gochecknoglobals
+var Suite *TestSuite //nolint:gochecknoglobals
 
-// RegistryTests is the struct we use for tests.
-type RegistryTests struct {
+// TestSuite is the struct we use for tests.
+type TestSuite struct {
 	logger log.Logger
 
 	registries []registry.Registry
@@ -28,7 +28,7 @@ type RegistryTests struct {
 
 // CreateSuite creates the suite for test usage.
 func CreateSuite(logger log.Logger, registries []registry.Registry, updateTime time.Duration, serviceOffset int) {
-	r := &RegistryTests{
+	r := &TestSuite{
 		logger:        logger,
 		registries:    registries,
 		updateTime:    updateTime,
@@ -50,7 +50,7 @@ func CreateSuite(logger log.Logger, registries []registry.Registry, updateTime t
 }
 
 // Setup setups the test suite.
-func (r *RegistryTests) Setup() {
+func (r *TestSuite) Setup() {
 	for _, service := range r.services {
 		if err := r.registries[0].Register(service); err != nil {
 			r.logger.Error("Failed to register service", err, slog.String("service", service.Name))
@@ -59,7 +59,7 @@ func (r *RegistryTests) Setup() {
 }
 
 // TearDown runs after all tests.
-func (r *RegistryTests) TearDown() {
+func (r *TestSuite) TearDown() {
 	for _, service := range r.services {
 		if err := r.registries[0].Deregister(service); err != nil {
 			r.logger.Error("Failed to deregister service", err, slog.String("service", service.Name))
@@ -68,7 +68,7 @@ func (r *RegistryTests) TearDown() {
 }
 
 // TestRegister tests registering.
-func (r *RegistryTests) TestRegister(t *testing.T) {
+func (r *TestSuite) TestRegister(t *testing.T) {
 	service := registry.Service{Name: "micro.test.svc.3", Version: "v1.0.0", Nodes: []*registry.Node{r.nodes[3]}}
 	require.NoError(t, r.registries[0].Register(&service))
 	time.Sleep(r.updateTime)
@@ -94,7 +94,7 @@ func (r *RegistryTests) TestRegister(t *testing.T) {
 }
 
 // TestDeregister tests deregistering.
-func (r *RegistryTests) TestDeregister(t *testing.T) {
+func (r *TestSuite) TestDeregister(t *testing.T) {
 	service1 := registry.Service{Name: "micro.test.svc.4", Version: "v1", Nodes: []*registry.Node{r.nodes[4]}}
 	service2 := registry.Service{Name: "micro.test.svc.4", Version: "v2", Nodes: []*registry.Node{r.nodes[5]}}
 
@@ -133,7 +133,7 @@ func (r *RegistryTests) TestDeregister(t *testing.T) {
 }
 
 // TestGetServiceAllRegistries tests a service on all registries.
-func (r *RegistryTests) TestGetServiceAllRegistries(t *testing.T) {
+func (r *TestSuite) TestGetServiceAllRegistries(t *testing.T) {
 	for _, reg := range r.registries {
 		services, err := reg.GetService(r.services[0].Name)
 		require.NoError(t, err)
@@ -144,14 +144,14 @@ func (r *RegistryTests) TestGetServiceAllRegistries(t *testing.T) {
 }
 
 // TestGetServiceWithNoNodes tests a non existent service.
-func (r *RegistryTests) TestGetServiceWithNoNodes(t *testing.T) {
+func (r *TestSuite) TestGetServiceWithNoNodes(t *testing.T) {
 	services, err := r.registries[0].GetService("missing")
 	require.NoError(t, err)
 	require.Equal(t, 0, len(services))
 }
 
 // BenchmarkGetService benchmarks.
-func (r *RegistryTests) BenchmarkGetService(b *testing.B) {
+func (r *TestSuite) BenchmarkGetService(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		services, err := r.registries[0].GetService(r.services[0].Name)
 		require.NoError(b, err)
@@ -162,7 +162,7 @@ func (r *RegistryTests) BenchmarkGetService(b *testing.B) {
 }
 
 // BenchmarkGetServiceWithNoNodes benchmarks.
-func (r *RegistryTests) BenchmarkGetServiceWithNoNodes(b *testing.B) {
+func (r *TestSuite) BenchmarkGetServiceWithNoNodes(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		services, err := r.registries[0].GetService("missing")
 		require.NoError(b, err)

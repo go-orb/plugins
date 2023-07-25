@@ -19,6 +19,7 @@ import (
 
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/types"
 
@@ -29,13 +30,13 @@ import (
 	thttp "github.com/go-orb/plugins/server/http/tests/util/http"
 
 	_ "github.com/go-orb/plugins/codecs/form"
-	_ "github.com/go-orb/plugins/codecs/json"
 	_ "github.com/go-orb/plugins/codecs/jsonpb"
 	_ "github.com/go-orb/plugins/codecs/proto"
 
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	_ "github.com/go-orb/plugins/config/source/file"
-	_ "github.com/go-orb/plugins/log/text"
+	_ "github.com/go-orb/plugins/log/slog"
+	_ "github.com/go-orb/plugins/registry/mdns"
 
 	"github.com/go-orb/plugins/server/http/router"
 	_ "github.com/go-orb/plugins/server/http/router/chi"
@@ -56,6 +57,10 @@ If scheme is HTTPS://
 Else
  > use http1 transport without upgrade ()
 */
+
+func init() {
+	log.DefaultLevel = log.LevelDebug
+}
 
 func TestServerSimple(t *testing.T) {
 	srv, cleanup, err := setupServer(t, false, mhttp.WithInsecure())
@@ -340,13 +345,17 @@ func TestServerRequestSpecificContentType(t *testing.T) {
 
 func TestServerIntegration(t *testing.T) {
 	name := types.ServiceName("com.example.test")
+	version := types.ServiceVersion("v1.0.0")
 
 	logger, err := log.ProvideLogger(name, nil)
-	require.NoError(t, err, "failed to setup logger")
+	require.NoError(t, err, "failed to setup the logger")
+
+	reg, err := registry.ProvideRegistry(name, version, nil, logger)
+	require.NoError(t, err, "failed to setup the registry")
 
 	h := new(handler.EchoHandler)
 
-	srv, err := server.ProvideServer(name, nil, logger,
+	srv, err := server.ProvideServer(name, nil, logger, reg,
 		mhttp.WithEntrypoint(
 			mhttp.WithName("test-ep-1"),
 			mhttp.WithAddress(":48081"),
@@ -393,13 +402,14 @@ func TestServerIntegration(t *testing.T) {
 func TestServerFileConfig(t *testing.T) {
 	thttp.RefreshClients()
 
-	server.Handlers.Register("handler-1", func(_ any) {})
-	server.Handlers.Register("handler-2", func(_ any) {})
+	server.Handlers.Set("handler-1", func(_ any) {})
+	server.Handlers.Set("handler-2", func(_ any) {})
 	router.Middleware.Register("middleware-1", func(h http.Handler) http.Handler { return h })
 	router.Middleware.Register("middleware-2", func(h http.Handler) http.Handler { return h })
 	router.Middleware.Register("middleware-4", func(h http.Handler) http.Handler { return h })
 
 	name := types.ServiceName("com.example.test")
+	version := types.ServiceVersion("v1.0.0")
 
 	fURL, err := url.Parse("file://config/config.yaml")
 	t.Logf("%+v", fURL.RawPath)
@@ -409,10 +419,13 @@ func TestServerFileConfig(t *testing.T) {
 	require.NoError(t, err, "failed to read file config")
 
 	logger, err := log.ProvideLogger(name, nil)
-	require.NoError(t, err, "failed to setup logger")
+	require.NoError(t, err, "failed to setup the logger")
+
+	reg, err := registry.ProvideRegistry(name, version, nil, logger)
+	require.NoError(t, err, "failed to setup the registry")
 
 	h := new(handler.EchoHandler)
-	srv, err := server.ProvideServer(name, config, logger,
+	srv, err := server.ProvideServer(name, config, logger, reg,
 		// TODO: test defaults
 		mhttp.WithEntrypoint(
 			mhttp.WithName("static-ep-1"),
@@ -635,6 +648,11 @@ func setupServer(t testing.TB, nolog bool, opts ...mhttp.Option) (*mhttp.ServerH
 		return nil, cancel, fmt.Errorf("failed to setup logger: %w", err)
 	}
 
+	reg, err := registry.ProvideRegistry("app", "v1.0.0", nil, logger)
+	if err != nil {
+		return nil, nil, fmt.Errorf("setup registry: %w", err)
+	}
+
 	h := new(handler.EchoHandler)
 	opts = append(opts,
 		mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(h)),
@@ -642,7 +660,7 @@ func setupServer(t testing.TB, nolog bool, opts ...mhttp.Option) (*mhttp.ServerH
 
 	cfg := mhttp.NewConfig(opts...)
 
-	server, err := mhttp.ProvideServerHTTP(name, logger, *cfg)
+	server, err := mhttp.ProvideServerHTTP(name, logger, reg, *cfg)
 	if err != nil {
 		return nil, cancel, fmt.Errorf("failed to provide http server: %w", err)
 	}

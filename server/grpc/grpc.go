@@ -15,6 +15,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/addr"
@@ -33,6 +34,8 @@ type ServerGRPC struct {
 
 	logger log.Logger
 
+	registry registry.Type
+
 	lis net.Listener
 
 	// health server implements the gRPC health protocol.
@@ -48,6 +51,7 @@ type ServerGRPC struct {
 func ProvideServerGRPC(
 	_ types.ServiceName,
 	logger log.Logger,
+	reg registry.Type,
 	cfg Config,
 	opts ...Option,
 ) (*ServerGRPC, error) {
@@ -60,16 +64,12 @@ func ProvideServerGRPC(
 		return nil, fmt.Errorf("grpc validate address '%s': %w", cfg.Address, err)
 	}
 
-	logger, err = logger.WithComponent(server.ComponentType, Plugin, cfg.Logger.Plugin, cfg.Logger.Level)
-	if err != nil {
-		return nil, fmt.Errorf("create %s (http) component logger: %w", cfg.Name, err)
-	}
-
-	logger = logger.With(slog.String("entrypoint", cfg.Name))
+	logger = logger.With(slog.String("component", server.ComponentType), slog.String("plugin", Plugin), slog.String("entrypoint", cfg.Name))
 
 	srv := ServerGRPC{
-		config: cfg,
-		logger: logger,
+		config:   cfg,
+		logger:   logger,
+		registry: reg,
 	}
 
 	srv.setupgRPCServer()

@@ -3,8 +3,7 @@ module github.com/go-orb/plugins/config/tests
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230723100102-e6b748900de2
-	github.com/go-orb/plugins/codecs/json v0.0.0-20230713091520-67e7b5a34489
+	github.com/go-orb/go-orb v0.0.0-20230725190534-6e856aec238f
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/config/source/file v0.0.0-20230713091520-67e7b5a34489
@@ -25,8 +24,6 @@ require (
 	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/go-orb/plugins/codecs/json => ../../codecs/json
 
 replace github.com/go-orb/plugins/codecs/yaml => ../../codecs/yaml
 

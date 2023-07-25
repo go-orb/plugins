@@ -11,7 +11,7 @@ import (
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
 
-	_ "github.com/go-orb/plugins/log/text"
+	_ "github.com/go-orb/plugins/log/slog"
 	"github.com/go-orb/plugins/registry/tests"
 )
 
@@ -102,14 +102,14 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	logger, err := log.New(log.NewConfig())
+	logger, err := log.New()
 	if err != nil {
 		log.Error("failed to create logger", err)
 		os.Exit(1)
 	}
 
-	cfg, err := NewConfig(types.ServiceName("test.service"), nil)
-	r := New(cfg, logger)
+	cfg, err := NewConfig(types.ServiceName("test.service"), nil, WithDomain("mdns.test.local"))
+	r := New("", "", cfg, logger)
 	if err != nil {
 		logger.Error("failed to create registry config", err)
 		os.Exit(1)
@@ -164,13 +164,13 @@ func TestWatcher(t *testing.T) {
 	}
 
 	// New registry
-	l, err := log.New(log.NewConfig())
+	l, err := log.New()
 	require.NoError(t, err, "failed to create logger")
 
 	cfg, err := NewConfig(types.ServiceName("test.service"), nil)
 	require.NoError(t, err, "failed to create registry config")
 
-	r := New(cfg, l)
+	r := New("", "", cfg, l)
 	require.NoError(t, r.Start(), "failed to start service")
 
 	w, err := r.Watch()

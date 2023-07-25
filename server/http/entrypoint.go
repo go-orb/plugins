@@ -12,6 +12,7 @@ package http
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -20,6 +21,7 @@ import (
 
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/addr"
@@ -40,8 +42,9 @@ const Plugin = "http"
 // want to listen on multiple interfaces, or multiple ports in parallel, even
 // with the same handler.
 type ServerHTTP struct {
-	Config Config
-	Logger log.Logger
+	Config   Config
+	Logger   log.Logger
+	Registry registry.Type
 
 	// router is not exported as you can't change the router after server creation.
 	// The router here is merely a reference to the router that is used in the servers
@@ -69,6 +72,7 @@ type ServerHTTP struct {
 func ProvideServerHTTP(
 	_ types.ServiceName,
 	logger log.Logger,
+	reg registry.Type,
 	cfg Config,
 	options ...Option,
 ) (*ServerHTTP, error) {
@@ -95,18 +99,14 @@ func ProvideServerHTTP(
 		return nil, fmt.Errorf("create codec map: %w", err)
 	}
 
-	logger, err = logger.WithComponent(server.ComponentType, Plugin, cfg.Logger.Plugin, cfg.Logger.Level)
-	if err != nil {
-		return nil, fmt.Errorf("create %s (http) component logger: %w", cfg.Name, err)
-	}
-
-	logger = logger.With(slog.String("entrypoint", cfg.Name))
+	logger = logger.With(slog.String("component", server.ComponentType), slog.String("plugin", Plugin), slog.String("entrypoint", cfg.Name))
 
 	entrypoint := ServerHTTP{
-		Config: cfg,
-		Logger: logger,
-		codecs: codecs,
-		router: router,
+		Config:   cfg,
+		Logger:   logger,
+		Registry: reg,
+		codecs:   codecs,
+		router:   router,
 	}
 
 	entrypoint.Config.TLS, err = entrypoint.setupTLS()
@@ -119,11 +119,9 @@ func ProvideServerHTTP(
 		return nil, fmt.Errorf("failed to create HTTP server: %w", err)
 	}
 
-	if !entrypoint.Config.HTTP3 {
-		return &entrypoint, nil
+	if entrypoint.Config.HTTP3 {
+		entrypoint.http3Server = entrypoint.newHTTP3Server()
 	}
-
-	entrypoint.http3Server = entrypoint.newHTTP3Server()
 
 	return &entrypoint, nil
 }
@@ -159,12 +157,17 @@ func (s *ServerHTTP) Start() error {
 
 	go func() {
 		if err = s.httpServer.Start(s.listenerTCP); err != nil {
-			s.Logger.Error("Failed to start HTTP server: %w", err)
+			s.Logger.Error("failed to start HTTP server: %w", err)
 		}
 	}()
 
 	if !s.Config.HTTP3 {
+		if err := s.register(); err != nil {
+			return fmt.Errorf("failed to register the HTTP server: %w", err)
+		}
+
 		s.started = true
+
 		return nil
 	}
 
@@ -176,9 +179,13 @@ func (s *ServerHTTP) Start() error {
 
 	go func() {
 		if err := s.http3Server.Start(); err != nil {
-			s.Logger.Error("Failed to start HTTP3 server", "error", err)
+			s.Logger.Error("failed to start HTTP3 server", "error", err)
 		}
 	}()
+
+	if err := s.register(); err != nil {
+		return fmt.Errorf("failed to register the HTTP server: %w", err)
+	}
 
 	s.started = true
 
@@ -287,4 +294,58 @@ func (s *ServerHTTP) setupTLS() (*mtls.Config, error) {
 	}
 
 	return &mtls.Config{Config: config}, nil
+}
+
+func (s *ServerHTTP) getEndpoints() ([]*registry.Endpoint, error) {
+	router, ok := s.router.(router.Routes)
+	if !ok {
+		return nil, errors.New("incompatible router")
+	}
+
+	routes := router.Routes()
+	result := make([]*registry.Endpoint, len(routes))
+
+	for _, r := range routes {
+		s.Logger.Debug("found endpoint", slog.String("name", r.Pattern))
+
+		result = append(result, &registry.Endpoint{
+			Name:     r.Pattern,
+			Metadata: map[string]string{"stream": "true"},
+		})
+
+		if len(r.SubRoutes) > 0 {
+			for _, sr := range r.SubRoutes {
+				s.Logger.Debug("found endpoint", slog.String("name", sr.Pattern))
+
+				result = append(result, &registry.Endpoint{
+					Name:     sr.Pattern,
+					Metadata: map[string]string{"stream": "true"},
+				})
+			}
+		}
+	}
+
+	return result, nil
+}
+
+func (s *ServerHTTP) register() error {
+	node := &registry.Node{
+		ID:       s.Registry.NodeID(),
+		Address:  s.Address(),
+		Metadata: make(map[string]string),
+	}
+
+	eps, err := s.getEndpoints()
+	if err != nil {
+		return err
+	}
+
+	rService := &registry.Service{
+		Name:      s.Registry.ServiceName(),
+		Version:   s.Registry.ServiceVersion(),
+		Nodes:     []*registry.Node{node},
+		Endpoints: eps,
+	}
+
+	return s.Registry.Register(rService)
 }

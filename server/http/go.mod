@@ -4,21 +4,19 @@ go 1.20
 
 require (
 	github.com/go-chi/chi v1.5.4
-	github.com/go-orb/go-orb v0.0.0-20230723100102-e6b748900de2
+	github.com/go-orb/go-orb v0.0.0-20230725190534-6e856aec238f
 	github.com/go-orb/plugins/codecs/form v0.0.0-20230713091520-67e7b5a34489
-	github.com/go-orb/plugins/codecs/json v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/config/source/file v0.0.0-20230713091520-67e7b5a34489
-	github.com/go-orb/plugins/log/text v0.0.0-20230713091520-67e7b5a34489
 	github.com/google/uuid v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/quic-go/quic-go v0.37.0
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
+	golang.org/x/exp v0.0.0-20230725093048-515e97ebf090
 	golang.org/x/net v0.12.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20230720185612-659f7aaaa771
+	google.golang.org/genproto/googleapis/api v0.0.0-20230724170836-66ad5b6ff146
 	google.golang.org/grpc v1.56.2
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -31,6 +29,8 @@ require (
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/pprof v0.0.0-20230705174524-200ffdc848b8 // indirect
+	github.com/google/subcommands v1.2.0 // indirect
+	github.com/google/wire v0.5.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
@@ -43,13 +43,11 @@ require (
 	golang.org/x/sys v0.10.0 // indirect
 	golang.org/x/text v0.11.0 // indirect
 	golang.org/x/tools v0.11.0 // indirect
-	google.golang.org/genproto v0.0.0-20230720185612-659f7aaaa771 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230720185612-659f7aaaa771 // indirect
+	google.golang.org/genproto v0.0.0-20230724170836-66ad5b6ff146 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230724170836-66ad5b6ff146 // indirect
 )
 
 replace github.com/go-orb/plugins/codecs/form => ../../codecs/form
-
-replace github.com/go-orb/plugins/codecs/json => ../../codecs/json
 
 replace github.com/go-orb/plugins/codecs/jsonpb => ../../codecs/jsonpb
 
@@ -58,5 +56,3 @@ replace github.com/go-orb/plugins/codecs/proto => ../../codecs/proto
 replace github.com/go-orb/plugins/codecs/yaml => ../../codecs/yaml
 
 replace github.com/go-orb/plugins/config/source/file => ../../config/source/file
-
-replace github.com/go-orb/plugins/log/text => ../../log/text
