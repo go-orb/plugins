@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
@@ -101,7 +102,7 @@ var (
 	}
 )
 
-func TestMain(m *testing.M) {
+func createServer() (*tests.TestSuite, func() error, error) {
 	logger, err := log.New()
 	if err != nil {
 		log.Error("failed to create logger", err)
@@ -115,19 +116,11 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	tests.CreateSuite(logger, []registry.Registry{r}, 0, 0)
-	tests.Suite.Setup()
-
-	result := m.Run()
-
-	tests.Suite.TearDown()
-
-	if err := r.Stop(context.Background()); err != nil {
-		logger.Error("failed to stop", err)
-		os.Exit(1)
+	cleanup := func() error {
+		return r.Stop(context.Background())
 	}
 
-	os.Exit(result)
+	return tests.CreateSuite(logger, []registry.Registry{r}, 0, 0), cleanup, nil
 }
 
 func TestEncoding(t *testing.T) {
@@ -216,27 +209,30 @@ func TestWatcher(t *testing.T) {
 	}
 }
 
-// TODO(rene): These tests fail, I think because there's no remote MDNS, we need to fix this!
-func TestRegister(t *testing.T) {
-	tests.Suite.TestRegister(t)
-}
+func TestSuite(t *testing.T) {
+	s, cleanup, err := createServer()
+	require.NoError(t, err, "while creating a server")
 
-func TestDeregister(t *testing.T) {
-	tests.Suite.TestDeregister(t)
-}
+	// Run the tests.
+	suite.Run(t, s)
 
-func TestGetServiceAllRegistries(t *testing.T) {
-	tests.Suite.TestGetServiceAllRegistries(t)
-}
-
-func TestGetServiceWithNoNodes(t *testing.T) {
-	tests.Suite.TestGetServiceWithNoNodes(t)
+	require.NoError(t, cleanup(), "while cleaning up")
 }
 
 func BenchmarkGetService(b *testing.B) {
-	tests.Suite.BenchmarkGetService(b)
+	s, cleanup, err := createServer()
+	require.NoError(b, err, "while creating a server")
+
+	s.BenchmarkGetService(b)
+
+	require.NoError(b, cleanup(), "while cleaning up")
 }
 
 func BenchmarkGetServiceWithNoNodes(b *testing.B) {
-	tests.Suite.BenchmarkGetServiceWithNoNodes(b)
+	s, cleanup, err := createServer()
+	require.NoError(b, err, "while creating a server")
+
+	s.BenchmarkGetServiceWithNoNodes(b)
+
+	require.NoError(b, cleanup(), "while cleaning up")
 }

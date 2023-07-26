@@ -15,15 +15,15 @@ import (
 	_ "github.com/go-orb/plugins/log/slog"
 	"github.com/go-orb/plugins/registry/tests"
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 
 	log "github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
-
-	"golang.org/x/exp/slog"
 )
 
-func TestMain(m *testing.M) {
+func createServer() (*tests.TestSuite, func() error, error) {
 	logger, err := log.New()
 	if err != nil {
 		log.Error("while creating a logger", err)
@@ -54,43 +54,28 @@ func TestMain(m *testing.M) {
 		}
 
 		regOne = New("", "", cfg, logger)
-		if err := regOne.Start(); err != nil {
-			log.Error("failed to connect registry one to NATS server", err, slog.Int("attempt", i))
-
+		err = regOne.Start()
+		if err != nil {
 			time.Sleep(time.Second)
 			continue
 		}
 
 		regTwo = New("", "", cfg, logger)
-		if err := regTwo.Start(); err != nil {
-			log.Error("failed to connect registry two to NATS server", err, slog.Int("attempt", i))
-		}
+		regTwo.Start() //nolint: errcheck
 
 		regThree = New("", "", cfg, logger)
-		if err := regThree.Start(); err != nil {
-			log.Error("failed to connect registry three to NATS server", err, slog.Int("attempt", i))
-		}
+		regThree.Start() //nolint: errcheck
 
 		started = true
 	}
 
 	if !started {
-		log.Error("failed to start NATS server", nil)
+		log.Error("failed to start NATS server", err)
 		os.Exit(1)
 	}
 
-	tests.CreateSuite(logger, []registry.Registry{regOne, regTwo, regThree}, 0, 0)
-	tests.Suite.Setup()
-
-	result := m.Run()
-
-	tests.Suite.TearDown()
-
-	if err := cleanup(); err != nil {
-		log.Error("Stopping nats failed", err)
-	}
-
-	os.Exit(result)
+	s := tests.CreateSuite(logger, []registry.Registry{regOne, regTwo, regThree}, 0, 0)
+	return s, cleanup, nil
 }
 
 func getFreeLocalhostAddress() (string, error) {
@@ -117,8 +102,6 @@ func natsServer() (string, func() error, error) {
 
 	args := []string{"--addr", host, "--port", fmt.Sprint(port), "-js"}
 	cmd := exec.Command(natsCmd, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 	if err := cmd.Start(); err != nil {
 		return addr, nil, errors.Wrap(err, "failed starting command")
 	}
@@ -183,26 +166,30 @@ func (l *LogWrapper) Tracef(format string, v ...interface{}) {
 	l.logger.Trace(format, v...)
 }
 
-func TestRegister(t *testing.T) {
-	tests.Suite.TestRegister(t)
-}
+func TestSuite(t *testing.T) {
+	s, cleanup, err := createServer()
+	require.NoError(t, err, "while creating a server")
 
-func TestDeregister(t *testing.T) {
-	tests.Suite.TestDeregister(t)
-}
+	// Run the tests.
+	suite.Run(t, s)
 
-func TestGetServiceAllRegistries(t *testing.T) {
-	tests.Suite.TestGetServiceAllRegistries(t)
-}
-
-func TestGetServiceWithNoNodes(t *testing.T) {
-	tests.Suite.TestGetServiceWithNoNodes(t)
+	require.NoError(t, cleanup(), "while cleaning up")
 }
 
 func BenchmarkGetService(b *testing.B) {
-	tests.Suite.BenchmarkGetService(b)
+	s, cleanup, err := createServer()
+	require.NoError(b, err, "while creating a server")
+
+	s.BenchmarkGetService(b)
+
+	require.NoError(b, cleanup(), "while cleaning up")
 }
 
 func BenchmarkGetServiceWithNoNodes(b *testing.B) {
-	tests.Suite.BenchmarkGetServiceWithNoNodes(b)
+	s, cleanup, err := createServer()
+	require.NoError(b, err, "while creating a server")
+
+	s.BenchmarkGetServiceWithNoNodes(b)
+
+	require.NoError(b, cleanup(), "while cleaning up")
 }

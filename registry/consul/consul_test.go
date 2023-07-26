@@ -10,19 +10,21 @@ import (
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
 	"github.com/hashicorp/consul/sdk/testutil"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 
 	_ "github.com/go-orb/plugins/log/slog"
 	"github.com/go-orb/plugins/registry/tests"
 )
 
-func TestMain(m *testing.M) {
+func createServer() (*tests.TestSuite, func() error, error) {
 	logger, err := log.New()
 	if err != nil {
 		log.Error("failed to create logger", err)
 		os.Exit(1)
 	}
 
-	server, err := createServer(&testing.T{})
+	server, err := createServer1(&testing.T{})
 	if err != nil {
 		logger.Error("failed to create a consul server", err)
 		os.Exit(1)
@@ -70,19 +72,15 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	tests.CreateSuite(logger, []registry.Registry{reg1, reg2, reg3}, 0, 1)
-	tests.Suite.Setup()
+	cleanup := func() error {
+		_ = server.Stop() //nolint:errcheck
+		return nil
+	}
 
-	exitVal := m.Run()
-
-	tests.Suite.TearDown()
-
-	server.Stop() //nolint:errcheck
-
-	os.Exit(exitVal)
+	return tests.CreateSuite(logger, []registry.Registry{reg1, reg2, reg3}, 0, 1), cleanup, nil
 }
 
-func createServer(t testing.TB) (*testutil.TestServer, error) {
+func createServer1(t testing.TB) (*testutil.TestServer, error) {
 	// Compile our consul path.
 	myConsulPath, err := filepath.Abs(filepath.Join("./test/bin/", runtime.GOOS+"_"+runtime.GOARCH))
 	if err != nil {
@@ -106,26 +104,30 @@ func createServer(t testing.TB) (*testutil.TestServer, error) {
 	return server, nil
 }
 
-func TestRegister(t *testing.T) {
-	tests.Suite.TestRegister(t)
-}
+func TestSuite(t *testing.T) {
+	s, cleanup, err := createServer()
+	require.NoError(t, err, "while creating a server")
 
-func TestDeregister(t *testing.T) {
-	tests.Suite.TestDeregister(t)
-}
+	// Run the tests.
+	suite.Run(t, s)
 
-func TestGetServiceAllRegistries(t *testing.T) {
-	tests.Suite.TestGetServiceAllRegistries(t)
-}
-
-func TestGetServiceWithNoNodes(t *testing.T) {
-	tests.Suite.TestGetServiceWithNoNodes(t)
+	require.NoError(t, cleanup(), "while cleaning up")
 }
 
 func BenchmarkGetService(b *testing.B) {
-	tests.Suite.BenchmarkGetService(b)
+	s, cleanup, err := createServer()
+	require.NoError(b, err, "while creating a server")
+
+	s.BenchmarkGetService(b)
+
+	require.NoError(b, cleanup(), "while cleaning up")
 }
 
 func BenchmarkGetServiceWithNoNodes(b *testing.B) {
-	tests.Suite.BenchmarkGetServiceWithNoNodes(b)
+	s, cleanup, err := createServer()
+	require.NoError(b, err, "while creating a server")
+
+	s.BenchmarkGetServiceWithNoNodes(b)
+
+	require.NoError(b, cleanup(), "while cleaning up")
 }
