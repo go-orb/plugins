@@ -26,6 +26,7 @@ import (
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/addr"
 	mtls "github.com/go-orb/go-orb/util/tls"
+	"github.com/google/uuid"
 
 	"github.com/go-orb/plugins/server/http/router"
 	mtcp "github.com/go-orb/plugins/server/http/utils/tcp"
@@ -45,6 +46,9 @@ type ServerHTTP struct {
 	Config   Config
 	Logger   log.Logger
 	Registry registry.Type
+
+	// entrypointID is the entrypointID (uuid) of this entrypoint in the registry.
+	entrypointID string
 
 	// router is not exported as you can't change the router after server creation.
 	// The router here is merely a reference to the router that is used in the servers
@@ -255,13 +259,27 @@ func (s *ServerHTTP) Address() string {
 
 // Transport returns the client transport to use.
 func (s *ServerHTTP) Transport() string {
+	//nolint:gocritic
 	if s.Config.H2C {
 		return "h2c"
 	} else if s.Config.HTTP3 {
 		return "http3"
+	} else if !s.Config.Insecure {
+		return "https"
 	}
 
 	return "http"
+}
+
+// EntrypointID returns the id (uuid) of this entrypoint in the registry.
+func (s *ServerHTTP) EntrypointID() string {
+	if s.entrypointID != "" {
+		return s.entrypointID
+	}
+
+	s.entrypointID = fmt.Sprintf("%s-%s", s.Registry.ServiceName(), uuid.New().String())
+
+	return s.entrypointID
 }
 
 // String returns the entrypoint type; http.
@@ -341,7 +359,7 @@ func (s *ServerHTTP) getEndpoints() ([]*registry.Endpoint, error) {
 
 func (s *ServerHTTP) register() error {
 	node := &registry.Node{
-		ID:        s.Registry.NodeID(),
+		ID:        s.EntrypointID(),
 		Address:   s.Address(),
 		Transport: s.Transport(),
 		Metadata:  make(map[string]string),

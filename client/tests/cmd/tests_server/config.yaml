@@ -1,0 +1,16 @@
+org:
+  orb:
+    svc:
+      client:
+        logger:
+          plugin: slog
+          format: json
+          level: WARN
+        client:
+          logger:
+            level: WARN
+      service:
+        logger:
+          plugin: slog
+          format: json
+          level: WARN

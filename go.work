@@ -1,6 +1,13 @@
 go 1.20
 
 use (
+	./client/orb
+	./client/orb/transport/basehttp
+	./client/orb/transport/h2c
+	./client/orb/transport/http
+	./client/orb/transport/http3
+	./client/orb/transport/https
+	./client/tests
 	./codecs/form
 	./codecs/jsonpb
 	./codecs/proto

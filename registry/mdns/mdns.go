@@ -146,17 +146,6 @@ func (m *RegistryMDNS) ServiceVersion() string {
 	return m.serviceVersion
 }
 
-// NodeID returns the ID of this service node in the registry.
-func (m *RegistryMDNS) NodeID() string {
-	if m.id != "" {
-		return m.id
-	}
-
-	m.id = m.serviceName + "-" + uuid.New().String()
-
-	return m.id
-}
-
 // Register registes a service's nodes to the registry.
 func (m *RegistryMDNS) Register(service *registry.Service, _ ...registry.RegisterOption) error {
 	m.Lock()
@@ -276,7 +265,7 @@ func (m *RegistryMDNS) registerNodes(service *registry.Service, entries []*mdnsE
 		entry.node = srv
 		entries = append(entries, entry)
 
-		m.logger.Trace("created new node",
+		m.logger.Trace("created a new node",
 			slog.String("id", node.ID),
 			slog.String("address", node.Address),
 			slog.String("transport", node.Transport),

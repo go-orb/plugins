@@ -11,7 +11,7 @@ require (
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/config/source/file v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/log/slog v0.0.0-20230726151712-9ff06382f83b
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20230726151712-9ff06382f83b
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20230725195840-87467dc1527a
 	github.com/google/uuid v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/quic-go/quic-go v0.37.0

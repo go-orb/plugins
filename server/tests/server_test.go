@@ -312,7 +312,10 @@ type ConfigMock struct {
 }
 
 type EntrypointMock struct {
-	config  ConfigMock
+	config ConfigMock
+
+	entrypointID string
+
 	started bool
 }
 
@@ -419,6 +422,17 @@ func (m *EntrypointMock) Name() string { return m.config.Name }
 func (m *EntrypointMock) Address() string { return "" }
 
 func (m *EntrypointMock) Transport() string { return "" }
+
+// EntrypointID returns the id (uuid) of this entrypoint in the registry.
+func (m *EntrypointMock) EntrypointID() string {
+	if m.entrypointID != "" {
+		return m.entrypointID
+	}
+
+	m.entrypointID = fmt.Sprintf("unknown-%s", uuid.New().String())
+
+	return m.entrypointID
+}
 
 func (m *EntrypointMock) Register(_ server.RegistrationFunc) {}
 

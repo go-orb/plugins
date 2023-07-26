@@ -21,6 +21,7 @@ import (
 	"github.com/go-orb/go-orb/util/addr"
 	mnet "github.com/go-orb/go-orb/util/net"
 	mtls "github.com/go-orb/go-orb/util/tls"
+	"github.com/google/uuid"
 )
 
 // Interface guard.
@@ -35,6 +36,9 @@ type ServerGRPC struct {
 	logger log.Logger
 
 	registry registry.Type
+
+	// entrypointID is the entrypointID (uuid) of this entrypoint in the registry.
+	entrypointID string
 
 	lis net.Listener
 
@@ -192,6 +196,17 @@ func (s *ServerGRPC) Address() string {
 // Transport returns the client transport to use.
 func (s *ServerGRPC) Transport() string {
 	return "grpc"
+}
+
+// EntrypointID returns the id (uuid) of this entrypoint in the registry.
+func (s *ServerGRPC) EntrypointID() string {
+	if s.entrypointID != "" {
+		return s.entrypointID
+	}
+
+	s.entrypointID = fmt.Sprintf("%s-%s", s.registry.ServiceName(), uuid.New().String())
+
+	return s.entrypointID
 }
 
 // Register executes a registration function on the entrypoint.
