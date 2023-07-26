@@ -10,6 +10,8 @@ require (
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/config/source/file v0.0.0-20230713091520-67e7b5a34489
+	github.com/go-orb/plugins/log/slog v0.0.0-20230726151712-9ff06382f83b
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20230726151712-9ff06382f83b
 	github.com/google/uuid v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/quic-go/quic-go v0.37.0
@@ -29,11 +31,10 @@ require (
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/pprof v0.0.0-20230705174524-200ffdc848b8 // indirect
-	github.com/google/subcommands v1.2.0 // indirect
-	github.com/google/wire v0.5.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/miekg/dns v1.1.55 // indirect
 	github.com/onsi/ginkgo/v2 v2.11.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect
