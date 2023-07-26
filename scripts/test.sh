@@ -111,7 +111,7 @@ function create_summary() {
 		# Kill all depdency processes.
 		post_test "${dir}"
 
-		print_red_msg "Succeded"
+		print_msg "Succeded"
 	done
 
 	if [[ ${failed} == "true" ]]; then
