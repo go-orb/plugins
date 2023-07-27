@@ -189,6 +189,11 @@ func (s *ServerGRPC) Address() string {
 	return s.config.Address
 }
 
+// Transport returns the client transport to use.
+func (s *ServerGRPC) Transport() string {
+	return "grpc"
+}
+
 // Register executes a registration function on the entrypoint.
 func (s *ServerGRPC) Register(register server.RegistrationFunc) {
 	register(s.server)

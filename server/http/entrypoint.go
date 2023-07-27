@@ -253,6 +253,17 @@ func (s *ServerHTTP) Address() string {
 	return s.Config.Address
 }
 
+// Transport returns the client transport to use.
+func (s *ServerHTTP) Transport() string {
+	if s.Config.H2C {
+		return "h2c"
+	} else if s.Config.HTTP3 {
+		return "http3"
+	}
+
+	return "http"
+}
+
 // String returns the entrypoint type; http.
 func (s *ServerHTTP) String() string {
 	return Plugin
@@ -306,19 +317,19 @@ func (s *ServerHTTP) getEndpoints() ([]*registry.Endpoint, error) {
 	result := make([]*registry.Endpoint, len(routes))
 
 	for _, r := range routes {
-		s.Logger.Debug("found endpoint", slog.String("name", r.Pattern))
+		s.Logger.Trace("found endpoint", slog.String("name", r.Pattern[1:]))
 
 		result = append(result, &registry.Endpoint{
-			Name:     r.Pattern,
+			Name:     r.Pattern[1:],
 			Metadata: map[string]string{"stream": "true"},
 		})
 
 		if len(r.SubRoutes) > 0 {
 			for _, sr := range r.SubRoutes {
-				s.Logger.Debug("found endpoint", slog.String("name", sr.Pattern))
+				s.Logger.Trace("found sub endpoint", slog.String("name", sr.Pattern[1:]))
 
 				result = append(result, &registry.Endpoint{
-					Name:     sr.Pattern,
+					Name:     sr.Pattern[1:],
 					Metadata: map[string]string{"stream": "true"},
 				})
 			}
@@ -330,9 +341,10 @@ func (s *ServerHTTP) getEndpoints() ([]*registry.Endpoint, error) {
 
 func (s *ServerHTTP) register() error {
 	node := &registry.Node{
-		ID:       s.Registry.NodeID(),
-		Address:  s.Address(),
-		Metadata: make(map[string]string),
+		ID:        s.Registry.NodeID(),
+		Address:   s.Address(),
+		Transport: s.Transport(),
+		Metadata:  make(map[string]string),
 	}
 
 	eps, err := s.getEndpoints()
