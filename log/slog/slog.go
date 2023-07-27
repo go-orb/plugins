@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
@@ -100,7 +101,7 @@ func (p *Provider) Start() error {
 		w = f
 	}
 
-	switch p.config.Format {
+	switch strings.ToLower(p.config.Format) {
 	case "text":
 		p.handler = slog.NewTextHandler(w, nil)
 	case "json":
@@ -124,8 +125,9 @@ func (p *Provider) Handler() (slog.Handler, error) {
 	return p.handler, nil
 }
 
+// String returns an identifier for this handler provider with its config.
 func (p *Provider) String() string {
-	return fmt.Sprintf("__slog-%s-%s__", p.config.Format, p.config.Target)
+	return fmt.Sprintf("__%s__-%s-%s", Name, p.config.Format, p.config.Target)
 }
 
 func Provide(sections []string, configs types.ConfigData, opts ...log.Option) (log.ProviderType, error) {
