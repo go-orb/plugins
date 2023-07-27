@@ -37,11 +37,11 @@ function get_dirs() {
 		# no all or changes, so it must a be a list of directories.
 		# either prepend the root of go-orb/plugins or try to get the
 		# path with realpath.
-		for dir in ${@}; do
+		for dir in "${@}"; do
 			if [[ ! -d ${dir} ]]; then
-				echo "${ORB_ROOT}/${dir}"
+				echo -n "${ORB_ROOT}/${dir} "
 			else
-				echo $(realpath "${dir}")
+				echo -n "$(realpath "${dir}") "
 			fi
 		done
 	fi

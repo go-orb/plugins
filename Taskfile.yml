@@ -3,7 +3,6 @@ version: "3"
 env:
   PROCS:
     sh: nproc
-  GOMAXPROCS: 1
   GOSUMDB: "off"
   GOPROXY: direct
 
@@ -58,13 +57,13 @@ tasks:
     desc: Replace "github.com/go-orb/* v0.0.0" with the current working directory
     cmds:
       - find . -mindepth 2 -name 'go.mod' -printf "%h\0" | xargs -0 -n1 -P ${PROCS} -- ./scripts/mod-replace.sh
-      - task: tidy
+      - task: mod-tidy
 
   mod-dropreplace:
     desc: Drop all "github.com/go-orb/*" replaces
     cmds:
       - find  . -mindepth 2 -name 'go.mod' -printf "%h\0" | xargs -0 -n1 -P ${PROCS} -- ./scripts/mod-dropreplace.sh
-      - task: tidy
+      - task: mod-tidy
 
   workuse:
     desc: Add go-orb/plugins/* packages to go.work
