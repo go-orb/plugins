@@ -109,7 +109,7 @@ func createServer() (*tests.TestSuite, func() error, error) {
 		os.Exit(1)
 	}
 
-	cfg, err := NewConfig(types.ServiceName("test.service"), nil, WithDomain("mdns.test.local"))
+	cfg, err := NewConfig("test.service", nil, WithDomain("mdns.test.local"))
 	r := New("", "", cfg, logger)
 	if err != nil {
 		logger.Error("failed to create registry config", err)

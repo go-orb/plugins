@@ -2,6 +2,7 @@
 package tests
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -80,16 +81,19 @@ func (r *TestSuite) TestRegister() {
 		}
 	}()
 
-	for _, reg := range r.registries {
-		services, err := reg.ListServices()
-		r.Require().NoError(err)
+	for idx, reg := range r.registries {
+		r.Run(fmt.Sprintf("reg-%d", idx), func() {
+			services, err := reg.ListServices()
+			r.Require().NoError(err)
 
-		r.Require().Equal(len(r.services)+1+r.serviceOffset, len(services))
+			r.Require().Equal(len(r.services)+1+r.serviceOffset, len(services))
 
-		services, err = reg.GetService(service.Name)
-		r.Require().NoError(err)
-		r.Require().Equal(1, len(services))
-		r.Require().Equal(service.Version, services[0].Version)
+			services, err = reg.GetService(service.Name)
+			r.Assert().NoError(err)
+			r.Assert().Equal(1, len(services))
+			r.Assert().Equal(service.Version, services[0].Version)
+			r.Assert().Equal(service.Nodes[0].Transport, services[0].Nodes[0].Transport)
+		})
 	}
 }
 
@@ -134,12 +138,14 @@ func (r *TestSuite) TestDeregister() {
 
 // TestGetServiceAllRegistries tests a service on all registries.
 func (r *TestSuite) TestGetServiceAllRegistries() {
-	for _, reg := range r.registries {
-		services, err := reg.GetService(r.services[0].Name)
-		r.Require().NoError(err)
-		r.Require().Equal(1, len(services))
-		r.Require().Equal(r.services[0].Name, services[0].Name)
-		r.Require().Equal(len(r.services[0].Nodes), len(services[0].Nodes))
+	for idx, reg := range r.registries {
+		r.Run(fmt.Sprintf("reg-%d", idx), func() {
+			services, err := reg.GetService(r.services[0].Name)
+			r.Require().NoError(err)
+			r.Require().Equal(1, len(services))
+			r.Require().Equal(r.services[0].Name, services[0].Name)
+			r.Require().Equal(len(r.services[0].Nodes), len(services[0].Nodes))
+		})
 	}
 }
 

@@ -10,7 +10,7 @@ import (
 )
 
 // metaTransportKey is the key to use to store the scheme in metadata.
-const metaTransportKey = "_md_scheme_"
+const metaTransportKey = "__mdns__transport"
 
 // Name provides the name of this registry.
 const Name = "mdns"

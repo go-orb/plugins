@@ -276,9 +276,10 @@ func (m *RegistryMDNS) registerNodes(service *registry.Service, entries []*mdnsE
 		entry.node = srv
 		entries = append(entries, entry)
 
-		m.logger.Debug("created new service",
+		m.logger.Trace("created new node",
 			slog.String("id", node.ID),
 			slog.String("address", node.Address),
+			slog.String("transport", node.Transport),
 		)
 	}
 
@@ -427,9 +428,9 @@ func (m *RegistryMDNS) getService(
 				Metadata: txt.Metadata,
 			}
 
-			// Fetch the Transport back from the metadata.
-			if Transport, ok := rNode.Metadata["Transport"]; ok {
-				rNode.Transport = Transport
+			// Fetch the trans back from the metadata.
+			if trans, ok := rNode.Metadata[metaTransportKey]; ok {
+				rNode.Transport = trans
 			}
 
 			service.Nodes = append(service.Nodes, rNode)
