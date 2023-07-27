@@ -36,9 +36,7 @@ type Form struct {
 }
 
 func init() {
-	if err := codecs.Plugins.Add(Name, NewFormCodec()); err != nil {
-		panic(err)
-	}
+	codecs.Register(Name, NewFormCodec())
 }
 
 // NewFormCodec will create a codec used to encode/decode HTML form values as

@@ -15,9 +15,7 @@ var _ codecs.Marshaler = (*Proto)(nil)
 type Proto struct{}
 
 func init() {
-	if err := codecs.Plugins.Add("proto", &Proto{}); err != nil {
-		panic(err)
-	}
+	codecs.Register("proto", &Proto{})
 }
 
 // ContentTypes returns the list of content types this marshaller is able to

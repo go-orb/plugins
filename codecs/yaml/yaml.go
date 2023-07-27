@@ -12,9 +12,7 @@ import (
 var _ codecs.Marshaler = (*Yaml)(nil)
 
 func init() {
-	if err := codecs.Plugins.Add("yaml", &Yaml{}); err != nil {
-		panic(err)
-	}
+	codecs.Register("yaml", &Yaml{})
 }
 
 // Yaml implements the codecs.Marshaler interface. It can be used to encode/decode

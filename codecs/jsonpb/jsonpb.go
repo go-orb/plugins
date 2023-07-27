@@ -12,9 +12,7 @@ import (
 var _ codecs.Marshaler = (*JSONPb)(nil)
 
 func init() {
-	if err := codecs.Plugins.Add("jsonpb", &JSONPb{}); err != nil {
-		panic(err)
-	}
+	codecs.Register("jsonpb", &JSONPb{})
 }
 
 // JSONPb wraps Google's implementation of a JSON <> Protocol buffer marshaller
