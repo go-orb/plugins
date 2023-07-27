@@ -55,6 +55,7 @@ function run_linter() {
 
 	$(go env GOPATH)/bin/golangci-lint --version
 
+	print_msg "Running linters with $(nproc) procs"
 	dirs=$1
 	failed="false"
 	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /usr/bin/env bash "${SCRIPT_DIR}/lib/run_lint.sh" || failed="true"
@@ -75,6 +76,7 @@ function run_test() {
 		go install github.com/kyoh86/richgo@latest
 	fi
 
+	print_msg "Running tests with $(nproc) procs"
 	failed="false"
 	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /usr/bin/env bash "${SCRIPT_DIR}/lib/run_test.sh" || failed="true"
 
