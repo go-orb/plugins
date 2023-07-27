@@ -127,9 +127,9 @@ function create_summary() {
 	fi
 }
 
-if [[ ! -d ${ORB_ROOT}/../go-orb ]]; then
+if [[ ! -d ${ORB_ROOT}/../go-orb ]] && [[ -f ${ORB_ROOT}/ORB_BRANCH ]]; then
 	print_header "Fetching go-orb"
-	git clone --branch feat/client https://github.com/go-orb/go-orb ${ORB_ROOT}/../go-orb
+	git clone --branch "$(cat ${ORB_ROOT}/ORB_BRANCH)" https://github.com/go-orb/go-orb ${ORB_ROOT}/../go-orb
 fi
 
 case $1 in
