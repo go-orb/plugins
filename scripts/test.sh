@@ -34,21 +34,32 @@ function get_dirs() {
 	elif [[ $1 == "changes" ]]; then
 		echo $(find_changes)
 	else
-		echo ${@}
+		# no all or changes, so it must a be a list of directories.
+		# either prepend the root of go-orb/plugins or try to get the
+		# path with realpath.
+		for dir in ${@}; do
+			if [[ ! -d ${dir} ]]; then
+				echo "${ORB_ROOT}/${dir}"
+			else
+				echo $(realpath "${dir}")
+			fi
+		done
 	fi
 }
 
 # Run GoLangCi Linters.
 function run_linter() {
-	[[ -e $(go env GOPATH)/bin/golangci-lint ]] || curl -sSfL "https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh" | sh -s -- -b $(go env GOPATH)/bin
+	if [[ ! -e $(go env GOPATH)/bin/golangci-lint ]]; then
+		curl -sSfL "https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh" | sh -s -- -b $(go env GOPATH)/bin
+	fi
 
 	$(go env GOPATH)/bin/golangci-lint --version
 
 	dirs=$1
-	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /usr/bin/env bash "${SCRIPT_DIR}/lib/lint.sh"
-	rc=$?
+	failed="false"
+	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /usr/bin/env bash "${SCRIPT_DIR}/lib/run_lint.sh" || failed="true"
 
-	if [[ "${rc}" != "0" ]]; then
+	if [[ "x${failed}" != "xfalse" ]]; then
 		print_red_header "Lint failed"
 	else
 		print_header "Lint OK"
@@ -59,19 +70,15 @@ function run_linter() {
 function run_test() {
 	dirs=$1
 
-	print_header "Downloading go dependencies..."
+	if [[ ! -e $(go env GOPATH)/bin/richgo ]]; then
+		print_msg "Downloading richgo..."
+		go install github.com/kyoh86/richgo@latest
+	fi
 
-	go install github.com/kyoh86/richgo@latest
+	failed="false"
+	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /usr/bin/env bash "${SCRIPT_DIR}/lib/run_test.sh" || failed="true"
 
-	for dir in "${dirs[@]}"; do
-		bash -c "cd ${dir}; go mod tidy &>/dev/null"
-	done
-
-	dirs=$1
-	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /usr/bin/env bash "${SCRIPT_DIR}/lib/test.sh"
-	rc=$?
-
-	if [[ $? != 0 ]]; then
+	if [[ "x${failed}" != "xfalse" ]]; then
 		print_red_header "Tests failed"
 		exit 1
 	fi
@@ -120,8 +127,9 @@ function create_summary() {
 	fi
 }
 
-if [[ ! -d ../go-orb ]]; then
-	git clone https://github.com/go-orb/go-orb ../go-orb
+if [[ ! -d ${ORB_ROOT}/../go-orb ]]; then
+	print_header "Fetching go-orb"
+	git clone --branch feat/client https://github.com/go-orb/go-orb ${ORB_ROOT}/../go-orb
 fi
 
 case $1 in
