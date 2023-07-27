@@ -107,8 +107,10 @@ function create_summary() {
 
 		go test ./... ${GO_TEST_FLAGS} -json |
 			tparse -notests -format=markdown >>"${GITHUB_STEP_SUMMARY}"
+		rc=$?
 
-		if [[ $? -ne 0 ]]; then
+
+		if [[ ${rc} -ne 0 ]]; then
 			failed="true"
 			print_red_msg "Failed"
 		fi
@@ -118,7 +120,9 @@ function create_summary() {
 		# Kill all depdency processes.
 		post_test "${dir}"
 
-		print_msg "Succeded"
+		if [[ ${rc} == 0 ]]; then
+			print_msg "Succeded"
+		fi
 	done
 
 	if [[ ${failed} == "true" ]]; then
