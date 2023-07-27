@@ -58,7 +58,7 @@ func TestGrpc(t *testing.T) {
 }
 
 func TestGrpcTLS(t *testing.T) {
-	addr := "127.0.0.1:42069"
+	addr := "127.0.0.1:43069"
 	tlsConfig, err := mtls.GenTLSConfig(addr)
 	require.NoError(t, err, "generate TLS config")
 
