@@ -7,6 +7,8 @@ github.com/go-chi/chi v1.5.4/go.mod h1:uaf8YgoFazUOkPBG7fxPftUylNumIev9awIWOENIu
 github.com/go-logr/logr v1.2.4 h1:g01GSCwiDw2xSZfjJ2/T9M+S6pFdcNtFYsp+Y43HYDQ=
 github.com/go-orb/go-orb v0.0.0-20230725195416-0c865f140784 h1:oFCwwDurkWD3vQsSInU8fJGOnVdduR5HJuxVIzlWjmA=
 github.com/go-orb/go-orb v0.0.0-20230725195416-0c865f140784/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
+github.com/go-orb/go-orb v0.0.0-20230727224033-0f3d9735ffae h1:wWrV1XdyAoAqKwJakP0UjOA6rU4KAT5nD5tzfOr2POE=
+github.com/go-orb/go-orb v0.0.0-20230727224033-0f3d9735ffae/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
 github.com/go-orb/plugins/log/slog v0.0.0-20230726151712-9ff06382f83b h1:1IYc6099haI+grRLF6Ia9k75Jn9/mZsrs/gdH/4ZSpc=
 github.com/go-orb/plugins/log/slog v0.0.0-20230726151712-9ff06382f83b/go.mod h1:kPLBp0A8HSdeuXQm+E10I+g8F51GnycTVpeTYDzi2i0=
 github.com/go-orb/plugins/registry/mdns v0.0.0-20230726151712-9ff06382f83b h1:9CJU+BGij43M8u9WIGv+iwFXBrltao20p6AKRZL0UJU=
@@ -107,6 +109,8 @@ google.golang.org/genproto/googleapis/rpc v0.0.0-20230726155614-23370e0ffb3e h1:
 google.golang.org/genproto/googleapis/rpc v0.0.0-20230726155614-23370e0ffb3e/go.mod h1:TUfxEVdsvPg18p6AslUXFoLdpED4oBnGwyqk3dV1XzM=
 google.golang.org/grpc v1.56.2 h1:fVRFRnXvU+x6C4IlHZewvJOVHoOv1TUuQyoRsYnB4bI=
 google.golang.org/grpc v1.56.2/go.mod h1:I9bI3vqKfayGqPUAwGdOSu7kt6oIJLixfffKrpXqQ9s=
+google.golang.org/grpc v1.57.0 h1:kfzNeI/klCGD2YPMUlaGNT3pxvYfga7smW3Vth8Zsiw=
+google.golang.org/grpc v1.57.0/go.mod h1:Sd+9RMTACXwmub0zcNY2c4arhtrbBYD1AUHI/dt16Mo=
 google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp09yW+WbY/TyQbw=
 google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
 google.golang.org/protobuf v1.31.0 h1:g0LDEJHgrBl9N9r17Ru3sqWhkIx2NB67okBHPwC7hs8=

@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/codecs/proto
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230725195416-0c865f140784
+	github.com/go-orb/go-orb v0.0.0-20230727224033-0f3d9735ffae
 	google.golang.org/protobuf v1.31.0
 )
 

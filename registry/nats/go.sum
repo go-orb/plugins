@@ -2,6 +2,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-orb/go-orb v0.0.0-20230725195416-0c865f140784 h1:oFCwwDurkWD3vQsSInU8fJGOnVdduR5HJuxVIzlWjmA=
 github.com/go-orb/go-orb v0.0.0-20230725195416-0c865f140784/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
+github.com/go-orb/go-orb v0.0.0-20230727224033-0f3d9735ffae h1:wWrV1XdyAoAqKwJakP0UjOA6rU4KAT5nD5tzfOr2POE=
+github.com/go-orb/go-orb v0.0.0-20230727224033-0f3d9735ffae/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
 github.com/go-orb/plugins/log/slog v0.0.0-20230726151712-9ff06382f83b h1:1IYc6099haI+grRLF6Ia9k75Jn9/mZsrs/gdH/4ZSpc=
 github.com/go-orb/plugins/log/slog v0.0.0-20230726151712-9ff06382f83b/go.mod h1:kPLBp0A8HSdeuXQm+E10I+g8F51GnycTVpeTYDzi2i0=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
