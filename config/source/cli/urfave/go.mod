@@ -20,3 +20,5 @@ require (
 	golang.org/x/exp v0.0.0-20230725093048-515e97ebf090 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/go-orb/go-orb => ../../../../../go-orb

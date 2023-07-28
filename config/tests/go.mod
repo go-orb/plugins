@@ -32,3 +32,5 @@ replace github.com/go-orb/plugins/config/source/cli/urfave => ../source/cli/urfa
 replace github.com/go-orb/plugins/config/source/file => ../source/file
 
 replace github.com/go-orb/plugins/config/source/http => ../source/http
+
+replace github.com/go-orb/go-orb => ../../../go-orb

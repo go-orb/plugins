@@ -25,3 +25,5 @@ require (
 replace github.com/go-orb/plugins/registry/tests => ../tests
 
 replace github.com/go-orb/plugins/log/slog => ../../log/slog
+
+replace github.com/go-orb/go-orb => ../../../go-orb

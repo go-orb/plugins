@@ -8,3 +8,5 @@ require (
 )
 
 require golang.org/x/exp v0.0.0-20230725093048-515e97ebf090 // indirect
+
+replace github.com/go-orb/go-orb => ../../../go-orb

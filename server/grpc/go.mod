@@ -39,3 +39,5 @@ replace github.com/go-orb/plugins/log/slog => ../../log/slog
 replace github.com/go-orb/plugins/config/source/file => ../../config/source/file
 
 replace github.com/go-orb/plugins/registry/mdns => ../../registry/mdns
+
+replace github.com/go-orb/go-orb => ../../../go-orb

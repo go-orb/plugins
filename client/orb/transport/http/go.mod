@@ -7,13 +7,13 @@ require (
 	github.com/go-orb/plugins/client/orb v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20230725003158-93bc3eff9bfa
 	github.com/go-orb/plugins/client/tests v0.0.0-20230713091520-67e7b5a34489
-	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20230727225210-cbbbd0c939a8
+	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20230728042620-269dc6079867
 	github.com/go-orb/plugins/codecs/proto v0.0.0
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230727225210-cbbbd0c939a8
-	github.com/go-orb/plugins/config/source/file v0.0.0-20230727225210-cbbbd0c939a8
-	github.com/go-orb/plugins/log/slog v0.0.0-20230727225210-cbbbd0c939a8
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20230727225210-cbbbd0c939a8
-	github.com/go-orb/plugins/server/http v0.0.0-20230727225210-cbbbd0c939a8
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230728042620-269dc6079867
+	github.com/go-orb/plugins/config/source/file v0.0.0-20230728042620-269dc6079867
+	github.com/go-orb/plugins/log/slog v0.0.0-20230728042620-269dc6079867
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20230728042620-269dc6079867
+	github.com/go-orb/plugins/server/http v0.0.0-20230728042620-269dc6079867
 	github.com/stretchr/testify v1.8.4
 )
 
@@ -25,7 +25,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/pprof v0.0.0-20230728192033-2ba5b33183c6 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.1 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/miekg/dns v1.1.55 // indirect

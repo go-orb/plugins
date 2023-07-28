@@ -31,7 +31,7 @@ require (
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/pprof v0.0.0-20230705174524-200ffdc848b8 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.1 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/miekg/dns v1.1.55 // indirect
@@ -61,3 +61,5 @@ replace github.com/go-orb/plugins/config/source/file => ../../config/source/file
 replace github.com/go-orb/plugins/log/slog => ../../log/slog
 
 replace github.com/go-orb/plugins/registry/mdns => ../../registry/mdns
+
+replace github.com/go-orb/go-orb => ../../../go-orb

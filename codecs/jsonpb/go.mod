@@ -23,3 +23,5 @@ require (
 )
 
 replace github.com/go-orb/plugins/codecs/proto => ../proto
+
+replace github.com/go-orb/go-orb => ../../../go-orb

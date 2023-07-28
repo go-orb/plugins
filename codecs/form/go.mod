@@ -17,3 +17,5 @@ require (
 )
 
 require github.com/stretchr/testify v1.8.4
+
+replace github.com/go-orb/go-orb => ../../../go-orb

@@ -11,3 +11,5 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	golang.org/x/exp v0.0.0-20230725093048-515e97ebf090 // indirect
 )
+
+replace github.com/go-orb/go-orb => ../../../go-orb

@@ -75,3 +75,7 @@ replace github.com/go-orb/plugins/config/source/cli/urfave => ../../config/sourc
 replace github.com/go-orb/plugins/server/grpc => ../../server/grpc
 
 replace github.com/go-orb/go-orb => ../../../go-orb
+
+replace github.com/go-orb/plugins/config/source/cli/urfave => ../../config/source/cli/urfave
+
+replace github.com/go-orb/plugins/server/grpc => ../../server/grpc

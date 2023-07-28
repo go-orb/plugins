@@ -20,8 +20,8 @@ github.com/google/pprof v0.0.0-20230728192033-2ba5b33183c6 h1:ZgoomqkdjGbQ3+qQXC
 github.com/google/pprof v0.0.0-20230728192033-2ba5b33183c6/go.mod h1:Jh3hGz2jkYak8qXPD19ryItVnUgpgeqzdkY/D0EaeuA=
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.1 h1:RoziI+96HlQWrbaVhgOOdFYUHtX81pwA6tCgDS9FNRo=
-github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.1/go.mod h1:Rj8lEaVgLiPn1jTMVXEhATiZhuyXJq167bMYPbJM1CY=
+github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.2 h1:dygLcbEBA+t/P7ck6a8AkXv6juQ4cK0RHBoh32jxhHM=
+github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.2/go.mod h1:Ap9RLCIJVtgQg1/BBgVEfypOAySvvlcpcVQkSzJCH4Y=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/errwrap v1.1.0 h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY2I=
 github.com/hashicorp/errwrap v1.1.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
