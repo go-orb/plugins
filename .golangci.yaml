@@ -196,7 +196,6 @@ linters:
 
     # Can be considered to be enabled
     - gochecknoinits
-    # - gochecknoglobals # RIP
     - dogsled
     - wrapcheck
     - paralleltest
@@ -212,6 +211,7 @@ linters:
     - rowserrcheck # generics
     - sqlclosecheck # generics
     - wastedassign # generics
+    - typecheck # generics
 
     # Not configured yet
     - depguard
