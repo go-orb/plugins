@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/codecs/form
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230727224033-0f3d9735ffae
+	github.com/go-orb/go-orb v0.0.0-20230728000045-a99830943143
 	github.com/go-playground/form/v4 v4.2.1
 	google.golang.org/protobuf v1.31.0
 )

@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/server/tests
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230725195416-0c865f140784
+	github.com/go-orb/go-orb v0.0.0-20230728000045-a99830943143
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/config/source/file v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/log/slog v0.0.0-20230726151712-9ff06382f83b
@@ -29,3 +29,7 @@ require (
 replace github.com/go-orb/plugins/codecs/yaml => ../../codecs/yaml
 
 replace github.com/go-orb/plugins/config/source/file => ../../config/source/file
+
+replace github.com/go-orb/plugins/log/slog => ../../log/slog
+
+replace github.com/go-orb/plugins/registry/mdns => ../../registry/mdns

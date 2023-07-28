@@ -16,7 +16,7 @@ import (
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
-	mnet "github.com/go-orb/go-orb/util/net"
+	maddr "github.com/go-orb/go-orb/util/addr"
 	"github.com/google/uuid"
 	consul "github.com/hashicorp/consul/api"
 	hash "github.com/mitchellh/hashstructure"
@@ -336,7 +336,7 @@ func (c *RegistryConsul) GetService(name string, _ ...registry.GetOption) ([]*re
 
 		rNode := &registry.Node{
 			ID:       id,
-			Address:  mnet.HostPort(address, service.Service.Port),
+			Address:  maddr.HostPort(address, service.Service.Port),
 			Metadata: service.Service.Meta,
 		}
 
@@ -432,7 +432,7 @@ func ProvideRegistryConsul(
 }
 
 // New creates a new consul registry.
-func New(serviceName string, serviceVersion string, cfg Config, logger log.Logger) *RegistryConsul {
+func New(serviceName string, _ string, cfg Config, logger log.Logger) *RegistryConsul {
 	cRegistry := &RegistryConsul{
 		serviceName: serviceName,
 		config:      cfg,

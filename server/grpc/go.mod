@@ -3,10 +3,10 @@ module github.com/go-orb/plugins/server/grpc
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230727224033-0f3d9735ffae
+	github.com/go-orb/go-orb v0.0.0-20230728000045-a99830943143
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/config/source/file v0.0.0-20230713091520-67e7b5a34489
-	github.com/go-orb/plugins/log/slog v0.0.0-20230713091520-67e7b5a34489
+	github.com/go-orb/plugins/log/slog v0.0.0-20230726151712-9ff06382f83b
 	github.com/go-orb/plugins/registry/mdns v0.0.0-20230725003158-93bc3eff9bfa
 	github.com/google/uuid v1.3.0
 	github.com/stretchr/testify v1.8.4
@@ -37,3 +37,5 @@ replace github.com/go-orb/plugins/codecs/yaml => ../../codecs/yaml
 replace github.com/go-orb/plugins/log/slog => ../../log/slog
 
 replace github.com/go-orb/plugins/config/source/file => ../../config/source/file
+
+replace github.com/go-orb/plugins/registry/mdns => ../../registry/mdns

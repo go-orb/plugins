@@ -3,9 +3,9 @@ module github.com/go-orb/plugins/registry/consul
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230727224033-0f3d9735ffae
+	github.com/go-orb/go-orb v0.0.0-20230728000045-a99830943143
 	github.com/go-orb/plugins/log/slog v0.0.0-20230713091520-67e7b5a34489
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20230727221422-934b31ce18ec
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20230727232451-486e54aeeec3
 	github.com/go-orb/plugins/registry/tests v0.0.0-20230713091520-67e7b5a34489
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/consul/api v1.23.0

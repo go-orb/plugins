@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/go-chi/chi v1.5.4
-	github.com/go-orb/go-orb v0.0.0-20230727224033-0f3d9735ffae
+	github.com/go-orb/go-orb v0.0.0-20230728000045-a99830943143
 	github.com/go-orb/plugins/codecs/form v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20230713091520-67e7b5a34489
@@ -57,3 +57,7 @@ replace github.com/go-orb/plugins/codecs/proto => ../../codecs/proto
 replace github.com/go-orb/plugins/codecs/yaml => ../../codecs/yaml
 
 replace github.com/go-orb/plugins/config/source/file => ../../config/source/file
+
+replace github.com/go-orb/plugins/log/slog => ../../log/slog
+
+replace github.com/go-orb/plugins/registry/mdns => ../../registry/mdns

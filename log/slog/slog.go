@@ -15,15 +15,20 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+// Name is this providers name.
 const Name = "slog"
 
-var (
+const (
+	// DefaultFormat is the default format for slog.
 	DefaultFormat = "text"
+	// DefaultTarget is the default target for slog.
 	DefaultTarget = "os.Stderr"
 )
 
-// The register, it's the same as the old func init() {}
-var _ = log.Register(Name, Provide)
+// The register.
+func init() {
+	log.Register(Name, Factory)
+}
 
 // Config is the config struct for slog.
 type Config struct {
@@ -52,7 +57,7 @@ func NewConfig(section []string, configs types.ConfigData, opts ...log.Option) (
 	return cfg, nil
 }
 
-// WithTarget sets the format for the logger.
+// WithFormat sets the format for the logger.
 func WithFormat(n string) log.Option {
 	return func(c log.ConfigType) {
 		cfg, ok := c.(*Config)
@@ -63,7 +68,7 @@ func WithFormat(n string) log.Option {
 }
 
 // WithTarget sets the target for the logger,
-// available options: os.Stdout, os.Stderr, /somedir/somefile
+// available options: os.Stdout, os.Stderr, /somedir/somefile.
 func WithTarget(n string) log.Option {
 	return func(c log.ConfigType) {
 		cfg, ok := c.(*Config)
@@ -83,20 +88,21 @@ type Provider struct {
 	handler slog.Handler
 }
 
+// Start configures the slog Handler.
 func (p *Provider) Start() error {
 	var w io.Writer
 
-	if p.config.Target == "os.Stdout" {
+	switch p.config.Target {
+	case "os.Stdout":
 		w = os.Stdout
-	} else if p.config.Target == "os.Stderr" {
+	case "os.Stderr":
 		w = os.Stderr
-	} else if p.config.Target == "" {
-		w = os.Stderr
-	} else {
+	default:
 		f, err := os.OpenFile(p.config.Target, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 		if err != nil {
 			return fmt.Errorf("while opening '%s': %w", p.config.Target, err)
 		}
+
 		p.file = f
 		w = f
 	}
@@ -113,7 +119,8 @@ func (p *Provider) Start() error {
 	return nil
 }
 
-func (p *Provider) Stop(ctx context.Context) error {
+// Stop closes if required a open log file.
+func (p *Provider) Stop(_ context.Context) error {
 	if p.file != nil {
 		return p.file.Close()
 	}
@@ -121,16 +128,18 @@ func (p *Provider) Stop(ctx context.Context) error {
 	return nil
 }
 
+// Handler returns the configure handler.
 func (p *Provider) Handler() (slog.Handler, error) {
 	return p.handler, nil
 }
 
-// String returns an identifier for this handler provider with its config.
-func (p *Provider) String() string {
+// Key returns an identifier for this handler provider with its config.
+func (p *Provider) Key() string {
 	return fmt.Sprintf("__%s__-%s-%s", Name, p.config.Format, p.config.Target)
 }
 
-func Provide(sections []string, configs types.ConfigData, opts ...log.Option) (log.ProviderType, error) {
+// Factory is the factory for a slog provider.
+func Factory(sections []string, configs types.ConfigData, opts ...log.Option) (log.ProviderType, error) {
 	cfg, err := NewConfig(sections, configs, opts...)
 	if err != nil {
 		return log.ProviderType{}, err
