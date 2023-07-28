@@ -33,8 +33,13 @@ function run() {
     return ${rc}
 }
 
-out=$(run $1 "${ORB_ROOT}" 2>&1)
-rc=$?
-printf "%s" "${out}"
+if [[ "${1}" == "xargs" ]]; then
+    out=$(run $2 "${ORB_ROOT}" 2>&1)
+    rc=$?
+    printf "%s" "${out}"
 
-exit ${rc}
+    exit ${rc}
+else
+    run $2 "${ORB_ROOT}"
+    exit $?
+fi

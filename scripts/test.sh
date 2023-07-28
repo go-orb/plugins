@@ -77,9 +77,16 @@ function run_test() {
 	fi
 
 	procs=$(expr $(nproc) - 1)
-	print_msg "Running tests with ${procs} procs, GOMAXPROCS=${GOMAXPROCS}"
 	failed="false"
-	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P ${procs} -- /usr/bin/env bash "${SCRIPT_DIR}/lib/run_test.sh" || failed="true"
+
+	if [[ ${#dirs[@]} == 1 ]] || [[ ${procs} == 1 ]]; then
+		for dir in "${dirs[@]}"; do
+			/usr/bin/env bash "${SCRIPT_DIR}/lib/run_test.sh" "direct" "${dir}"
+		done
+	else
+		print_msg "Running tests with ${procs} procs, GOMAXPROCS=${GOMAXPROCS}"
+		printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P ${procs} -- /usr/bin/env bash "${SCRIPT_DIR}/lib/run_test.sh" "xargs" || failed="true"
+	fi
 
 	if [[ "x${failed}" != "xfalse" ]]; then
 		print_red_header "Tests failed"
