@@ -1,9 +1,5 @@
 name: PR Tests
 on:
-  push:
-    branches:
-      - "**"
-      - "!main"
   pull_request: {}
 permissions: read-all
 jobs:
