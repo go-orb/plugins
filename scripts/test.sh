@@ -76,9 +76,10 @@ function run_test() {
 		go install github.com/kyoh86/richgo@latest
 	fi
 
-	print_msg "Running tests with $(nproc) procs"
+	procs=$(expr $(nproc) - 1)
+	print_msg "Running tests with ${procs} procs, GOMAXPROCS=${GOMAXPROCS}"
 	failed="false"
-	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /usr/bin/env bash "${SCRIPT_DIR}/lib/run_test.sh" || failed="true"
+	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P ${procs} -- /usr/bin/env bash "${SCRIPT_DIR}/lib/run_test.sh" || failed="true"
 
 	if [[ "x${failed}" != "xfalse" ]]; then
 		print_red_header "Tests failed"
