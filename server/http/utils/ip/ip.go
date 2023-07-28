@@ -68,7 +68,7 @@ func ParsePort(address string) (int, error) {
 	return p, nil
 }
 
-// trunk-ignore(golangci-lint/gochecknoglobals): .
+//nolint:gochecknoglobals
 var networkTypesHTTP3 = map[string]string{
 	"unix": "unixgram",
 	"tcp4": "udp4",
