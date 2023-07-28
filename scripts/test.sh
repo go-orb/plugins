@@ -94,6 +94,35 @@ function run_test() {
 	fi
 }
 
+
+# Run Unit tests+benchamrks with RichGo for pretty output.
+function run_bench() {
+	dirs=$1
+
+	if [[ ! -e $(go env GOPATH)/bin/richgo ]]; then
+		print_msg "Downloading richgo..."
+		go install github.com/kyoh86/richgo@latest
+	fi
+
+	procs=$(expr $(nproc) - 1)
+	failed="false"
+
+	if [[ ${#dirs[@]} == 1 ]] || [[ ${procs} == 1 ]]; then
+		for dir in "${dirs[@]}"; do
+			/usr/bin/env bash "${SCRIPT_DIR}/lib/run_bench.sh" "direct" "${dir}"
+		done
+	else
+		print_msg "Running tests with ${procs} procs, GOMAXPROCS=${GOMAXPROCS}"
+		printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P ${procs} -- /usr/bin/env bash "${SCRIPT_DIR}/lib/run_bench.sh" "xargs" || failed="true"
+	fi
+
+	if [[ "x${failed}" != "xfalse" ]]; then
+		print_red_header "Tests failed"
+		exit 1
+	fi
+}
+
+
 # Run unit tests with tparse to create a summary.
 function create_summary() {
 	go install github.com/mfridman/tparse@latest
@@ -161,6 +190,14 @@ case $1 in
 	print_list "${dirs[@]}"
 
 	run_test "${dirs[@]}"
+	;;
+"bench")
+	read -a dirs <<< $(get_dirs "${@:2}")
+	[[ ${#dirs[@]} -eq 0 ]] && print_red_header "No changed Go files detected" && exit 0
+
+	print_list "${dirs[@]}"
+
+	run_bench "${dirs[@]}"
 	;;
 "summary")
 	read -a dirs <<< $(get_dirs "${@:2}")
