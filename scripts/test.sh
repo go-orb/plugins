@@ -170,9 +170,20 @@ function create_summary() {
 	fi
 }
 
-if [[ ! -d ${ORB_ROOT}/../go-orb ]] && [[ -f ${ORB_ROOT}/ORB_BRANCH ]]; then
-	print_header "Fetching go-orb"
-	git clone --branch "$(cat ${ORB_ROOT}/ORB_BRANCH)" https://github.com/go-orb/go-orb ${ORB_ROOT}/../go-orb
+if [[ ! -z "${CI}" ]]; then # only run in github_ci
+	if [[ -f ${ORB_ROOT}/ORB_BRANCH ]]; then
+		if [[ ! -d ${ORB_ROOT}/../go-orb ]]; then
+			print_header "Fetching go-orb: $(cat ${ORB_ROOT}/ORB_BRANCH)"
+			git clone --branch "$(cat ${ORB_ROOT}/ORB_BRANCH)" https://github.com/go-orb/go-orb ${ORB_ROOT}/../go-orb
+		else
+			print_header "Updating go-orb with branch: $(cat ${ORB_ROOT}/ORB_BRANCH)"
+			pushd ${ORB_ROOT}/../go-orb >/dev/null
+			git reset --hard
+			git checkout "$(cat ${ORB_ROOT}/ORB_BRANCH)"
+			git pull
+			popd >/dev/null
+		fi
+	fi
 fi
 
 case $1 in
