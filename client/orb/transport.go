@@ -14,8 +14,14 @@ type Transport interface {
 	Stop(ctx context.Context) error
 	String() string
 
+	// NoCodec indicates whatever the transport does the encoding on its own.
+	NeedsCodec() bool
+
 	// Call does the actual call to the service, it's important that any errors returned by Call are orberrors.
 	Call(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (*client.RawResponse, error)
+
+	// CallNoCodec is the same as call but using the transports codecs.
+	CallNoCodec(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) error
 }
 
 // TransportType is the type returned by NewTransportFunc.

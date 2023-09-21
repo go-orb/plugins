@@ -31,7 +31,7 @@ var (
 	DefaultRequests = []TestRequest{
 		{
 			Name:     "default codec with URL",
-			Endpoint: "user/debug/echo",
+			Endpoint: "/echo.Streams/Call",
 			Request: &proto.CallRequest{
 				Name: "Alex",
 			},
@@ -42,7 +42,7 @@ var (
 		},
 		{
 			Name:     "default codec",
-			Endpoint: "user/debug/echo",
+			Endpoint: "/echo.Streams/Call",
 			Request: &proto.CallRequest{
 				Name: "Alex",
 			},
@@ -52,7 +52,7 @@ var (
 		},
 		{
 			Name:        "application/proto",
-			Endpoint:    "user/debug/echo",
+			Endpoint:    "/echo.Streams/Call",
 			ContentType: "application/proto",
 			Request: &proto.CallRequest{
 				Name: "Alex",
@@ -63,7 +63,7 @@ var (
 		},
 		{
 			Name:        "application/json",
-			Endpoint:    "user/debug/echo",
+			Endpoint:    "/echo.Streams/Call",
 			ContentType: "application/json",
 			Request: &proto.CallRequest{
 				Name: "Alex",
@@ -74,7 +74,7 @@ var (
 		},
 		{
 			Name:     "error request",
-			Endpoint: "user/debug/echo",
+			Endpoint: "/echo.Streams/Call",
 			Error:    true,
 			Request: &proto.CallRequest{
 				Name: "error",
@@ -83,18 +83,6 @@ var (
 				Msg: "Hello Alex",
 			},
 		},
-		// {
-		// 	Name:        "no service",
-		// 	Service:     "",
-		// 	Endpoint:    "user/debug/echo",
-		// 	ContentType: "",
-		// 	Request: &proto.CallRequest{
-		// 		Name: "Alex",
-		// 	},
-		// 	Response: &proto.CallResponse{
-		// 		Msg: "Hello Alex",
-		// 	},
-		// },
 	}
 )
 

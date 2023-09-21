@@ -5,12 +5,12 @@ org:
         logger:
           plugin: slog
           format: json
-          level: WARN
+          level: INFO # DEBUG-1
         client:
           logger:
-            level: WARN
+            level: INFO # DEBUG-1
       service:
         logger:
           plugin: slog
           format: json
-          level: WARN
+          level: INFO # DEBUG-1

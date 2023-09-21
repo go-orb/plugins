@@ -19,7 +19,7 @@ import (
 // RegisterStreamsHTTPHandler registers the service to an HTTP server.
 func RegisterStreamsHTTPHandler(srv *mhttp.ServerHTTP, handler StreamsServer) {
 	r := srv.Router()
-	r.Post("/user/debug/echo", mhttp.NewGRPCHandler(srv, handler.Call))
+	r.Post("/echo.Streams/Call", mhttp.NewGRPCHandler(srv, handler.Call))
 }
 
 // RegisterStreamsHandler will return a registration function that can be
@@ -30,7 +30,7 @@ func RegisterStreamsHandler(handler StreamsServer) server.RegistrationFunc {
 		case *mhttp.ServerHTTP:
 			RegisterStreamsHTTPHandler(srv, handler)
 		case grpc.ServiceRegistrar:
-			// RegisterStreamsgRPCHandler(srv, handler)
+			RegisterStreamsServer(srv, handler)
 		default:
 			// Maybe we should log here with slog global logger
 		}

@@ -108,12 +108,18 @@ func (c *Client) ResolveService(
 	return rNodes, nil
 }
 
-// Call does the actual call.
-func (c *Client) Call(
-	ctx context.Context,
-	req *client.Request[any, any],
-	opts ...client.CallOption,
-) (resp *client.RawResponse, err error) {
+func (c *Client) NeedsCodec(ctx context.Context, req *client.Request[any, any], opts ...client.CallOption) bool {
+	co := c.makeOptions(opts...)
+
+	transport, err := c.transportForReq(ctx, req, co)
+	if err != nil {
+		return false
+	}
+
+	return transport.NeedsCodec()
+}
+
+func (c *Client) makeOptions(opts ...client.CallOption) *client.CallOptions {
 	// Construct CallOptions, use the client's config as base.
 	co := &client.CallOptions{
 		ContentType:         c.config.Config.ContentType,
@@ -128,6 +134,7 @@ func (c *Client) Call(
 		RequestTimeout:      c.config.Config.RequestTimeout,
 		StreamTimeout:       c.config.Config.StreamTimeout,
 		ConnClose:           false,
+		TlsConfig:           c.config.Config.TlsConfig,
 	}
 
 	// Apply options.
@@ -135,28 +142,21 @@ func (c *Client) Call(
 		o(co)
 	}
 
-	// Wrap middlewares
-	call := c.call
-	for _, m := range c.middlewares {
-		call = m.Call(call)
-	}
-
-	return call(ctx, req, co)
+	return co
 }
 
-func (c *Client) call(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (resp *client.RawResponse, err error) {
+func (c *Client) transportForReq(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (Transport, error) {
 	node, err := req.Node(ctx, opts)
 	if err != nil {
 		return nil, orberrors.ErrInternalServerError.Wrap(err)
 	}
 
-	// Add metadata to the context.
-	ctx = metadata.Ensure(ctx)
-
 	// Try to fetch the transport from the internal registry.
 	transport, err := c.transports.Get(node.Transport)
 
 	if err != nil {
+		err = nil
+
 		// Failed to get it from the registry, try to create a new one.
 		tcreator, err := Transports.Get(node.Transport)
 		if err != nil {
@@ -176,11 +176,77 @@ func (c *Client) call(ctx context.Context, req *client.Request[any, any], opts *
 			return nil, orberrors.ErrInternalServerError.Wrap(fmt.Errorf("%w (%s)", client.ErrFailedToCreateTransport, node.Transport))
 		}
 
+		if err := transport.Start(); err != nil {
+			return nil, orberrors.From(err)
+		}
+
 		// Store the transport for later use.
 		c.transports.Set(node.Transport, transport)
 	}
 
+	return transport, err
+}
+
+// Call does the actual call.
+func (c *Client) Call(
+	ctx context.Context,
+	req *client.Request[any, any],
+	result any,
+	opts ...client.CallOption,
+) (resp *client.RawResponse, err error) {
+
+	co := c.makeOptions(opts...)
+
+	// Wrap middlewares
+	call := c.call
+	for _, m := range c.middlewares {
+		call = m.Call(call)
+	}
+
+	return call(ctx, req, co)
+}
+
+func (c *Client) call(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (resp *client.RawResponse, err error) {
+	transport, err := c.transportForReq(ctx, req, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	// Add metadata to the context.
+	ctx = metadata.Ensure(ctx)
+
 	return transport.Call(ctx, req, opts)
+}
+
+// Call does the actual call.
+func (c *Client) CallNoCodec(
+	ctx context.Context,
+	req *client.Request[any, any],
+	result any,
+	opts ...client.CallOption,
+) error {
+
+	co := c.makeOptions(opts...)
+
+	// Wrap middlewares
+	call := c.callNoCodec
+	for _, m := range c.middlewares {
+		call = m.CallNoCodec(call)
+	}
+
+	// Add metadata to the context.
+	ctx = metadata.Ensure(ctx)
+
+	return call(ctx, req, result, co)
+}
+
+func (c *Client) callNoCodec(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) (err error) {
+	transport, err := c.transportForReq(ctx, req, opts)
+	if err != nil {
+		return err
+	}
+
+	return transport.CallNoCodec(ctx, req, result, opts)
 }
 
 // New creates a new orb client. This functions should rarely be called manually.

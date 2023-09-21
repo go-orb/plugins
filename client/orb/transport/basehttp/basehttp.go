@@ -42,6 +42,10 @@ func (t *Transport) String() string {
 	return t.name
 }
 
+func (t *Transport) NeedsCodec() bool {
+	return true
+}
+
 // Call does the actual rpc call to the server.
 func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (*client.RawResponse, error) {
 	codec, err := codecs.GetMime(opts.ContentType)
@@ -59,13 +63,13 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 		return nil, orberrors.From(err)
 	}
 
-	t.logger.Trace("Making a request", "url", node.Transport+"://"+node.Address+"/"+req.Endpoint(), "content-type", opts.ContentType)
+	t.logger.Trace("Making a request", "url", node.Transport+"://"+node.Address+req.Endpoint(), "content-type", opts.ContentType)
 
 	// Create a net/http request.
 	hReq, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
-		fmt.Sprintf("%s://%s/%s", t.scheme, node.Address, req.Endpoint()),
+		fmt.Sprintf("%s://%s%s", t.scheme, node.Address, req.Endpoint()),
 		bytes.NewReader(reqBody),
 	)
 	if err != nil {
@@ -103,26 +107,31 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 	}
 
 	// Create a Response{} and fill it.
-	result := &client.RawResponse{
+	res := &client.RawResponse{
 		ContentType: resp.Header.Get("Content-Type"),
 		Body:        respBody,
 		Headers:     make(map[string][]string),
 	}
 
-	t.logger.Trace("Got a result", "url", node.Transport+"://"+node.Address+"/"+req.Endpoint(), "content-type", result.ContentType)
+	t.logger.Trace("Got a result", "url", node.Transport+"://"+node.Address+req.Endpoint(), "content-type", res.ContentType)
 
 	// Copy headers to the RawResponse if wanted.
 	if opts.Headers {
 		for k, v := range resp.Header {
-			result.Headers[k] = v
+			res.Headers[k] = v
 		}
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return result, orberrors.NewHTTP(resp.StatusCode)
+		return res, orberrors.NewHTTP(resp.StatusCode)
 	}
 
-	return result, nil
+	return res, nil
+}
+
+// Call does the actual rpc call to the server.
+func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) error {
+	return orberrors.ErrInternalServerError
 }
 
 // NewTransport creates a Transport with a custom http.Client.

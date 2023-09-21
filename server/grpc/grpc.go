@@ -139,6 +139,8 @@ func (s *ServerGRPC) Start() error {
 		s.health.Resume()
 	}
 
+	s.register()
+
 	s.started = true
 
 	return nil
@@ -257,4 +259,44 @@ func (s *ServerGRPC) listen() error {
 	s.lis = lis
 
 	return nil
+}
+
+func (s *ServerGRPC) getEndpoints() ([]*registry.Endpoint, error) {
+	sInfo := s.server.GetServiceInfo()
+
+	result := make([]*registry.Endpoint, len(sInfo))
+
+	for k := range sInfo {
+		s.logger.Trace("found endpoint", slog.String("name", k))
+
+		result = append(result, &registry.Endpoint{
+			Name:     k,
+			Metadata: map[string]string{"stream": "true"},
+		})
+	}
+
+	return result, nil
+}
+
+func (s *ServerGRPC) register() error {
+	node := &registry.Node{
+		ID:        s.EntrypointID(),
+		Address:   s.Address(),
+		Transport: s.Transport(),
+		Metadata:  make(map[string]string),
+	}
+
+	eps, err := s.getEndpoints()
+	if err != nil {
+		return err
+	}
+
+	rService := &registry.Service{
+		Name:      s.registry.ServiceName(),
+		Version:   s.registry.ServiceVersion(),
+		Nodes:     []*registry.Node{node},
+		Endpoints: eps,
+	}
+
+	return s.registry.Register(rService)
 }

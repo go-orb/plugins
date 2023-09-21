@@ -3,9 +3,9 @@ module github.com/go-orb/plugins/client/orb
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230728000045-a99830943143
-	golang.org/x/exp v0.0.0-20230801115018-d63ba01acd4b
-	google.golang.org/grpc v1.57.0
+	github.com/go-orb/go-orb v0.0.0-20230805173903-ba3da7c24b9d
+	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
+	google.golang.org/grpc v1.58.0
 )
 
 require (
