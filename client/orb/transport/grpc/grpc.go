@@ -32,25 +32,6 @@ type Transport struct {
 
 // Start starts the transport.
 func (t *Transport) Start() error {
-	factory := func(ctx context.Context, addr string, tlsConfig *tls.Config) (*grpc.ClientConn, error) {
-		opts := []grpc.DialOption{}
-
-		if tlsConfig != nil {
-			opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)))
-		} else {
-			opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-		}
-
-		return grpc.DialContext(ctx, addr, opts...)
-	}
-
-	pool, err := pool.New(factory, 16, time.Duration(time.Second*5))
-	if err != nil {
-		return orberrors.From(err)
-	}
-
-	t.pool = pool
-
 	return nil
 }
 
@@ -83,10 +64,38 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 		return orberrors.From(err)
 	}
 
+	if t.pool == nil {
+		factory := func(ctx context.Context, addr string, tlsConfig *tls.Config) (*grpc.ClientConn, error) {
+			gopts := []grpc.DialOption{}
+
+			if tlsConfig != nil {
+				gopts = append(gopts, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)))
+			} else {
+				gopts = append(gopts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+			}
+
+			gopts = append(gopts, grpc.WithReturnConnectionError(), grpc.WithConnectParams(grpc.ConnectParams{
+				MinConnectTimeout: opts.ConnectionTimeout,
+			}))
+
+			return grpc.DialContext(ctx, addr, gopts...)
+		}
+
+		pool, err := pool.New(factory, opts.PoolSize, opts.PoolTTL)
+		if err != nil {
+			return orberrors.From(err)
+		}
+
+		t.pool = pool
+	}
+
 	conn, err := t.pool.Get(ctx, node.Address, opts.TlsConfig)
 	if err != nil {
 		return orberrors.From(err)
 	}
+
+	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(opts.RequestTimeout))
+	defer cancel()
 
 	err = conn.Invoke(ctx, req.Endpoint(), req.Request(), result)
 	defer conn.Close()

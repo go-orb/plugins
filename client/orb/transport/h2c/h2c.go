@@ -2,10 +2,12 @@
 package h2c
 
 import (
+	"context"
 	"crypto/tls"
 	"net"
 	"net/http"
 
+	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/plugins/client/orb"
 	"github.com/go-orb/plugins/client/orb/transport/basehttp"
@@ -24,14 +26,17 @@ func NewTransportH2C(logger log.Logger) (orb.TransportType, error) {
 	return basehttp.NewTransport(
 		Name,
 		logger,
-		&http.Client{
-			Transport: &http2.Transport{
-				AllowHTTP: true,
-				DialTLS: func(network, addr string, cfg *tls.Config) (net.Conn, error) {
-					return net.Dial(network, addr)
-				},
-			},
-		},
 		"http",
+		func(ctx context.Context, opts *client.CallOptions) (*http.Client, error) {
+			return &http.Client{
+				Timeout: opts.RequestTimeout,
+				Transport: &http2.Transport{
+					AllowHTTP: true,
+					DialTLS: func(network, addr string, cfg *tls.Config) (net.Conn, error) {
+						return net.DialTimeout(network, addr, opts.DialTimeout)
+					},
+				},
+			}, nil
+		},
 	)
 }

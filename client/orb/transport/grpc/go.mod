@@ -13,7 +13,6 @@ require (
 	github.com/go-orb/plugins/log/slog v0.0.0-20230805175939-5c62af9f797c
 	github.com/go-orb/plugins/registry/mdns v0.0.0-20230805175939-5c62af9f797c
 	github.com/go-orb/plugins/server/http v0.0.0-20230805175939-5c62af9f797c
-	github.com/processout/grpc-go-pool v1.2.1
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/grpc v1.58.0
 )

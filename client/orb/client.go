@@ -124,6 +124,8 @@ func (c *Client) makeOptions(opts ...client.CallOption) *client.CallOptions {
 	co := &client.CallOptions{
 		ContentType:         c.config.Config.ContentType,
 		PreferredTransports: c.config.Config.PreferredTransports,
+		PoolSize:            c.config.Config.PoolSize,
+		PoolTTL:             c.config.Config.PoolTTL,
 		AnyTransport:        c.config.Config.AnyTransport,
 		Selector:            c.config.Config.Selector,
 		Backoff:             c.config.Config.Backoff,

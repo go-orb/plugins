@@ -2,9 +2,11 @@
 package http3
 
 import (
+	"context"
 	"crypto/tls"
 	"net/http"
 
+	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/plugins/client/orb"
 	"github.com/go-orb/plugins/client/orb/transport/basehttp"
@@ -23,14 +25,17 @@ func NewTransportHTTP3(logger log.Logger) (orb.TransportType, error) {
 	return basehttp.NewTransport(
 		Name,
 		logger,
-		&http.Client{
-			Transport: &http3.RoundTripper{
-				TLSClientConfig: &tls.Config{
-					//nolint:gosec
-					InsecureSkipVerify: true,
-				},
-			},
-		},
 		"https",
+		func(ctx context.Context, opts *client.CallOptions) (*http.Client, error) {
+			return &http.Client{
+				Timeout: opts.RequestTimeout,
+				Transport: &http3.RoundTripper{
+					TLSClientConfig: &tls.Config{
+						//nolint:gosec
+						InsecureSkipVerify: true,
+					},
+				},
+			}, nil
+		},
 	)
 }

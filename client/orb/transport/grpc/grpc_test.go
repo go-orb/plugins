@@ -31,10 +31,6 @@ func TestSuite(t *testing.T) {
 	suite.Run(t, newSuite())
 }
 
-func BenchmarkGRPCProto16(b *testing.B) {
+func BenchmarkGRPC16(b *testing.B) {
 	newSuite().Benchmark(b, "application/proto", 16)
-}
-
-func BenchmarkGRPCJSON16(b *testing.B) {
-	newSuite().Benchmark(b, "application/json", 16)
 }

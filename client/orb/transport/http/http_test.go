@@ -29,10 +29,10 @@ func TestSuite(t *testing.T) {
 	suite.Run(t, newSuite())
 }
 
-func BenchmarkH2CProto16(b *testing.B) {
+func BenchmarkHTTPProto16(b *testing.B) {
 	newSuite().Benchmark(b, "application/proto", 16)
 }
 
-func BenchmarkH2CJSON16(b *testing.B) {
+func BenchmarkHTTPJSON16(b *testing.B) {
 	newSuite().Benchmark(b, "application/json", 16)
 }

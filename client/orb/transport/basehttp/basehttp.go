@@ -19,12 +19,15 @@ import (
 
 var _ (orb.Transport) = (*Transport)(nil)
 
+type TransportClientCreator func(ctx context.Context, opts *client.CallOptions) (*http.Client, error)
+
 // Transport is a go-orb/plugins/client/orb compatible transport.
 type Transport struct {
-	name    string
-	logger  log.Logger
-	hclient *http.Client
-	scheme  string
+	name          string
+	logger        log.Logger
+	clientCreator TransportClientCreator
+	hclient       *http.Client
+	scheme        string
 }
 
 // Start starts the transport.
@@ -34,7 +37,10 @@ func (t *Transport) Start() error {
 
 // Stop stop the transport.
 func (t *Transport) Stop(_ context.Context) error {
-	t.hclient.CloseIdleConnections()
+	if t.hclient != nil {
+		t.hclient.CloseIdleConnections()
+	}
+
 	return nil
 }
 
@@ -65,6 +71,10 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 
 	t.logger.Trace("Making a request", "url", node.Transport+"://"+node.Address+req.Endpoint(), "content-type", opts.ContentType)
 
+	// Set the connection timeout
+	ctx, cancel := context.WithTimeout(ctx, opts.ConnectionTimeout)
+	defer cancel()
+
 	// Create a net/http request.
 	hReq, err := http.NewRequestWithContext(
 		ctx,
@@ -87,6 +97,16 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 		for name, value := range md {
 			hReq.Header.Set(name, value)
 		}
+	}
+
+	// Get the client
+	if t.hclient == nil {
+		hclient, err := t.clientCreator(ctx, opts)
+		if err != nil {
+			return nil, err
+		}
+
+		t.hclient = hclient
 	}
 
 	// Run the request.
@@ -135,11 +155,11 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 }
 
 // NewTransport creates a Transport with a custom http.Client.
-func NewTransport(name string, logger log.Logger, hclient *http.Client, scheme string) (orb.TransportType, error) {
+func NewTransport(name string, logger log.Logger, scheme string, clientCreator TransportClientCreator) (orb.TransportType, error) {
 	return orb.TransportType{Transport: &Transport{
-		name:    name,
-		logger:  logger,
-		hclient: hclient,
-		scheme:  scheme,
+		name:          name,
+		logger:        logger,
+		scheme:        scheme,
+		clientCreator: clientCreator,
 	}}, nil
 }
