@@ -224,7 +224,7 @@ func (s *TestSuite) SetupSuite() {
 	}
 
 	if err != nil {
-		s.Assert().NoError(err, "failed to wait for the server")
+		s.Require().NoError(err, "failed to wait for the server")
 		s.Require().NoError(s.serverRunner.Kill(), "while stopping the server sub process")
 	}
 }
@@ -261,7 +261,7 @@ func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest) {
 		opts = append(opts, client.WithPreferredTransports(s.Transports...))
 	}
 
-	resp, err := client.Call[proto.CallResponse](
+	rsp, err := client.Call[proto.CallResponse](
 		ctx,
 		s.client,
 		req.Service,
@@ -271,10 +271,10 @@ func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest) {
 	)
 
 	if req.Error {
-		s.Require().NotNil(err)
+		s.Require().Error(err)
 	} else {
 		s.Require().NoError(err)
-		s.Assert().Equal(req.Response.Msg, resp.Msg, "unexpected response")
+		s.Equal(req.Response.GetMsg(), rsp.GetMsg(), "unexpected response")
 	}
 }
 

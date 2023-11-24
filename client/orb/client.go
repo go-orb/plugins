@@ -108,6 +108,7 @@ func (c *Client) ResolveService(
 	return rNodes, nil
 }
 
+// NeedsCodec returns whetever the underlying transport requires a codec to translate the communication with the server.
 func (c *Client) NeedsCodec(ctx context.Context, req *client.Request[any, any], opts ...client.CallOption) bool {
 	co := c.makeOptions(opts...)
 
@@ -136,7 +137,7 @@ func (c *Client) makeOptions(opts ...client.CallOption) *client.CallOptions {
 		RequestTimeout:      c.config.Config.RequestTimeout,
 		StreamTimeout:       c.config.Config.StreamTimeout,
 		ConnClose:           false,
-		TlsConfig:           c.config.Config.TlsConfig,
+		TLSConfig:           c.config.Config.TLSConfig,
 	}
 
 	// Apply options.
@@ -193,10 +194,9 @@ func (c *Client) transportForReq(ctx context.Context, req *client.Request[any, a
 func (c *Client) Call(
 	ctx context.Context,
 	req *client.Request[any, any],
-	result any,
+	_ any,
 	opts ...client.CallOption,
 ) (resp *client.RawResponse, err error) {
-
 	co := c.makeOptions(opts...)
 
 	// Wrap middlewares
@@ -220,14 +220,13 @@ func (c *Client) call(ctx context.Context, req *client.Request[any, any], opts *
 	return transport.Call(ctx, req, opts)
 }
 
-// Call does the actual call.
+// CallNoCodec does the actual call without codecs.
 func (c *Client) CallNoCodec(
 	ctx context.Context,
 	req *client.Request[any, any],
 	result any,
 	opts ...client.CallOption,
 ) error {
-
 	co := c.makeOptions(opts...)
 
 	// Wrap middlewares

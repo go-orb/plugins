@@ -89,7 +89,7 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 		t.pool = pool
 	}
 
-	conn, err := t.pool.Get(ctx, node.Address, opts.TlsConfig)
+	conn, err := t.pool.Get(ctx, node.Address, opts.TLSConfig)
 	if err != nil {
 		return orberrors.From(err)
 	}
@@ -98,7 +98,22 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 	defer cancel()
 
 	err = conn.Invoke(ctx, req.Endpoint(), req.Request(), result)
-	defer conn.Close()
+	if err != nil {
+		gErr, ok := status.FromError(err)
+		if !ok {
+			_ = conn.Close() //nolint:errcheck
+
+			return orberrors.From(err)
+		}
+
+		httpStatusCode := CodeToHTTPStatus(gErr.Code())
+
+		_ = conn.Close() //nolint:errcheck
+
+		return orberrors.New(httpStatusCode, gErr.Message())
+	}
+
+	err = conn.Close()
 	if err != nil {
 		gErr, ok := status.FromError(err)
 		if !ok {
@@ -106,6 +121,7 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 		}
 
 		httpStatusCode := CodeToHTTPStatus(gErr.Code())
+
 		return orberrors.New(httpStatusCode, gErr.Message())
 	}
 
