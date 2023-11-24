@@ -30,8 +30,7 @@ func TestIPParser(t *testing.T) {
 	for i, test := range tests {
 		t.Run("TestIPParser"+strconv.Itoa(i), func(t *testing.T) {
 			err := ValidateAddress(test.IP)
-			require.NoError(t, err)
-			require.Equal(t, test.Expected, test.IP)
+			require.Equal(t, test.Expected, err != nil, test.IP, err)
 		})
 	}
 }

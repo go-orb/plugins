@@ -53,7 +53,7 @@ func (s *Source) Read(u *url.URL) source.Data {
 	marshalers := codecs.Plugins.All()
 
 	if _, err := os.Stat(path); err != nil {
-		result.Error = err
+		result.Error = fmt.Errorf("%w: %w", config.ErrFileNotFound, err)
 		return result
 	}
 
