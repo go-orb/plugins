@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20231119181816-8fb44c1953fd
-	github.com/go-orb/plugins/client/orb v0.0.0-20230713091520-67e7b5a34489
+	github.com/go-orb/plugins/client/orb v0.0.0-20231124134616-38fd310569fc
 	github.com/go-orb/plugins/client/tests v0.0.0-00010101000000-000000000000
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231124134025-598f45933d43
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20231124134025-598f45933d43
@@ -51,5 +51,3 @@ require (
 replace github.com/go-orb/plugins/client/orb => ../..
 
 replace github.com/go-orb/plugins/client/tests => ../../../tests
-
-replace github.com/go-orb/go-orb => ../../../../../go-orb

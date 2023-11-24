@@ -3,9 +3,9 @@ module github.com/go-orb/plugins/log/slog
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20230728000045-a99830943143
+	github.com/go-orb/go-orb v0.0.0-20231119181816-8fb44c1953fd
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/exp v0.0.0-20230725093048-515e97ebf090
+	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 )
 
 require (
@@ -14,5 +14,3 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/go-orb/go-orb => ../../../go-orb
