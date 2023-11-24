@@ -220,7 +220,7 @@ func (s *ServerHTTP) Stop(ctx context.Context) error {
 	}
 
 	type stopper interface {
-		Stop(context.Context) error
+		Stop(ctx context.Context) error
 	}
 
 	go func(srv stopper, l net.Listener) {

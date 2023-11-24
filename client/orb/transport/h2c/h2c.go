@@ -21,7 +21,7 @@ func init() {
 	orb.Transports.Register(Name, NewTransportH2C)
 }
 
-// NewTransportH2C creates a new h2c transport for the orb. client.
+// NewTransportH2C creates a new h2c transport for the orb client.
 func NewTransportH2C(logger log.Logger) (orb.TransportType, error) {
 	return basehttp.NewTransport(
 		Name,

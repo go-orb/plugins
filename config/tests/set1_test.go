@@ -27,7 +27,7 @@ func testSet1URLs(t *testing.T, urls []*url.URL) {
 	require.NoError(t, err)
 
 	// Check if it merges right.
-	assert.Equal(t, true, cfg.Enabled)
+	assert.True(t, cfg.Enabled)
 	assert.Equal(t, "mdns", cfg.Plugin)
 	assert.Equal(t, "app", cfg.Domain)
 	assert.Equal(t, 600, cfg.Timeout)
@@ -113,5 +113,5 @@ func TestSet1FailUnknown(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = config.Read([]*url.URL{u1, u2, u3}, []string{"app"})
-	require.Error(t, err, config.ErrFileNotFound)
+	require.ErrorIs(t, err, config.ErrFileNotFound)
 }

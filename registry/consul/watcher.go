@@ -1,8 +1,8 @@
 package consul
 
 import (
-	"fmt"
 	"net"
+	"strconv"
 	"sync"
 
 	"github.com/go-orb/go-orb/registry"
@@ -113,7 +113,7 @@ func (cw *consulWatcher) serviceHandler(_ uint64, data interface{}) { //nolint:f
 
 		svc.Nodes = append(svc.Nodes, &registry.Node{
 			ID:       id,
-			Address:  net.JoinHostPort(address, fmt.Sprint(entry.Service.Port)),
+			Address:  net.JoinHostPort(address, strconv.Itoa(entry.Service.Port)),
 			Metadata: entry.Service.Meta,
 		})
 	}

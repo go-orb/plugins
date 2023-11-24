@@ -73,7 +73,7 @@ func MakeRequest(addr, name string, tlsConfig *tls.Config) error {
 		return fmt.Errorf("grpc call: %w", err)
 	}
 
-	if resp.Msg != "Hello "+name {
+	if resp.GetMsg() != "Hello "+name {
 		return errors.New("message invalid")
 	}
 
@@ -106,7 +106,7 @@ func MakeStreamRequest(addr, name string, s int, tlsConfig *tls.Config) error {
 			return err
 		}
 
-		if m.Msg != "hello "+name {
+		if m.GetMsg() != "hello "+name {
 			return errors.New("invalid message received")
 		}
 	}

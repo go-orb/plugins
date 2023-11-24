@@ -249,18 +249,18 @@ func TestServerInvalidMessage(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := thttp.HTTP2Client.Do(req)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	body, err := io.ReadAll(resp.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	t.Logf("expected error: %v", string(body))
 	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode, string(body))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Close connection
 	_, err = io.Copy(io.Discard, resp.Body)
-	assert.NoError(t, err)
-	assert.NoError(t, resp.Body.Close())
+	require.NoError(t, err)
+	require.NoError(t, resp.Body.Close())
 }
 
 func TestServerErrorRPC(t *testing.T) {
@@ -284,7 +284,7 @@ func TestServerErrorRPC(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := thttp.HTTP2Client.Do(req)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
@@ -320,20 +320,20 @@ func TestServerRequestSpecificContentType(t *testing.T) {
 		req.Header.Set("Accept", expectedCt)
 
 		resp, err := thttp.HTTP2Client.Do(req)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		body, err := io.ReadAll(resp.Body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Validate conent type received
 		assert.Equal(t, http.StatusOK, resp.StatusCode, string(body))
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, expectedCt, ct, string(body))
 
 		// Close connection
 		_, err = io.Copy(io.Discard, resp.Body)
-		assert.NoError(t, err)
-		assert.NoError(t, resp.Body.Close())
+		require.NoError(t, err)
+		require.NoError(t, resp.Body.Close())
 	}
 
 	testCt("application/proto")
@@ -382,7 +382,7 @@ func TestServerIntegration(t *testing.T) {
 
 	e, err := srv.GetEntrypoint("test-ep-1")
 	require.NoError(t, err, "failed to fetch entrypoint 1")
-	require.Equal(t, len(e.(*mhttp.ServerHTTP).Router().Routes()), 1, "number of routes not equal to 1")
+	require.Len(t, e.(*mhttp.ServerHTTP).Router().Routes(), 1, "number of routes not equal to 1")
 	makeRequests(t, "https://"+e.Address(), thttp.TypeHTTP3)
 
 	e, err = srv.GetEntrypoint("test-ep-2")
@@ -444,33 +444,33 @@ func TestServerFileConfig(t *testing.T) {
 	e, err := srv.GetEntrypoint("static-ep-1")
 	require.NoError(t, err, "failed to fetch entrypoint 1")
 	ep := e.(*mhttp.ServerHTTP) //nolint:errcheck
-	require.Equal(t, true, strings.HasSuffix(ep.Config.Address, ":48081"))
-	require.Equal(t, true, ep.Config.HTTP3, "HTTP3 static ep 1")
-	require.Equal(t, true, ep.Config.Gzip, "Gzip static ep 1")
+	require.True(t, strings.HasSuffix(ep.Config.Address, ":48081"))
+	require.True(t, ep.Config.HTTP3, "HTTP3 static ep 1")
+	require.True(t, ep.Config.Gzip, "Gzip static ep 1")
 	makeRequests(t, "https://"+e.Address(), thttp.TypeHTTP3)
 
 	e, err = srv.GetEntrypoint("test-ep-1")
 	require.NoError(t, err, "failed to fetch entrypoint 1")
 	ep = e.(*mhttp.ServerHTTP) //nolint:errcheck
-	require.Equal(t, true, strings.HasSuffix(ep.Config.Address, ":4512"))
-	require.Equal(t, true, ep.Config.HTTP3, "HTTP3")
+	require.True(t, strings.HasSuffix(ep.Config.Address, ":4512"))
+	require.True(t, ep.Config.HTTP3, "HTTP3")
 	makeRequests(t, "https://"+e.Address(), thttp.TypeHTTP3)
 
 	e, err = srv.GetEntrypoint("test-ep-2")
 	require.NoError(t, err, "failed to fetch entrypoint 2")
 	ep = e.(*mhttp.ServerHTTP) //nolint:errcheck
-	require.Equal(t, true, strings.HasSuffix(ep.Config.Address, ":4513"))
-	require.Equal(t, true, ep.Config.Insecure, "Insecure")
-	require.Equal(t, true, ep.Config.H2C, "H2C")
+	require.True(t, strings.HasSuffix(ep.Config.Address, ":4513"))
+	require.True(t, ep.Config.Insecure, "Insecure")
+	require.True(t, ep.Config.H2C, "H2C")
 	makeRequests(t, "https://"+e.Address(), thttp.TypeH2C)
 
 	e, err = srv.GetEntrypoint("test-ep-3")
 	require.NoError(t, err, "failed to fetch entrypoint 3")
 	ep = e.(*mhttp.ServerHTTP) //nolint:errcheck
-	require.Equal(t, true, strings.HasSuffix(ep.Config.Address, ":4514"))
-	require.Equal(t, true, ep.Config.HTTP3, "HTTP3")
-	require.Equal(t, true, ep.Config.H2C, "H2C")
-	require.Equal(t, true, ep.Config.Gzip, "Gzip")
+	require.True(t, strings.HasSuffix(ep.Config.Address, ":4514"))
+	require.True(t, ep.Config.HTTP3, "HTTP3")
+	require.True(t, ep.Config.H2C, "H2C")
+	require.True(t, ep.Config.Gzip, "Gzip")
 	makeRequests(t, "https://"+e.Address(), thttp.TypeHTTP3)
 
 	_, err = srv.GetEntrypoint("test-ep-4")
@@ -479,9 +479,9 @@ func TestServerFileConfig(t *testing.T) {
 	e, err = srv.GetEntrypoint("test-ep-5")
 	require.NoError(t, err, "failed to fetch entrypoint 5")
 	ep = e.(*mhttp.ServerHTTP) //nolint:errcheck
-	require.Equal(t, true, strings.HasSuffix(ep.Config.Address, ":4516"))
-	require.Equal(t, 3, len(ep.Config.HandlerRegistrations), "Registration len")
-	require.Equal(t, 4, len(ep.Config.Middleware), "Middleware len")
+	require.True(t, strings.HasSuffix(ep.Config.Address, ":4516"))
+	require.Len(t, ep.Config.HandlerRegistrations, 3, "Registration len")
+	require.Len(t, ep.Config.Middleware, 4, "Middleware len")
 	makeRequests(t, "https://"+e.Address(), thttp.TypeHTTP2)
 
 	require.NoError(t, srv.Stop(context.Background()), "failed to start server")

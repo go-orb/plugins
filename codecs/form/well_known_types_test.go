@@ -75,12 +75,12 @@ func TestMarshalBytes(t *testing.T) {
 		expect string
 	}{
 		{
-			input:  wrapperspb.Bytes([]byte("abc123!?$*&()'-=@~")).ProtoReflect(),
+			input:  wrapperspb.Bytes([]byte("abc123!?$*&()'-=@~")).ProtoReflect(), //nolint:protogetter
 			expect: base64.StdEncoding.EncodeToString([]byte("abc123!?$*&()'-=@~")),
 		},
 		{
-			input:  wrapperspb.Bytes([]byte("kratos")).ProtoReflect(),
-			expect: base64.StdEncoding.EncodeToString([]byte("kratos")),
+			input:  wrapperspb.Bytes([]byte("micro")).ProtoReflect(), //nolint:protogetter
+			expect: base64.StdEncoding.EncodeToString([]byte("micro")),
 		},
 	}
 	for _, v := range tests {

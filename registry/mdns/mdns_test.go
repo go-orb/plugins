@@ -145,10 +145,10 @@ func TestEncoding(t *testing.T) {
 
 func TestWatcher(t *testing.T) {
 	testFn := func(expected, actual *registry.Service) {
-		require.NotEqual(t, actual, nil, "expected result, got nil: "+expected.Name)
+		require.NotNil(t, actual, "expected result, got nil: "+expected.Name)
 		require.Equal(t, expected.Name, actual.Name, "service name not equal")
 		require.Equal(t, expected.Version, actual.Version, "service version not equal")
-		require.Equal(t, 1, len(actual.Nodes), "expected only 1 node")
+		require.Len(t, actual.Nodes, 1, "expected only 1 node")
 
 		node := expected.Nodes[0]
 		require.Equal(t, node.ID, actual.Nodes[0].ID, "node IDs not equal")
@@ -183,7 +183,7 @@ func TestWatcher(t *testing.T) {
 				continue
 			}
 
-			require.Equal(t, res.Action, "create", "expected create event")
+			require.Equal(t, "create", res.Action, "expected create event")
 
 			testFn(service, res.Service)
 			break

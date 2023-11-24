@@ -12,6 +12,7 @@ import (
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/client/orb"
@@ -19,6 +20,7 @@ import (
 
 var _ (orb.Transport) = (*Transport)(nil)
 
+// TransportClientCreator is a factory for a client transport.
 type TransportClientCreator func(ctx context.Context, opts *client.CallOptions) (*http.Client, error)
 
 // Transport is a go-orb/plugins/client/orb compatible transport.
@@ -48,12 +50,14 @@ func (t *Transport) String() string {
 	return t.name
 }
 
+// NeedsCodec is always true for http based transports.
 func (t *Transport) NeedsCodec() bool {
 	return true
 }
 
 // Call does the actual rpc call to the server.
-func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (*client.RawResponse, error) {
+func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions,
+) (*client.RawResponse, error) {
 	codec, err := codecs.GetMime(opts.ContentType)
 	if err != nil {
 		return nil, orberrors.ErrBadRequest.Wrap(err)
@@ -69,7 +73,9 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 		return nil, orberrors.From(err)
 	}
 
-	t.logger.Trace("Making a request", "url", node.Transport+"://"+node.Address+req.Endpoint(), "content-type", opts.ContentType)
+	t.logger.Trace(
+		"Making a request", "url", node.Transport+"://"+node.Address+req.Endpoint(), "content-type", opts.ContentType,
+	)
 
 	// Set the connection timeout
 	ctx, cancel := context.WithTimeout(ctx, opts.ConnectionTimeout)
@@ -109,6 +115,11 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 		t.hclient = hclient
 	}
 
+	return t.call2(node, opts, req, hReq)
+}
+
+func (t *Transport) call2(node *registry.Node, opts *client.CallOptions, req *client.Request[any, any], hReq *http.Request,
+) (*client.RawResponse, error) {
 	// Run the request.
 	resp, err := t.hclient.Do(hReq)
 	if err != nil {
@@ -133,7 +144,9 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 		Headers:     make(map[string][]string),
 	}
 
-	t.logger.Trace("Got a result", "url", node.Transport+"://"+node.Address+req.Endpoint(), "content-type", res.ContentType)
+	t.logger.Trace(
+		"Got a result", "url", node.Transport+"://"+node.Address+req.Endpoint(), "content-type", res.ContentType,
+	)
 
 	// Copy headers to the RawResponse if wanted.
 	if opts.Headers {
@@ -149,13 +162,14 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 	return res, nil
 }
 
-// Call does the actual rpc call to the server.
-func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) error {
+// CallNoCodec is a noop for http based transports.
+func (t *Transport) CallNoCodec(_ context.Context, _ *client.Request[any, any], _ any, _ *client.CallOptions) error {
 	return orberrors.ErrInternalServerError
 }
 
 // NewTransport creates a Transport with a custom http.Client.
-func NewTransport(name string, logger log.Logger, scheme string, clientCreator TransportClientCreator) (orb.TransportType, error) {
+func NewTransport(name string, logger log.Logger, scheme string, clientCreator TransportClientCreator,
+) (orb.TransportType, error) {
 	return orb.TransportType{Transport: &Transport{
 		name:          name,
 		logger:        logger,

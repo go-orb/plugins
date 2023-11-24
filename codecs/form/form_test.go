@@ -12,6 +12,7 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/go-orb/plugins/codecs/form/testdata"
 )
@@ -59,10 +60,10 @@ func TestFormCodecMarshal(t *testing.T) {
 	for i, test := range marshalTests {
 		t.Run("MarshalTest"+strconv.Itoa(i), func(t *testing.T) {
 			c, err := form.Marshal(&test.Input)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			content := string(c)
-			assert.Equal(t, content, test.Expected)
+			assert.Equal(t, test.Expected, content)
 		})
 	}
 }
@@ -73,10 +74,10 @@ func TestFormCodecUnmarshal(t *testing.T) {
 		Password: "micro_pwd",
 	}
 	content, err := getCodec(t).Marshal(req)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	bindReq := new(LoginRequest)
-	assert.NoError(t, getCodec(t).Unmarshal(content, bindReq))
+	require.NoError(t, getCodec(t).Unmarshal(content, bindReq))
 	assert.Equal(t, "micro", bindReq.Username)
 	assert.Equal(t, "micro_pwd", bindReq.Password)
 }
@@ -111,7 +112,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 		Bytes:     &wrapperspb.BytesValue{Value: []byte("123")},
 	}
 	content, err := getCodec(t).Marshal(&in)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expected := "a=19&age=18&b=true&bool=false&byte=MTIz&bytes=MTIz&count=3&d=" +
 		"22.22&double=12.33&duration=2m0.000000022s&field=1%2C2&float=12.34&id=" +
@@ -122,26 +123,25 @@ func TestProtoEncodeDecode(t *testing.T) {
 	assert.Equal(t, expected, string(content))
 
 	in2 := testdata.Complex{}
-	assert.NoError(t, getCodec(t).Unmarshal(content, &in2))
-	assert.Equal(t, in2.Id, int64(2233))
-	assert.Equal(t, in2.NoOne, "2233")
-	assert.NotEqual(t, in2.Simple.Component, nil)
-	assert.Equal(t, in2.Simple.Component, "5566")
-	assert.NotEqual(t, in2.Simples, nil)
-	assert.Equal(t, len(in2.Simples), 2)
-	assert.Equal(t, len(in2.Simples), 2)
-	assert.Equal(t, in2.Simples[0], "3344")
-	assert.Equal(t, in2.Simples[1], "5566")
+	require.NoError(t, getCodec(t).Unmarshal(content, &in2))
+	assert.Equal(t, int64(2233), in2.GetId())
+	assert.Equal(t, "2233", in2.GetNoOne())
+	assert.NotNil(t, in2.GetSimple().GetComponent())
+	assert.Equal(t, "5566", in2.GetSimple().GetComponent())
+	assert.NotNil(t, in2.GetSimples())
+	assert.Len(t, in2.GetSimples(), 2)
+	assert.Equal(t, "3344", in2.GetSimples()[0])
+	assert.Equal(t, "5566", in2.GetSimples()[1])
 }
 
 func TestDecodeStructPb(t *testing.T) {
 	req := new(testdata.StructPb)
 	query := `data={"name":"micro"}&data_list={"name1": "micro"}&data_list={"name2": "go-micro"}`
-	assert.NoError(t, getCodec(t).Unmarshal([]byte(query), req))
-	assert.Equal(t, req.Data.GetFields()["name"].GetStringValue(), "micro")
-	assert.Equal(t, len(req.DataList), 2)
-	assert.Equal(t, req.DataList[0].GetFields()["name1"].GetStringValue(), "micro")
-	assert.Equal(t, req.DataList[1].GetFields()["name2"].GetStringValue(), "go-micro")
+	require.NoError(t, getCodec(t).Unmarshal([]byte(query), req))
+	assert.Equal(t, "micro", req.GetData().GetFields()["name"].GetStringValue())
+	assert.Len(t, req.GetDataList(), 2)
+	assert.Equal(t, "micro", req.GetDataList()[0].GetFields()["name1"].GetStringValue())
+	assert.Equal(t, "go-micro", req.GetDataList()[1].GetFields()["name2"].GetStringValue())
 }
 
 func TestDecodeBytesValuePb(t *testing.T) {
@@ -149,15 +149,15 @@ func TestDecodeBytesValuePb(t *testing.T) {
 	val := base64.URLEncoding.EncodeToString([]byte(url))
 	content := "bytes=" + val
 	in2 := &testdata.Complex{}
-	assert.NoError(t, getCodec(t).Unmarshal([]byte(content), in2))
-	assert.Equal(t, string(in2.Bytes.Value), url)
+	require.NoError(t, getCodec(t).Unmarshal([]byte(content), in2))
+	assert.Equal(t, url, string(in2.GetBytes().GetValue()))
 }
 
 func TestEncodeFieldMask(t *testing.T) {
 	req := &testdata.HelloRequest{
 		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"foo", "bar"}},
 	}
-	assert.Equal(t, EncodeFieldMask(req.ProtoReflect()), "updateMask=foo,bar")
+	assert.Equal(t, "updateMask=foo,bar", EncodeFieldMask(req.ProtoReflect()))
 }
 
 func TestOptional(t *testing.T) {
@@ -168,16 +168,16 @@ func TestOptional(t *testing.T) {
 		OptInt32: &v,
 	}
 	e, err := getCodec(t).EncodeValues(req)
-	assert.NoError(t, err)
-	assert.Equal(t, e.Encode(), "name=foo&optInt32=100&sub.naming=bar")
+	require.NoError(t, err)
+	assert.Equal(t, "name=foo&optInt32=100&sub.naming=bar", e.Encode())
 }
 
 func getCodec(t *testing.T) *Form {
 	codec, err := codecs.Plugins.Get(Name)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	form, ok := codec.(*Form)
-	assert.Equal(t, ok, true)
+	assert.True(t, ok)
 
 	return form
 }

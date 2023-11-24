@@ -39,9 +39,9 @@ func TestCliConfig(t *testing.T) {
 	require.NoError(t, err)
 
 	// Check if it merges right.
-	assert.Equal(t, true, cfg.Enabled, "Enabled")
+	assert.True(t, cfg.Enabled, "Enabled")
 	assert.Equal(t, "nats", cfg.Plugin, "Plugin")
 	assert.Equal(t, 600, cfg.Timeout, "Timeout")
-	assert.Equal(t, false, cfg.Secure, "Secure")
+	assert.False(t, cfg.Secure, "Secure")
 	assert.EqualValues(t, []string{"nats://localhost:4222"}, cfg.Addresses, "Addresses")
 }

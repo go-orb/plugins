@@ -101,19 +101,19 @@ func TestMock(t *testing.T) {
 	require.NoError(t, srv.Start(), "failed to start server")
 	count, err := startCounter.Get(ep1)
 	require.NoError(t, err, "failed to fetch start count, ep has not been started")
-	require.Equal(t, count, 1, "sever should have been started")
+	require.Equal(t, 1, count, "sever should have been started")
 	count, err = startCounter.Get(ep2)
 	require.NoError(t, err, "failed to fetch start count, ep has not been started")
-	require.Equal(t, count, 1, "sever should have been started")
+	require.Equal(t, 1, count, "sever should have been started")
 
 	// Check if all entrypoints stopped
 	require.NoError(t, srv.Stop(context.Background()), "failed to stop server")
 	count, err = stopCounter.Get(ep1)
 	require.NoError(t, err, "failed to fetch stop count, ep has not been stopped")
-	require.Equal(t, count, 1, "sever should have been stopped")
+	require.Equal(t, 1, count, "sever should have been stopped")
 	count, err = stopCounter.Get(ep2)
 	require.NoError(t, err, "startedfailed to fetch stop count, ep has not been stopped")
-	require.Equal(t, count, 1, "sever should have been stopped")
+	require.Equal(t, 1, count, "sever should have been stopped")
 
 	_, err = srv.GetEntrypoint(ep1)
 	require.NoError(t, err, "entrypoint 1 not found")
@@ -161,7 +161,7 @@ func TestMockConfigFile(t *testing.T) {
 	epCfg = ep.(*EntrypointMock).config
 	require.Equal(t, "abc-field-one", epCfg.FieldOne, "ep 1, FieldOne")
 	require.Equal(t, 9, epCfg.FieldTwo, "ep 1, FieldTwo")
-	require.Equal(t, false, epCfg.FieldThree, "ep 1, FieldThree")
+	require.False(t, epCfg.FieldThree, "ep 1, FieldThree")
 	require.Equal(t, 5, epCfg.FieldFour, "ep 1, FieldFour")
 
 	ep, err = srv.GetEntrypoint("mock-ep-2")
@@ -169,7 +169,7 @@ func TestMockConfigFile(t *testing.T) {
 	epCfg = ep.(*EntrypointMock).config
 	require.Equal(t, "def-field-one", epCfg.FieldOne, "ep 2, FieldOne")
 	require.Equal(t, 0, epCfg.FieldTwo, "ep 2, FieldTwo")
-	require.Equal(t, true, epCfg.FieldThree, "ep 2, FieldThree")
+	require.True(t, epCfg.FieldThree, "ep 2, FieldThree")
 	require.Equal(t, 5, epCfg.FieldFour, "ep 2, FieldFour")
 
 	_, err = srv.GetEntrypoint("mock-ep-3")
@@ -181,7 +181,7 @@ func TestMockConfigFile(t *testing.T) {
 	epCfg = ep.(*EntrypointMock).config
 	require.Equal(t, "abc-field-one", epCfg.FieldOne, "ep 4, FieldOne")
 	require.Equal(t, 9, epCfg.FieldTwo, "ep 4, FieldTwo")
-	require.Equal(t, false, epCfg.FieldThree, "ep 4, FieldThree")
+	require.False(t, epCfg.FieldThree, "ep 4, FieldThree")
 	require.Equal(t, 5, epCfg.FieldFour, "ep 4, FieldFour")
 
 	_, err = srv.GetEntrypoint("mock-ep-5")

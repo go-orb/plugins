@@ -91,7 +91,7 @@ func genService(file *protogen.File, generated *protogen.GeneratedFile, service 
 
 		rule, ok := proto.GetExtension(method.Desc.Options(), annotations.E_Http).(*annotations.HttpRule)
 		if rule != nil && ok {
-			for _, bind := range rule.AdditionalBindings {
+			for _, bind := range rule.GetAdditionalBindings() {
 				serviceDescription.AddMethod(buildHTTPRule(generated, method, bind))
 			}
 
@@ -124,9 +124,9 @@ func hasHTTPRule(services []*protogen.Service) bool {
 }
 
 func buildHTTPRule(generated *protogen.GeneratedFile, protogenMethod *protogen.Method, rule *annotations.HttpRule) methodDesc {
-	body := rule.Body
-	responseBody := rule.ResponseBody
-	path, method := parsePattern(rule.Pattern)
+	body := rule.GetBody()
+	responseBody := rule.GetResponseBody()
+	path, method := parsePattern(rule.GetPattern())
 
 	methodDescription := buildMethodDesc(generated, protogenMethod, method, path)
 
@@ -176,8 +176,8 @@ func parsePattern(pattern any) (string, string) {
 		path = pattern.Patch
 		method = http.MethodPatch
 	case *annotations.HttpRule_Custom:
-		path = pattern.Custom.Path
-		method = pattern.Custom.Kind
+		path = pattern.Custom.GetPath()
+		method = pattern.Custom.GetKind()
 	}
 
 	return path, method

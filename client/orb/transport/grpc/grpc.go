@@ -38,7 +38,7 @@ func (t *Transport) Start() error {
 // Stop stop the transport.
 func (t *Transport) Stop(_ context.Context) error {
 	if t.pool != nil {
-		t.pool.Close() // nolint:errcheck
+		t.pool.Close()
 	}
 
 	return nil
@@ -48,16 +48,17 @@ func (t *Transport) String() string {
 	return Name
 }
 
+// NeedsCodec returns false for grpc the transport.
 func (t *Transport) NeedsCodec() bool {
 	return false
 }
 
-// Call does the actual rpc call to the server.
-func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (*client.RawResponse, error) {
+// Call is a noop for grpc.
+func (t *Transport) Call(_ context.Context, _ *client.Request[any, any], _ *client.CallOptions) (*client.RawResponse, error) {
 	return nil, orberrors.ErrInternalServerError
 }
 
-// Call does the actual rpc call to the server using the transports codecs.
+// CallNoCodec does the actual rpc call to the server.
 func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) error {
 	node, err := req.Node(ctx, opts)
 	if err != nil {

@@ -352,7 +352,7 @@ func (c *client) setInterface(iface *net.Interface, loopback bool) error {
 }
 
 // query is used to perform a lookup and stream results.
-func (c *client) query(params *QueryParam) error { //nolint:gocognit
+func (c *client) query(params *QueryParam) error {
 	// Create the service name
 	serviceAddr := fmt.Sprintf("%s.%s.", util.TrimDot(params.Service), util.TrimDot(params.Domain))
 

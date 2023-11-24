@@ -189,8 +189,8 @@ func checkProtoResponse(body []byte, name string) error {
 		return errors.Wrap(err, "Failed to unmarhsal data")
 	}
 
-	if data.Msg != "Hello "+name {
-		return fmt.Errorf("request failed; expected different response than: %v", data.Msg)
+	if data.GetMsg() != "Hello "+name {
+		return fmt.Errorf("request failed; expected different response than: %v", data.GetMsg())
 	}
 
 	return nil

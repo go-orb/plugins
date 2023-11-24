@@ -3,13 +3,13 @@ package tls
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGenerateCertificate(t *testing.T) {
 	_, err := GenTLSConfig("localhost:8080")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	_, err = CertificateQuic()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }

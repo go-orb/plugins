@@ -86,13 +86,13 @@ func (r *TestSuite) TestRegister() {
 			services, err := reg.ListServices()
 			r.Require().NoError(err)
 
-			r.Require().Equal(len(r.services)+1+r.serviceOffset, len(services))
+			r.Require().Len(services, len(r.services)+1+r.serviceOffset)
 
 			services, err = reg.GetService(service.Name)
-			r.Assert().NoError(err)
-			r.Assert().Equal(1, len(services))
-			r.Assert().Equal(service.Version, services[0].Version)
-			r.Assert().Equal(service.Nodes[0].Transport, services[0].Nodes[0].Transport)
+			r.Require().NoError(err)
+			r.Len(services, 1)
+			r.Equal(service.Version, services[0].Version)
+			r.Equal(service.Nodes[0].Transport, services[0].Nodes[0].Transport)
 		})
 	}
 }
@@ -107,11 +107,11 @@ func (r *TestSuite) TestDeregister() {
 
 	services, err := r.registries[0].ListServices()
 	r.Require().NoError(err)
-	r.Require().Equal(len(r.services)+1+r.serviceOffset, len(services))
+	r.Require().Len(services, len(r.services)+1+r.serviceOffset)
 
 	services, err = r.registries[0].GetService(service1.Name)
 	r.Require().NoError(err)
-	r.Require().Equal(1, len(services))
+	r.Require().Len(services, 1)
 	r.Require().Equal(service1.Version, services[0].Version)
 
 	r.Require().NoError(r.registries[0].Register(&service2))
@@ -119,21 +119,21 @@ func (r *TestSuite) TestDeregister() {
 
 	services, err = r.registries[0].GetService(service2.Name)
 	r.Require().NoError(err)
-	r.Require().Equal(2, len(services))
+	r.Require().Len(services, 2)
 
 	r.Require().NoError(r.registries[0].Deregister(&service1))
 	time.Sleep(r.updateTime)
 
 	services, err = r.registries[0].GetService(service1.Name)
 	r.Require().NoError(err)
-	r.Require().Equal(1, len(services))
+	r.Require().Len(services, 1)
 
 	r.Require().NoError(r.registries[0].Deregister(&service2))
 	time.Sleep(r.updateTime)
 
 	services, err = r.registries[0].GetService(service1.Name)
 	r.Require().NoError(err)
-	r.Require().Equal(0, len(services))
+	r.Require().Empty(services)
 }
 
 // TestGetServiceAllRegistries tests a service on all registries.
@@ -142,7 +142,7 @@ func (r *TestSuite) TestGetServiceAllRegistries() {
 		r.Run(fmt.Sprintf("reg-%d", idx), func() {
 			services, err := reg.GetService(r.services[0].Name)
 			r.Require().NoError(err)
-			r.Require().Equal(1, len(services))
+			r.Require().Len(services, 1)
 			r.Require().Equal(r.services[0].Name, services[0].Name)
 			r.Require().Equal(len(r.services[0].Nodes), len(services[0].Nodes))
 		})
@@ -153,7 +153,7 @@ func (r *TestSuite) TestGetServiceAllRegistries() {
 func (r *TestSuite) TestGetServiceWithNoNodes() {
 	services, err := r.registries[0].GetService("missing")
 	r.Require().NoError(err)
-	r.Require().Equal(0, len(services))
+	r.Require().Empty(services)
 }
 
 // BenchmarkGetService benchmarks.
@@ -167,7 +167,7 @@ func (r *TestSuite) BenchmarkGetService(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		services, err := r.registries[0].GetService(r.services[0].Name)
 		require.NoError(b, err)
-		require.Equal(b, 1, len(services))
+		require.Len(b, services, 1)
 		require.Equal(b, r.services[0].Name, services[0].Name)
 		require.Equal(b, len(r.services[0].Nodes), len(services[0].Nodes))
 	}
@@ -187,7 +187,7 @@ func (r *TestSuite) BenchmarkGetServiceWithNoNodes(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		services, err := r.registries[0].GetService("missing")
 		require.NoError(b, err)
-		require.Equal(b, 0, len(services))
+		require.Empty(b, services)
 	}
 	b.StopTimer()
 

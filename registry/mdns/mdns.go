@@ -46,7 +46,6 @@ var _ registry.Registry = (*RegistryMDNS)(nil)
 type RegistryMDNS struct {
 	serviceName    string
 	serviceVersion string
-	id             string
 
 	config Config
 	logger log.Logger
@@ -402,10 +401,10 @@ func (m *RegistryMDNS) getService(
 			switch {
 			// Prefer IPv4 addrs
 			case len(entry.AddrV4) > 0:
-				addr = net.JoinHostPort(entry.AddrV4.String(), fmt.Sprint(entry.Port))
+				addr = net.JoinHostPort(entry.AddrV4.String(), strconv.Itoa(entry.Port))
 			// Else use IPv6
 			case len(entry.AddrV6) > 0:
-				addr = net.JoinHostPort(entry.AddrV6.String(), fmt.Sprint(entry.Port))
+				addr = net.JoinHostPort(entry.AddrV6.String(), strconv.Itoa(entry.Port))
 			default:
 				m.logger.Info("[mdns]: invalid endpoint received: %v", entry)
 				continue
@@ -595,7 +594,6 @@ func (m *RegistryMDNS) watch() {
 	}
 }
 
-//nolint:gocognit
 func (m *mdnsWatcher) Next() (*registry.Result, error) {
 	for {
 		select {
@@ -639,9 +637,9 @@ func (m *mdnsWatcher) Next() (*registry.Result, error) {
 
 			switch {
 			case len(entry.AddrV4) > 0:
-				addr = net.JoinHostPort(entry.AddrV4.String(), fmt.Sprint(entry.Port))
+				addr = net.JoinHostPort(entry.AddrV4.String(), strconv.Itoa(entry.Port))
 			case len(entry.AddrV6) > 0:
-				addr = net.JoinHostPort(entry.AddrV6.String(), fmt.Sprint(entry.Port))
+				addr = net.JoinHostPort(entry.AddrV6.String(), strconv.Itoa(entry.Port))
 			}
 
 			rNode := &registry.Node{

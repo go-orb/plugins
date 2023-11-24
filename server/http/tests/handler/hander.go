@@ -18,7 +18,7 @@ type EchoHandler struct {
 
 // Call implements the call method.
 func (c *EchoHandler) Call(_ context.Context, in *proto.CallRequest) (*proto.CallResponse, error) {
-	switch in.Name {
+	switch in.GetName() {
 	case "error":
 		return nil, errors.New("you asked for an error, here you go")
 	case "big":
@@ -28,8 +28,8 @@ func (c *EchoHandler) Call(_ context.Context, in *proto.CallRequest) (*proto.Cal
 			return nil, err
 		}
 
-		return &proto.CallResponse{Msg: "Hello " + in.Name, Payload: msg}, nil
+		return &proto.CallResponse{Msg: "Hello " + in.GetName(), Payload: msg}, nil
 	default:
-		return &proto.CallResponse{Msg: "Hello " + in.Name}, nil
+		return &proto.CallResponse{Msg: "Hello " + in.GetName()}, nil
 	}
 }

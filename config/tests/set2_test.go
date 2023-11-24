@@ -25,10 +25,10 @@ func testSet2URLs(t *testing.T, urls []*url.URL) {
 	require.NoError(t, err)
 
 	// Check if it merges right.
-	assert.Equal(t, true, cfg.Enabled)
+	assert.True(t, cfg.Enabled)
 	assert.Equal(t, "nats", cfg.Plugin)
 	assert.Equal(t, 600, cfg.Timeout)
-	assert.Equal(t, false, cfg.Secure)
+	assert.False(t, cfg.Secure)
 	assert.EqualValues(t, []string{"nats://localhost:4222"}, cfg.Addresses)
 }
 

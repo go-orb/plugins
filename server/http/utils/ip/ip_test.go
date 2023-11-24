@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var tests = []struct {
@@ -30,14 +30,15 @@ func TestIPParser(t *testing.T) {
 	for i, test := range tests {
 		t.Run("TestIPParser"+strconv.Itoa(i), func(t *testing.T) {
 			err := ValidateAddress(test.IP)
-			assert.Equal(t, test.Expected, err != nil, test.IP, err)
+			require.NoError(t, err)
+			require.Equal(t, test.Expected, test.IP)
 		})
 	}
 }
 
 func TestParsePort(t *testing.T) {
 	_, err := ParsePort(":8080")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	_, err = ParsePort(":abc")
-	assert.Error(t, err)
+	require.Error(t, err)
 }

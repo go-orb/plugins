@@ -53,8 +53,8 @@ func TestGrpc(t *testing.T) {
 	require.NoError(t, err, "setup server")
 	defer cleanup(t)
 
-	assert.NoError(t, tgrpc.MakeRequest(srv.Address(), "Alex", nil), "make request")
-	assert.NoError(t, tgrpc.MakeStreamRequest(srv.Address(), "Alex", 5, nil), "stream request")
+	require.NoError(t, tgrpc.MakeRequest(srv.Address(), "Alex", nil), "make request")
+	require.NoError(t, tgrpc.MakeStreamRequest(srv.Address(), "Alex", 5, nil), "stream request")
 }
 
 func TestGrpcTLS(t *testing.T) {
@@ -76,8 +76,8 @@ func TestGrpcTLS(t *testing.T) {
 	require.NoError(t, err, "setup server")
 	defer cleanup(t)
 
-	assert.NoError(t, tgrpc.MakeRequest(srv.Address(), "Alex", tlsConfig), "unary request")
-	assert.NoError(t, tgrpc.MakeStreamRequest(srv.Address(), "Alex", 5, tlsConfig), "stream request")
+	require.NoError(t, tgrpc.MakeRequest(srv.Address(), "Alex", tlsConfig), "unary request")
+	require.NoError(t, tgrpc.MakeStreamRequest(srv.Address(), "Alex", 5, tlsConfig), "stream request")
 }
 
 func TestGrpcMiddleware(t *testing.T) {
@@ -100,10 +100,10 @@ func TestGrpcMiddleware(t *testing.T) {
 	require.NoError(t, err, "setup server")
 	defer cleanup(t)
 
-	assert.NoError(t, tgrpc.MakeRequest(srv.Address(), "Alex", nil), "unary request")
+	require.NoError(t, tgrpc.MakeRequest(srv.Address(), "Alex", nil), "unary request")
 	assert.EqualValues(t, 2, unaryC.Load())
 
-	assert.NoError(t, tgrpc.MakeStreamRequest(srv.Address(), "Alex", 5, nil), "stream request")
+	require.NoError(t, tgrpc.MakeStreamRequest(srv.Address(), "Alex", 5, nil), "stream request")
 	assert.EqualValues(t, 2, streamC.Load())
 }
 
@@ -120,12 +120,12 @@ func TestGrpcStartStop(t *testing.T) {
 	)
 	require.NoError(t, err, "setup server")
 
-	assert.NoError(t, srv.Start(), "start server 1")
-	assert.NoError(t, srv.Start(), "start server 2")
-	assert.NoError(t, srv.Start(), "start server 3")
+	require.NoError(t, srv.Start(), "start server 1")
+	require.NoError(t, srv.Start(), "start server 2")
+	require.NoError(t, srv.Start(), "start server 3")
 
-	assert.NoError(t, tgrpc.MakeRequest(srv.Address(), "Alex", nil), "make request")
-	assert.NoError(t, tgrpc.MakeStreamRequest(srv.Address(), "Alex", 5, nil), "stream request")
+	require.NoError(t, tgrpc.MakeRequest(srv.Address(), "Alex", nil), "make request")
+	require.NoError(t, tgrpc.MakeStreamRequest(srv.Address(), "Alex", 5, nil), "stream request")
 
 	cleanup(t)
 	cleanup(t)
@@ -173,18 +173,18 @@ func TestGrpcIntegration(t *testing.T) {
 	e, err := srv.GetEntrypoint("test-ep-1")
 	require.NoError(t, err, "failed to fetch entrypoint 1")
 	ep := e.(*mgrpc.ServerGRPC) //nolint:errcheck
-	require.Equal(t, true, ep.Config().Reflection, "server 1 reflection")
-	require.Equal(t, true, ep.Config().HealthService, "server 1 health")
-	require.Equal(t, true, ep.Config().Insecure, "server 1 insecure")
+	require.True(t, ep.Config().Reflection, "server 1 reflection")
+	require.True(t, ep.Config().HealthService, "server 1 health")
+	require.True(t, ep.Config().Insecure, "server 1 insecure")
 	require.NoError(t, tgrpc.MakeRequest(ep.Address(), "Alex", nil), "make request")
 	require.NoError(t, tgrpc.MakeStreamRequest(ep.Address(), "Alex", 5, nil), "stream request")
 
 	e, err = srv.GetEntrypoint("test-ep-2")
 	require.NoError(t, err, "failed to fetch entrypoint 2")
 	ep = e.(*mgrpc.ServerGRPC) //nolint:errcheck
-	require.Equal(t, false, ep.Config().Reflection, "server 2 reflection")
-	require.Equal(t, true, ep.Config().HealthService, "server 2 health")
-	require.Equal(t, true, ep.Config().Insecure, "server 2 insecure")
+	require.False(t, ep.Config().Reflection, "server 2 reflection")
+	require.True(t, ep.Config().HealthService, "server 2 health")
+	require.True(t, ep.Config().Insecure, "server 2 insecure")
 	require.NoError(t, tgrpc.MakeRequest(ep.Address(), "Alex", nil), "make request")
 	require.NoError(t, tgrpc.MakeStreamRequest(ep.Address(), "Alex", 5, nil), "stream request")
 
@@ -250,7 +250,7 @@ func TestServerFileConfig(t *testing.T) {
 	e, err := srv.GetEntrypoint("static-ep-1")
 	require.NoError(t, err, "failed to fetch static ep 1")
 	ep := e.(*mgrpc.ServerGRPC) //nolint:errcheck
-	require.Equal(t, true, ep.Config().Insecure, "static 1 insecure")
+	require.True(t, ep.Config().Insecure, "static 1 insecure")
 	require.NoError(t, tgrpc.MakeRequest(ep.Address(), "Alex", nil), "make request")
 	require.NoError(t, tgrpc.MakeStreamRequest(ep.Address(), "Alex", 5, nil), "stream request")
 	require.EqualValues(t, 1, counter1.Load(), "counter 1, static ep 1")
@@ -262,8 +262,8 @@ func TestServerFileConfig(t *testing.T) {
 	e, err = srv.GetEntrypoint("test-ep-1")
 	require.NoError(t, err, "failed to fetch ep 1")
 	ep = e.(*mgrpc.ServerGRPC) //nolint:errcheck
-	require.Equal(t, true, ep.Config().Insecure, "server 1 insecure")
-	require.Equal(t, false, ep.Config().Reflection, "server 1 reflection")
+	require.True(t, ep.Config().Insecure, "server 1 insecure")
+	require.False(t, ep.Config().Reflection, "server 1 reflection")
 	require.NoError(t, tgrpc.MakeRequest(ep.Address(), "Alex", nil), "make request")
 	require.NoError(t, tgrpc.MakeStreamRequest(ep.Address(), "Alex", 5, nil), "stream request")
 	require.EqualValues(t, 2, counter1.Load(), "counter 1, ep 1")
@@ -275,8 +275,8 @@ func TestServerFileConfig(t *testing.T) {
 	e, err = srv.GetEntrypoint("test-ep-2")
 	require.NoError(t, err, "failed to fetch ep 2")
 	ep = e.(*mgrpc.ServerGRPC) //nolint:errcheck
-	require.Equal(t, true, ep.Config().Insecure, "server 2 insecure")
-	require.Equal(t, false, ep.Config().HealthService, "server 2 health")
+	require.True(t, ep.Config().Insecure, "server 2 insecure")
+	require.False(t, ep.Config().HealthService, "server 2 health")
 	require.NoError(t, tgrpc.MakeRequest(ep.Address(), "Alex", nil), "make request")
 	require.NoError(t, tgrpc.MakeStreamRequest(ep.Address(), "Alex", 5, nil), "stream request")
 	require.EqualValues(t, 3, counter1.Load(), "counter 1, ep 2")
@@ -288,9 +288,9 @@ func TestServerFileConfig(t *testing.T) {
 	e, err = srv.GetEntrypoint("test-ep-3")
 	require.NoError(t, err, "failed to fetch ep 3")
 	ep = e.(*mgrpc.ServerGRPC) //nolint:errcheck
-	require.Equal(t, true, ep.Config().Insecure, "server 3 insecure")
-	require.Equal(t, false, ep.Config().HealthService, "server 3 health")
-	require.Equal(t, false, ep.Config().Reflection, "server 3 reflection")
+	require.True(t, ep.Config().Insecure, "server 3 insecure")
+	require.False(t, ep.Config().HealthService, "server 3 health")
+	require.False(t, ep.Config().Reflection, "server 3 reflection")
 	require.Equal(t, time.Second*11, ep.Config().Timeout, "server 3 timeout")
 	require.NoError(t, tgrpc.MakeRequest(ep.Address(), "Alex", nil), "make request")
 	require.NoError(t, tgrpc.MakeStreamRequest(ep.Address(), "Alex", 5, nil), "stream request")
@@ -306,7 +306,7 @@ func TestServerFileConfig(t *testing.T) {
 	e, err = srv.GetEntrypoint("test-ep-5")
 	require.NoError(t, err, "failed to fetch ep 5")
 	ep = e.(*mgrpc.ServerGRPC) //nolint:errcheck
-	require.Equal(t, true, ep.Config().Insecure, "server 5 insecure")
+	require.True(t, ep.Config().Insecure, "server 5 insecure")
 	require.NoError(t, tgrpc.MakeRequest(ep.Address(), "Alex", nil), "make request")
 	require.NoError(t, tgrpc.MakeStreamRequest(ep.Address(), "Alex", 5, nil), "stream request")
 	require.EqualValues(t, 5, counter1.Load(), "counter 1, ep 5")
@@ -315,5 +315,5 @@ func TestServerFileConfig(t *testing.T) {
 	require.EqualValues(t, 5, counterS1.Load(), "counter S1, ep 5")
 	require.Equal(t, 3, ep.Config().UnaryInterceptors.Len())
 	require.Equal(t, 1, ep.Config().StreamInterceptors.Len())
-	require.Equal(t, 3, len(ep.Config().HandlerRegistrations))
+	require.Len(t, ep.Config().HandlerRegistrations, 3)
 }

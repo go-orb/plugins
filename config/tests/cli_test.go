@@ -67,10 +67,10 @@ func testSections(t *testing.T, sections []string) {
 	require.NoError(t, err)
 
 	// Check if it merges right.
-	assert.Equal(t, true, cfg.Enabled, "Enabled by default")
+	assert.True(t, cfg.Enabled, "Enabled by default")
 	assert.Equal(t, "nats", cfg.Plugin, "Plugin")
 	assert.Equal(t, 600, cfg.Timeout, "Timeout")
-	assert.Equal(t, true, cfg.Secure, "Secure by default")
+	assert.True(t, cfg.Secure, "Secure by default")
 	assert.EqualValues(t, []string{"nats://localhost:4222"}, cfg.Addresses, "Addresses")
 }
 

@@ -341,7 +341,7 @@ func parseMessage(messageDesc protoreflect.MessageDescriptor, value string) (pro
 	case "google.protobuf.FieldMask":
 		fm := &fieldmaskpb.FieldMask{}
 		for _, fv := range strings.Split(value, ",") {
-			fm.Paths = append(fm.Paths, jsonSnakeCase(fv))
+			fm.Paths = append(fm.GetPaths(), jsonSnakeCase(fv))
 		}
 
 		msg = fm

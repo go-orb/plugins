@@ -139,7 +139,9 @@ func (s *ServerGRPC) Start() error {
 		s.health.Resume()
 	}
 
-	s.register()
+	if err := s.register(); err != nil {
+		return err
+	}
 
 	s.started = true
 
@@ -261,7 +263,7 @@ func (s *ServerGRPC) listen() error {
 	return nil
 }
 
-func (s *ServerGRPC) getEndpoints() ([]*registry.Endpoint, error) {
+func (s *ServerGRPC) getEndpoints() []*registry.Endpoint {
 	sInfo := s.server.GetServiceInfo()
 
 	result := make([]*registry.Endpoint, len(sInfo))
@@ -275,7 +277,7 @@ func (s *ServerGRPC) getEndpoints() ([]*registry.Endpoint, error) {
 		})
 	}
 
-	return result, nil
+	return result
 }
 
 func (s *ServerGRPC) register() error {
@@ -286,10 +288,7 @@ func (s *ServerGRPC) register() error {
 		Metadata:  make(map[string]string),
 	}
 
-	eps, err := s.getEndpoints()
-	if err != nil {
-		return err
-	}
+	eps := s.getEndpoints()
 
 	rService := &registry.Service{
 		Name:      s.registry.ServiceName(),

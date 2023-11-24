@@ -21,11 +21,11 @@ type EchoHandler struct {
 
 // Call implements the call method.
 func (c *EchoHandler) Call(_ context.Context, in *proto.CallRequest) (*proto.CallResponse, error) {
-	if in.Sleep != 0 {
-		time.Sleep(time.Second * time.Duration(in.Sleep))
+	if in.GetSleep() != 0 {
+		time.Sleep(time.Second * time.Duration(in.GetSleep()))
 	}
 
-	switch in.Name {
+	switch in.GetName() {
 	case "error":
 		return nil, errors.New("you asked for an error, here you go")
 	case "big":
@@ -35,9 +35,9 @@ func (c *EchoHandler) Call(_ context.Context, in *proto.CallRequest) (*proto.Cal
 			return nil, err
 		}
 
-		return &proto.CallResponse{Msg: "Hello " + in.Name, Payload: msg}, nil
+		return &proto.CallResponse{Msg: "Hello " + in.GetName(), Payload: msg}, nil
 	default:
-		return &proto.CallResponse{Msg: "Hello " + in.Name}, nil
+		return &proto.CallResponse{Msg: "Hello " + in.GetName()}, nil
 	}
 }
 
@@ -52,7 +52,7 @@ func (c *EchoHandler) Stream(in proto.Streams_StreamServer) error {
 			return nil
 		}
 
-		if err := in.Send(&proto.CallResponse{Msg: "hello " + msg.Name}); err != nil {
+		if err := in.Send(&proto.CallResponse{Msg: "hello " + msg.GetName()}); err != nil {
 			slog.Error("failed to send message", err)
 			return err
 		}

@@ -1,7 +1,6 @@
 package nats
 
 import (
-	"fmt"
 	"net"
 	"os"
 	"os/exec"
@@ -100,7 +99,7 @@ func natsServer() (string, func() error, error) {
 		return addr, nil, err
 	}
 
-	args := []string{"--addr", host, "--port", fmt.Sprint(port), "-js"}
+	args := []string{"--addr", host, "--port", strconv.Itoa(port), "-js"}
 	cmd := exec.Command(natsCmd, args...)
 	if err := cmd.Start(); err != nil {
 		return addr, nil, errors.Wrap(err, "failed starting command")
