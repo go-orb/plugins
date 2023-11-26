@@ -25,6 +25,7 @@ use (
 	./registry/regutil
 	./registry/tests
 	./server/grpc
+	./server/hertz
 	./server/http
 	./server/tests
 )
