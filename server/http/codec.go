@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"golang.org/x/exp/slog"
+	"log/slog"
 
 	"github.com/go-orb/plugins/server/http/headers"
 	"github.com/go-orb/plugins/server/http/utils/header"

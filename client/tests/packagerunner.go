@@ -8,8 +8,9 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"log/slog"
+
 	"github.com/go-orb/go-orb/log"
-	"golang.org/x/exp/slog"
 )
 
 // PackageRunnerOptions contains the options.

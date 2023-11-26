@@ -6,11 +6,12 @@ import (
 	"testing"
 	"time"
 
+	"log/slog"
+
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"golang.org/x/exp/slog"
 )
 
 // TestSuite is the struct we use for tests.

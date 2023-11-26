@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 
+	"log/slog"
+
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
@@ -15,7 +17,6 @@ import (
 	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
 	"golang.org/x/exp/slices"
-	"golang.org/x/exp/slog"
 )
 
 var _ (client.Client) = (*Client)(nil)

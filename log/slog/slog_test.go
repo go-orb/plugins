@@ -4,11 +4,12 @@ import (
 	"context"
 	"testing"
 
+	"log/slog"
+
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/config/source"
 	"github.com/go-orb/go-orb/log"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/exp/slog"
 )
 
 func TestChangeLevel(t *testing.T) {

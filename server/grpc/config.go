@@ -6,8 +6,9 @@ import (
 	"net"
 	"time"
 
+	"log/slog"
+
 	"github.com/google/uuid"
-	"golang.org/x/exp/slog"
 	"google.golang.org/grpc"
 
 	"github.com/go-orb/go-orb/server"

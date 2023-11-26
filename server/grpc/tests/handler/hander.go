@@ -8,8 +8,9 @@ import (
 	"io"
 	"time"
 
+	"log/slog"
+
 	"github.com/go-orb/plugins/server/grpc/tests/proto"
-	"golang.org/x/exp/slog"
 )
 
 var _ proto.StreamsServer = (*EchoHandler)(nil)

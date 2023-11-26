@@ -16,7 +16,8 @@ import (
 
 	"github.com/go-orb/plugins/server/http/router"
 
-	"golang.org/x/exp/slog"
+	"log/slog"
+
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )

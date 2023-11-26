@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net"
 
-	"golang.org/x/exp/slog"
+	"log/slog"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"

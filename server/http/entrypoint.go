@@ -17,7 +17,7 @@ import (
 	"net"
 	"net/http"
 
-	"golang.org/x/exp/slog"
+	"log/slog"
 
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/log"

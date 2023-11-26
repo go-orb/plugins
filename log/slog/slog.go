@@ -9,10 +9,11 @@ import (
 	"os"
 	"strings"
 
+	"log/slog"
+
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/types"
-	"golang.org/x/exp/slog"
 )
 
 // Name is this providers name.

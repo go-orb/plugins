@@ -11,6 +11,8 @@ import (
 	"testing"
 	"time"
 
+	"log/slog"
+
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
@@ -22,7 +24,6 @@ import (
 	"github.com/go-orb/plugins/client/tests/proto"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/exp/slices"
-	"golang.org/x/exp/slog"
 	"google.golang.org/grpc"
 )
 
