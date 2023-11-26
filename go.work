@@ -17,6 +17,7 @@ use (
 	./config/source/file
 	./config/source/http
 	./config/tests
+	./log/lumberjack
 	./log/slog
 	./registry/consul
 	./registry/mdns
