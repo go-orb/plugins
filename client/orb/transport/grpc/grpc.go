@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"time"
 
 	"google.golang.org/grpc"
@@ -98,12 +99,12 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 	defer cancel()
 
 	t.logger.Trace(
-		"Making a request", "url", node.Transport+"://"+node.Address+req.Endpoint(), "content-type", opts.ContentType,
+		"Making a request", "url", fmt.Sprintf("%s://%s/%s/Call", node.Transport, node.Address, req.Endpoint()), "content-type", opts.ContentType,
 	)
 
-	err = conn.Invoke(ctx, req.Endpoint(), req.Request(), result)
+	err = conn.Invoke(ctx, fmt.Sprintf("/%s/Call", req.Endpoint()), req.Request(), result)
 	t.logger.Trace(
-		"Got a result", "url", node.Transport+"://"+node.Address+req.Endpoint(), "content-type", opts.ContentType,
+		"Got a result", "url", fmt.Sprintf("%s://%s/%s/Call", node.Transport, node.Address, req.Endpoint()), "content-type", opts.ContentType,
 	)
 
 	if err != nil {

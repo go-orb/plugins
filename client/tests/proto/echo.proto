@@ -9,7 +9,7 @@ option go_package = "./proto;proto";
 service Streams {
   rpc Call(CallRequest) returns (CallResponse) {
     option (google.api.http) = {
-      post : "/echo.Streams/Call"
+      post : "/echo.Streams"
       body : "*"
     };
   }
