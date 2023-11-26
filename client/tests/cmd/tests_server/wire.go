@@ -15,6 +15,7 @@ import (
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/plugins/client/tests/handler"
 	"github.com/go-orb/plugins/client/tests/proto"
+
 	mgrpc "github.com/go-orb/plugins/server/grpc"
 	mhttp "github.com/go-orb/plugins/server/http"
 
@@ -72,12 +73,12 @@ func provideServerOpts() ([]server.Option, error) {
 			mhttp.WithAllowH2C(),
 			mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
 		),
-		mhttp.WithEntrypoint(
-			mhttp.WithName("http3"),
-			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[3])),
-			mhttp.WithHTTP3(),
-			mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
-		),
+		// mhttp.WithEntrypoint(
+		// 	mhttp.WithName("http3"),
+		// 	mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[3])),
+		// 	mhttp.WithHTTP3(),
+		// 	mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
+		// ),
 		mhttp.WithEntrypoint(
 			mhttp.WithName("https"),
 			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[4])),

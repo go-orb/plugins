@@ -17,14 +17,11 @@ import (
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
-	"github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/container"
-	"github.com/go-orb/plugins/client/tests/handler"
 	"github.com/go-orb/plugins/client/tests/proto"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/exp/slices"
-	"google.golang.org/grpc"
 )
 
 //nolint:gochecknoglobals
@@ -148,14 +145,6 @@ type TestRequest struct {
 
 	Request  *proto.CallRequest
 	Response *proto.CallResponse
-}
-
-func init() {
-	server.Handlers.Set("Streams",
-		server.NewRegistrationFunc[grpc.ServiceRegistrar, proto.StreamsServer](
-			proto.RegisterStreamsServer,
-			new(handler.EchoHandler),
-		))
 }
 
 // SetupSuite setups the test suite.

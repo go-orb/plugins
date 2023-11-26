@@ -139,7 +139,7 @@ func (p *PackageRunner) Build() error {
 	}
 
 	p.logger.Debug("Compiling", "packagePath", p.packagePath, "binaryPath", p.binaryPath)
-	buildCmd := exec.Command("go", "build", "-o", p.binaryPath, p.packagePath) //nolint:gosec
+	buildCmd := exec.Command("go", "build", "-ldflags", "-s -w", "-o", p.binaryPath, p.packagePath) //nolint:gosec
 
 	err := buildCmd.Run()
 	if err != nil {
