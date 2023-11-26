@@ -150,6 +150,8 @@ func (p *PackageRunner) Build() error {
 
 // Start runs the binary build with Build().
 func (p *PackageRunner) Start() error {
+	p.logger.Debug("Starting", "binaryPath", p.binaryPath, "numProcs", p.options.NumProcesses, "args", p.options.Args)
+
 	for i := 0; i < p.options.NumProcesses; i++ {
 		// Run the compiled binary as a subprocess
 		cmd := exec.Command(p.binaryPath, p.options.Args...) //nolint:gosec

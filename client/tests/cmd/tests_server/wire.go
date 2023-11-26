@@ -22,6 +22,7 @@ import (
 	"github.com/hashicorp/consul/sdk/freeport"
 )
 
+// provideConfigData reads the config from cli and returns it.
 func provideConfigData(
 	serviceName types.ServiceName,
 	serviceVersion types.ServiceVersion,
@@ -36,6 +37,8 @@ func provideConfigData(
 	return config.Read([]*url.URL{u}, cfgSections)
 }
 
+// provideServerOpts provides options for the go-orb server.
+// TODO(jochumdev): We should simplify server opts.
 func provideServerOpts() ([]server.Option, error) {
 	// Get some free ports
 	ports, err := freeport.Take(5)
@@ -80,6 +83,7 @@ func provideServerOpts() ([]server.Option, error) {
 	}, nil
 }
 
+// provideComponents creates a slice of components out of the arguments.
 func provideComponents(
 	serviceName types.ServiceName,
 	serviceVersion types.ServiceVersion,
@@ -96,6 +100,7 @@ func provideComponents(
 	return components, nil
 }
 
+// newComponents combines everything above and returns a slice of components.
 func newComponents(
 	serviceName types.ServiceName,
 	serviceVersion types.ServiceVersion,

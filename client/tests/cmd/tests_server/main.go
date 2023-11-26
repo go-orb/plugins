@@ -21,9 +21,6 @@ import (
 )
 
 func main() {
-	done := make(chan os.Signal, 1)
-	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
-
 	var (
 		serviceName    = types.ServiceName("org.orb.svc.service")
 		serviceVersion = types.ServiceVersion("v0.0.1")
@@ -43,9 +40,13 @@ func main() {
 		}
 	}
 
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
+
 	// Blocks until we get a sigint/sigterm
 	<-done
 
+	// Shutdown.
 	ctx := context.Background()
 
 	for k := range components {

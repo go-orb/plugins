@@ -6,9 +6,6 @@ org:
           plugin: slog
           format: json
           level: INFO # DEBUG-1
-        client:
-          logger:
-            level: INFO # DEBUG-1
       service:
         logger:
           plugin: slog
