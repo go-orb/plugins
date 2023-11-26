@@ -5,6 +5,7 @@ env:
     sh: nproc
   GOSUMDB: "off"
   GOPROXY: direct
+  GOMAXPROCS: 1
 
 tasks:
   runall:

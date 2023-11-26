@@ -18,8 +18,10 @@ function run() {
 
     # Run tests.
     if [[ -f "COVERPKGS" ]]; then
+        echo $(go env GOPATH)/bin/go test ./...  -v -benchmem -bench=. -cover -coverpkg="$(cat COVERPKGS | tr '\n' ',')"
         $(go env GOPATH)/bin/richgo test ./... -v -benchmem -bench=. -cover -coverpkg="$(cat COVERPKGS | tr '\n' ',')"
     else
+        echo $(go env GOPATH)/bin/go test ./... -v -benchmem -bench=. -cover
         $(go env GOPATH)/bin/richgo test ./... -v -benchmem -bench=. -cover
     fi
 

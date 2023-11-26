@@ -3,8 +3,10 @@
 export SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 export ORB_ROOT=$(realpath "${SCRIPT_DIR}/..")
 
-# Run all tests/benchmarks with a single cpu core.
-export GOMAXPROCS=1
+if [[ -e $GOMAXPROCS ]]; then
+	# Run all tests/benchmarks with a single core by default.
+	export GOMAXPROCS=1
+fi
 
 export ORB_GO_TEST_FLAGS="-v -race -cover"
 
