@@ -1,6 +1,6 @@
 module github.com/go-orb/plugins/server/http
 
-go 1.20
+go 1.21.4
 
 require (
 	github.com/go-chi/chi v1.5.5
@@ -16,7 +16,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/quic-go/quic-go v0.40.0
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	golang.org/x/net v0.18.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20231120223509-83a465c0220f
 	google.golang.org/grpc v1.59.0
@@ -40,6 +39,7 @@ require (
 	github.com/quic-go/qtls-go1-20 v0.4.1 // indirect
 	go.uber.org/mock v0.3.0 // indirect
 	golang.org/x/crypto v0.15.0 // indirect
+	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/text v0.14.0 // indirect

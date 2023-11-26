@@ -85,7 +85,7 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 	hReq, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
-		fmt.Sprintf("http://%s/%s", node.Address, req.Endpoint()),
+		fmt.Sprintf("%s://%s/%s", t.scheme, node.Address, req.Endpoint()),
 		bytes.NewReader(reqBody),
 	)
 	if err != nil {

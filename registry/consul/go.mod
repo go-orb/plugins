@@ -1,6 +1,6 @@
 module github.com/go-orb/plugins/registry/consul
 
-go 1.20
+go 1.21.4
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20231126093803-b366a8714a50

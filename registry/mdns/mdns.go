@@ -407,7 +407,7 @@ func (m *RegistryMDNS) getService(
 			case len(entry.AddrV6) > 0:
 				addr = net.JoinHostPort(entry.AddrV6.String(), strconv.Itoa(entry.Port))
 			default:
-				m.logger.Info("[mdns]: invalid endpoint received: %v", entry)
+				m.logger.Info("[mdns]: invalid endpoint received", "entry", entry.Name)
 				continue
 			}
 

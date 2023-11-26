@@ -1,6 +1,6 @@
 module github.com/go-orb/plugins/server/grpc
 
-go 1.20
+go 1.21.4
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20231126093803-b366a8714a50
@@ -10,7 +10,6 @@ require (
 	github.com/go-orb/plugins/registry/mdns v0.0.0-20230725003158-93bc3eff9bfa
 	github.com/google/uuid v1.4.0
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	google.golang.org/grpc v1.59.0
 	google.golang.org/protobuf v1.31.0
 )
@@ -23,6 +22,7 @@ require (
 	github.com/miekg/dns v1.1.57 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/sanity-io/litter v1.5.5 // indirect
+	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.18.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
