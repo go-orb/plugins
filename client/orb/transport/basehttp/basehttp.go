@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/go-orb/go-orb/client"
@@ -63,8 +62,9 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 		return nil, orberrors.ErrBadRequest.Wrap(err)
 	}
 
-	reqBody, err := codec.Encode(req.Request())
-	if err != nil {
+	// Encode the request into a *bytes.Buffer{}.
+	buff := bytes.NewBuffer(nil)
+	if err := codec.NewEncoder(buff).Encode(req.Request()); err != nil {
 		return nil, orberrors.ErrBadRequest.Wrap(err)
 	}
 
@@ -86,7 +86,7 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 		ctx,
 		http.MethodPost,
 		fmt.Sprintf("%s://%s/%s", t.scheme, node.Address, req.Endpoint()),
-		bytes.NewReader(reqBody),
+		buff,
 	)
 	if err != nil {
 		return nil, orberrors.ErrBadRequest.Wrap(err)
@@ -127,7 +127,9 @@ func (t *Transport) call2(node *registry.Node, opts *client.CallOptions, req *cl
 	}
 
 	// Read the whole body into a []byte slice.
-	respBody, err := io.ReadAll(resp.Body)
+	buff := bytes.NewBuffer(nil)
+	_, err = buff.ReadFrom(resp.Body)
+
 	if err != nil {
 		return nil, orberrors.From(err)
 	}
@@ -140,7 +142,7 @@ func (t *Transport) call2(node *registry.Node, opts *client.CallOptions, req *cl
 	// Create a Response{} and fill it.
 	res := &client.RawResponse{
 		ContentType: resp.Header.Get("Content-Type"),
-		Body:        respBody,
+		Body:        buff,
 		Headers:     make(map[string][]string),
 	}
 

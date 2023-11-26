@@ -3,18 +3,18 @@ module github.com/go-orb/plugins/client/orb/transport/http
 go 1.21.4
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231126205116-9614b6032b2c
-	github.com/go-orb/plugins/client/orb v0.0.0-20231126111023-0a8c6d6cb2ee
-	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20231126111023-0a8c6d6cb2ee
+	github.com/go-orb/go-orb v0.0.0-20231126231708-592c8d8d05c6
+	github.com/go-orb/plugins/client/orb v0.0.0-20231126210304-ce92168466b6
+	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20231126210304-ce92168466b6
 	github.com/go-orb/plugins/client/tests v0.0.0-20230713091520-67e7b5a34489
-	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231126111023-0a8c6d6cb2ee
+	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231126210304-ce92168466b6
 	github.com/go-orb/plugins/codecs/proto v0.0.0
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231126111023-0a8c6d6cb2ee
-	github.com/go-orb/plugins/config/source/file v0.0.0-20231126111023-0a8c6d6cb2ee
-	github.com/go-orb/plugins/log/slog v0.0.0-20231126111023-0a8c6d6cb2ee
-	github.com/go-orb/plugins/registry/consul v0.0.0-20231126195549-e63aba97d467
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20231126111023-0a8c6d6cb2ee
-	github.com/go-orb/plugins/server/http v0.0.0-20231126111023-0a8c6d6cb2ee
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231126210304-ce92168466b6
+	github.com/go-orb/plugins/config/source/file v0.0.0-20231126210304-ce92168466b6
+	github.com/go-orb/plugins/log/slog v0.0.0-20231126210304-ce92168466b6
+	github.com/go-orb/plugins/registry/consul v0.0.0-20231126210304-ce92168466b6
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20231126210304-ce92168466b6
+	github.com/go-orb/plugins/server/http v0.0.0-20231126210304-ce92168466b6
 	github.com/stretchr/testify v1.8.4
 )
 
@@ -23,7 +23,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/go-chi/chi v1.5.5 // indirect
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20231126111023-0a8c6d6cb2ee // indirect
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20231126210304-ce92168466b6 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/pprof v0.0.0-20231101202521-4ca4178f5c7a // indirect
