@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/client/orb/transport/h2c
 go 1.21.4
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231126172125-9f19ded9b372
+	github.com/go-orb/go-orb v0.0.0-20231126205116-9614b6032b2c
 	github.com/go-orb/plugins/client/orb v0.0.0-20231126111023-0a8c6d6cb2ee
 	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20231126111023-0a8c6d6cb2ee
 	github.com/go-orb/plugins/client/tests v0.0.0-20230713091520-67e7b5a34489
@@ -12,7 +12,7 @@ require (
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231126111023-0a8c6d6cb2ee
 	github.com/go-orb/plugins/config/source/file v0.0.0-20231126111023-0a8c6d6cb2ee
 	github.com/go-orb/plugins/log/slog v0.0.0-20231126111023-0a8c6d6cb2ee
-	github.com/go-orb/plugins/registry/consul v0.0.0-20231126111023-0a8c6d6cb2ee
+	github.com/go-orb/plugins/registry/consul v0.0.0-20231126195549-e63aba97d467
 	github.com/go-orb/plugins/registry/mdns v0.0.0-20231126111023-0a8c6d6cb2ee
 	github.com/go-orb/plugins/server/http v0.0.0-20231126111023-0a8c6d6cb2ee
 	github.com/stretchr/testify v1.8.4

@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/client/tests
 go 1.21.4
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231126172125-9f19ded9b372
+	github.com/go-orb/go-orb v0.0.0-20231126205116-9614b6032b2c
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231126111023-0a8c6d6cb2ee
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20231126111023-0a8c6d6cb2ee
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231126111023-0a8c6d6cb2ee
@@ -90,3 +90,9 @@ replace github.com/go-orb/plugins/log/slog => ../../log/slog
 replace github.com/go-orb/plugins/config/source/cli/urfave => ../../config/source/cli/urfave
 
 replace github.com/go-orb/plugins/registry/regutil => ../../registry/regutil
+
+replace github.com/go-orb/plugins/log/lumberjack => ../../log/lumberjack
+
+replace github.com/go-orb/plugins/registry/consul => ../../registry/consul
+
+replace github.com/go-orb/plugins/server/grpc => ../../server/grpc

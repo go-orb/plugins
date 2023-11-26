@@ -1,7 +1,7 @@
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/go-orb/go-orb v0.0.0-20231126172125-9f19ded9b372 h1:kDrM6oXRed9rJKbBiE2/7wNzuqjTkuOuoUoynduWOIY=
-github.com/go-orb/go-orb v0.0.0-20231126172125-9f19ded9b372/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
+github.com/go-orb/go-orb v0.0.0-20231126205116-9614b6032b2c h1:zyyqPNrxim7wu+L6BBC2uhvkVt0qR9vdeZ9O455RqnE=
+github.com/go-orb/go-orb v0.0.0-20231126205116-9614b6032b2c/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
 github.com/go-orb/plugins/registry/tests v0.0.0-20230713091520-67e7b5a34489 h1:09PWHl0w0G2MphOzBOFlf9bNOiCgCqgDzqUOMWqMEXk=
 github.com/go-orb/plugins/registry/tests v0.0.0-20230713091520-67e7b5a34489/go.mod h1:coFDlNQJ1wBbjuVLAMFp+XeqvSX4/+1m8hlXegffPaU=
 github.com/google/uuid v1.4.0 h1:MtMxsa51/r9yyhkyLsVeVt0B+BGQZzpQiTQ4eHZ8bc4=

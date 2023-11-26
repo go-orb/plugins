@@ -59,7 +59,7 @@ func TestFormCodecMarshal(t *testing.T) {
 
 	for i, test := range marshalTests {
 		t.Run("MarshalTest"+strconv.Itoa(i), func(t *testing.T) {
-			c, err := form.Marshal(&test.Input)
+			c, err := form.Encode(&test.Input)
 			require.NoError(t, err)
 
 			content := string(c)
@@ -73,11 +73,11 @@ func TestFormCodecUnmarshal(t *testing.T) {
 		Username: "micro",
 		Password: "micro_pwd",
 	}
-	content, err := getCodec(t).Marshal(req)
+	content, err := getCodec(t).Encode(req)
 	require.NoError(t, err)
 
 	bindReq := new(LoginRequest)
-	require.NoError(t, getCodec(t).Unmarshal(content, bindReq))
+	require.NoError(t, getCodec(t).Decode(content, bindReq))
 	assert.Equal(t, "micro", bindReq.Username)
 	assert.Equal(t, "micro_pwd", bindReq.Password)
 }
@@ -111,7 +111,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 		String_:   &wrapperspb.StringValue{Value: "go-micro"},
 		Bytes:     &wrapperspb.BytesValue{Value: []byte("123")},
 	}
-	content, err := getCodec(t).Marshal(&in)
+	content, err := getCodec(t).Encode(&in)
 	require.NoError(t, err)
 
 	expected := "a=19&age=18&b=true&bool=false&byte=MTIz&bytes=MTIz&count=3&d=" +
@@ -123,7 +123,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 	assert.Equal(t, expected, string(content))
 
 	in2 := testdata.Complex{}
-	require.NoError(t, getCodec(t).Unmarshal(content, &in2))
+	require.NoError(t, getCodec(t).Decode(content, &in2))
 	assert.Equal(t, int64(2233), in2.GetId())
 	assert.Equal(t, "2233", in2.GetNoOne())
 	assert.NotNil(t, in2.GetSimple().GetComponent())
@@ -137,7 +137,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 func TestDecodeStructPb(t *testing.T) {
 	req := new(testdata.StructPb)
 	query := `data={"name":"micro"}&data_list={"name1": "micro"}&data_list={"name2": "go-micro"}`
-	require.NoError(t, getCodec(t).Unmarshal([]byte(query), req))
+	require.NoError(t, getCodec(t).Decode([]byte(query), req))
 	assert.Equal(t, "micro", req.GetData().GetFields()["name"].GetStringValue())
 	assert.Len(t, req.GetDataList(), 2)
 	assert.Equal(t, "micro", req.GetDataList()[0].GetFields()["name1"].GetStringValue())
@@ -149,7 +149,7 @@ func TestDecodeBytesValuePb(t *testing.T) {
 	val := base64.URLEncoding.EncodeToString([]byte(url))
 	content := "bytes=" + val
 	in2 := &testdata.Complex{}
-	require.NoError(t, getCodec(t).Unmarshal([]byte(content), in2))
+	require.NoError(t, getCodec(t).Decode([]byte(content), in2))
 	assert.Equal(t, url, string(in2.GetBytes().GetValue()))
 }
 

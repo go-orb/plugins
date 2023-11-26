@@ -22,7 +22,7 @@ func init() {
 // handle.
 func (p *Proto) ContentTypes() []string {
 	return []string{
-		"application/octet-stream",
+		"application/octet-stream", // TODO(jochumdev): Remove me?
 		"application/proto",
 		"application/protobuf",
 		"application/x-proto",
@@ -30,8 +30,8 @@ func (p *Proto) ContentTypes() []string {
 	}
 }
 
-// Marshal marshals "value" into Proto.
-func (*Proto) Marshal(value interface{}) ([]byte, error) {
+// Encode encodes "value" into Proto.
+func (*Proto) Encode(value interface{}) ([]byte, error) {
 	message, ok := value.(proto.Message)
 	if !ok {
 		return nil, errors.New("unable to marshal non proto field")
@@ -40,8 +40,8 @@ func (*Proto) Marshal(value interface{}) ([]byte, error) {
 	return proto.Marshal(message)
 }
 
-// Unmarshal unmarshals proto "data" into "value".
-func (*Proto) Unmarshal(data []byte, value interface{}) error {
+// Decode decodes proto "data" into "value".
+func (*Proto) Decode(data []byte, value interface{}) error {
 	message, ok := value.(proto.Message)
 	if !ok {
 		return errors.New("unable to unmarshal non proto field")
@@ -57,14 +57,14 @@ func (p *Proto) NewDecoder(reader io.Reader) codecs.Decoder {
 		if err != nil {
 			return err
 		}
-		return p.Unmarshal(buffer, value)
+		return p.Decode(buffer, value)
 	})
 }
 
 // NewEncoder returns an Encoder which writes proto stream into "writer".
 func (p *Proto) NewEncoder(writer io.Writer) codecs.Encoder {
 	return codecs.EncoderFunc(func(value interface{}) error {
-		buffer, err := p.Marshal(value)
+		buffer, err := p.Encode(value)
 		if err != nil {
 			return err
 		}
@@ -75,6 +75,18 @@ func (p *Proto) NewEncoder(writer io.Writer) codecs.Encoder {
 
 		return nil
 	})
+}
+
+// Encodes returns if this is able to encode the given type.
+func (p *Proto) Encodes(v any) bool {
+	_, ok := v.(proto.Message)
+
+	return ok
+}
+
+// Decodes returns if this is able to decode the given type.
+func (p *Proto) Decodes(v any) bool {
+	return p.Encodes(v)
 }
 
 // String returns the codec plugin name.

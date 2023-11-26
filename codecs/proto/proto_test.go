@@ -38,14 +38,14 @@ func TestProtoMarshalUnmarshal(t *testing.T) {
 	marshaller := Proto{}
 
 	// Marshal
-	buffer, err := marshaller.Marshal(message)
+	buffer, err := marshaller.Encode(message)
 	if err != nil {
 		t.Fatalf("Marshaling returned error: %s", err.Error())
 	}
 
 	// Unmarshal
 	unmarshalled := &examplepb.ABitOfEverything{}
-	err = marshaller.Unmarshal(buffer, unmarshalled)
+	err = marshaller.Decode(buffer, unmarshalled)
 	if err != nil {
 		t.Fatalf("Unmarshalling returned error: %s", err.Error())
 	}

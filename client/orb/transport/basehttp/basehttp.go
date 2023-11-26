@@ -63,7 +63,7 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 		return nil, orberrors.ErrBadRequest.Wrap(err)
 	}
 
-	reqBody, err := codec.Marshal(req.Request())
+	reqBody, err := codec.Encode(req.Request())
 	if err != nil {
 		return nil, orberrors.ErrBadRequest.Wrap(err)
 	}
