@@ -13,6 +13,7 @@ import (
 
 	"github.com/go-orb/go-orb/server"
 
+	mhertz "github.com/go-orb/plugins/server/hertz"
 	mhttp "github.com/go-orb/plugins/server/http"
 )
 
@@ -22,6 +23,12 @@ func RegisterStreamsHTTPHandler(srv *mhttp.ServerHTTP, handler StreamsServer) {
 	r.Post("/echo.Streams", mhttp.NewGRPCHandler(srv, handler.Call))
 }
 
+// RegisterStreamsHertzHandler registers the service to an HTTP server.
+func RegisterStreamsHertzHandler(srv *mhertz.ServerHertz, handler StreamsServer) {
+	s := srv.Server()
+	s.POST("/echo.Streams", mhertz.NewGRPCHandler(srv, handler.Call))
+}
+
 // RegisterStreamsHandler will return a registration function that can be
 // provided to entrypoints as a handler registration.
 func RegisterStreamsHandler(handler StreamsServer) server.RegistrationFunc {
@@ -29,6 +36,8 @@ func RegisterStreamsHandler(handler StreamsServer) server.RegistrationFunc {
 		switch srv := any(s).(type) {
 		case *mhttp.ServerHTTP:
 			RegisterStreamsHTTPHandler(srv, handler)
+		case *mhertz.ServerHertz:
+			RegisterStreamsHertzHandler(srv, handler)
 		case grpc.ServiceRegistrar:
 			RegisterStreamsServer(srv, handler)
 		default:

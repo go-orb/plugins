@@ -31,7 +31,7 @@ func TestSuite(t *testing.T) {
 }
 
 func BenchmarkHTTP3Proto16(b *testing.B) {
-	newSuite().Benchmark(b, "application/proto", 16)
+	newSuite().Benchmark(b, "application/x-protobuf", 16)
 }
 
 func BenchmarkHTTP3JSON16(b *testing.B) {

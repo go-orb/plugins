@@ -339,6 +339,7 @@ func TestServerRequestSpecificContentType(t *testing.T) {
 	testCt("application/proto")
 	testCt("application/protobuf")
 	testCt("application/x-proto")
+	testCt("application/x-protobuf")
 	testCt("application/json")
 	testCt("application/x-www-form-urlencoded")
 }
@@ -688,5 +689,6 @@ func makeRequests(t *testing.T, addr string, reqType thttp.ReqType) {
 	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/proto", reqType), fmt.Sprintf("%s: POST Proto", addr))
 	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/x-proto", reqType), fmt.Sprintf("%s: POST Proto", addr))
 	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/protobuf", reqType), fmt.Sprintf("%s: POST Proto", addr))
+	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/x-protobuf", reqType), fmt.Sprintf("%s: POST Proto", addr))
 	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/x-protobuf", reqType), fmt.Sprintf("%s: POST Proto", addr))
 }

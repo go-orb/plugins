@@ -33,5 +33,5 @@ func TestSuite(t *testing.T) {
 }
 
 func BenchmarkGRPC16(b *testing.B) {
-	newSuite().Benchmark(b, "application/proto", 16)
+	newSuite().Benchmark(b, "application/x-protobuf", 16)
 }

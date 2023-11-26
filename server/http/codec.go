@@ -14,7 +14,7 @@ import (
 	"github.com/go-orb/plugins/server/http/utils/header"
 )
 
-// TODO: decode body now also does content type setting, maybe separate that out
+// TODO(davincible): decode body now also does content type setting, maybe separate that out
 
 // Decode body takes the request body and decodes it into the proto type.
 func (s *ServerHTTP) decodeBody(resp http.ResponseWriter, request *http.Request, msg any) (string, error) {
@@ -41,7 +41,7 @@ func (s *ServerHTTP) decodeBody(resp http.ResponseWriter, request *http.Request,
 		}
 
 		// Gzip decode if needed
-		eHeader := request.Header.Get(headers.ConentEncoding)
+		eHeader := request.Header.Get(headers.ContentEncoding)
 		if strings.Contains(eHeader, headers.GzipContentEncoding) {
 			body, err = gzip.NewReader(request.Body)
 			if err != nil {
@@ -88,11 +88,11 @@ func (s *ServerHTTP) encodeBody(w http.ResponseWriter, r *http.Request, v any) e
 
 	// Gzip compress response if needed.
 	aeHeader := r.Header.Get(headers.AcceptEncoding)
-	reHeader := r.Header.Get(headers.ConentEncoding)
+	reHeader := r.Header.Get(headers.ContentEncoding)
 	gzipEnabled := s.Config.Gzip || strings.Contains(reHeader, headers.GzipContentEncoding)
 
 	if gzipEnabled && strings.Contains(aeHeader, headers.GzipContentEncoding) {
-		w.Header().Set(headers.ConentEncoding, headers.GzipContentEncoding)
+		w.Header().Set(headers.ContentEncoding, headers.GzipContentEncoding)
 
 		nw = gzip.NewWriter(w)
 		defer nw.(io.Closer).Close() //nolint:errcheck

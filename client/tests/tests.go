@@ -63,9 +63,9 @@ var (
 			},
 		},
 		{
-			Name:        "application/proto",
+			Name:        "proto",
 			Endpoint:    "echo.Streams",
-			ContentType: "application/proto",
+			ContentType: "application/x-protobuf",
 			Request: &proto.CallRequest{
 				Name: "Alex",
 			},
@@ -74,7 +74,7 @@ var (
 			},
 		},
 		{
-			Name:        "application/json",
+			Name:        "json",
 			Endpoint:    "echo.Streams",
 			ContentType: "application/json",
 			Request: &proto.CallRequest{

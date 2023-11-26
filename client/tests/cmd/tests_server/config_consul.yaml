@@ -10,8 +10,9 @@ org:
           plugin: consul
       service:
         logger:
-          plugin: slog
+          plugin: lumberjack
           format: json
-          level: INFO # DEBUG-1
+          level: DEBUG-1 # INFO
+          file: /tmp/test_server.log
         registry:
           plugin: consul

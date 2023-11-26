@@ -35,6 +35,7 @@ func (j *JSONPb) NewDecoder(r io.Reader) codecs.Decoder {
 func (j *JSONPb) ContentTypes() []string {
 	return []string{
 		"application/json",
+		"application/json; charset=utf-8",
 	}
 }
 

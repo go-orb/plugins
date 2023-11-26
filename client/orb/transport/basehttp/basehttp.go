@@ -74,7 +74,7 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 	}
 
 	t.logger.Trace(
-		"Making a request", "url", fmt.Sprintf("%s://%s/%s/Call", node.Transport, node.Address, req.Endpoint()), "content-type", opts.ContentType,
+		"Making a request", "url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()), "content-type", opts.ContentType,
 	)
 
 	// Set the connection timeout
@@ -145,7 +145,7 @@ func (t *Transport) call2(node *registry.Node, opts *client.CallOptions, req *cl
 	}
 
 	t.logger.Trace(
-		"Got a result", "url", fmt.Sprintf("%s://%s/%s/Call", node.Transport, node.Address, req.Endpoint()), "content-type", res.ContentType,
+		"Got a result", "url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()), "content-type", res.ContentType,
 	)
 
 	// Copy headers to the RawResponse if wanted.

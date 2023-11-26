@@ -3,10 +3,10 @@ package headers
 
 // HTTP Headers.
 const (
-	ContentType    = "Content-Type"
-	ConentEncoding = "Content-Encoding"
-	AcceptEncoding = "Accept-Encoding"
-	Accept         = "Accept"
+	ContentType     = "Content-Type"
+	ContentEncoding = "Content-Encoding"
+	AcceptEncoding  = "Accept-Encoding"
+	Accept          = "Accept"
 )
 
 // Content Type values.

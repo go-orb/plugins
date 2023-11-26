@@ -70,7 +70,7 @@ const (
 
 	// DefaultConfigSection is the section key used in config files used to
 	// configure the server options.
-	DefaultConfigSection = "http"
+	DefaultConfigSection = Plugin
 
 	// DefaultMaxHeaderBytes is the maximum size to parse from a client's
 	// HTTP request headers.

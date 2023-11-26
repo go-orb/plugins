@@ -103,7 +103,7 @@ func ProvideServerHTTP(
 		return nil, fmt.Errorf("create codec map: %w", err)
 	}
 
-	logger = logger.With(slog.String("component", server.ComponentType), slog.String("plugin", Plugin), slog.String("entrypoint", cfg.Name))
+	logger = logger.With(slog.String("entrypoint", cfg.Name))
 
 	entrypoint := ServerHTTP{
 		Config:   cfg,
@@ -138,7 +138,7 @@ func (s *ServerHTTP) Start() error {
 
 	var err error
 
-	s.Logger.Debug("Starting all HTTP entrypoints")
+	s.Logger.Debug("Starting")
 
 	for _, middleware := range s.Config.Middleware {
 		s.router.Use(middleware)
@@ -205,7 +205,7 @@ func (s *ServerHTTP) Stop(ctx context.Context) error {
 	errChan := make(chan error)
 	defer close(errChan)
 
-	s.Logger.Debug("Stopping all HTTP entrypoints")
+	s.Logger.Debug("Stopping")
 
 	if err := s.deregister(); err != nil {
 		return err
