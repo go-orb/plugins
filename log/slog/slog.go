@@ -22,8 +22,8 @@ const Name = "slog"
 const (
 	// DefaultFormat is the default format for slog.
 	DefaultFormat = "text"
-	// DefaultTarget is the default target for slog.
-	DefaultTarget = "os.Stderr"
+	// DefaultFile is the default target for slog.
+	DefaultFile = "os.Stderr"
 )
 
 // The register.
@@ -35,8 +35,9 @@ func init() {
 type Config struct {
 	log.Config
 
+	// Format is the log format, either json or text.
 	Format string `json:"format" yaml:"format"`
-	Target string `json:"target" yaml:"target"`
+	File   string `json:"file" yaml:"file"`
 }
 
 // NewConfig creates a new config.
@@ -44,7 +45,7 @@ func NewConfig(section []string, configs types.ConfigData, opts ...log.Option) (
 	cfg := Config{
 		Config: log.NewConfig(),
 		Format: DefaultFormat,
-		Target: DefaultTarget,
+		File:   DefaultFile,
 	}
 
 	for _, o := range opts {
@@ -68,13 +69,13 @@ func WithFormat(n string) log.Option {
 	}
 }
 
-// WithTarget sets the target for the logger,
+// WithFile sets the target for the logger,
 // available options: os.Stdout, os.Stderr, /somedir/somefile.
-func WithTarget(n string) log.Option {
+func WithFile(n string) log.Option {
 	return func(c log.ConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.Target = n
+			cfg.File = n
 		}
 	}
 }
@@ -93,15 +94,15 @@ type Provider struct {
 func (p *Provider) Start() error {
 	var w io.Writer
 
-	switch p.config.Target {
+	switch p.config.File {
 	case "os.Stdout":
 		w = os.Stdout
 	case "os.Stderr":
 		w = os.Stderr
 	default:
-		f, err := os.OpenFile(p.config.Target, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+		f, err := os.OpenFile(p.config.File, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 		if err != nil {
-			return fmt.Errorf("while opening '%s': %w", p.config.Target, err)
+			return fmt.Errorf("while opening '%s': %w", p.config.File, err)
 		}
 
 		p.file = f
@@ -136,7 +137,7 @@ func (p *Provider) Handler() (slog.Handler, error) {
 
 // Key returns an identifier for this handler provider with its config.
 func (p *Provider) Key() string {
-	return fmt.Sprintf("__%s__-%s-%s", Name, p.config.Format, p.config.Target)
+	return fmt.Sprintf("__%s__-%s-%s", Name, p.config.Format, p.config.File)
 }
 
 // Factory is the factory for a slog provider.

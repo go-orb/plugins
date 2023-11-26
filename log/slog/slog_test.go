@@ -46,7 +46,7 @@ func TestComponentLogger(t *testing.T) {
 }
 
 func TestCreateCustomLogger(t *testing.T) {
-	l, err := log.New(log.WithPlugin("slog"), WithFormat("json"), WithTarget("os.Stdout"))
+	l, err := log.New(log.WithPlugin("slog"), WithFormat("json"), WithFile("os.Stdout"))
 	require.NoError(t, err)
 
 	l.Info("json stdout test")
