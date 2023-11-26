@@ -13,6 +13,7 @@ import (
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	_ "github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/slog"
+	_ "github.com/go-orb/plugins/registry/consul"
 	_ "github.com/go-orb/plugins/registry/mdns"
 	_ "github.com/go-orb/plugins/server/http/router/chi"
 )
@@ -21,7 +22,7 @@ func newSuite() *tests.TestSuite {
 	_, filename, _, _ := runtime.Caller(0)
 	pluginsRoot := filepath.Join(filepath.Dir(filename), "../../../../")
 
-	return tests.NewSuite(pluginsRoot, []string{})
+	return tests.NewSuite(pluginsRoot, []string{"https"})
 }
 
 func TestSuite(t *testing.T) {

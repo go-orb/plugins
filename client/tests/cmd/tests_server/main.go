@@ -16,6 +16,7 @@ import (
 	_ "github.com/go-orb/plugins/config/source/cli/urfave"
 	_ "github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/slog"
+	_ "github.com/go-orb/plugins/registry/consul"
 	_ "github.com/go-orb/plugins/registry/mdns"
 	_ "github.com/go-orb/plugins/server/http/router/chi"
 )

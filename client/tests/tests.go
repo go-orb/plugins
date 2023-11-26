@@ -22,6 +22,7 @@ import (
 	"github.com/go-orb/plugins/client/tests/proto"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/exp/slices"
+	"golang.org/x/exp/slog"
 	"google.golang.org/grpc"
 )
 
@@ -98,9 +99,6 @@ type TestSuite struct {
 
 	// Requests is the requests to make.
 	Requests []TestRequest
-
-	// Debug indicates if we should print the servers output?
-	Debug bool
 
 	logger   log.Logger
 	registry registry.Type
@@ -198,10 +196,10 @@ func (s *TestSuite) SetupSuite() {
 	// Start a server
 	pro := []PackageRunnerOption{
 		WithOverwrite(),
-		WithRunEnv("GOMAXPROCS=1"),
+		WithRunEnv("GOMAXPROCS=" + os.Getenv("GOMAXPROCS")),
 		WithArgs("--config", filepath.Join(s.PluginsRoot, "client/tests/cmd/tests_server/config.yaml")),
 	}
-	if s.Debug {
+	if logger.Level() <= slog.LevelDebug {
 		pro = append(pro, WithStdOut(os.Stdout), WithStdErr(os.Stderr))
 	}
 
@@ -328,7 +326,6 @@ func (s *TestSuite) runRequestBenchmark(b *testing.B, req TestRequest, pN int) {
 
 	var wg sync.WaitGroup
 
-	b.ResetTimer()
 	b.StartTimer()
 
 	// Start requests
@@ -350,7 +347,13 @@ func (s *TestSuite) runRequestBenchmark(b *testing.B, req TestRequest, pN int) {
 							req.PreferredTransports,
 							s.client.Config().AnyTransport,
 						)
-						s.Require().NoError(err)
+						if err != nil {
+							s.logger.Error("While requesting", "err", err)
+
+							wg.Done()
+
+							return
+						}
 
 						myReq.URL = fmt.Sprintf("%s://%s", node.Transport, node.Address)
 					}
@@ -373,14 +376,16 @@ func (s *TestSuite) runRequestBenchmark(b *testing.B, req TestRequest, pN int) {
 
 // Benchmark runs b.N times, each with pN requests in parallel.
 func (s *TestSuite) Benchmark(b *testing.B, contentType string, pN int) {
-	s.SetT(&testing.T{})
-	s.SetupSuite()
+	b.StopTimer()
 
 	req := s.Requests[0]
 	req.Service = string(ServiceName)
-	req.URL = "t"
+	// req.URL = "t" // Set to "t" to bypass the registry in benchmarks.
 	req.PreferredTransports = s.Transports
 	req.ContentType = contentType
+
+	s.SetT(&testing.T{})
+	s.SetupSuite()
 
 	s.runRequestBenchmark(b, req, pN)
 

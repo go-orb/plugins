@@ -34,7 +34,10 @@ func provideConfigData(
 
 	cfgSections := types.SplitServiceName(serviceName)
 
-	return config.Read([]*url.URL{u}, cfgSections)
+	data, err := config.Read([]*url.URL{u}, cfgSections)
+	config.Dump(data)
+
+	return data, err
 }
 
 // provideServerOpts provides options for the go-orb server.

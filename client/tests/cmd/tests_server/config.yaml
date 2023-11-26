@@ -1,13 +1,1 @@
-org:
-  orb:
-    svc:
-      client:
-        logger:
-          plugin: slog
-          format: json
-          level: INFO # DEBUG-1
-      service:
-        logger:
-          plugin: slog
-          format: json
-          level: INFO # DEBUG-1
+config_consul.yaml

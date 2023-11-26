@@ -28,12 +28,14 @@ import (
 	_ "github.com/go-orb/plugins/config/source/cli/urfave"
 	_ "github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/slog"
+	_ "github.com/go-orb/plugins/registry/consul"
 	_ "github.com/go-orb/plugins/registry/mdns"
 	_ "github.com/go-orb/plugins/server/http/router/chi"
 )
 
 // Injectors from wire.go:
 
+// newComponents combines everything above and returns a slice of components.
 func newComponents(serviceName types.ServiceName, serviceVersion types.ServiceVersion) ([]types.Component, error) {
 	configData, err := provideConfigData(serviceName, serviceVersion)
 	if err != nil {
@@ -71,6 +73,7 @@ var (
 
 // wire.go:
 
+// provideConfigData reads the config from cli and returns it.
 func provideConfigData(
 	serviceName types.ServiceName,
 	serviceVersion types.ServiceVersion,
@@ -82,9 +85,14 @@ func provideConfigData(
 
 	cfgSections := types.SplitServiceName(serviceName)
 
-	return config.Read([]*url.URL{u}, cfgSections)
+	data, err := config.Read([]*url.URL{u}, cfgSections)
+	config.Dump(data)
+
+	return data, err
 }
 
+// provideServerOpts provides options for the go-orb server.
+// TODO(jochumdev): We should simplify server opts.
 func provideServerOpts() ([]server.Option, error) {
 
 	ports, err := freeport.Take(5)
@@ -97,6 +105,7 @@ func provideServerOpts() ([]server.Option, error) {
 	return []server.Option{grpc.WithEntrypoint(grpc.WithName("grpc"), grpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[0])), grpc.WithInsecure(true), grpc.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), http.WithEntrypoint(http.WithName("http"), http.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[1])), http.WithInsecure(), http.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), http.WithEntrypoint(http.WithName("h2c"), http.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[2])), http.WithInsecure(), http.WithAllowH2C(), http.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), http.WithEntrypoint(http.WithName("http3"), http.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[3])), http.WithHTTP3(), http.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), http.WithEntrypoint(http.WithName("https"), http.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[4])), http.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)))}, nil
 }
 
+// provideComponents creates a slice of components out of the arguments.
 func provideComponents(
 	serviceName types.ServiceName,
 	serviceVersion types.ServiceVersion,

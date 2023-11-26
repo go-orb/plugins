@@ -1,0 +1,17 @@
+org:
+  orb:
+    svc:
+      client:
+        logger:
+          plugin: slog
+          format: json
+          level: INFO # DEBUG-1
+        registry:
+          plugin: consul
+      service:
+        logger:
+          plugin: slog
+          format: json
+          level: INFO # DEBUG-1
+        registry:
+          plugin: consul
