@@ -1,8 +1,6 @@
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/go-orb/go-orb v0.0.0-20231126114533-bd59affa0e69 h1:A79/jlBOaYx90fn2PoYCL57RrOtopuyE57xQghS4sgQ=
-github.com/go-orb/go-orb v0.0.0-20231126114533-bd59affa0e69/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
 github.com/go-orb/go-orb v0.0.0-20231126172125-9f19ded9b372 h1:kDrM6oXRed9rJKbBiE2/7wNzuqjTkuOuoUoynduWOIY=
 github.com/go-orb/go-orb v0.0.0-20231126172125-9f19ded9b372/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
