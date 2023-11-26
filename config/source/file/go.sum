@@ -1,6 +1,8 @@
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/go-orb/go-orb v0.0.0-20231126065910-b6f900e0435a h1:si5fDUwgudzix7SqFDxufGu6vv9P0gNt+tsjq6HFED4=
 github.com/go-orb/go-orb v0.0.0-20231126065910-b6f900e0435a/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
+github.com/go-orb/go-orb v0.0.0-20231126093803-b366a8714a50 h1:c9CnggXmHxGVYp5k5bf1kxTYlpjsrg2qJg7pzpY6bec=
+github.com/go-orb/go-orb v0.0.0-20231126093803-b366a8714a50/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
 github.com/google/uuid v1.4.0 h1:MtMxsa51/r9yyhkyLsVeVt0B+BGQZzpQiTQ4eHZ8bc4=
 github.com/google/uuid v1.4.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=

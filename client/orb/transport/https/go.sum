@@ -34,6 +34,8 @@ github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V
 github.com/go-logr/logr v1.3.0 h1:2y3SDp0ZXuc6/cjLSZ+Q3ir+QB9T/iG5yYRXqsagWSY=
 github.com/go-orb/go-orb v0.0.0-20231126065910-b6f900e0435a h1:si5fDUwgudzix7SqFDxufGu6vv9P0gNt+tsjq6HFED4=
 github.com/go-orb/go-orb v0.0.0-20231126065910-b6f900e0435a/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
+github.com/go-orb/go-orb v0.0.0-20231126093803-b366a8714a50 h1:c9CnggXmHxGVYp5k5bf1kxTYlpjsrg2qJg7pzpY6bec=
+github.com/go-orb/go-orb v0.0.0-20231126093803-b366a8714a50/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
 github.com/go-orb/plugins/registry/consul v0.0.0-20231124165538-436cc523f53a h1:wnVjoWkekauwWxF8GdF6weGirms5foQ3b4SWJ3rU0t8=
 github.com/go-orb/plugins/registry/consul v0.0.0-20231124165538-436cc523f53a/go.mod h1:snmZbQzPkjnxc+yyRphT6WyEaas70ec3E4ysMsQn7Hk=
 github.com/go-orb/plugins/registry/regutil v0.0.0-20231124165538-436cc523f53a h1:d1/S5fVVcajWWLHlrHjL5eFLbkKyPe1fBfdCNEdIrJI=

@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/registry/nats
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231126065910-b6f900e0435a
+	github.com/go-orb/go-orb v0.0.0-20231126093803-b366a8714a50
 	github.com/go-orb/plugins/log/slog v0.0.0-20230726151712-9ff06382f83b
 	github.com/go-orb/plugins/registry/tests v0.0.0-20230713091520-67e7b5a34489
 	github.com/google/uuid v1.4.0

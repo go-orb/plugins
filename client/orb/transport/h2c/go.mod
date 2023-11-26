@@ -3,9 +3,9 @@ module github.com/go-orb/plugins/client/orb/transport/h2c
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231126065910-b6f900e0435a
-	github.com/go-orb/plugins/client/orb v0.0.0-20231124165538-436cc523f53a
-	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20231124165538-436cc523f53a
+	github.com/go-orb/go-orb v0.0.0-20231126093803-b366a8714a50
+	github.com/go-orb/plugins/client/orb v0.0.0-20231126093807-8047bcf7d3d6
+	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20231126093807-8047bcf7d3d6
 	github.com/go-orb/plugins/client/tests v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231124165538-436cc523f53a
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20231124165538-436cc523f53a

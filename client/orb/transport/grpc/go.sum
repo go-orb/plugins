@@ -34,6 +34,8 @@ github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V
 github.com/go-logr/logr v1.3.0 h1:2y3SDp0ZXuc6/cjLSZ+Q3ir+QB9T/iG5yYRXqsagWSY=
 github.com/go-orb/go-orb v0.0.0-20231126065910-b6f900e0435a h1:si5fDUwgudzix7SqFDxufGu6vv9P0gNt+tsjq6HFED4=
 github.com/go-orb/go-orb v0.0.0-20231126065910-b6f900e0435a/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
+github.com/go-orb/go-orb v0.0.0-20231126093803-b366a8714a50 h1:c9CnggXmHxGVYp5k5bf1kxTYlpjsrg2qJg7pzpY6bec=
+github.com/go-orb/go-orb v0.0.0-20231126093803-b366a8714a50/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
 github.com/go-orb/plugins/registry/tests v0.0.0-20230713091520-67e7b5a34489 h1:09PWHl0w0G2MphOzBOFlf9bNOiCgCqgDzqUOMWqMEXk=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 h1:tfuBGBXKqDEevZMzYi5KSi8KkcZtzBcTgAUUtapy0OI=

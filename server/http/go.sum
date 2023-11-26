@@ -7,6 +7,8 @@ github.com/go-chi/chi v1.5.5/go.mod h1:C9JqLr3tIYjDOZpzn+BCuxY8z8vmca43EeMgyZt7i
 github.com/go-logr/logr v1.3.0 h1:2y3SDp0ZXuc6/cjLSZ+Q3ir+QB9T/iG5yYRXqsagWSY=
 github.com/go-orb/go-orb v0.0.0-20231126065910-b6f900e0435a h1:si5fDUwgudzix7SqFDxufGu6vv9P0gNt+tsjq6HFED4=
 github.com/go-orb/go-orb v0.0.0-20231126065910-b6f900e0435a/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
+github.com/go-orb/go-orb v0.0.0-20231126093803-b366a8714a50 h1:c9CnggXmHxGVYp5k5bf1kxTYlpjsrg2qJg7pzpY6bec=
+github.com/go-orb/go-orb v0.0.0-20231126093803-b366a8714a50/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
 github.com/go-orb/plugins/registry/tests v0.0.0-20230713091520-67e7b5a34489 h1:09PWHl0w0G2MphOzBOFlf9bNOiCgCqgDzqUOMWqMEXk=
 github.com/go-playground/assert/v2 v2.0.1 h1:MsBgLAaY856+nPRTKrp3/OZK38U/wa0CcBYNjji3q3A=
 github.com/go-playground/assert/v2 v2.0.1/go.mod h1:VDjEfimB/XKnb+ZQfWdccd7VUvScMdVu0Titje2rxJ4=
