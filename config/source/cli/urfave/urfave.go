@@ -8,6 +8,7 @@ import (
 	oCli "github.com/go-orb/go-orb/config/source/cli"
 	"github.com/hashicorp/go-multierror"
 	"github.com/urfave/cli/v2"
+	"golang.org/x/exp/slices"
 )
 
 func init() {
@@ -134,15 +135,21 @@ func (c *flagCLI) parse(args []string) error {
 	}
 
 	for n, tf := range c.intFlags {
-		c.flags[n].Value = tf.Get(ctx)
+		if c.flags[n].Default != tf.Get(ctx) {
+			c.flags[n].Value = tf.Get(ctx)
+		}
 	}
 
 	for n, tf := range c.stringFlags {
-		c.flags[n].Value = tf.Get(ctx)
+		if c.flags[n].Default != tf.Get(ctx) {
+			c.flags[n].Value = tf.Get(ctx)
+		}
 	}
 
 	for n, tf := range c.stringSliceFlags {
-		c.flags[n].Value = tf.Get(ctx)
+		if !slices.Equal(c.flags[n].Default.([]string), tf.Get(ctx)) {
+			c.flags[n].Value = tf.Get(ctx)
+		}
 	}
 
 	return nil
