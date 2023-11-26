@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/server/grpc
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231119181816-8fb44c1953fd
+	github.com/go-orb/go-orb v0.0.0-20231126065910-b6f900e0435a
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/config/source/file v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/log/slog v0.0.0-20230726151712-9ff06382f83b
@@ -20,7 +20,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/miekg/dns v1.1.55 // indirect
+	github.com/miekg/dns v1.1.57 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/sanity-io/litter v1.5.5 // indirect
 	golang.org/x/mod v0.14.0 // indirect

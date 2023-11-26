@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/codecs/jsonpb
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231119181816-8fb44c1953fd
+	github.com/go-orb/go-orb v0.0.0-20231126065910-b6f900e0435a
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20230713091520-67e7b5a34489
 	github.com/google/go-cmp v0.6.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.1
@@ -16,7 +16,6 @@ require (
 	golang.org/x/net v0.18.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/genproto v0.0.0-20231106174013-bbf56f31fb17 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20231120223509-83a465c0220f // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231120223509-83a465c0220f // indirect
 	google.golang.org/grpc v1.59.0 // indirect

@@ -236,7 +236,7 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 		Check:   check,
 	}
 
-	// Add the scheme to metadata if required
+	// Add the transport scheme to metadata if required
 	if _, ok := asr.Meta[metaTransportKey]; !ok {
 		asr.Meta[metaTransportKey] = node.Transport
 	}
@@ -247,6 +247,8 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 			Native: true,
 		}
 	}
+
+	c.logger.Trace("Registering a service", "name", asr.Name, "address", asr.Address, "port", asr.Port, "transport", node.Transport)
 
 	if err := c.Client().Agent().ServiceRegister(asr); err != nil {
 		return err

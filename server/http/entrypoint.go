@@ -207,6 +207,10 @@ func (s *ServerHTTP) Stop(ctx context.Context) error {
 
 	s.Logger.Debug("Stopping all HTTP entrypoints")
 
+	if err := s.deregister(); err != nil {
+		return err
+	}
+
 	c := 1
 	if s.Config.HTTP3 {
 		c++
@@ -357,7 +361,7 @@ func (s *ServerHTTP) getEndpoints() ([]*registry.Endpoint, error) {
 	return result, nil
 }
 
-func (s *ServerHTTP) register() error {
+func (s *ServerHTTP) registryService() (*registry.Service, error) {
 	node := &registry.Node{
 		ID:        s.EntrypointID(),
 		Address:   s.Address(),
@@ -367,15 +371,31 @@ func (s *ServerHTTP) register() error {
 
 	eps, err := s.getEndpoints()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	rService := &registry.Service{
+	return &registry.Service{
 		Name:      s.Registry.ServiceName(),
 		Version:   s.Registry.ServiceVersion(),
 		Nodes:     []*registry.Node{node},
 		Endpoints: eps,
+	}, nil
+}
+
+func (s *ServerHTTP) register() error {
+	rService, err := s.registryService()
+	if err != nil {
+		return err
 	}
 
 	return s.Registry.Register(rService)
+}
+
+func (s *ServerHTTP) deregister() error {
+	rService, err := s.registryService()
+	if err != nil {
+		return err
+	}
+
+	return s.Registry.Deregister(rService)
 }

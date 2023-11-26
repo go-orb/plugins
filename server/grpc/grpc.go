@@ -156,6 +156,10 @@ func (s *ServerGRPC) Stop(ctx context.Context) error {
 
 	s.logger.Info("gRPC server shutting down: " + s.lis.Addr().String())
 
+	if err := s.deregister(); err != nil {
+		return err
+	}
+
 	done := make(chan any)
 
 	go func() {
@@ -188,7 +192,8 @@ func (s *ServerGRPC) Config() Config {
 	return s.config
 }
 
-// Address returns the address the entypoint listens on.
+// Address returns the address the entypoint listens on,
+// for example: 127.0.0.1:8000 .
 func (s *ServerGRPC) Address() string {
 	if s.lis != nil {
 		return s.lis.Addr().String()
@@ -280,7 +285,7 @@ func (s *ServerGRPC) getEndpoints() []*registry.Endpoint {
 	return result
 }
 
-func (s *ServerGRPC) register() error {
+func (s *ServerGRPC) registryService() *registry.Service {
 	node := &registry.Node{
 		ID:        s.EntrypointID(),
 		Address:   s.Address(),
@@ -290,12 +295,18 @@ func (s *ServerGRPC) register() error {
 
 	eps := s.getEndpoints()
 
-	rService := &registry.Service{
+	return &registry.Service{
 		Name:      s.registry.ServiceName(),
 		Version:   s.registry.ServiceVersion(),
 		Nodes:     []*registry.Node{node},
 		Endpoints: eps,
 	}
+}
 
-	return s.registry.Register(rService)
+func (s *ServerGRPC) register() error {
+	return s.registry.Register(s.registryService())
+}
+
+func (s *ServerGRPC) deregister() error {
+	return s.registry.Deregister(s.registryService())
 }

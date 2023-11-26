@@ -75,11 +75,10 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 				gopts = append(gopts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 			}
 
-			gopts = append(gopts, grpc.WithReturnConnectionError(), grpc.WithConnectParams(grpc.ConnectParams{
-				MinConnectTimeout: opts.ConnectionTimeout,
-			}))
+			dialctx, cancel := context.WithTimeout(ctx, opts.ConnectionTimeout)
+			defer cancel()
 
-			return grpc.DialContext(ctx, addr, gopts...)
+			return grpc.DialContext(dialctx, addr, gopts...)
 		}
 
 		pool, err := pool.New(factory, opts.PoolSize, opts.PoolTTL)
@@ -98,7 +97,15 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(opts.RequestTimeout))
 	defer cancel()
 
+	t.logger.Trace(
+		"Making a request", "url", node.Transport+"://"+node.Address+req.Endpoint(), "content-type", opts.ContentType,
+	)
+
 	err = conn.Invoke(ctx, req.Endpoint(), req.Request(), result)
+	t.logger.Trace(
+		"Got a result", "url", node.Transport+"://"+node.Address+req.Endpoint(), "content-type", opts.ContentType,
+	)
+
 	if err != nil {
 		gErr, ok := status.FromError(err)
 		if !ok {

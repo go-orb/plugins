@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/codecs/yaml
 go 1.20
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231119181816-8fb44c1953fd
+	github.com/go-orb/go-orb v0.0.0-20231126065910-b6f900e0435a
 	gopkg.in/yaml.v3 v3.0.1
 )
 
