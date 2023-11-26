@@ -31,6 +31,16 @@ var (
 	ServiceName     = types.ServiceName("org.orb.svc.service")
 	DefaultRequests = []TestRequest{
 		{
+			Name:     "32byte",
+			Endpoint: "/echo.Streams/Call",
+			Request: &proto.CallRequest{
+				Name: "32byte",
+			},
+			Response: &proto.CallResponse{
+				Msg: "",
+			},
+		},
+		{
 			Name:     "default codec with URL",
 			Endpoint: "/echo.Streams/Call",
 			Request: &proto.CallRequest{
@@ -380,7 +390,7 @@ func (s *TestSuite) Benchmark(b *testing.B, contentType string, pN int) {
 
 	req := s.Requests[0]
 	req.Service = string(ServiceName)
-	// req.URL = "t" // Set to "t" to bypass the registry in benchmarks.
+	req.URL = "t" // Set to "t" to bypass the registry in benchmarks.
 	req.PreferredTransports = s.Transports
 	req.ContentType = contentType
 

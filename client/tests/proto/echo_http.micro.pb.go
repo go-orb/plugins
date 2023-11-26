@@ -2,7 +2,7 @@
 //
 // version:
 // - protoc-gen-go-micro-http v1.0.0
-// - protoc                   v3.21.7
+// - protoc                   v4.25.1
 //
 // Proto source: echo.proto
 

@@ -21,6 +21,13 @@ func (c *EchoHandler) Call(_ context.Context, in *proto.CallRequest) (*proto.Cal
 	switch in.GetName() {
 	case "error":
 		return nil, errors.New("you asked for an error, here you go")
+	case "32byte":
+		msg := make([]byte, 32)
+		if _, err := rand.Reader.Read(msg); err != nil {
+			return nil, err
+		}
+
+		return &proto.CallResponse{Msg: "", Payload: msg}, nil
 	case "big":
 		// Can be used to test large messages, e.g. to bench gzip compression
 		msg := make([]byte, 1024*1024*10)
