@@ -4,7 +4,7 @@ go 1.21.4
 
 require (
 	github.com/cloudwego/hertz v0.7.2
-	github.com/go-orb/go-orb v0.0.0-20231126231708-592c8d8d05c6
+	github.com/go-orb/go-orb v0.0.0-20231127002523-4909ba192408
 	github.com/google/uuid v1.4.0
 	github.com/hertz-contrib/http2 v0.1.8
 )

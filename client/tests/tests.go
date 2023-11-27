@@ -39,6 +39,15 @@ var (
 			},
 		},
 		{
+			Name:        "handwritten-json",
+			Endpoint:    "echo.Streams",
+			ContentType: "application/json",
+			Request:     `{"name": "Alex"}`,
+			Response: &proto.CallResponse{
+				Msg: "Hello Alex",
+			},
+		},
+		{
 			Name:     "default codec with URL",
 			Endpoint: "echo.Streams",
 			Request: &proto.CallRequest{
@@ -143,8 +152,8 @@ type TestRequest struct {
 	// Expect an error?
 	Error bool
 
-	Request  *proto.CallRequest
-	Response *proto.CallResponse
+	Request  any
+	Response any
 }
 
 // SetupSuite setups the test suite.
@@ -272,7 +281,7 @@ func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest) {
 		s.Require().Error(err)
 	} else {
 		s.Require().NoError(err)
-		s.Equal(req.Response.GetMsg(), rsp.GetMsg(), "unexpected response")
+		s.Equal(req.Response.(*proto.CallResponse).GetMsg(), rsp.GetMsg(), "unexpected response")
 	}
 }
 

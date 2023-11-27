@@ -20,7 +20,7 @@ type Transport interface {
 	// Call does the actual call to the service, it's important that any errors returned by Call are orberrors.
 	Call(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (*client.RawResponse, error)
 
-	// CallNoCodec is the same as call but using the transports codecs.
+	// CallNoCodec is the same as call but it's using the codec from the transport.
 	CallNoCodec(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) error
 }
 
@@ -29,7 +29,7 @@ type TransportType struct {
 	Transport
 }
 
-// NewTransportFunc is used by a transports to register itself with "Transports".
+// NewTransportFunc is used by a transports to register itself with the global "Transports" below.
 type NewTransportFunc = func(log.Logger) (TransportType, error)
 
 //nolint:gochecknoglobals

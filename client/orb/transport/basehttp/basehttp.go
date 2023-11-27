@@ -57,7 +57,7 @@ func (t *Transport) NeedsCodec() bool {
 // Call does the actual rpc call to the server.
 func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions,
 ) (*client.RawResponse, error) {
-	codec, err := codecs.GetMime(opts.ContentType)
+	codec, err := codecs.GetEncoder(opts.ContentType, req.Request())
 	if err != nil {
 		return nil, orberrors.ErrBadRequest.Wrap(err)
 	}

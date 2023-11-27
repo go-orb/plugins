@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/server/tests
 go 1.21.4
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231126231708-592c8d8d05c6
+	github.com/go-orb/go-orb v0.0.0-20231127002523-4909ba192408
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/config/source/file v0.0.0-20230713091520-67e7b5a34489
 	github.com/go-orb/plugins/log/slog v0.0.0-20230726151712-9ff06382f83b
