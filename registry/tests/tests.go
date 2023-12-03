@@ -6,8 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"log/slog"
-
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/stretchr/testify/require"
@@ -55,7 +53,7 @@ func CreateSuite(logger log.Logger, registries []registry.Registry, updateTime t
 func (r *TestSuite) SetupSuite() {
 	for _, service := range r.services {
 		if err := r.registries[0].Register(service); err != nil {
-			r.logger.Error("Failed to register service", err, slog.String("service", service.Name))
+			r.logger.Error("Failed to register service", "error", err, "service", service.Name)
 		}
 	}
 }
@@ -64,7 +62,7 @@ func (r *TestSuite) SetupSuite() {
 func (r *TestSuite) TearDownSuite() {
 	for _, service := range r.services {
 		if err := r.registries[0].Deregister(service); err != nil {
-			r.logger.Error("Failed to deregister service", err, slog.String("service", service.Name))
+			r.logger.Error("Failed to deregister service", "error", err, "service", service.Name)
 		}
 	}
 }
