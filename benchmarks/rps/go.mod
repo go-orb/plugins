@@ -3,17 +3,15 @@ module github.com/go-orb/plugins/benchmarks/rps
 go 1.21.4
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231203043104-786235203189
+	github.com/go-orb/go-orb v0.0.0-20231203061431-2cf52a164da0
 	github.com/go-orb/plugins/client/orb v0.0.0-20231127002628-07da06ff9de8
 	github.com/go-orb/plugins/client/orb/transport/grpc v0.0.0-20231127002628-07da06ff9de8
 	github.com/go-orb/plugins/client/orb/transport/h2c v0.0.0-20231127002628-07da06ff9de8
-	github.com/go-orb/plugins/client/orb/transport/hertzh2c v0.0.0-00010101000000-000000000000
-	github.com/go-orb/plugins/client/orb/transport/hertzhttp v0.0.0-00010101000000-000000000000
 	github.com/go-orb/plugins/client/orb/transport/http v0.0.0-20231127002628-07da06ff9de8
 	github.com/go-orb/plugins/client/orb/transport/http3 v0.0.0-20231127002628-07da06ff9de8
 	github.com/go-orb/plugins/client/orb/transport/https v0.0.0-20231127002628-07da06ff9de8
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231127002628-07da06ff9de8
-	github.com/go-orb/plugins/codecs/proto v0.0.0
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20231203062758-5020673db140
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231127002628-07da06ff9de8
 	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231127002628-07da06ff9de8
 	github.com/go-orb/plugins/config/source/file v0.0.0-20231127002628-07da06ff9de8
