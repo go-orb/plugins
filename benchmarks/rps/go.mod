@@ -100,15 +100,3 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/go-orb/plugins/codecs/proto => ../../codecs/proto
-
-replace github.com/go-orb/plugins/server/hertz => ../../server/hertz
-
-replace github.com/go-orb/plugins/client/orb/transport/http => ../../client/orb/transport/http
-
-replace github.com/go-orb/plugins/client/orb/transport/basehertz => ../../client/orb/transport/basehertz
-
-replace github.com/go-orb/plugins/client/orb/transport/hertzhttp => ../../client/orb/transport/hertzhttp
-
-replace github.com/go-orb/plugins/client/orb/transport/hertzh2c => ../../client/orb/transport/hertzh2c

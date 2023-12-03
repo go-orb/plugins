@@ -4,17 +4,17 @@ go 1.21.4
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20231203061431-2cf52a164da0
-	github.com/go-orb/plugins/client/orb v0.0.0-20231127002628-07da06ff9de8
-	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20231127002628-07da06ff9de8
+	github.com/go-orb/plugins/client/orb v0.0.0-20231203062758-5020673db140
+	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20231203062758-5020673db140
 	github.com/go-orb/plugins/client/tests v0.0.0-20230713091520-67e7b5a34489
-	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231127002628-07da06ff9de8
+	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231203062758-5020673db140
 	github.com/go-orb/plugins/codecs/proto v0.0.0
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231127002628-07da06ff9de8
-	github.com/go-orb/plugins/config/source/file v0.0.0-20231127002628-07da06ff9de8
-	github.com/go-orb/plugins/log/slog v0.0.0-20231127002628-07da06ff9de8
-	github.com/go-orb/plugins/registry/consul v0.0.0-20231127002628-07da06ff9de8
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20231127002628-07da06ff9de8
-	github.com/go-orb/plugins/server/http v0.0.0-20231127002628-07da06ff9de8
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231203062758-5020673db140
+	github.com/go-orb/plugins/config/source/file v0.0.0-20231203062758-5020673db140
+	github.com/go-orb/plugins/log/slog v0.0.0-20231203062758-5020673db140
+	github.com/go-orb/plugins/registry/consul v0.0.0-20231203062758-5020673db140
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20231203062758-5020673db140
+	github.com/go-orb/plugins/server/http v0.0.0-20231203062758-5020673db140
 	github.com/quic-go/quic-go v0.40.0
 	github.com/stretchr/testify v1.8.4
 )
@@ -25,7 +25,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/go-chi/chi v1.5.5 // indirect
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20231127002628-07da06ff9de8 // indirect
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20231203062758-5020673db140 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/pprof v0.0.0-20231127191134-f3a68a39ae15 // indirect
