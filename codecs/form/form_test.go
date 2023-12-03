@@ -173,8 +173,8 @@ func TestOptional(t *testing.T) {
 }
 
 func getCodec(t *testing.T) *Form {
-	codec, err := codecs.Plugins.Get(Name)
-	require.NoError(t, err)
+	codec, ok := codecs.Plugins.Get(Name)
+	require.True(t, ok)
 
 	form, ok := codec.(*Form)
 	assert.True(t, ok)

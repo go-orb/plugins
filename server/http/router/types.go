@@ -57,8 +57,8 @@ func (m Middlewares) UnmarshalYAML(data *yaml.Node) error {
 
 func (m Middlewares) set(middlewares []string) error {
 	for _, name := range middlewares {
-		middleware, err := Middleware.Get(name)
-		if err != nil {
+		middleware, ok := Middleware.Get(name)
+		if !ok {
 			return fmt.Errorf("middleware %s not found, did you register it?", name)
 		}
 

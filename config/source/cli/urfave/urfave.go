@@ -12,12 +12,7 @@ import (
 )
 
 func init() {
-	if err := oCli.Plugins.Add(
-		"urfave",
-		Parse,
-	); err != nil {
-		panic(err)
-	}
+	oCli.Plugins.Add("urfave", Parse)
 }
 
 type flagCLI struct {

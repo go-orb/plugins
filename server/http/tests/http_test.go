@@ -59,7 +59,7 @@ Else
 */
 
 func init() {
-	log.DefaultLevel = log.LevelDebug
+	log.DefaultLevel = log.LevelDebug.String()
 }
 
 func TestServerSimple(t *testing.T) {
@@ -637,9 +637,9 @@ func setupServer(t testing.TB, nolog bool, opts ...mhttp.Option) (*mhttp.ServerH
 	name := types.ServiceName("test-server")
 	lopts := []log.Option{}
 	if nolog {
-		lopts = append(lopts, log.WithLevel(log.LevelError))
+		lopts = append(lopts, log.WithLevel(log.LevelError.String()))
 	} else {
-		lopts = append(lopts, log.WithLevel(log.LevelDebug))
+		lopts = append(lopts, log.WithLevel(log.LevelDebug.String()))
 	}
 
 	cancel := func() {}

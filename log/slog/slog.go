@@ -12,6 +12,7 @@ import (
 	"log/slog"
 
 	"github.com/go-orb/go-orb/config"
+	"github.com/go-orb/go-orb/config/source/cli"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/types"
 )
@@ -29,6 +30,17 @@ const (
 // The register.
 func init() {
 	log.Register(Name, Factory)
+
+	err := cli.Flags.Add(cli.NewFlag(
+		"log_level",
+		log.DefaultLevel,
+		cli.ConfigPathSlice([]string{log.DefaultConfigSection, "level"}),
+		cli.Usage("Log level (FATAL, ERROR, NOTICE, WARN, INFO, DEBUG, TRACE)"),
+		cli.EnvVars("LOG_LEVEL"),
+	))
+	if err != nil && !errors.Is(err, cli.ErrFlagExists) {
+		panic(err)
+	}
 }
 
 // Config is the config struct for slog.

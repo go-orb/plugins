@@ -99,20 +99,20 @@ func TestMock(t *testing.T) {
 
 	// Check if all entrypoints started
 	require.NoError(t, srv.Start(), "failed to start server")
-	count, err := startCounter.Get(ep1)
-	require.NoError(t, err, "failed to fetch start count, ep has not been started")
+	count, ok := startCounter.Get(ep1)
+	require.True(t, ok, "failed to fetch start count, ep has not been started")
 	require.Equal(t, 1, count, "sever should have been started")
-	count, err = startCounter.Get(ep2)
-	require.NoError(t, err, "failed to fetch start count, ep has not been started")
+	count, ok = startCounter.Get(ep2)
+	require.True(t, ok, "failed to fetch start count, ep has not been started")
 	require.Equal(t, 1, count, "sever should have been started")
 
 	// Check if all entrypoints stopped
 	require.NoError(t, srv.Stop(context.Background()), "failed to stop server")
-	count, err = stopCounter.Get(ep1)
-	require.NoError(t, err, "failed to fetch stop count, ep has not been stopped")
+	count, ok = stopCounter.Get(ep1)
+	require.True(t, ok, "failed to fetch stop count, ep has not been stopped")
 	require.Equal(t, 1, count, "sever should have been stopped")
-	count, err = stopCounter.Get(ep2)
-	require.NoError(t, err, "startedfailed to fetch stop count, ep has not been stopped")
+	count, ok = stopCounter.Get(ep2)
+	require.True(t, ok, "startedfailed to fetch stop count, ep has not been stopped")
 	require.Equal(t, 1, count, "sever should have been stopped")
 
 	_, err = srv.GetEntrypoint(ep1)
@@ -286,7 +286,7 @@ func setupServer(opts ...server.Option) (server.Server, error) {
 
 	srv, err := server.ProvideServer(service, nil, logger, reg, opts...)
 	if err != nil {
-		return server.Server{}, fmt.Errorf("failed to setup server: %w", err)
+		return srv, fmt.Errorf("failed to setup server: %w", err)
 	}
 
 	return srv, nil
@@ -296,8 +296,8 @@ var _ (server.Entrypoint) = (*EntrypointMock)(nil)
 
 type MockOption func(*ConfigMock)
 
-var startCounter = container.NewSafeMap[int]()
-var stopCounter = container.NewSafeMap[int]()
+var startCounter = container.NewMap[string, int]()
+var stopCounter = container.NewMap[string, int]()
 
 type ConfigMock struct {
 	t          *testing.T
@@ -374,8 +374,8 @@ func (m *EntrypointMock) Start() error {
 		m.config.t.Logf("starting entrypoint %s", m.config.Name)
 	}
 
-	count, err := startCounter.Get(m.config.Name)
-	if err != nil {
+	count, ok := startCounter.Get(m.config.Name)
+	if !ok {
 		count = 0
 	}
 
@@ -397,8 +397,8 @@ func (m *EntrypointMock) Stop(_ context.Context) error {
 		m.config.t.Logf("stopping entrypoint %s", m.config.Name)
 	}
 
-	count, err := stopCounter.Get(m.config.Name)
-	if err != nil {
+	count, ok := stopCounter.Get(m.config.Name)
+	if !ok {
 		count = 0
 	}
 

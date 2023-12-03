@@ -12,9 +12,7 @@ import (
 var _ router.Router = (*Router)(nil)
 
 func init() {
-	if err := router.Plugins.Add("chi", newRouter); err != nil {
-		panic(err)
-	}
+	router.Plugins.Add("chi", newRouter)
 }
 
 // Router router implements the router interface.

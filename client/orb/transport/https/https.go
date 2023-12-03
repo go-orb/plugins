@@ -28,7 +28,7 @@ func NewTransportHTTPS(logger log.Logger) (orb.TransportType, error) {
 		"https",
 		func(ctx context.Context, opts *client.CallOptions) (*http.Client, error) {
 			return &http.Client{
-				Timeout: opts.RequestTimeout,
+				Timeout: opts.ConnectionTimeout,
 				Transport: &http.Transport{
 					MaxIdleConns:        opts.PoolHosts * opts.PoolSize,
 					MaxIdleConnsPerHost: opts.PoolSize,

@@ -8,13 +8,8 @@ import (
 )
 
 func init() {
-	if err := server.Plugins.Add(Name, pluginProvider); err != nil {
-		panic(err)
-	}
-
-	if err := server.NewDefaults.Add(Name, newDefaultConfig); err != nil {
-		panic(err)
-	}
+	server.Plugins.Add(Name, pluginProvider)
+	server.NewDefaults.Add(Name, newDefaultConfig)
 }
 
 func pluginProvider(

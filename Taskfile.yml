@@ -11,7 +11,7 @@ tasks:
   runall:
     desc: Run a command in all packages
     cmds:
-      - find . -mindepth 2 -name 'go.mod' -print0 | xargs -0 -n1 -P ${PROCS} -- /bin/bash -c 'pushd `dirname $1`; {{.CLI_ARGS}}; popd >/dev/null' '_'
+      - find . -mindepth 2 -name 'go.mod' -print0 | xargs -0 -n1 -P ${PROCS} -- /bin/bash -c 'echo $1; pushd `dirname $1`; {{.CLI_ARGS}}; popd >/dev/null' '_'
 
   run:
     desc: Run a command in a directory

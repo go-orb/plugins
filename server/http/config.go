@@ -263,14 +263,16 @@ func (c *Config) NewCodecMap() (codecs.Map, error) {
 
 	cm := make(codecs.Map, len(c.CodecWhitelist))
 
-	for name, codec := range codecs.Plugins.All() {
+	codecs.Plugins.Range(func(name string, codec codecs.Marshaler) bool {
 		if slicemap.In(c.CodecWhitelist, name) {
 			// One codec can support multiple mime types, we add all of them to the map.
 			for _, mime := range codec.ContentTypes() {
 				cm[mime] = codec
 			}
 		}
-	}
+
+		return true
+	})
 
 	if len(cm) == 0 {
 		return nil, ErrNoMatchingCodecs
@@ -286,8 +288,8 @@ func (c *Config) NewRouter() (router.Router, error) {
 		return nil, ErrNoRouter
 	}
 
-	newRouter, err := router.Plugins.Get(c.Router)
-	if err != nil {
+	newRouter, ok := router.Plugins.Get(c.Router)
+	if !ok {
 		return nil, ErrRouterNotFound
 	}
 

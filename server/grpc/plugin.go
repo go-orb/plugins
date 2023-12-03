@@ -15,22 +15,17 @@ import (
 const Plugin = "grpc"
 
 func init() {
-	if err := server.Plugins.Add(Plugin, pluginProvider); err != nil {
-		panic(err)
-	}
-
-	if err := server.NewDefaults.Add(Plugin, newDefaultConfig); err != nil {
-		panic(err)
-	}
+	server.Plugins.Add(Plugin, pluginProvider)
+	server.NewDefaults.Add(Plugin, newDefaultConfig)
 }
 
 //nolint:gochecknoglobals
 var (
 	// UnaryInterceptors is a plugin container for unary interceptors middleware.
-	UnaryInterceptors = container.NewMap[grpc.UnaryServerInterceptor]()
+	UnaryInterceptors = container.NewMap[string, grpc.UnaryServerInterceptor]()
 
 	// StreamInterceptors is a plugin container for streaming interceptors middleware.
-	StreamInterceptors = container.NewMap[grpc.StreamServerInterceptor]()
+	StreamInterceptors = container.NewMap[string, grpc.StreamServerInterceptor]()
 )
 
 // Errors.

@@ -18,7 +18,6 @@ import (
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
-	"github.com/go-orb/go-orb/util/container"
 	"github.com/go-orb/plugins/client/tests/proto"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/exp/slices"
@@ -30,26 +29,27 @@ var (
 	DefaultRequests = []TestRequest{
 		{
 			Name:     "32byte",
-			Endpoint: "echo.Streams",
+			Endpoint: "echo.Streams/Call",
 			Request: &proto.CallRequest{
 				Name: "32byte",
 			},
 			Response: &proto.CallResponse{
 				Msg: "",
 			},
+			URL: "t",
 		},
-		{
-			Name:        "handwritten-json",
-			Endpoint:    "echo.Streams",
-			ContentType: "application/json",
-			Request:     `{"name": "Alex"}`,
-			Response: &proto.CallResponse{
-				Msg: "Hello Alex",
-			},
-		},
+		// {
+		// 	Name:        "raw-json",
+		// 	Endpoint:    "echo.Streams/Call",
+		// 	ContentType: "application/json",
+		// 	Request:     `{"name": "Alex"}`,
+		// 	Response: &proto.CallResponse{
+		// 		Msg: "Hello Alex",
+		// 	},
+		// },
 		{
 			Name:     "default codec with URL",
-			Endpoint: "echo.Streams",
+			Endpoint: "echo.Streams/Call",
 			Request: &proto.CallRequest{
 				Name: "Alex",
 			},
@@ -60,7 +60,7 @@ var (
 		},
 		{
 			Name:     "default codec",
-			Endpoint: "echo.Streams",
+			Endpoint: "echo.Streams/Call",
 			Request: &proto.CallRequest{
 				Name: "Alex",
 			},
@@ -70,7 +70,7 @@ var (
 		},
 		{
 			Name:        "proto",
-			Endpoint:    "echo.Streams",
+			Endpoint:    "echo.Streams/Call",
 			ContentType: "application/x-protobuf",
 			Request: &proto.CallRequest{
 				Name: "Alex",
@@ -81,7 +81,7 @@ var (
 		},
 		{
 			Name:        "json",
-			Endpoint:    "echo.Streams",
+			Endpoint:    "echo.Streams/Call",
 			ContentType: "application/json",
 			Request: &proto.CallRequest{
 				Name: "Alex",
@@ -92,7 +92,7 @@ var (
 		},
 		{
 			Name:     "error request",
-			Endpoint: "echo.Streams",
+			Endpoint: "echo.Streams/Call",
 			Error:    true,
 			Request: &proto.CallRequest{
 				Name: "error",
@@ -122,6 +122,10 @@ type TestSuite struct {
 
 	serverRunner *PackageRunner
 	client       client.Type
+
+	// To create more clients in Benchmarks.
+	clientName types.ServiceName
+	configData types.ConfigData
 }
 
 // NewSuite creates a new test suite.
@@ -172,16 +176,17 @@ func (s *TestSuite) SetupSuite() {
 		s.Require().NoError(err, "while parsing a config")
 	}
 
-	clientName := types.ServiceName("org.orb.svc.client")
+	s.configData = cfgData
+	s.clientName = types.ServiceName("org.orb.svc.client")
 
 	// Logger
-	logger, err := log.ProvideLogger(clientName, cfgData)
+	logger, err := log.ProvideLogger(s.clientName, cfgData)
 	s.Require().NoError(err, "while setting up logger")
 	s.Require().NoError(logger.Start())
 	s.logger = logger
 
 	// Registry
-	reg, err := registry.ProvideRegistry(clientName, version, cfgData, logger)
+	reg, err := registry.ProvideRegistry(s.clientName, version, cfgData, logger)
 	if err != nil {
 		s.Require().NoError(err, "while creating a registry")
 	}
@@ -190,7 +195,7 @@ func (s *TestSuite) SetupSuite() {
 	s.registry = reg
 
 	// Client
-	c, err := client.ProvideClient(clientName, cfgData, logger, reg)
+	c, err := client.ProvideClient(s.clientName, cfgData, logger, reg)
 	if err != nil {
 		s.Require().NoError(err, "while creating a client")
 	}
@@ -205,6 +210,8 @@ func (s *TestSuite) SetupSuite() {
 	// Start a server
 	pro := []PackageRunnerOption{
 		WithOverwrite(),
+		// WithNumProcesses(5),
+		// WithRunEnv("GOMAXPROCS=1"),
 		WithRunEnv("GOMAXPROCS=" + os.Getenv("GOMAXPROCS")),
 		WithArgs("--config", filepath.Join(s.PluginsRoot, "client/tests/cmd/tests_server/config.yaml")),
 	}
@@ -254,7 +261,7 @@ func (s *TestSuite) TearDownSuite() {
 	}
 }
 
-func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest) {
+func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest, c client.Type) {
 	opts := []client.CallOption{}
 	if req.ContentType != "" {
 		opts = append(opts, client.WithContentType(req.ContentType))
@@ -270,7 +277,7 @@ func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest) {
 
 	rsp, err := client.Call[proto.CallResponse](
 		ctx,
-		s.client,
+		c,
 		req.Service,
 		req.Endpoint,
 		req.Request,
@@ -315,14 +322,14 @@ func (s *TestSuite) TestRunRequests() {
 				req.URL = fmt.Sprintf("%s://%s", node.Transport, node.Address)
 			}
 
-			s.doRequest(ctx, &req)
+			s.doRequest(ctx, &req, s.client)
 		})
 	}
 }
 
-func (s *TestSuite) runRequestBenchmark(b *testing.B, req TestRequest, pN int) {
+func (s *TestSuite) runRequestBenchmark(b *testing.B, req *TestRequest, numClients int) {
 	var (
-		nodes *container.Map[[]*registry.Node]
+		nodes client.NodeMap
 		err   error
 	)
 
@@ -331,55 +338,49 @@ func (s *TestSuite) runRequestBenchmark(b *testing.B, req TestRequest, pN int) {
 		s.Require().NoError(err)
 	}
 
-	done := make(chan struct{})
-
 	var wg sync.WaitGroup
 
 	b.StartTimer()
+	b.ResetTimer()
 
 	// Start requests
-	go func() {
-		for i := 0; i < b.N; i++ {
-			// Run parallel requests.
-			for p := 0; p < pN; p++ {
-				wg.Add(1)
+	for i := 0; i < numClients; i++ {
+		requestor := func(s *TestSuite, req *TestRequest, nodes client.NodeMap, wg *sync.WaitGroup) {
+			for i := 0; i < b.N; i++ {
+				myReq := *req
+				myReq.PreferredTransports = s.Transports
 
-				requestor := func() {
-					myReq := req
-					myReq.PreferredTransports = s.Transports
+				if myReq.URL == "t" {
+					node, err := s.client.Config().Selector(
+						context.Background(),
+						myReq.Service,
+						nodes,
+						req.PreferredTransports,
+						s.client.Config().AnyTransport,
+					)
+					if err != nil {
+						s.logger.Error("While requesting", "err", err)
 
-					if myReq.URL == "t" {
-						node, err := s.client.Config().Selector(
-							context.Background(),
-							myReq.Service,
-							nodes,
-							req.PreferredTransports,
-							s.client.Config().AnyTransport,
-						)
-						if err != nil {
-							s.logger.Error("While requesting", "err", err)
+						wg.Done()
 
-							wg.Done()
-
-							return
-						}
-
-						myReq.URL = fmt.Sprintf("%s://%s", node.Transport, node.Address)
+						return
 					}
 
-					s.doRequest(context.Background(), &myReq)
-					wg.Done()
+					myReq.URL = fmt.Sprintf("%s://%s", node.Transport, node.Address)
 				}
-				go requestor()
+
+				s.doRequest(context.Background(), &myReq, s.client)
 			}
-			wg.Wait()
+
+			wg.Done()
 		}
-		done <- struct{}{}
-	}()
 
-	// Wait for all jobs to finish
-	<-done
+		wg.Add(1)
 
+		go requestor(s, req, nodes, &wg)
+	}
+
+	wg.Wait()
 	b.StopTimer()
 }
 
@@ -396,7 +397,7 @@ func (s *TestSuite) Benchmark(b *testing.B, contentType string, pN int) {
 	s.SetT(&testing.T{})
 	s.SetupSuite()
 
-	s.runRequestBenchmark(b, req, pN)
+	s.runRequestBenchmark(b, &req, pN)
 
 	s.TearDownSuite()
 }

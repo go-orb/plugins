@@ -36,7 +36,6 @@ func provideConfigData(
 	cfgSections := types.SplitServiceName(serviceName)
 
 	data, err := config.Read([]*url.URL{u}, cfgSections)
-	config.Dump(data)
 
 	return data, err
 }
@@ -45,7 +44,7 @@ func provideConfigData(
 // TODO(jochumdev): We should simplify server opts.
 func provideServerOpts() ([]server.Option, error) {
 	// Get some free ports
-	ports, err := freeport.Take(5)
+	ports, err := freeport.Take(7)
 	if err != nil {
 		return nil, err
 	}
@@ -62,26 +61,26 @@ func provideServerOpts() ([]server.Option, error) {
 		),
 		mhttp.WithEntrypoint(
 			mhttp.WithName("http"),
-			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[1])),
+			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[3])),
 			mhttp.WithInsecure(),
 			mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
 		),
 		mhttp.WithEntrypoint(
 			mhttp.WithName("h2c"),
-			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[2])),
+			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[4])),
 			mhttp.WithInsecure(),
 			mhttp.WithAllowH2C(),
 			mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
 		),
 		mhttp.WithEntrypoint(
 			mhttp.WithName("http3"),
-			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[3])),
+			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[5])),
 			mhttp.WithHTTP3(),
 			mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
 		),
 		mhttp.WithEntrypoint(
 			mhttp.WithName("https"),
-			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[4])),
+			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[6])),
 			mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
 		),
 	}, nil

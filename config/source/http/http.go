@@ -50,25 +50,22 @@ func (s *Source) Read(myURL *url.URL) source.Data {
 	}
 
 	path := myURL.Path
-	marshalers := codecs.Plugins.All()
 
 	var decoder codecs.Marshaler
 
 	// Get the marshaler from the extension.
 	pathExt := filepath.Ext(path)
 
-	for _, m := range marshalers {
+	codecs.Plugins.Range(func(_ string, m codecs.Marshaler) bool {
 		for _, ext := range m.Exts() {
 			if pathExt == ext {
 				decoder = m
-				break
+				return false
 			}
 		}
 
-		if decoder != nil {
-			break
-		}
-	}
+		return true
+	})
 
 	if decoder == nil {
 		result.Error = codecs.ErrNoFileMarshaler

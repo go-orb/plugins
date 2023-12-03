@@ -50,7 +50,6 @@ func (s *Source) Read(u *url.URL) source.Data {
 	}
 
 	path := u.Host + u.Path
-	marshalers := codecs.Plugins.All()
 
 	if _, err := os.Stat(path); err != nil {
 		result.Error = fmt.Errorf("%w: %w", config.ErrFileNotFound, err)
@@ -63,14 +62,16 @@ func (s *Source) Read(u *url.URL) source.Data {
 		decoder codecs.Marshaler
 	)
 
-	for _, m := range marshalers {
+	codecs.Plugins.Range(func(_ string, m codecs.Marshaler) bool {
 		for _, ext := range m.Exts() {
 			if pathExt == ext {
 				decoder = m
-				break
+				return false
 			}
 		}
-	}
+
+		return true
+	})
 
 	if decoder == nil {
 		result.Error = config.ErrCodecNotFound

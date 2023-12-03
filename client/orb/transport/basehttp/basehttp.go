@@ -5,7 +5,9 @@ package basehttp
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/go-orb/go-orb/client"
@@ -74,7 +76,9 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 	}
 
 	t.logger.Trace(
-		"Making a request", "url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()), "content-type", opts.ContentType,
+		"Making a request",
+		"url", fmt.Sprintf("%s://%s/%s", t.scheme, node.Address, req.Endpoint()),
+		"content-type", opts.ContentType,
 	)
 
 	// Set the connection timeout
@@ -126,16 +130,15 @@ func (t *Transport) call2(node *registry.Node, opts *client.CallOptions, req *cl
 		return nil, orberrors.From(err)
 	}
 
-	// Read the whole body into a []byte slice.
 	buff := bytes.NewBuffer(nil)
-	_, err = buff.ReadFrom(resp.Body)
 
-	if err != nil {
+	_, err = buff.ReadFrom(resp.Body)
+	if err != nil && !errors.Is(err, io.EOF) {
 		return nil, orberrors.From(err)
 	}
 
-	// Tell the client and server we are done reading.
-	if err = resp.Body.Close(); err != nil {
+	// Close the request body.
+	if err := resp.Body.Close(); err != nil {
 		return nil, orberrors.From(err)
 	}
 
@@ -147,7 +150,10 @@ func (t *Transport) call2(node *registry.Node, opts *client.CallOptions, req *cl
 	}
 
 	t.logger.Trace(
-		"Got a result", "url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()), "content-type", res.ContentType,
+		"Got a result",
+		"url", fmt.Sprintf("%s://%s/%s", t.scheme, node.Address, req.Endpoint()),
+		"content-type", res.ContentType,
+		"size", resp.ContentLength,
 	)
 
 	// Copy headers to the RawResponse if wanted.

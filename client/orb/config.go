@@ -11,8 +11,9 @@ import (
 // Name contains the plugins name.
 const Name = "orb"
 
-// Old was init() { }.
-var _ = client.Register(Name, ProvideClientOrb)
+func init() {
+	client.Register(Name, ProvideClientOrb)
+}
 
 // Config is the config for the orb client.
 type Config struct {

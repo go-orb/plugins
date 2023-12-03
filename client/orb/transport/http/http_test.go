@@ -37,3 +37,19 @@ func BenchmarkHTTPProto16(b *testing.B) {
 func BenchmarkHTTPJSON16(b *testing.B) {
 	newSuite().Benchmark(b, "application/json", 16)
 }
+
+func BenchmarkHTTPProto32(b *testing.B) {
+	newSuite().Benchmark(b, "application/x-protobuf", 32)
+}
+
+func BenchmarkHTTPJSON32(b *testing.B) {
+	newSuite().Benchmark(b, "application/json", 32)
+}
+
+func BenchmarkHTTPProto64(b *testing.B) {
+	newSuite().Benchmark(b, "application/x-protobuf", 64)
+}
+
+func BenchmarkHTTPJSON64(b *testing.B) {
+	newSuite().Benchmark(b, "application/json", 64)
+}

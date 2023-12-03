@@ -16,7 +16,7 @@ func TestChangeLevel(t *testing.T) {
 	l, err := log.New(log.WithSetDefault())
 	require.NoError(t, err)
 
-	lDebug := l.WithLevel(log.LevelDebug)
+	lDebug := l.WithLevel(log.LevelDebug.String())
 	require.NoError(t, err)
 
 	l.Info("Default logger Test")
@@ -31,7 +31,7 @@ func TestComponentLogger(t *testing.T) {
 
 	l.Info("Message One")
 
-	cfg := log.NewConfig(log.WithLevel(log.LevelTrace), log.WithPlugin("slog"))
+	cfg := log.NewConfig(log.WithLevel(log.LevelTrace.String()), log.WithPlugin("slog"))
 
 	sections := []string{"com", "example", "test", "logger"}
 	data, err := config.ParseStruct(sections, &cfg)

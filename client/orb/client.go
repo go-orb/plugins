@@ -16,7 +16,6 @@ import (
 	"github.com/go-orb/go-orb/util/container"
 	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
-	"golang.org/x/exp/slices"
 )
 
 var _ (client.Client) = (*Client)(nil)
@@ -30,7 +29,7 @@ type Client struct {
 
 	middlewares []client.Middleware
 
-	transports container.SafeMap[Transport]
+	transports *container.SafeMap[string, Transport]
 }
 
 // Start starts the client.
@@ -42,13 +41,15 @@ func (c *Client) Start() error {
 func (c *Client) Stop(ctx context.Context) error {
 	hasError := false
 
-	for _, t := range c.transports.All() {
+	c.transports.Range(func(name string, t Transport) bool {
 		if err := t.Stop(ctx); err != nil {
 			c.logger.Error("failed to stop a transport", "error", err)
 
 			hasError = true
 		}
-	}
+
+		return true
+	})
 
 	if hasError {
 		return errors.New("there has been an error stopping the orb client, see the logs")
@@ -76,7 +77,7 @@ func (c *Client) ResolveService(
 	_ context.Context,
 	service string,
 	preferredTransports ...string,
-) (*container.Map[[]*registry.Node], error) {
+) (client.NodeMap, error) {
 	if service == "" {
 		return nil, client.ErrServiceArgumentEmpty
 	}
@@ -86,23 +87,23 @@ func (c *Client) ResolveService(
 		return nil, err
 	}
 
-	rNodes := container.NewMap[[]*registry.Node]()
+	rNodes := make(client.NodeMap)
 
 	// Find nodes to query
 	for _, service := range svc {
 		for _, node := range service.Nodes {
-			tNodes, err := rNodes.Get(node.Transport)
-			if err != nil {
+			tNodes, ok := rNodes[node.Transport]
+			if !ok {
 				tNodes = []*registry.Node{}
 			}
 
 			tNodes = append(tNodes, node)
-			rNodes.Set(node.Transport, tNodes)
+			rNodes[node.Transport] = tNodes
 		}
 	}
 
 	// Not one node found.
-	if rNodes.Len() == 0 {
+	if len(rNodes) == 0 {
 		return nil, fmt.Errorf("%w: requested transports was: %s", client.ErrNoNodeFound, preferredTransports)
 	}
 
@@ -156,14 +157,12 @@ func (c *Client) transportForReq(ctx context.Context, req *client.Request[any, a
 	}
 
 	// Try to fetch the transport from the internal registry.
-	transport, err := c.transports.Get(node.Transport)
+	transport, ok := c.transports.Get(node.Transport)
 
-	if err != nil {
-		err = nil
-
+	if !ok {
 		// Failed to get it from the registry, try to create a new one.
-		tcreator, err := Transports.Get(node.Transport)
-		if err != nil {
+		tcreator, ok := Transports.Get(node.Transport)
+		if !ok {
 			c.logger.Error("Failed to create a transport", slog.String("service", req.Service()), slog.String("transport", node.Transport))
 			return nil, orberrors.ErrInternalServerError.Wrap(fmt.Errorf("%w (%s)", client.ErrFailedToCreateTransport, node.Transport))
 		}
@@ -256,28 +255,30 @@ func (c *Client) callNoCodec(ctx context.Context, req *client.Request[any, any],
 func New(cfg Config, log log.Logger, registry registry.Type) *Client {
 	// Filter out unknown preferred transports from config.
 	nPTransports := []string{}
-	allTransports := Transports.Keys()
 
 	for _, pt := range cfg.PreferredTransports {
-		if slices.Contains(allTransports, pt) {
+		if _, ok := Transports.Get(pt); ok {
 			nPTransports = append(nPTransports, pt)
 		}
 	}
 
-	cfg.PreferredTransports = nPTransports
-
 	// To keep the client working when no transports match,
 	// we use all transports in any order as preferred ones.
-	if len(cfg.PreferredTransports) == 0 {
-		cfg.PreferredTransports = allTransports
+	if len(nPTransports) == 0 {
+		Transports.Range(func(name string, _ TransportFactory) bool {
+			nPTransports = append(nPTransports, name)
+			return true
+		})
 	}
+
+	cfg.PreferredTransports = nPTransports
 
 	return &Client{
 		config:      cfg,
 		logger:      log,
 		registry:    registry,
 		middlewares: []client.Middleware{},
-		transports:  *container.NewSafeMap[Transport](),
+		transports:  container.NewSafeMap[string, Transport](),
 	}
 }
 
@@ -295,7 +296,7 @@ func ProvideClientOrb(
 	}
 
 	sections := types.SplitServiceName(name)
-	if err := config.Parse(append(sections, client.DefaultConfigSection), data, cfg); err != nil {
+	if err := config.Parse(append(sections, client.DefaultConfigSection), data, &cfg); err != nil {
 		return client.Type{}, err
 	}
 

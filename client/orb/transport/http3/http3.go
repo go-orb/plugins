@@ -28,7 +28,7 @@ func NewTransportHTTP3(logger log.Logger) (orb.TransportType, error) {
 		"https",
 		func(ctx context.Context, opts *client.CallOptions) (*http.Client, error) {
 			return &http.Client{
-				Timeout: opts.RequestTimeout,
+				Timeout: opts.ConnectionTimeout,
 				Transport: &http3.RoundTripper{
 					TLSClientConfig: &tls.Config{
 						//nolint:gosec

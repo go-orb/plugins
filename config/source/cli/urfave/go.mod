@@ -3,14 +3,15 @@ module github.com/go-orb/plugins/config/source/cli/urfave
 go 1.21.4
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231127002523-4909ba192408
+	github.com/go-orb/go-orb v0.0.0-20231203061431-2cf52a164da0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/stretchr/testify v1.8.4
-	github.com/urfave/cli/v2 v2.25.7
-	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
+	github.com/urfave/cli/v2 v2.26.0
+	golang.org/x/exp v0.0.0-20231127185646-65229373498e
 )
 
 require (
+	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.3 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect

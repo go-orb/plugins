@@ -29,10 +29,10 @@ type TransportType struct {
 	Transport
 }
 
-// NewTransportFunc is used by a transports to register itself with the global "Transports" below.
-type NewTransportFunc = func(log.Logger) (TransportType, error)
+// TransportFactory is used by a transports to register itself with the global "Transports" below.
+type TransportFactory = func(log.Logger) (TransportType, error)
 
 //nolint:gochecknoglobals
 var (
-	Transports = container.NewPlugins[NewTransportFunc]()
+	Transports = container.NewPlugins[TransportFactory]()
 )

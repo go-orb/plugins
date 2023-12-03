@@ -5,6 +5,7 @@ import (
 	"context"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/log"
@@ -28,15 +29,20 @@ func NewTransportHTTP(logger log.Logger) (orb.TransportType, error) {
 		"http",
 		func(ctx context.Context, opts *client.CallOptions) (*http.Client, error) {
 			return &http.Client{
-				Timeout: opts.RequestTimeout,
+				Timeout: opts.ConnectionTimeout,
 				Transport: &http.Transport{
-					MaxIdleConns:        opts.PoolHosts * opts.PoolSize,
-					MaxIdleConnsPerHost: opts.PoolSize,
-					MaxConnsPerHost:     opts.PoolHosts,
-					IdleConnTimeout:     opts.PoolTTL,
-					Dial: (&net.Dialer{
-						Timeout: opts.DialTimeout,
-					}).Dial,
+					MaxIdleConns:          opts.PoolSize,
+					MaxIdleConnsPerHost:   opts.PoolHosts + 1,
+					MaxConnsPerHost:       opts.PoolHosts,
+					IdleConnTimeout:       opts.PoolTTL,
+					ExpectContinueTimeout: 1 * time.Second,
+					ForceAttemptHTTP2:     false,
+					DisableKeepAlives:     false,
+					DialContext: (&net.Dialer{
+						Timeout:   opts.DialTimeout,
+						KeepAlive: 30 * time.Second,
+						DualStack: false,
+					}).DialContext,
 				},
 			}, nil
 		},

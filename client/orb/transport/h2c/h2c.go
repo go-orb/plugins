@@ -29,7 +29,7 @@ func NewTransportH2C(logger log.Logger) (orb.TransportType, error) {
 		"http",
 		func(ctx context.Context, opts *client.CallOptions) (*http.Client, error) {
 			return &http.Client{
-				Timeout: opts.RequestTimeout,
+				Timeout: opts.ConnectionTimeout,
 				Transport: &http2.Transport{
 					AllowHTTP: true,
 					DialTLS: func(network, addr string, cfg *tls.Config) (net.Conn, error) {
