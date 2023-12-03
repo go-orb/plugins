@@ -25,11 +25,3 @@ require (
 	golang.org/x/exp v0.0.0-20231127185646-65229373498e // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/go-orb/plugins/codecs/yaml => ../../codecs/yaml
-
-replace github.com/go-orb/plugins/config/source/cli/urfave => ../source/cli/urfave
-
-replace github.com/go-orb/plugins/config/source/file => ../source/file
-
-replace github.com/go-orb/plugins/config/source/http => ../source/http

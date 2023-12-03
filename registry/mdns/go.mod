@@ -21,7 +21,3 @@ require (
 	golang.org/x/tools v0.16.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/go-orb/plugins/log/slog => ../../log/slog
-
-replace github.com/go-orb/plugins/registry/tests => ../tests

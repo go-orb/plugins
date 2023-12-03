@@ -26,11 +26,3 @@ require (
 	golang.org/x/tools v0.16.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/go-orb/plugins/codecs/yaml => ../../codecs/yaml
-
-replace github.com/go-orb/plugins/config/source/file => ../../config/source/file
-
-replace github.com/go-orb/plugins/log/slog => ../../log/slog
-
-replace github.com/go-orb/plugins/registry/mdns => ../../registry/mdns

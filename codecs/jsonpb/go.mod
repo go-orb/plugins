@@ -11,5 +11,3 @@ require (
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 )
-
-replace github.com/go-orb/plugins/codecs/proto => ../proto

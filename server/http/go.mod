@@ -47,17 +47,3 @@ require (
 	google.golang.org/genproto v0.0.0-20231127180814-3a041ad873d4 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231127180814-3a041ad873d4 // indirect
 )
-
-replace github.com/go-orb/plugins/codecs/form => ../../codecs/form
-
-replace github.com/go-orb/plugins/codecs/jsonpb => ../../codecs/jsonpb
-
-replace github.com/go-orb/plugins/codecs/proto => ../../codecs/proto
-
-replace github.com/go-orb/plugins/codecs/yaml => ../../codecs/yaml
-
-replace github.com/go-orb/plugins/config/source/file => ../../config/source/file
-
-replace github.com/go-orb/plugins/log/slog => ../../log/slog
-
-replace github.com/go-orb/plugins/registry/mdns => ../../registry/mdns
