@@ -1,4 +1,4 @@
-# <code style="color: green">Vanessa</code>
+# Benchmarks
 
 This repo contains benchmarks for go-orb.
 

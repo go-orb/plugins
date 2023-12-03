@@ -604,7 +604,12 @@ github.com/go-orb/go-orb v0.0.0-20231126205116-9614b6032b2c/go.mod h1:0bGLTR4f9f
 github.com/go-orb/go-orb v0.0.0-20231126235537-91e12e2b6632/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
 github.com/go-orb/go-orb v0.0.0-20231127002523-4909ba192408/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
 github.com/go-orb/go-orb v0.0.0-20231127004134-24c6188445e8/go.mod h1:0bGLTR4f9fNqnJcATma3+3e+HcGbnr4dmrZt8OGPG3s=
+github.com/go-orb/go-orb v0.0.0-20231203043104-786235203189/go.mod h1:gRtbFGsmi8PBss932UtNlBTHcjO1eETvr19TP1GUvv0=
+github.com/go-orb/plugins/client/orb/transport/grpc v0.0.0-20231127002628-07da06ff9de8/go.mod h1:yk6MK76BFMThG/FnlEB4ERZp2uA8WY1+2epkYHggpqU=
+github.com/go-orb/plugins/client/orb/transport/h2c v0.0.0-20231127002628-07da06ff9de8/go.mod h1:h2NhKQLkJv3ibUc7Yyr3GUfVMxT9rkJcA++Uljh9zPw=
 github.com/go-orb/plugins/client/orb/transport/http v0.0.0-20231127002628-07da06ff9de8/go.mod h1:cDUpkKsJD16dnoQiFmO+dhB6+yp7dJjYT3My95LLV8k=
+github.com/go-orb/plugins/client/orb/transport/http3 v0.0.0-20231127002628-07da06ff9de8/go.mod h1:XUAf3GuYIqSdt3tOHRH2mS6ywq7U3E8A9GsjLWqW0oM=
+github.com/go-orb/plugins/client/orb/transport/https v0.0.0-20231127002628-07da06ff9de8/go.mod h1:tbqgS/okXkJ7ICfY6oBpt6rK26IalUv7LvtjUlziJak=
 github.com/go-orb/plugins/codecs/form v0.0.0-20230713091520-67e7b5a34489/go.mod h1:kxE2L7InsjunE1YxOSaKuteu4pY41HE5Xl9uNmXxYG8=
 github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20230713091520-67e7b5a34489/go.mod h1:u424K2L346fJ1bINyCoCl9yofFSkcv7L2uy8RO1q6pI=
 github.com/go-orb/plugins/server/hertz v0.0.0-20231127002628-07da06ff9de8/go.mod h1:rZpium/oJm04vZH8jcf2j+v9DUzT3EbhmQ5MANWq4xc=
