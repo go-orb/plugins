@@ -22,7 +22,7 @@ func newSuite() *tests.TestSuite {
 	_, filename, _, _ := runtime.Caller(0)
 	pluginsRoot := filepath.Join(filepath.Dir(filename), "../../../../")
 
-	s := tests.NewSuite(pluginsRoot, []string{"grpc"})
+	s := tests.NewSuite(pluginsRoot, []string{Name})
 	// s.Debug = true
 	return s
 }
@@ -30,8 +30,4 @@ func newSuite() *tests.TestSuite {
 func TestSuite(t *testing.T) {
 	// Run the tests.
 	suite.Run(t, newSuite())
-}
-
-func BenchmarkGRPC16(b *testing.B) {
-	newSuite().Benchmark(b, "application/x-protobuf", 16)
 }

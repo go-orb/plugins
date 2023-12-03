@@ -7,8 +7,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"sync"
-	"testing"
 	"time"
 
 	"log/slog"
@@ -104,7 +102,7 @@ var (
 	}
 )
 
-// TestSuite runs a bunch of tests / benchmarks.
+// TestSuite runs a bunch of tests.
 type TestSuite struct {
 	suite.Suite
 
@@ -325,79 +323,4 @@ func (s *TestSuite) TestRunRequests() {
 			s.doRequest(ctx, &req, s.client)
 		})
 	}
-}
-
-func (s *TestSuite) runRequestBenchmark(b *testing.B, req *TestRequest, numClients int) {
-	var (
-		nodes client.NodeMap
-		err   error
-	)
-
-	if req.URL == "t" {
-		nodes, err = s.client.ResolveService(context.Background(), req.Service, req.PreferredTransports...)
-		s.Require().NoError(err)
-	}
-
-	var wg sync.WaitGroup
-
-	b.StartTimer()
-	b.ResetTimer()
-
-	// Start requests
-	for i := 0; i < numClients; i++ {
-		requestor := func(s *TestSuite, req *TestRequest, nodes client.NodeMap, wg *sync.WaitGroup) {
-			for i := 0; i < b.N; i++ {
-				myReq := *req
-				myReq.PreferredTransports = s.Transports
-
-				if myReq.URL == "t" {
-					node, err := s.client.Config().Selector(
-						context.Background(),
-						myReq.Service,
-						nodes,
-						req.PreferredTransports,
-						false,
-					)
-					if err != nil {
-						s.logger.Error("While requesting", "err", err)
-
-						wg.Done()
-
-						return
-					}
-
-					myReq.URL = fmt.Sprintf("%s://%s", node.Transport, node.Address)
-				}
-
-				s.doRequest(context.Background(), &myReq, s.client)
-			}
-
-			wg.Done()
-		}
-
-		wg.Add(1)
-
-		go requestor(s, req, nodes, &wg)
-	}
-
-	wg.Wait()
-	b.StopTimer()
-}
-
-// Benchmark runs b.N times, each with pN requests in parallel.
-func (s *TestSuite) Benchmark(b *testing.B, contentType string, pN int) {
-	b.StopTimer()
-
-	req := s.Requests[0]
-	req.Service = string(ServiceName)
-	req.URL = "t" // Set to "t" to bypass the registry in benchmarks.
-	req.PreferredTransports = s.Transports
-	req.ContentType = contentType
-
-	s.SetT(&testing.T{})
-	s.SetupSuite()
-
-	s.runRequestBenchmark(b, &req, pN)
-
-	s.TearDownSuite()
 }

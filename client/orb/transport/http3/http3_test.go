@@ -22,18 +22,10 @@ func newSuite() *tests.TestSuite {
 	_, filename, _, _ := runtime.Caller(0)
 	pluginsRoot := filepath.Join(filepath.Dir(filename), "../../../../")
 
-	return tests.NewSuite(pluginsRoot, []string{"http3"})
+	return tests.NewSuite(pluginsRoot, []string{Name})
 }
 
 func TestSuite(t *testing.T) {
 	// Run the tests.
 	suite.Run(t, newSuite())
-}
-
-func BenchmarkHTTP3Proto16(b *testing.B) {
-	newSuite().Benchmark(b, "application/x-protobuf", 16)
-}
-
-func BenchmarkHTTP3JSON16(b *testing.B) {
-	newSuite().Benchmark(b, "application/json", 16)
 }

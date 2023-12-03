@@ -22,7 +22,7 @@ func newSuite() *tests.TestSuite {
 	_, filename, _, _ := runtime.Caller(0)
 	pluginsRoot := filepath.Join(filepath.Dir(filename), "../../../../")
 
-	s := tests.NewSuite(pluginsRoot, []string{"h2c"})
+	s := tests.NewSuite(pluginsRoot, []string{Name})
 	// s.Debug = true
 	return s
 }
@@ -30,12 +30,4 @@ func newSuite() *tests.TestSuite {
 func TestSuite(t *testing.T) {
 	// Run the tests.
 	suite.Run(t, newSuite())
-}
-
-func BenchmarkH2CProto16(b *testing.B) {
-	newSuite().Benchmark(b, "application/x-protobuf", 16)
-}
-
-func BenchmarkH2CJSON16(b *testing.B) {
-	newSuite().Benchmark(b, "application/json", 16)
 }
