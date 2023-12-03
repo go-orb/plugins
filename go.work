@@ -2,8 +2,11 @@ go 1.21.4
 
 use (
 	./client/orb
+	./client/orb/transport/basehertz
 	./client/orb/transport/basehttp
 	./client/orb/transport/grpc
+	./client/orb/transport/hertzh2c
+	./client/orb/transport/hertzhttp
 	./client/orb/transport/h2c
 	./client/orb/transport/http
 	./client/orb/transport/http3

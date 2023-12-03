@@ -125,12 +125,12 @@ func (s *ServerHertz) Address() string {
 // Transport returns the client transport to use.
 func (s *ServerHertz) Transport() string {
 	if s.Config.H2C {
-		return "h2c"
+		return "hertzh2c"
 	} else if !s.Config.Insecure {
-		return "https"
+		return "hertzhttps"
 	}
 
-	return "http"
+	return "hertzhttp"
 }
 
 // EntrypointID returns the id (uuid) of this entrypoint in the registry.
