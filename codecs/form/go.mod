@@ -5,6 +5,7 @@ go 1.21.4
 require (
 	github.com/go-orb/go-orb v0.0.0-20231203061431-2cf52a164da0
 	github.com/go-playground/form/v4 v4.2.1
+	github.com/stretchr/testify v1.8.4
 	google.golang.org/protobuf v1.31.0
 )
 
@@ -15,5 +16,3 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-require github.com/stretchr/testify v1.8.4

@@ -4,10 +4,10 @@ go 1.21.4
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20231203061431-2cf52a164da0
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20230713091520-67e7b5a34489
-	github.com/go-orb/plugins/config/source/file v0.0.0-20230713091520-67e7b5a34489
-	github.com/go-orb/plugins/log/slog v0.0.0-20230726151712-9ff06382f83b
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20230725195840-87467dc1527a
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231203073750-7988ab6b7f08
+	github.com/go-orb/plugins/config/source/file v0.0.0-20231203073750-7988ab6b7f08
+	github.com/go-orb/plugins/log/slog v0.0.0-20231203073750-7988ab6b7f08
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20231203073750-7988ab6b7f08
 	github.com/google/uuid v1.4.0
 	github.com/stretchr/testify v1.8.4
 )
@@ -19,7 +19,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/miekg/dns v1.1.57 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
+	golang.org/x/exp v0.0.0-20230725093048-515e97ebf090 // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect

@@ -4,17 +4,17 @@ go 1.21.4
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20231203061431-2cf52a164da0
-	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231203071502-d87ce98e590c
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20231203071502-d87ce98e590c
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231203071502-d87ce98e590c
-	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231203071502-d87ce98e590c
-	github.com/go-orb/plugins/config/source/file v0.0.0-20231203071502-d87ce98e590c
-	github.com/go-orb/plugins/log/lumberjack v0.0.0-20231203071502-d87ce98e590c
-	github.com/go-orb/plugins/log/slog v0.0.0-20231203071502-d87ce98e590c
-	github.com/go-orb/plugins/registry/consul v0.0.0-20231203071502-d87ce98e590c
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20231203071502-d87ce98e590c
-	github.com/go-orb/plugins/server/grpc v0.0.0-20231203071502-d87ce98e590c
-	github.com/go-orb/plugins/server/http v0.0.0-20231203071502-d87ce98e590c
+	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231203073750-7988ab6b7f08
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20231203073750-7988ab6b7f08
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231203073750-7988ab6b7f08
+	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231203073750-7988ab6b7f08
+	github.com/go-orb/plugins/config/source/file v0.0.0-20231203073750-7988ab6b7f08
+	github.com/go-orb/plugins/log/lumberjack v0.0.0-20231203073750-7988ab6b7f08
+	github.com/go-orb/plugins/log/slog v0.0.0-20231203073750-7988ab6b7f08
+	github.com/go-orb/plugins/registry/consul v0.0.0-20231203073750-7988ab6b7f08
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20231203073750-7988ab6b7f08
+	github.com/go-orb/plugins/server/grpc v0.0.0-20231203073750-7988ab6b7f08
+	github.com/go-orb/plugins/server/http v0.0.0-20231203073750-7988ab6b7f08
 	github.com/google/wire v0.5.0
 	github.com/hashicorp/consul/sdk v0.15.0
 	github.com/stretchr/testify v1.8.4

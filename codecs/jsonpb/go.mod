@@ -7,7 +7,4 @@ require (
 	google.golang.org/protobuf v1.31.0
 )
 
-require (
-	github.com/cornelk/hashmap v1.0.8 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
-)
+require github.com/cornelk/hashmap v1.0.8 // indirect
