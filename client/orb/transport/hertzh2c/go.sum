@@ -37,8 +37,12 @@ github.com/go-orb/go-orb v0.0.0-20231203061431-2cf52a164da0 h1:iys2hp/ryB0BQlCTb
 github.com/go-orb/go-orb v0.0.0-20231203061431-2cf52a164da0/go.mod h1:gRtbFGsmi8PBss932UtNlBTHcjO1eETvr19TP1GUvv0=
 github.com/go-orb/plugins/client/orb v0.0.0-20231203063539-a0de6a0006d9 h1:KIR5JzOnOUW7yki8Qk60aaAbpnLmKZs+h1X3PwuMXZk=
 github.com/go-orb/plugins/client/orb v0.0.0-20231203063539-a0de6a0006d9/go.mod h1:9E5e1JE/6x4oPvVSnPmdwb85zoFXBKS6CJv61qakp4g=
+github.com/go-orb/plugins/client/orb v0.0.0-20231203071115-abf83200d391 h1:UVetDZlVCjvv1U885LcfNwneP3VioBiFNJo3iv1qxHU=
+github.com/go-orb/plugins/client/orb v0.0.0-20231203071115-abf83200d391/go.mod h1:69ju9atTCwzexb8HcZm2WhZUE2d9tQLVVgbZMJSWu2c=
 github.com/go-orb/plugins/client/orb/transport/basehertz v0.0.0-20231203063539-a0de6a0006d9 h1:mSYXrYWfdA6SHeLB1MA2YsSPepEOdk9Ad9UySYb7AtE=
 github.com/go-orb/plugins/client/orb/transport/basehertz v0.0.0-20231203063539-a0de6a0006d9/go.mod h1:6MP4AqHQPas0iCsNgNXpchzO4JqK5fAQZ7sozypK2pU=
+github.com/go-orb/plugins/client/orb/transport/basehertz v0.0.0-20231203071115-abf83200d391 h1:wWdIc4ZK1An6PxclsdP96kkOwl354rbEsEPNgzQlVfg=
+github.com/go-orb/plugins/client/orb/transport/basehertz v0.0.0-20231203071115-abf83200d391/go.mod h1:oE27ZqlaC8MvjeETNnKyDLBJ5inT5ym/ZwZBmvmHpxk=
 github.com/go-orb/plugins/client/tests v0.0.0-20231203063539-a0de6a0006d9/go.mod h1:hVwg3YVEkttSYa0f+Smw8up1qWdW1dBDg75MCVKoh0c=
 github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231203062758-5020673db140/go.mod h1:FMXxMFnj8vrrro4fQGrx98CuW7MzZVtiLPVQxmICOvw=
 github.com/go-orb/plugins/codecs/proto v0.0.0-20231203062758-5020673db140/go.mod h1:/MziSr0thF58IaS7Y3Z3mTl+ScdPu/AiFezsjhrNwdg=
@@ -48,6 +52,7 @@ github.com/go-orb/plugins/log/slog v0.0.0-20231203062758-5020673db140/go.mod h1:
 github.com/go-orb/plugins/registry/consul v0.0.0-20231203062758-5020673db140/go.mod h1:futXBZM1vXlr3/lxEdNDLh4iePyJWwQHo/QbT0RoOMw=
 github.com/go-orb/plugins/registry/mdns v0.0.0-20231203062758-5020673db140/go.mod h1:XBKutZ64s0GMSZPuidMw+mfqRSaSY7TFeE6sdYjFnp0=
 github.com/go-orb/plugins/server/http v0.0.0-20231203062758-5020673db140/go.mod h1:Fa6XUHtM/L0lVpfDHPA4vF8YwUk69wTa9kZR4DHc+IY=
+github.com/go-orb/plugins/server/http v0.0.0-20231203063539-a0de6a0006d9/go.mod h1:Fa6XUHtM/L0lVpfDHPA4vF8YwUk69wTa9kZR4DHc+IY=
 github.com/golang/protobuf v1.3.2/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
