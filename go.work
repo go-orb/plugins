@@ -1,6 +1,7 @@
 go 1.21.4
 
 use (
+	./benchmarks/rps
 	./client/orb
 	./client/orb/transport/basehertz
 	./client/orb/transport/basehttp
