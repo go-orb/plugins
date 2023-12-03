@@ -17,6 +17,7 @@ import (
 	"github.com/go-orb/plugins/client/tests/proto"
 
 	mgrpc "github.com/go-orb/plugins/server/grpc"
+	mhertz "github.com/go-orb/plugins/server/hertz"
 	mhttp "github.com/go-orb/plugins/server/http"
 
 	"github.com/google/wire"
@@ -53,9 +54,22 @@ func provideServerOpts() ([]server.Option, error) {
 	hInstance := new(handler.EchoHandler)
 
 	return []server.Option{
+		mhertz.WithEntrypoint(
+			mhertz.WithName("hertzhttp"),
+			mhertz.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[0])),
+			mhertz.WithInsecure(),
+			mhertz.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
+		),
+		mhertz.WithEntrypoint(
+			mhertz.WithName("hertzh2c"),
+			mhertz.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[1])),
+			mhertz.WithInsecure(),
+			mhertz.WithAllowH2C(),
+			mhertz.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
+		),
 		mgrpc.WithEntrypoint(
 			mgrpc.WithName("grpc"),
-			mgrpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[0])),
+			mgrpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[2])),
 			mgrpc.WithInsecure(true),
 			mgrpc.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
 		),

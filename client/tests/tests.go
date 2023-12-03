@@ -299,7 +299,7 @@ func (s *TestSuite) TestResolveServiceTransport() {
 	nodes, err := s.client.ResolveService(ctx, string(ServiceName), s.Transports...)
 	s.Require().NoError(err)
 
-	node, err := s.client.Config().Selector(ctx, string(ServiceName), nodes, s.Transports, s.client.Config().AnyTransport)
+	node, err := s.client.Config().Selector(ctx, string(ServiceName), nodes, s.Transports, false)
 	s.Require().NoError(err)
 
 	s.Require().True(slices.Contains(s.Transports, node.Transport))
@@ -317,7 +317,7 @@ func (s *TestSuite) TestRunRequests() {
 				nodes, err := s.client.ResolveService(ctx, req.Service, s.Transports...)
 				s.Require().NoError(err)
 
-				node, err := s.client.Config().Selector(ctx, req.Service, nodes, s.Transports, s.client.Config().AnyTransport)
+				node, err := s.client.Config().Selector(ctx, req.Service, nodes, s.Transports, false)
 				s.Require().NoError(err)
 				req.URL = fmt.Sprintf("%s://%s", node.Transport, node.Address)
 			}
@@ -356,7 +356,7 @@ func (s *TestSuite) runRequestBenchmark(b *testing.B, req *TestRequest, numClien
 						myReq.Service,
 						nodes,
 						req.PreferredTransports,
-						s.client.Config().AnyTransport,
+						false,
 					)
 					if err != nil {
 						s.logger.Error("While requesting", "err", err)
