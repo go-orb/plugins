@@ -14,7 +14,7 @@ This project is a work in progress, please do not use yet!
 
 ### go.mod replacements
 
-When you work on packages that require changes in other plugins or changes on the core you will need:
+When you work on packages that require changes in the core you will need:
 
 ```bash
 go-task mod-replace
@@ -28,7 +28,7 @@ This will add replace statements to all go.mod's in this repo.
 go-task mod-dropreplace
 ```
 
-We do not accept commit's with a "replace" line outside of "github.com/go-orb/plugins/".
+We do not accept commit's with a "replace" line.
 
 ### Quirks
 
