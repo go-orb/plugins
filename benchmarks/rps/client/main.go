@@ -158,11 +158,9 @@ func bench(
 		client.WithContentType(cfg.ContentType),
 	}
 
-	if false {
-		opts = append(opts, client.WithTrace())
+	if err := cli.With(client.WithClientPoolSize(cfg.Connections)); err != nil {
+		return err
 	}
-
-	cli.With(client.WithClientPoolSize(cfg.Connections))
 
 	wCtx, wCancel := context.WithCancel(context.Background())
 

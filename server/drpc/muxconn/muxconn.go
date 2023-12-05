@@ -13,6 +13,7 @@ import (
 	"storj.io/drpc/drpcmanager"
 )
 
+// ErrClosed happens when connection has been closed.
 var ErrClosed = errors.New("connection closed")
 
 var _ drpc.Conn = (*Conn)(nil)
@@ -24,7 +25,7 @@ type Options struct {
 }
 
 // Conn implements drpc.Conn using the yamux
-// multiplexer to allow concurrent RPCs
+// multiplexer to allow concurrent RPCs.
 type Conn struct {
 	conn          io.ReadWriteCloser
 	sess          *yamux.Session
@@ -33,7 +34,7 @@ type Conn struct {
 	unblockedChan chan struct{}
 }
 
-// New returns a new multiplexed DRPC connection
+// New returns a new multiplexed DRPC connection.
 func New(conn io.ReadWriteCloser) (*Conn, error) {
 	return NewWithOptions(conn, Options{})
 }
