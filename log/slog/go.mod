@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/log/slog
 go 1.21.4
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231203061431-2cf52a164da0
+	github.com/go-orb/go-orb v0.0.0-20231205050211-f64e9b008f76
 	github.com/stretchr/testify v1.8.4
 )
 

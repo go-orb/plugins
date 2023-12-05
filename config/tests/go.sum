@@ -6,14 +6,6 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-orb/go-orb v0.0.0-20231203061431-2cf52a164da0 h1:iys2hp/ryB0BQlCTbTMbco9JPzdV1L+oWKkptVqqkK4=
 github.com/go-orb/go-orb v0.0.0-20231203061431-2cf52a164da0/go.mod h1:gRtbFGsmi8PBss932UtNlBTHcjO1eETvr19TP1GUvv0=
-github.com/go-orb/plugins/codecs/yaml v0.0.0-20231203073750-7988ab6b7f08 h1:FUm2zfGfCh2cG5cx9nvpsaVfKucElZ6mv6B+GLEC4cI=
-github.com/go-orb/plugins/codecs/yaml v0.0.0-20231203073750-7988ab6b7f08/go.mod h1:h0MeS/C0Shx7HrXG4qeCPXoaAV2QXZC3Nvxt7Hl5UJw=
-github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231203073750-7988ab6b7f08 h1:Jbt3E1hvXFbzZxETGghoPS41pztdhOPNJEZpNhODmiI=
-github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231203073750-7988ab6b7f08/go.mod h1:9J0SlmLengP3cJcpUpqmxoyJQlD4B9TS+n5f5jrmsCQ=
-github.com/go-orb/plugins/config/source/file v0.0.0-20231203073750-7988ab6b7f08 h1:gYTunE/uoKHGgEzuLLw8BCl6q0tsf0+dkM0+2s+Ig74=
-github.com/go-orb/plugins/config/source/file v0.0.0-20231203073750-7988ab6b7f08/go.mod h1:d3+yXZMF77WMtl8DiiUWIbqcXVq6SVsORrYMDEqNReY=
-github.com/go-orb/plugins/config/source/http v0.0.0-20231203073750-7988ab6b7f08 h1:3ag1iYMyGdrUXNOXay5w+mmM+8YeC8k+pGwlI4id+zc=
-github.com/go-orb/plugins/config/source/http v0.0.0-20231203073750-7988ab6b7f08/go.mod h1:YpfI1uXxZ77k+om8gjdLm4KAdg0jC79dNeB3oegXyIg=
 github.com/google/uuid v1.4.0 h1:MtMxsa51/r9yyhkyLsVeVt0B+BGQZzpQiTQ4eHZ8bc4=
 github.com/google/uuid v1.4.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=

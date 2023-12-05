@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc"
 
 	mdrpc "github.com/go-orb/plugins/server/drpc"
-	// mhertz "github.com/go-orb/plugins/server/hertz" .
+	mhertz "github.com/go-orb/plugins/server/hertz"
 	mhttp "github.com/go-orb/plugins/server/http"
 )
 
@@ -29,10 +29,10 @@ func registerEchoHTTPHandler(srv *mhttp.ServerHTTP, handler orbEchoHandler) {
 	r.Post("/echo.Echo/Echo", mhttp.NewGRPCHandler(srv, handler.Echo))
 }
 
-// func registerEchoHertzHandler(srv *mhertz.Server, handler orbEchoHandler) {
-// 	s := srv.Router()
-// 	s.POST("/echo.Echo/Echo", mhertz.NewGRPCHandler(srv, handler.Echo))
-// }
+func registerEchoHertzHandler(srv *mhertz.Server, handler orbEchoHandler) {
+	s := srv.Router()
+	s.POST("/echo.Echo/Echo", mhertz.NewGRPCHandler(srv, handler.Echo))
+}
 
 func registerEchoDRPCHandler(srv *mdrpc.Server, handler orbEchoHandler) error {
 	desc := DRPCEchoDescription{}
@@ -62,8 +62,8 @@ func OrbRegister(handler EchoServer) server.RegistrationFunc {
 		switch srv := s.(type) {
 		case *mhttp.ServerHTTP:
 			registerEchoHTTPHandler(srv, handler.(orbEchoHandler))
-		// case *mhertz.Server:
-		// 	registerEchoHertzHandler(srv, handler.(orbEchoHandler))
+		case *mhertz.Server:
+			registerEchoHertzHandler(srv, handler.(orbEchoHandler))
 		case *mdrpc.Server:
 			registerEchoDRPCHandler(srv, handler.(orbEchoHandler)) //nolint:errcheck,gosec
 		case grpc.ServiceRegistrar:

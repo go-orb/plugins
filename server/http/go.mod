@@ -4,7 +4,7 @@ go 1.21.4
 
 require (
 	github.com/go-chi/chi v1.5.5
-	github.com/go-orb/go-orb v0.0.0-20231203061431-2cf52a164da0
+	github.com/go-orb/go-orb v0.0.0-20231205050211-f64e9b008f76
 	github.com/go-orb/plugins/codecs/form v0.0.0-20231203073750-7988ab6b7f08
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231203073750-7988ab6b7f08
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20231203073750-7988ab6b7f08
@@ -29,7 +29,7 @@ require (
 	github.com/go-playground/form/v4 v4.2.1 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/google/pprof v0.0.0-20231127191134-f3a68a39ae15 // indirect
+	github.com/google/pprof v0.0.0-20231205033806-a5a03c77bf08 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/miekg/dns v1.1.57 // indirect

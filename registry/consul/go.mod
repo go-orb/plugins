@@ -3,9 +3,9 @@ module github.com/go-orb/plugins/registry/consul
 go 1.21.4
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231203061431-2cf52a164da0
+	github.com/go-orb/go-orb v0.0.0-20231205050211-f64e9b008f76
 	github.com/go-orb/plugins/log/slog v0.0.0-20231203073750-7988ab6b7f08
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20231203074959-0fd4c3d92e13
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20231205034045-56e7ea07fb2a
 	github.com/go-orb/plugins/registry/tests v0.0.0-20231203073750-7988ab6b7f08
 	github.com/google/uuid v1.4.0
 	github.com/hashicorp/consul/api v1.26.1
@@ -21,7 +21,7 @@ require (
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-hclog v1.5.0 // indirect
+	github.com/hashicorp/go-hclog v1.6.1 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-rootcerts v1.0.2 // indirect
@@ -36,6 +36,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	golang.org/x/exp v0.0.0-20231127185646-65229373498e // indirect
+	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
