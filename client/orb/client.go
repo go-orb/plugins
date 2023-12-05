@@ -67,9 +67,20 @@ func (c *Client) Type() string {
 	return client.ComponentType
 }
 
-// Config returns a pointer to the clients config.
-func (c *Client) Config() *client.Config {
-	return &c.config.Config
+// Config returns the internal config, this is for tests.
+func (c *Client) Config() client.Config {
+	return c.config.Config
+}
+
+// With closes all transports and configures the client with the given options.
+func (c *Client) With(opts ...client.Option) error {
+	err := c.Stop(context.Background())
+
+	for _, o := range opts {
+		o(&c.config)
+	}
+
+	return err
 }
 
 // ResolveService resolves a servicename to a Node with the help of the registry.

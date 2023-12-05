@@ -3,9 +3,9 @@ module github.com/go-orb/plugins/registry/consul
 go 1.21.4
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231205050211-f64e9b008f76
+	github.com/go-orb/go-orb v0.0.0-20231205054835-5d5151ec921b
 	github.com/go-orb/plugins/log/slog v0.0.0-20231205051152-a7c84fe79f05
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20231205051152-a7c84fe79f05
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20231205052311-482ca12d811d
 	github.com/go-orb/plugins/registry/tests v0.0.0-20231205051152-a7c84fe79f05
 	github.com/google/uuid v1.4.0
 	github.com/hashicorp/consul/api v1.26.1
@@ -19,6 +19,7 @@ require (
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fatih/color v1.16.0 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v1.6.1 // indirect
@@ -31,6 +32,7 @@ require (
 	github.com/hashicorp/serf v0.10.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/miekg/dns v1.1.57 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

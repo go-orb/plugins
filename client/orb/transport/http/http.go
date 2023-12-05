@@ -29,17 +29,17 @@ func NewTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, error)
 			Timeout: cfg.ConnectionTimeout,
 			Transport: &http.Transport{
 				MaxIdleConns:          cfg.PoolHosts * cfg.PoolSize,
-				MaxIdleConnsPerHost:   cfg.PoolHosts + 1,
-				MaxConnsPerHost:       cfg.PoolHosts,
+				MaxIdleConnsPerHost:   cfg.PoolSize,
+				MaxConnsPerHost:       cfg.PoolSize + 1,
 				IdleConnTimeout:       cfg.PoolTTL,
 				ExpectContinueTimeout: 1 * time.Second,
 				ForceAttemptHTTP2:     false,
 				DisableKeepAlives:     false,
-				DialContext: (&net.Dialer{
+				Dial: (&net.Dialer{
 					Timeout:   cfg.DialTimeout,
 					KeepAlive: 15 * time.Second,
 					DualStack: false,
-				}).DialContext,
+				}).Dial,
 			},
 		},
 	)

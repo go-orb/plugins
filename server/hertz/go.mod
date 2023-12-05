@@ -4,7 +4,7 @@ go 1.21.4
 
 require (
 	github.com/cloudwego/hertz v0.7.2
-	github.com/go-orb/go-orb v0.0.0-20231205050211-f64e9b008f76
+	github.com/go-orb/go-orb v0.0.0-20231205054835-5d5151ec921b
 	github.com/google/uuid v1.4.0
 	github.com/hertz-contrib/http2 v0.1.8
 )
@@ -20,6 +20,7 @@ require (
 	github.com/cloudwego/netpoll v0.5.1 // indirect
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.6 // indirect

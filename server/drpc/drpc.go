@@ -49,7 +49,7 @@ func (s *Server) Start() error {
 		return nil
 	}
 
-	s.logger.Debug("Starting")
+	s.logger.Info("Starting", "address", s.config.Address)
 
 	// create a drpc RPC mux
 	s.mux = drpcmux.New()

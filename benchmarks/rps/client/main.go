@@ -30,13 +30,12 @@ import (
 	_ "github.com/go-orb/plugins/config/source/cli/urfave"
 	_ "github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/slog"
-	_ "github.com/go-orb/plugins/registry/mdns"
+	_ "github.com/go-orb/plugins/registry/consul"
 
 	// All transports.
 	_ "github.com/go-orb/plugins/client/orb/transport/drpc"
 	_ "github.com/go-orb/plugins/client/orb/transport/grpc"
 	_ "github.com/go-orb/plugins/client/orb/transport/h2c"
-
 	_ "github.com/go-orb/plugins/client/orb/transport/hertzh2c"
 	_ "github.com/go-orb/plugins/client/orb/transport/hertzhttp"
 	_ "github.com/go-orb/plugins/client/orb/transport/http"
@@ -158,6 +157,12 @@ func bench(
 		client.WithPreferredTransports(cfg.Transport),
 		client.WithContentType(cfg.ContentType),
 	}
+
+	if false {
+		opts = append(opts, client.WithTrace())
+	}
+
+	cli.With(client.WithClientPoolSize(cfg.Connections))
 
 	wCtx, wCancel := context.WithCancel(context.Background())
 
@@ -283,7 +288,18 @@ func bench(
 		mStats.Error += cStat.Error
 	}
 
-	logger.Info("Sum results", "reqsOk", mStats.Ok, "reqsError", mStats.Error)
+	logger.Info("Summary",
+		"bypass_registry", cfg.BypassRegistry,
+		"connections", cfg.Connections,
+		"duration", cfg.Duration,
+		"timeout", cfg.Timeout,
+		"threads", cfg.Threads,
+		"transport", cfg.Transport,
+		"package_size", cfg.PackageSize,
+		"content_type", cfg.ContentType,
+		"reqsOk", mStats.Ok,
+		"reqsError", mStats.Error,
+	)
 
 	return nil
 }

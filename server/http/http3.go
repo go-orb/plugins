@@ -37,7 +37,8 @@ func (s *ServerHTTP) newHTTP3Server() *http3server {
 
 		// TODO: remove this config when draft versions are no longer supported (we have no need to support drafts)
 		QuicConfig: &quic.Config{
-			Versions: []quic.VersionNumber{quic.Version1, quic.Version2},
+			MaxIncomingStreams: int64(s.Config.MaxConcurrentStreams),
+			Versions:           []quic.VersionNumber{quic.Version1, quic.Version2},
 		},
 	}
 

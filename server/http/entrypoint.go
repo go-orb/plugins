@@ -138,7 +138,7 @@ func (s *ServerHTTP) Start() error {
 
 	var err error
 
-	s.Logger.Debug("Starting")
+	s.Logger.Info("Starting", "address", s.Config.Address)
 
 	for _, middleware := range s.Config.Middleware {
 		s.router.Use(middleware)

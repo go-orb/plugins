@@ -41,7 +41,7 @@ const (
 	// DefaultMaxConcurrentStreams for HTTP2.
 	DefaultMaxConcurrentStreams = 512
 
-	// DefaultHTTP2 dicates whether to also allow HTTP/2 connections.
+	// DefaultHTTP2 dicates whether to also allow HTTP/2 and HTTP/3 connections.
 	DefaultHTTP2 = true
 
 	// DefaultHTTP3 dicates whether to also start an HTTP/3.0 server.

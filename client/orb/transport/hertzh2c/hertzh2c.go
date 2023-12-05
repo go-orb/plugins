@@ -7,6 +7,9 @@ import (
 
 	hclient "github.com/cloudwego/hertz/pkg/app/client"
 	"github.com/go-orb/plugins/client/orb/transport/basehertz"
+
+	"github.com/hertz-contrib/http2/config"
+	"github.com/hertz-contrib/http2/factory"
 )
 
 // Name is the transports name.
@@ -23,9 +26,17 @@ func NewTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, error)
 		logger,
 		"http",
 		func() (*hclient.Client, error) {
-			return hclient.NewClient(
-				hclient.WithMaxConnsPerHost(cfg.PoolHosts),
+			c, err := hclient.NewClient(
+				hclient.WithNoDefaultUserAgentHeader(true),
+				hclient.WithMaxConnsPerHost(cfg.PoolSize),
 			)
+			if err != nil {
+				return nil, err
+			}
+
+			c.SetClientFactory(factory.NewClientFactory(config.WithAllowHTTP(true)))
+
+			return c, nil
 		},
 	)
 }

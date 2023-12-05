@@ -24,7 +24,8 @@ func NewTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, error)
 		"http",
 		func() (*hclient.Client, error) {
 			return hclient.NewClient(
-				hclient.WithMaxConnsPerHost(cfg.PoolHosts),
+				hclient.WithNoDefaultUserAgentHeader(true),
+				hclient.WithMaxConnsPerHost(cfg.PoolSize),
 			)
 		},
 	)

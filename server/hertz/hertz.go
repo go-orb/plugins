@@ -50,7 +50,7 @@ func (s *Server) Start() error {
 		return nil
 	}
 
-	s.Logger.Debug("Starting")
+	s.Logger.Info("Starting", "address", s.Config.Address)
 
 	// for _, middleware := range s.Config.Middleware {
 	// 	s.router.Use(middleware)
