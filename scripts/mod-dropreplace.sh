@@ -12,14 +12,7 @@ for package in $(grep --null -E "^replace\s+github.com/go-orb/[\/a-zA-Z\-]+ => .
         continue;
     fi
 
-    # We do not remove "internal" replaces.
-    if [[ "${package:0:$GO_ORB_PLUGINS_LEN}" == "${GO_ORB_PLUGINS}" ]]; then
-        continue;
-    fi
-
     echo go mod edit -dropreplace="${package}";
     go mod edit -dropreplace="${package}";
-    # We should replace @main with @latest once we have releases.
-    go get -u "${package}@main"
 done;
 popd >/dev/null;
