@@ -16,9 +16,9 @@ import (
 	echohandler "github.com/go-orb/plugins/benchmarks/rps/handler/echo"
 	echopb "github.com/go-orb/plugins/benchmarks/rps/proto/echo"
 
-	mgrpc "github.com/go-orb/plugins/server/grpc"
-	// mhertz "github.com/go-orb/plugins/server/hertz"
 	"github.com/go-orb/plugins/server/drpc"
+	mgrpc "github.com/go-orb/plugins/server/grpc"
+	mhertz "github.com/go-orb/plugins/server/hertz"
 	mhttp "github.com/go-orb/plugins/server/http"
 
 	"github.com/google/wire"

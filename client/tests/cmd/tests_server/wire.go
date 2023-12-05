@@ -16,6 +16,7 @@ import (
 	"github.com/go-orb/plugins/client/tests/handler"
 	"github.com/go-orb/plugins/client/tests/proto"
 
+	"github.com/go-orb/plugins/server/drpc"
 	mgrpc "github.com/go-orb/plugins/server/grpc"
 	mhertz "github.com/go-orb/plugins/server/hertz"
 	mhttp "github.com/go-orb/plugins/server/http"
@@ -96,6 +97,11 @@ func provideServerOpts() ([]server.Option, error) {
 			mhttp.WithName("https"),
 			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[6])),
 			mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
+		),
+		drpc.WithEntrypoint(
+			drpc.WithName("https"),
+			drpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[6])),
+			drpc.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
 		),
 	}, nil
 }
