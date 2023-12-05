@@ -31,7 +31,7 @@ func NewTransportHTTP(logger log.Logger) (orb.TransportType, error) {
 			return &http.Client{
 				Timeout: opts.ConnectionTimeout,
 				Transport: &http.Transport{
-					MaxIdleConns:          opts.PoolSize,
+					MaxIdleConns:          opts.PoolHosts * opts.PoolSize,
 					MaxIdleConnsPerHost:   opts.PoolHosts + 1,
 					MaxConnsPerHost:       opts.PoolHosts,
 					IdleConnTimeout:       opts.PoolTTL,
@@ -40,7 +40,7 @@ func NewTransportHTTP(logger log.Logger) (orb.TransportType, error) {
 					DisableKeepAlives:     false,
 					DialContext: (&net.Dialer{
 						Timeout:   opts.DialTimeout,
-						KeepAlive: 30 * time.Second,
+						KeepAlive: 15 * time.Second,
 						DualStack: false,
 					}).DialContext,
 				},

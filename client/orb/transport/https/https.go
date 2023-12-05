@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/log"
@@ -34,9 +35,12 @@ func NewTransportHTTPS(logger log.Logger) (orb.TransportType, error) {
 					MaxIdleConnsPerHost: opts.PoolSize,
 					MaxConnsPerHost:     opts.PoolHosts,
 					IdleConnTimeout:     opts.PoolTTL,
-					Dial: (&net.Dialer{
-						Timeout: opts.DialTimeout,
-					}).Dial,
+					ForceAttemptHTTP2:   false,
+					DisableKeepAlives:   false,
+					DialContext: (&net.Dialer{
+						Timeout:   opts.DialTimeout,
+						KeepAlive: 15 * time.Second,
+					}).DialContext,
 					TLSHandshakeTimeout: opts.DialTimeout,
 					TLSClientConfig: &tls.Config{
 						//nolint:gosec
