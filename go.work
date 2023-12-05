@@ -5,6 +5,7 @@ use (
 	./client/orb
 	./client/orb/transport/basehertz
 	./client/orb/transport/basehttp
+	./client/orb/transport/drpc
 	./client/orb/transport/grpc
 	./client/orb/transport/h2c
 	./client/orb/transport/hertzh2c
