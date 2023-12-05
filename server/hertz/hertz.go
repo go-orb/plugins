@@ -23,13 +23,13 @@ import (
 	"github.com/hertz-contrib/http2/factory"
 )
 
-var _ orbserver.Entrypoint = (*ServerHertz)(nil)
+var _ orbserver.Entrypoint = (*Server)(nil)
 
 // Name is the plugin name.
 const Name = "hertz"
 
-// ServerHertz is the hertz Server for go-orb.
-type ServerHertz struct {
+// Server is the hertz Server for go-orb.
+type Server struct {
 	Config   Config
 	Logger   log.Logger
 	Registry registry.Type
@@ -45,7 +45,7 @@ type ServerHertz struct {
 }
 
 // Start will create the listeners and start the server on the entrypoint.
-func (s *ServerHertz) Start() error {
+func (s *Server) Start() error {
 	if s.started {
 		return nil
 	}
@@ -80,7 +80,7 @@ func (s *ServerHertz) Start() error {
 		errCh <- h.Run()
 	}(s.hServer, errCh)
 
-	if err := s.register(); err != nil {
+	if err := s.registryRegister(); err != nil {
 		return fmt.Errorf("failed to register the HTTP server: %w", err)
 	}
 
@@ -90,7 +90,7 @@ func (s *ServerHertz) Start() error {
 }
 
 // Stop will stop the Hertz server(s).
-func (s *ServerHertz) Stop(ctx context.Context) error {
+func (s *Server) Stop(ctx context.Context) error {
 	if !s.started {
 		return nil
 	}
@@ -100,7 +100,7 @@ func (s *ServerHertz) Stop(ctx context.Context) error {
 
 	s.Logger.Debug("Stopping")
 
-	if err := s.deregister(); err != nil {
+	if err := s.registryDeregister(); err != nil {
 		return err
 	}
 
@@ -113,17 +113,17 @@ func (s *ServerHertz) Stop(ctx context.Context) error {
 }
 
 // Register executes a registration function on the entrypoint.
-func (s *ServerHertz) Register(register orbserver.RegistrationFunc) {
+func (s *Server) Register(register orbserver.RegistrationFunc) {
 	register(s)
 }
 
 // Address returns the address the entrypoint is listening on.
-func (s *ServerHertz) Address() string {
+func (s *Server) Address() string {
 	return s.Config.Address
 }
 
 // Transport returns the client transport to use.
-func (s *ServerHertz) Transport() string {
+func (s *Server) Transport() string {
 	if s.Config.H2C {
 		return "hertzh2c"
 	} else if !s.Config.Insecure {
@@ -134,7 +134,7 @@ func (s *ServerHertz) Transport() string {
 }
 
 // EntrypointID returns the id (uuid) of this entrypoint in the registry.
-func (s *ServerHertz) EntrypointID() string {
+func (s *Server) EntrypointID() string {
 	if s.entrypointID != "" {
 		return s.entrypointID
 	}
@@ -145,26 +145,26 @@ func (s *ServerHertz) EntrypointID() string {
 }
 
 // String returns the entrypoint type; http.
-func (s *ServerHertz) String() string {
+func (s *Server) String() string {
 	return Name
 }
 
 // Name returns the entrypoint name.
-func (s *ServerHertz) Name() string {
+func (s *Server) Name() string {
 	return s.Config.Name
 }
 
 // Type returns the component type.
-func (s *ServerHertz) Type() string {
+func (s *Server) Type() string {
 	return orbserver.ComponentType
 }
 
-// Server returns the hertz server.
-func (s *ServerHertz) Server() *server.Hertz {
+// Router returns the hertz server.
+func (s *Server) Router() *server.Hertz {
 	return s.hServer
 }
 
-func (s *ServerHertz) getEndpoints() []*registry.Endpoint {
+func (s *Server) getEndpoints() []*registry.Endpoint {
 	routes := s.hServer.Routes()
 
 	result := make([]*registry.Endpoint, len(routes))
@@ -181,7 +181,7 @@ func (s *ServerHertz) getEndpoints() []*registry.Endpoint {
 	return result
 }
 
-func (s *ServerHertz) registryService() *registry.Service {
+func (s *Server) registryService() *registry.Service {
 	node := &registry.Node{
 		ID:        s.EntrypointID(),
 		Address:   s.Address(),
@@ -197,28 +197,28 @@ func (s *ServerHertz) registryService() *registry.Service {
 	}
 }
 
-func (s *ServerHertz) register() error {
+func (s *Server) registryRegister() error {
 	rService := s.registryService()
 
 	return s.Registry.Register(rService)
 }
 
-func (s *ServerHertz) deregister() error {
+func (s *Server) registryDeregister() error {
 	rService := s.registryService()
 
 	return s.Registry.Deregister(rService)
 }
 
-// ProvideServerHertz creates a new entrypoint for a single address. You can create
+// ProvideServer creates a new entrypoint for a single address. You can create
 // multiple entrypoints for multiple addresses and ports. One entrypoint
 // can serve a HTTP1 and HTTP2/H2C server.
-func ProvideServerHertz(
+func ProvideServer(
 	_ types.ServiceName,
 	logger log.Logger,
 	reg registry.Type,
 	cfg Config,
 	options ...Option,
-) (*ServerHertz, error) {
+) (*Server, error) {
 	cfg.ApplyOptions(options...)
 
 	var err error
@@ -239,7 +239,7 @@ func ProvideServerHertz(
 
 	logger = logger.With(slog.String("entrypoint", cfg.Name))
 
-	entrypoint := ServerHertz{
+	entrypoint := Server{
 		Config:   cfg,
 		Logger:   logger,
 		Registry: reg,

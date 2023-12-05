@@ -35,7 +35,7 @@ func RegisterEchoHTTPHandler(srv *mhttp.ServerHTTP, handler OrbEchoHandler) {
 
 // RegisterStreamsHertzHandler registers the service to an HTTP server.
 func RegisterStreamsHertzHandler(srv *mhertz.ServerHertz, handler OrbEchoHandler) {
-	s := srv.Server()
+	s := srv.Router()
 	s.POST("/echo.Echo/Echo", mhertz.NewGRPCHandler(srv, handler.Echo))
 }
 

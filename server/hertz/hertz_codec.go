@@ -51,7 +51,7 @@ func GetAcceptType(ctx codecs.Map, acceptHeader string, contentType string) stri
 }
 
 // Decode body takes the request body and decodes it into the proto type.
-func (s *ServerHertz) decodeBody(ctx *app.RequestContext, msg any) (string, error) {
+func (s *Server) decodeBody(ctx *app.RequestContext, msg any) (string, error) {
 	if ctx.Request.Header.IsGet() {
 		return consts.MIMEApplicationJSON, ctx.BindQuery(msg)
 	}
@@ -70,7 +70,7 @@ func (s *ServerHertz) decodeBody(ctx *app.RequestContext, msg any) (string, erro
 }
 
 // encodeBody takes the return proto type and encodes it into the response.
-func (s *ServerHertz) encodeBody(ctx *app.RequestContext, v any) error {
+func (s *Server) encodeBody(ctx *app.RequestContext, v any) error {
 	ct := utils.FilterContentType(ctx.Request.Header.Get(consts.HeaderAccept))
 
 	switch ct {

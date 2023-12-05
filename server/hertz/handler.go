@@ -13,9 +13,9 @@ var (
 	ErrNotHTTPServer = errors.New("server provider is not of type *http.Server")
 )
 
-// NewGRPCHandler will wrap a gRPC function with a Hertz handler.
+// NewGRPCHandler wraps a gRPC function with a Hertz handler.
 func NewGRPCHandler[Tin any, Tout any](
-	srv *ServerHertz,
+	srv *Server,
 	f func(context.Context, *Tin) (*Tout, error),
 ) func(c context.Context, ctx *app.RequestContext) {
 	return func(ctx context.Context, c *app.RequestContext) {
