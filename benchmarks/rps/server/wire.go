@@ -17,7 +17,7 @@ import (
 	proto "github.com/go-orb/plugins/benchmarks/rps/proto/echo"
 
 	mgrpc "github.com/go-orb/plugins/server/grpc"
-	mhertz "github.com/go-orb/plugins/server/hertz"
+	// mhertz "github.com/go-orb/plugins/server/hertz"
 	mhttp "github.com/go-orb/plugins/server/http"
 
 	"github.com/google/wire"
@@ -60,19 +60,19 @@ func provideServerOpts() ([]server.Option, error) {
 			mgrpc.WithInsecure(true),
 			mgrpc.WithRegistration("Streams", proto.RegisterEchoHandler(hInstance)),
 		),
-		mhertz.WithEntrypoint(
-			mhertz.WithName("hertzhttp"),
-			mhertz.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[1])),
-			mhertz.WithInsecure(),
-			mhertz.WithRegistration("Streams", proto.RegisterEchoHandler(hInstance)),
-		),
-		mhertz.WithEntrypoint(
-			mhertz.WithName("hertzh2c"),
-			mhertz.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[2])),
-			mhertz.WithInsecure(),
-			mhertz.WithAllowH2C(),
-			mhertz.WithRegistration("Streams", proto.RegisterEchoHandler(hInstance)),
-		),
+		// mhertz.WithEntrypoint(
+		// 	mhertz.WithName("hertzhttp"),
+		// 	mhertz.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[1])),
+		// 	mhertz.WithInsecure(),
+		// 	mhertz.WithRegistration("Streams", proto.RegisterEchoHandler(hInstance)),
+		// ),
+		// mhertz.WithEntrypoint(
+		// 	mhertz.WithName("hertzh2c"),
+		// 	mhertz.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[2])),
+		// 	mhertz.WithInsecure(),
+		// 	mhertz.WithAllowH2C(),
+		// 	mhertz.WithRegistration("Streams", proto.RegisterEchoHandler(hInstance)),
+		// ),
 		mhttp.WithEntrypoint(
 			mhttp.WithName("http"),
 			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[3])),
