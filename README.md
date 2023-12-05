@@ -12,23 +12,7 @@ This project is a work in progress, please do not use yet!
 
 ## Development
 
-### go.mod replacements
-
-When you work on packages that require changes in the core you will need:
-
-```bash
-go-task mod-replace
-```
-
-This will add replace statements to all go.mod's in this repo.
-
-**Before** a git commit you have to:
-
-```bash
-go-task mod-dropreplace
-```
-
-We do not accept commit's with a "replace" line.
+We do not accept commit's with a "replace" line in a go.mod.
 
 ### Quirks
 
