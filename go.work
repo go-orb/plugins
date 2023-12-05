@@ -28,6 +28,7 @@ use (
 	./registry/nats
 	./registry/regutil
 	./registry/tests
+	./server/drpc
 	./server/grpc
 	./server/hertz
 	./server/http
