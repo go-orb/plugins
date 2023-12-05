@@ -15,29 +15,38 @@ import (
 
 	"github.com/go-orb/go-orb/server"
 
+	mdrpc "github.com/go-orb/plugins/server/drpc"
 	mhertz "github.com/go-orb/plugins/server/hertz"
 	mhttp "github.com/go-orb/plugins/server/http"
 )
 
-type OrbStreamsHandler interface {
+type orbStreamsHandler interface {
 	Call(context.Context, *CallRequest) (*CallResponse, error)
 	mustEmbedUnimplementedStreamsServer()
 }
 
-type UnsafeOrbStreamsServer struct{}
-
-func (s *UnsafeOrbStreamsServer) mustEmbedUnimplementedStreamsServer() {}
-
-// RegisterStreamsHTTPHandler registers the service to an HTTP server.
-func RegisterStreamsHTTPHandler(srv *mhttp.ServerHTTP, handler OrbStreamsHandler) {
+func registerStreamsHTTPHandler(srv *mhttp.ServerHTTP, handler orbStreamsHandler) {
 	r := srv.Router()
 	r.Post("/echo.Streams/Call", mhttp.NewGRPCHandler(srv, handler.Call))
 }
 
-// RegisterStreamsHertzHandler registers the service to an hertz server.
-func RegisterStreamsHertzHandler(srv *mhertz.ServerHertz, handler OrbStreamsHandler) {
-	r := srv.Server()
+func registerStreamsHertzHandler(srv *mhertz.Server, handler orbStreamsHandler) {
+	r := srv.Router()
 	r.POST("/echo.Streams/Call", mhertz.NewGRPCHandler(srv, handler.Call))
+}
+
+func registerStreamsDRPCHandler(srv *mdrpc.Server, handler orbStreamsHandler) {
+	desc := DRPCStreamsDescription{}
+
+	// Register with DRPC.
+	r := srv.Router()
+	r.Register(handler, desc)
+
+	// Add each endpoint name of this handler to the orb drpc server.
+	for i := 0; i < desc.NumMethods(); i++ {
+		name, _, _, _, _ := desc.Method(i)
+		srv.AddEndpoint(name)
+	}
 }
 
 // RegisterStreamsHandler will return a registration function that can be
@@ -46,9 +55,11 @@ func RegisterStreamsHandler(handler any) server.RegistrationFunc {
 	return server.RegistrationFunc(func(s any) {
 		switch srv := any(s).(type) {
 		case *mhttp.ServerHTTP:
-			RegisterStreamsHTTPHandler(srv, handler.(OrbStreamsHandler))
-		case *mhertz.ServerHertz:
-			RegisterStreamsHertzHandler(srv, handler.(OrbStreamsHandler))
+			registerStreamsHTTPHandler(srv, handler.(orbStreamsHandler))
+		case *mhertz.Server:
+			registerStreamsHertzHandler(srv, handler.(orbStreamsHandler))
+		case *mdrpc.Server:
+			registerStreamsDRPCHandler(srv, handler.(orbStreamsHandler))
 		case grpc.ServiceRegistrar:
 			RegisterStreamsServer(srv, handler.(StreamsServer))
 		default:

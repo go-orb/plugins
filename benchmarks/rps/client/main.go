@@ -35,8 +35,9 @@ import (
 	// All transports.
 	_ "github.com/go-orb/plugins/client/orb/transport/grpc"
 	_ "github.com/go-orb/plugins/client/orb/transport/h2c"
-	_ "github.com/go-orb/plugins/client/orb/transport/hertzh2c"
-	_ "github.com/go-orb/plugins/client/orb/transport/hertzhttp"
+
+	// _ "github.com/go-orb/plugins/client/orb/transport/hertzh2c"
+	// _ "github.com/go-orb/plugins/client/orb/transport/hertzhttp" .
 	_ "github.com/go-orb/plugins/client/orb/transport/http"
 	_ "github.com/go-orb/plugins/client/orb/transport/http3"
 	_ "github.com/go-orb/plugins/client/orb/transport/https"

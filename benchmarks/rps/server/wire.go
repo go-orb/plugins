@@ -13,8 +13,8 @@ import (
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/types"
-	handler "github.com/go-orb/plugins/benchmarks/rps/handler/echo"
-	proto "github.com/go-orb/plugins/benchmarks/rps/proto/echo"
+	echohandler "github.com/go-orb/plugins/benchmarks/rps/handler/echo"
+	echopb "github.com/go-orb/plugins/benchmarks/rps/proto/echo"
 
 	mgrpc "github.com/go-orb/plugins/server/grpc"
 	// mhertz "github.com/go-orb/plugins/server/hertz"
@@ -51,51 +51,51 @@ func provideServerOpts() ([]server.Option, error) {
 	}
 
 	// Our lonely handler
-	hInstance := new(handler.Handler)
+	hInstance := new(echohandler.Handler)
 
 	return []server.Option{
 		mgrpc.WithEntrypoint(
 			mgrpc.WithName("grpc"),
 			mgrpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[0])),
 			mgrpc.WithInsecure(true),
-			mgrpc.WithRegistration("Streams", proto.RegisterEchoHandler(hInstance)),
+			mgrpc.WithRegistration("Streams", echopb.OrbRegister(hInstance)),
 		),
 		// mhertz.WithEntrypoint(
 		// 	mhertz.WithName("hertzhttp"),
 		// 	mhertz.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[1])),
 		// 	mhertz.WithInsecure(),
-		// 	mhertz.WithRegistration("Streams", proto.RegisterEchoHandler(hInstance)),
+		// 	mhertz.WithRegistration("Streams", echopb.OrbRegister(hInstance)),
 		// ),
 		// mhertz.WithEntrypoint(
 		// 	mhertz.WithName("hertzh2c"),
 		// 	mhertz.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[2])),
 		// 	mhertz.WithInsecure(),
 		// 	mhertz.WithAllowH2C(),
-		// 	mhertz.WithRegistration("Streams", proto.RegisterEchoHandler(hInstance)),
+		// 	mhertz.WithRegistration("Streams", echopb.OrbRegister(hInstance)),
 		// ),
 		mhttp.WithEntrypoint(
 			mhttp.WithName("http"),
 			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[3])),
 			mhttp.WithInsecure(),
-			mhttp.WithRegistration("Streams", proto.RegisterEchoHandler(hInstance)),
+			mhttp.WithRegistration("Streams", echopb.OrbRegister(hInstance)),
 		),
 		mhttp.WithEntrypoint(
 			mhttp.WithName("h2c"),
 			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[4])),
 			mhttp.WithInsecure(),
 			mhttp.WithAllowH2C(),
-			mhttp.WithRegistration("Streams", proto.RegisterEchoHandler(hInstance)),
+			mhttp.WithRegistration("Streams", echopb.OrbRegister(hInstance)),
 		),
 		mhttp.WithEntrypoint(
 			mhttp.WithName("http3"),
 			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[5])),
 			mhttp.WithHTTP3(),
-			mhttp.WithRegistration("Streams", proto.RegisterEchoHandler(hInstance)),
+			mhttp.WithRegistration("Streams", echopb.OrbRegister(hInstance)),
 		),
 		mhttp.WithEntrypoint(
 			mhttp.WithName("https"),
 			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[6])),
-			mhttp.WithRegistration("Streams", proto.RegisterEchoHandler(hInstance)),
+			mhttp.WithRegistration("Streams", echopb.OrbRegister(hInstance)),
 		),
 	}, nil
 }
