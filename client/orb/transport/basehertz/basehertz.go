@@ -22,7 +22,7 @@ import (
 var _ (orb.Transport) = (*Transport)(nil)
 
 // TransportClientCreator is a factory for a client transport.
-type TransportClientCreator func(ctx context.Context, opts *client.CallOptions) (*hclient.Client, error)
+type TransportClientCreator func() (*hclient.Client, error)
 
 // Transport is a go-orb/plugins/client/orb compatible transport.
 type Transport struct {
@@ -100,7 +100,7 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 
 	// Get the client
 	if t.hclient == nil {
-		hclient, err := t.clientCreator(ctx, opts)
+		hclient, err := t.clientCreator()
 		if err != nil {
 			return nil, err
 		}

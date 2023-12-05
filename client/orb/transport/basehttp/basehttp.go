@@ -21,16 +21,12 @@ import (
 
 var _ (orb.Transport) = (*Transport)(nil)
 
-// TransportClientCreator is a factory for a client transport.
-type TransportClientCreator func(ctx context.Context, opts *client.CallOptions) (*http.Client, error)
-
 // Transport is a go-orb/plugins/client/orb compatible transport.
 type Transport struct {
-	name          string
-	logger        log.Logger
-	clientCreator TransportClientCreator
-	hclient       *http.Client
-	scheme        string
+	name    string
+	logger  log.Logger
+	hclient *http.Client
+	scheme  string
 }
 
 // Start starts the transport.
@@ -109,16 +105,6 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 		}
 	}
 
-	// Get the client
-	if t.hclient == nil {
-		hclient, err := t.clientCreator(ctx, opts)
-		if err != nil {
-			return nil, err
-		}
-
-		t.hclient = hclient
-	}
-
 	return t.call2(node, opts, req, hReq)
 }
 
@@ -176,12 +162,14 @@ func (t *Transport) CallNoCodec(_ context.Context, _ *client.Request[any, any], 
 }
 
 // NewTransport creates a Transport with a custom http.Client.
-func NewTransport(name string, logger log.Logger, scheme string, clientCreator TransportClientCreator,
+func NewTransport(
+	name string, logger log.Logger, scheme string, hclient *http.Client,
 ) (orb.TransportType, error) {
 	return orb.TransportType{Transport: &Transport{
-		name:          name,
-		logger:        logger,
-		scheme:        scheme,
-		clientCreator: clientCreator,
-	}}, nil
+		name:    name,
+		logger:  logger,
+		scheme:  scheme,
+		hclient: hclient,
+	},
+	}, nil
 }

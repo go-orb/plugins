@@ -138,7 +138,7 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 }
 
 // NewTransport creates a Transport.
-func NewTransport(logger log.Logger) (orb.TransportType, error) {
+func NewTransport(logger log.Logger, _ *orb.Config) (orb.TransportType, error) {
 	return orb.TransportType{Transport: &Transport{
 		logger: logger,
 	}}, nil

@@ -13,7 +13,7 @@ var _ proto.StreamsServer = (*EchoHandler)(nil)
 
 // EchoHandler is a test handler.
 type EchoHandler struct {
-	proto.UnsafeOrbStreamsServer
+	proto.UnsafeStreamsServer
 }
 
 // Call implements the call method.

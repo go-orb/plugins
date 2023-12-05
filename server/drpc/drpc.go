@@ -54,6 +54,11 @@ func (s *Server) Start() error {
 	// create a drpc RPC mux
 	s.mux = drpcmux.New()
 
+	// Register handlers.
+	for _, h := range s.config.HandlerRegistrations {
+		h(s)
+	}
+
 	s.server = drpcserver.New(s.mux)
 
 	var err error

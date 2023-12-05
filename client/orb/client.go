@@ -167,7 +167,7 @@ func (c *Client) transportForReq(ctx context.Context, req *client.Request[any, a
 			return nil, orberrors.ErrInternalServerError.Wrap(fmt.Errorf("%w (%s)", client.ErrFailedToCreateTransport, node.Transport))
 		}
 
-		transport, err = tcreator(c.logger.With("transport", node.Transport))
+		transport, err = tcreator(c.logger.With("transport", node.Transport), &c.config)
 		if err != nil {
 			c.logger.Error(
 				"Failed to create a transport",

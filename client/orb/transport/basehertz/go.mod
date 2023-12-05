@@ -4,8 +4,8 @@ go 1.21.4
 
 require (
 	github.com/cloudwego/hertz v0.7.2
-	github.com/go-orb/go-orb v0.0.0-20231203061431-2cf52a164da0
-	github.com/go-orb/plugins/client/orb v0.0.0-20231203074959-0fd4c3d92e13
+	github.com/go-orb/go-orb v0.0.0-20231205050211-f64e9b008f76
+	github.com/go-orb/plugins/client/orb v0.0.0-20231205034045-56e7ea07fb2a
 )
 
 require (
@@ -19,9 +19,6 @@ require (
 	github.com/cloudwego/netpoll v0.5.1 // indirect
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/henrylee2cn/ameda v1.5.1 // indirect
-	github.com/henrylee2cn/goutil v1.0.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.6 // indirect
 	github.com/nyaruka/phonenumbers v1.2.2 // indirect
 	github.com/tidwall/gjson v1.17.0 // indirect

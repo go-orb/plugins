@@ -30,7 +30,7 @@ type TransportType struct {
 }
 
 // TransportFactory is used by a transports to register itself with the global "Transports" below.
-type TransportFactory = func(log.Logger) (TransportType, error)
+type TransportFactory = func(log.Logger, *Config) (TransportType, error)
 
 //nolint:gochecknoglobals
 var (
