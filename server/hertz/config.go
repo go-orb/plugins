@@ -201,7 +201,7 @@ type Config struct {
 // NewConfig will create a new default config for the entrypoint.
 func NewConfig(options ...Option) *Config {
 	cfg := Config{
-		Name:                 "http-" + uuid.NewString(),
+		Name:                 "hertz-" + uuid.NewString(),
 		Address:              DefaultAddress,
 		Insecure:             DefaultInsecure,
 		MaxConcurrentStreams: DefaultMaxConcurrentStreams,
