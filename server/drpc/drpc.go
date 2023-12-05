@@ -56,9 +56,14 @@ func (s *Server) Start() error {
 
 	s.server = drpcserver.New(s.mux)
 
-	listener, err := net.Listen("tcp", s.config.Address)
-	if err != nil {
-		return err
+	var err error
+
+	listener := s.config.Listener
+	if listener == nil {
+		listener, err = net.Listen("tcp", s.config.Address)
+		if err != nil {
+			return err
+		}
 	}
 
 	go func(s *Server, listener net.Listener) {

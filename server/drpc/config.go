@@ -2,6 +2,7 @@ package drpc
 
 import (
 	"fmt"
+	"net"
 	"time"
 
 	"log/slog"
@@ -54,6 +55,9 @@ type Config struct {
 	// The default name is 'http-<random uuid>'
 	Name string `json:"name" yaml:"name"`
 
+	// Listener can be used to provide your own Listener, when in use `Address` is obsolete.
+	Listener net.Listener `json:"-" yaml:"-"`
+
 	// Address to listen on.
 	// TODO: implement this, and the address method.
 	// If no IP is provided, an interface will be selected automatically. Private
@@ -62,27 +66,6 @@ type Config struct {
 	// If no port is provided, a random port will be selected. To listen on a
 	// specific interface, but with a random port, you can use '<IP>:0'.
 	Address string `json:"address" yaml:"address"`
-
-	// ReadTimeout is the maximum duration for reading the entire
-	// request, including the body. A zero or negative value means
-	// there will be no timeout.
-	ReadTimeout time.Duration `json:"readTimeout" yaml:"readTimeout"`
-
-	// WriteTimeout is the maximum duration before timing out
-	// writes of the response. It is reset whenever a new
-	// request's header is read. Like ReadTimeout, it does not
-	// let Handlers make decisions on a per-request basis.
-	// A zero or negative value means there will be no timeout.
-	WriteTimeout time.Duration `json:"writeTimeout" yaml:"writeTimeout"`
-
-	// IdleTimeout is the maximum amount of time to wait for the
-	// next request when keep-alives are enabled. If IdleTimeout
-	// is zero, the value of ReadTimeout is used. If both are
-	// zero, there is no timeout.
-	IdleTimeout time.Duration `json:"idleTimeout" yaml:"idleTimeout"`
-
-	// StopTimeout is the timeout for ServerHertz.Stop().
-	StopTimeout time.Duration `json:"stopTimeout" yaml:"stopTimeout"`
 
 	// HandlerRegistrations are all handler registration functions that will be
 	// registered to the server upon startup.
@@ -103,12 +86,8 @@ type Config struct {
 // NewConfig will create a new default config for the entrypoint.
 func NewConfig(options ...Option) *Config {
 	cfg := Config{
-		Name:                 "http-" + uuid.NewString(),
+		Name:                 "dprc-" + uuid.NewString(),
 		Address:              DefaultAddress,
-		ReadTimeout:          DefaultReadTimeout,
-		WriteTimeout:         DefaultWriteTimeout,
-		IdleTimeout:          DefaultIdleTimeout,
-		StopTimeout:          DefaultStopTimeout,
 		HandlerRegistrations: make(server.HandlerRegistrations),
 	}
 
@@ -145,6 +124,13 @@ func WithName(name string) Option {
 	}
 }
 
+// WithListener sets the entrypoints listener. This overwrites `Address`.
+func WithListener(l net.Listener) Option {
+	return func(c *Config) {
+		c.Listener = l
+	}
+}
+
 // WithAddress specifies the address to listen on.
 // If you want to listen on all interfaces use the format ":8080"
 // If you want to listen on a specific interface/address use the full IP.
@@ -160,33 +146,6 @@ func WithAddress(address string) Option {
 func WithConfig(config Config) Option {
 	return func(c *Config) {
 		*c = config
-	}
-}
-
-// WithReadTimeout sets the maximum duration for reading the entire request,
-// including the body. A zero or negative value means there will be no timeout.
-func WithReadTimeout(timeout time.Duration) Option {
-	return func(c *Config) {
-		c.ReadTimeout = timeout
-	}
-}
-
-// WithWriteTimeout sets the maximum duration before timing out writes of the
-// response. It is reset whenever a new request's header is read. Like
-// ReadTimeout, it does not let Handlers make decisions on a per-request basis.
-// A zero or negative value means there will be no timeout.
-func WithWriteTimeout(timeout time.Duration) Option {
-	return func(c *Config) {
-		c.WriteTimeout = timeout
-	}
-}
-
-// WithIdleTimeout is the maximum amount of time to wait for the next request when
-// keep-alives are enabled. If IdleTimeout is zero, the value of ReadTimeout is
-// used. If both are zero, there is no timeout.
-func WithIdleTimeout(timeout time.Duration) Option {
-	return func(c *Config) {
-		c.IdleTimeout = timeout
 	}
 }
 
