@@ -3,9 +3,13 @@
 export SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 export ORB_ROOT=$(realpath "${SCRIPT_DIR}/..")
 
-if [[ -e $GOMAXPROCS ]]; then
+if [[ "x$GOMAXPROCS" == "x" ]]; then
 	# Run all tests/benchmarks with a single core by default.
 	export GOMAXPROCS=1
+fi
+
+if [[ "x$PROCS" == "x" ]]; then
+	export PROCS=$(expr $(nproc) - 1)
 fi
 
 export ORB_GO_TEST_FLAGS="-v -race -cover"
@@ -78,7 +82,7 @@ function run_test() {
 		go install github.com/kyoh86/richgo@latest
 	fi
 
-	procs=$(expr $(nproc) - 1)
+	procs=$PROCS
 	failed="false"
 
 	if [[ ${#dirs[@]} == 1 ]] || [[ ${procs} == 1 ]]; then
@@ -106,7 +110,7 @@ function run_bench() {
 		go install github.com/kyoh86/richgo@latest
 	fi
 
-	procs=$(expr $(nproc) - 1)
+	procs=$PROCS
 	failed="false"
 
 	if [[ ${#dirs[@]} == 1 ]] || [[ ${procs} == 1 ]]; then
