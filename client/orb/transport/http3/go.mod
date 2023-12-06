@@ -4,8 +4,8 @@ go 1.21.5
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078
-	github.com/go-orb/plugins/client/orb v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20231206161850-d3e504c766e1
+	github.com/go-orb/plugins/client/orb v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20231206164224-3acd91946bd6
 	github.com/go-orb/plugins/client/tests v0.0.0-20231205051152-a7c84fe79f05
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231205052311-482ca12d811d
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20231205052311-482ca12d811d
@@ -72,7 +72,7 @@ require (
 	go.uber.org/mock v0.3.0 // indirect
 	golang.org/x/arch v0.6.0 // indirect
 	golang.org/x/crypto v0.16.0 // indirect
-	golang.org/x/exp v0.0.0-20231127185646-65229373498e // indirect
+	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect

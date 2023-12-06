@@ -4,29 +4,29 @@ go 1.21.5
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078
-	github.com/go-orb/plugins/client/middleware/log v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/client/orb v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/client/orb/transport/drpc v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/client/orb/transport/grpc v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/client/orb/transport/h2c v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/client/orb/transport/hertzh2c v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/client/orb/transport/hertzhttp v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/client/orb/transport/http v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/client/orb/transport/http3 v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/client/orb/transport/https v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/config/source/file v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/log/lumberjack v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/log/slog v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/registry/consul v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/server/drpc v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/server/grpc v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/server/hertz v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/server/http v0.0.0-20231206161850-d3e504c766e1
+	github.com/go-orb/plugins/client/middleware/log v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/client/orb v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/client/orb/transport/drpc v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/client/orb/transport/grpc v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/client/orb/transport/h2c v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/client/orb/transport/hertzh2c v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/client/orb/transport/hertzhttp v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/client/orb/transport/http v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/client/orb/transport/http3 v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/client/orb/transport/https v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/config/source/file v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/log/lumberjack v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/log/slog v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/registry/consul v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/server/drpc v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/server/grpc v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/server/hertz v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/server/http v0.0.0-20231206164224-3acd91946bd6
 	github.com/google/wire v0.5.0
 	github.com/hashicorp/consul/sdk v0.15.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20231127180814-3a041ad873d4
@@ -51,9 +51,9 @@ require (
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-chi/chi v1.5.5 // indirect
-	github.com/go-orb/plugins/client/orb/transport/basehertz v0.0.0-20231206161850-d3e504c766e1 // indirect
-	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20231206161850-d3e504c766e1 // indirect
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20231206161850-d3e504c766e1 // indirect
+	github.com/go-orb/plugins/client/orb/transport/basehertz v0.0.0-20231206164224-3acd91946bd6 // indirect
+	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20231206164224-3acd91946bd6 // indirect
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20231206164224-3acd91946bd6 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/pprof v0.0.0-20231205033806-a5a03c77bf08 // indirect
@@ -92,7 +92,7 @@ require (
 	go.uber.org/mock v0.3.0 // indirect
 	golang.org/x/arch v0.6.0 // indirect
 	golang.org/x/crypto v0.16.0 // indirect
-	golang.org/x/exp v0.0.0-20231127185646-65229373498e // indirect
+	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect

@@ -4,23 +4,23 @@ go 1.21.5
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078
-	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/config/source/file v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/log/lumberjack v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/log/slog v0.0.0-20231206161850-d3e504c766e1
+	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/config/source/file v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/log/lumberjack v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/log/slog v0.0.0-20231206164224-3acd91946bd6
 	github.com/go-orb/plugins/registry/consul v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/server/drpc v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/server/grpc v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/server/hertz v0.0.0-20231206161850-d3e504c766e1
-	github.com/go-orb/plugins/server/http v0.0.0-20231206161850-d3e504c766e1
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/server/drpc v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/server/grpc v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/server/hertz v0.0.0-20231206164224-3acd91946bd6
+	github.com/go-orb/plugins/server/http v0.0.0-20231206164224-3acd91946bd6
 	github.com/google/wire v0.5.0
 	github.com/hashicorp/consul/sdk v0.15.0
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/exp v0.0.0-20231127185646-65229373498e
+	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb
 	google.golang.org/genproto/googleapis/api v0.0.0-20231127180814-3a041ad873d4
 	google.golang.org/grpc v1.59.0
 	google.golang.org/protobuf v1.31.0
