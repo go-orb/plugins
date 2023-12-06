@@ -130,7 +130,7 @@ func (s *ServerGRPC) Start() error {
 
 	go func() {
 		if err := s.server.Serve(s.lis); err != nil {
-			// TODO: propagate error here
+			// TODO(davincible): propagate error here
 			s.logger.Error("failed to start gRPC server", err)
 		}
 	}()

@@ -59,7 +59,7 @@ type Config struct {
 	Listener net.Listener `json:"-" yaml:"-"`
 
 	// Address to listen on.
-	// TODO: implement this, and the address method.
+	// TODO(davincible): implement this, and the address method.
 	// If no IP is provided, an interface will be selected automatically. Private
 	// interfaces are preferred, if none are found a public interface will be used.
 	//
@@ -78,7 +78,7 @@ type Config struct {
 	// Logger allows you to dynamically change the log level and plugin for a
 	// specific entrypoint.
 	Logger struct {
-		Level  slog.Level `json:"level,omitempty" yaml:"level,omitempty"` // TODO: change with custom level
+		Level  slog.Level `json:"level,omitempty" yaml:"level,omitempty"` // TODO(davincible): change with custom level
 		Plugin string     `json:"plugin,omitempty" yaml:"plugin,omitempty"`
 	} `json:"logger" yaml:"logger"`
 }

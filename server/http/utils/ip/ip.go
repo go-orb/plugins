@@ -92,7 +92,7 @@ func RegisterNetworkHTTP3(originalNetwork, h3Network string) {
 func GetHTTP3Network(originalNetwork string) string {
 	h3Network, ok := networkTypesHTTP3[strings.ToLower(originalNetwork)]
 	if !ok {
-		// TODO: Maybe a better default is to not enable HTTP/3 if we do not know the network?
+		// TODO(davincible): Maybe a better default is to not enable HTTP/3 if we do not know the network?
 		return "udp"
 	}
 

@@ -35,7 +35,7 @@ func (s *ServerHTTP) newHTTP3Server() *http3server {
 		TLSConfig:      s.Config.TLS.Config,
 		MaxHeaderBytes: s.Config.MaxHeaderBytes,
 
-		// TODO: remove this config when draft versions are no longer supported (we have no need to support drafts)
+		// TODO(davincible): remove this config when draft versions are no longer supported (we have no need to support drafts)
 		QuicConfig: &quic.Config{
 			MaxIncomingStreams: int64(s.Config.MaxConcurrentStreams),
 			Versions:           []quic.VersionNumber{quic.Version1, quic.Version2},
@@ -64,6 +64,6 @@ func (h3 *http3server) Start() error {
 }
 
 func (h3 *http3server) Stop(_ context.Context) error {
-	// TODO: use h3.CloseGracefully() when available.
+	// TODO(davincible): use h3.CloseGracefully() when available.
 	return h3.Close()
 }

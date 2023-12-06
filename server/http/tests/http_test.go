@@ -42,12 +42,12 @@ import (
 	_ "github.com/go-orb/plugins/server/http/router/chi"
 )
 
-// TODO: test get path params
+// TODO(davincible): test get path params
 
-// TODO: for client, provide info on this error: 		t.Error("As:", errors.As(err, &x509.HostnameError{}))
+// TODO(davincible): for client, provide info on this error: 		t.Error("As:", errors.As(err, &x509.HostnameError{}))
 //       >> change URL to proper hostname
 
-// TODO: Provide context on unknown authority error for client x509.UnknownAuthorityError
+// TODO(davincible): Provide context on unknown authority error for client x509.UnknownAuthorityError
 //       >> Self signed cert was used
 
 /*
@@ -427,7 +427,7 @@ func TestServerFileConfig(t *testing.T) {
 
 	h := new(handler.EchoHandler)
 	srv, err := server.ProvideServer(name, config, logger, reg,
-		// TODO: test defaults
+		// TODO(davincible): test defaults
 		mhttp.WithEntrypoint(
 			mhttp.WithName("static-ep-1"),
 			mhttp.WithAddress(":48081"),

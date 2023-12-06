@@ -22,7 +22,7 @@ const (
 	// DefaultAddress to use for new HTTP servers.
 	// If set to "random", the default, a random address will be selected,
 	// preferably on a private interface (XX subet). TODO: implement.
-	// TODO: revisit default address, probably use random addr.
+	// TODO(davincible): revisit default address, probably use random addr.
 	DefaultAddress = "0.0.0.0:42069"
 
 	// DefaultInsecure will create an HTTP server without TLS, for insecure connections.
@@ -104,7 +104,7 @@ type Config struct {
 	Name string `json:"name" yaml:"name"`
 
 	// Address to listen on.
-	// TODO: implement this, and the address method.
+	// TODO(davincible): implement this, and the address method.
 	// If no IP is provided, an interface will be selected automatically. Private
 	// interfaces are preferred, if none are found a public interface will be used.
 	//
@@ -206,7 +206,7 @@ type Config struct {
 	// Logger allows you to dynamically change the log level and plugin for a
 	// specific entrypoint.
 	Logger struct {
-		Level  slog.Level `json:"level,omitempty" yaml:"level,omitempty"` // TODO: change with custom level
+		Level  slog.Level `json:"level,omitempty" yaml:"level,omitempty"` // TODO(davincible): change with custom level
 		Plugin string     `json:"plugin,omitempty" yaml:"plugin,omitempty"`
 	} `json:"logger" yaml:"logger"`
 }

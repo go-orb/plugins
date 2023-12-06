@@ -8,7 +8,7 @@ import (
 
 // BuildListenerTCP creates a net listener with or without TLS.
 func BuildListenerTCP(addr string, tlsConf *tls.Config) (net.Listener, error) {
-	// TODO: do we need tcp keep alive listener? To set timeout on keep alive
+	// TODO(davincible): do we need tcp keep alive listener? To set timeout on keep alive
 	if tlsConf != nil {
 		return tls.Listen("tcp", addr, tlsConf)
 	}

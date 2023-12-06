@@ -122,7 +122,7 @@ func (c *RegistryConsul) Deregister(s *registry.Service, _ ...registry.Deregiste
 }
 
 // Register registers a service within the registry.
-// TODO(rene): work on the nolints.
+// TODO(jochumdev): work on the nolints.
 //
 //nolint:gocyclo,funlen,cyclop
 func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.RegisterOption) error {

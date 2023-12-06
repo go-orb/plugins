@@ -53,7 +53,7 @@ func (s *ServerHTTP) newHTTPServer(router router.Router) (*httpServer, error) {
 		WriteTimeout:      s.Config.WriteTimeout,
 		IdleTimeout:       s.Config.IdleTimeout,
 		ReadHeaderTimeout: time.Second * 4,
-		// TODO: do we need to set this? would be nice but doesn't take interface
+		// TODO(davincible): do we need to set this? would be nice but doesn't take interface
 		// ErrorLog:          httpServerLogger,
 	}
 
