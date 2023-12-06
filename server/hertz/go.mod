@@ -1,6 +1,8 @@
 module github.com/go-orb/plugins/server/hertz
 
-go 1.21.5
+go 1.21
+
+toolchain go1.21.5
 
 require (
 	github.com/cloudwego/hertz v0.7.2
@@ -20,7 +22,6 @@ require (
 	github.com/cloudwego/netpoll v0.5.1 // indirect
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.6 // indirect
