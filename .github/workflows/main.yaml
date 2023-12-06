@@ -7,7 +7,7 @@ permissions: read-all
 jobs:
   golangci:
     name: Lint
-    runs-on: [self-hosted, ubuntu-latest]
+    runs-on: [self-hosted, linux, x64]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -20,7 +20,7 @@ jobs:
         run: ./scripts/test.sh lint all
   test:
     name: Unit Tests
-    runs-on: [self-hosted, ubuntu-latest]
+    runs-on: [self-hosted, linux, x64]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -33,7 +33,7 @@ jobs:
         run: ./scripts/test.sh test all
   summary:
     name: Summary
-    runs-on: [self-hosted, ubuntu-latest]
+    runs-on: [self-hosted, linux, x64]
     steps:
       - uses: actions/checkout@v3
         with:
