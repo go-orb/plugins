@@ -1,3 +1,4 @@
+// Package log provides a logging middleware for client.
 package log
 
 import (
@@ -14,14 +15,12 @@ func init() {
 	client.Middlewares.Register(Name, Provide)
 }
 
+// Name is the middlewares name.
 const Name = "log"
-
-type Config struct {
-	*client.MiddlewareConfig `yaml:",inline"`
-}
 
 var _ client.Middleware = (*Middleware)(nil)
 
+// Middleware is the log Middleware for client.
 type Middleware struct {
 	logger log.Logger
 }
@@ -31,7 +30,7 @@ func (m *Middleware) Start() error { return nil }
 
 // Stop the component. E.g. disconnect from the broker.
 // The context will contain a timeout, and cancelation should be respected.
-func (m *Middleware) Stop(ctx context.Context) error { return nil }
+func (m *Middleware) Stop(_ context.Context) error { return nil }
 
 // Type returns the component type, e.g. broker.
 func (m *Middleware) Type() string {
@@ -92,7 +91,8 @@ func (m *Middleware) CallNoCodec(
 	}
 }
 
-func Provide(sections []string, configs types.ConfigData, client client.Type, logger log.Logger) (client.Middleware, error) {
+// Provide will be registered to client.Middlewares, it's a factory for this.
+func Provide(sections []string, configs types.ConfigData, _ client.Type, logger log.Logger) (client.Middleware, error) {
 	// Configure the logger.
 	logger, err := logger.WithConfig(sections, configs)
 	if err != nil {

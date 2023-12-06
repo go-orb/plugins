@@ -13,7 +13,6 @@ import (
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/log"
-	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/client/orb"
@@ -99,10 +98,10 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 		}
 	}
 
-	return t.call2(node, opts, req, hReq)
+	return t.call2(opts, hReq)
 }
 
-func (t *Transport) call2(node *registry.Node, opts *client.CallOptions, req *client.Request[any, any], hReq *http.Request,
+func (t *Transport) call2(opts *client.CallOptions, hReq *http.Request,
 ) (*client.RawResponse, error) {
 	// Run the request.
 	resp, err := t.hclient.Do(hReq)

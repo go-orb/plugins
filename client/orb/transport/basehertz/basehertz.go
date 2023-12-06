@@ -119,9 +119,9 @@ func (h *hresBodyCloserWrapper) Close() error {
 
 func (t *Transport) call2(
 	ctx context.Context,
-	node *registry.Node,
+	_ *registry.Node,
 	opts *client.CallOptions,
-	req *client.Request[any, any],
+	_ *client.Request[any, any],
 	hReq *protocol.Request,
 ) (*client.RawResponse, error) {
 	// Run the request.

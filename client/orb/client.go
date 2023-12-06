@@ -308,13 +308,16 @@ func ProvideClient(
 
 	sections := types.SplitServiceName(name)
 	sections = append(sections, client.DefaultConfigSection)
+
 	if err := config.Parse(sections, data, &cfg); err != nil {
 		return client.Type{}, err
 	}
 
-	c := New(cfg, logger, registry)
+	newClient := New(cfg, logger, registry)
 
+	//nolint:nestif
 	if config.HasKey[[]any](sections, "middlewares", data) {
+		// Get and factory them all.
 		middlewares := []client.Middleware{}
 
 		for i := 0; ; i++ {
@@ -323,6 +326,7 @@ func ProvideClient(
 				if errors.Is(err, config.ErrNotExistent) || mCfg.Name == "" {
 					break
 				}
+
 				return client.Type{}, err
 			}
 
@@ -331,7 +335,7 @@ func ProvideClient(
 				return client.Type{}, fmt.Errorf("Client middleware '%s' not found, did you import it?", mCfg.Name)
 			}
 
-			m, err := fac(append(sections, "middlewares", strconv.Itoa(i)), data, client.Type{Client: c}, logger)
+			m, err := fac(append(sections, "middlewares", strconv.Itoa(i)), data, client.Type{Client: newClient}, logger)
 			if err != nil {
 				return client.Type{}, err
 			}
@@ -339,10 +343,11 @@ func ProvideClient(
 			middlewares = append(middlewares, m)
 		}
 
+		// Apply them to the client.
 		if len(middlewares) > 0 {
-			c.middlewares = middlewares
+			newClient.middlewares = middlewares
 		}
 	}
 
-	return client.Type{Client: c}, nil
+	return client.Type{Client: newClient}, nil
 }
