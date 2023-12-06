@@ -15,6 +15,7 @@ runtimes:
     - node@18.12.1
 lint:
   enabled:
+    - osv-scanner@1.5.0
     - checkov@3.1.9
     - trivy@0.48.0
     - trufflehog@3.63.2
@@ -27,7 +28,6 @@ lint:
     - golangci-lint@1.55.2
     - prettier@3.1.0
   disabled:
-    - osv-scanner
     - gokart
     - shellcheck
     - shfmt
