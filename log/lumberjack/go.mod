@@ -1,9 +1,9 @@
 module github.com/go-orb/plugins/log/lumberjack
 
-go 1.21.4
+go 1.21.5
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231205054835-5d5151ec921b
+	github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 

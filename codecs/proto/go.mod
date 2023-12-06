@@ -1,9 +1,9 @@
 module github.com/go-orb/plugins/codecs/proto
 
-go 1.21.4
+go 1.21.5
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231205054835-5d5151ec921b
+	github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078
 	google.golang.org/protobuf v1.31.0
 )
 

@@ -1,10 +1,10 @@
 module github.com/go-orb/plugins/server/hertz
 
-go 1.21.4
+go 1.21.5
 
 require (
 	github.com/cloudwego/hertz v0.7.2
-	github.com/go-orb/go-orb v0.0.0-20231205054835-5d5151ec921b
+	github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078
 	github.com/google/uuid v1.4.0
 	github.com/hertz-contrib/http2 v0.1.8
 )

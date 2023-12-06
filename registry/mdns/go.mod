@@ -1,9 +1,9 @@
 module github.com/go-orb/plugins/registry/mdns
 
-go 1.21.4
+go 1.21.5
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231205054835-5d5151ec921b
+	github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078
 	github.com/go-orb/plugins/log/slog v0.0.0-20231205051152-a7c84fe79f05
 	github.com/go-orb/plugins/registry/tests v0.0.0-20231205051152-a7c84fe79f05
 	github.com/google/uuid v1.4.0
