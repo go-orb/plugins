@@ -42,6 +42,8 @@ github.com/go-orb/plugins/client/orb v0.0.0-20231206043051-39c19db01b8f h1:GIC2G
 github.com/go-orb/plugins/client/orb v0.0.0-20231206043051-39c19db01b8f/go.mod h1:AwdEKO1R2RPXSPVGvPp0Z4YCaZJJCJIo+cVI6qlQZdM=
 github.com/go-orb/plugins/client/orb v0.0.0-20231206160454-235a736267d8 h1:sKSXqenSYFwKuPkVP9kynRyNZ6zilcYyL7vEyi4KaIM=
 github.com/go-orb/plugins/client/orb v0.0.0-20231206160454-235a736267d8/go.mod h1:AwdEKO1R2RPXSPVGvPp0Z4YCaZJJCJIo+cVI6qlQZdM=
+github.com/go-orb/plugins/client/orb v0.0.0-20231206161240-54de0e61ff14 h1:rqEtRnMhMAt3zmlUwNlLmZjmF+sxGAELXo3g4ZQIHoM=
+github.com/go-orb/plugins/client/orb v0.0.0-20231206161240-54de0e61ff14/go.mod h1:AwdEKO1R2RPXSPVGvPp0Z4YCaZJJCJIo+cVI6qlQZdM=
 github.com/golang/protobuf v1.3.2/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=

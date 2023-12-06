@@ -5,7 +5,7 @@ go 1.21.4
 require (
 	github.com/go-orb/go-orb v0.0.0-20231205054835-5d5151ec921b
 	github.com/go-orb/plugins/log/slog v0.0.0-20231205051152-a7c84fe79f05
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20231206160454-235a736267d8
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20231206161240-54de0e61ff14
 	github.com/go-orb/plugins/registry/tests v0.0.0-20231205051152-a7c84fe79f05
 	github.com/google/uuid v1.4.0
 	github.com/hashicorp/consul/api v1.26.1
