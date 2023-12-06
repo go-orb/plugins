@@ -18,6 +18,8 @@ jobs:
           check-latest: true
       - name: Run Linters
         run: ./scripts/test.sh lint all
+        env:
+          PROCS: 1
   test:
     name: Unit Tests
     runs-on: [self-hosted, linux, x64]
@@ -31,6 +33,8 @@ jobs:
           check-latest: true
       - name: Run Unit Tests
         run: ./scripts/test.sh test all
+        env:
+          PROCS: 1
   summary:
     name: Summary
     runs-on: [self-hosted, linux, x64]
@@ -44,3 +48,5 @@ jobs:
           check-latest: true
       - name: Create Summary
         run: ./scripts/test.sh summary all
+        env:
+          PROCS: 1
