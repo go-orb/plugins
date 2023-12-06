@@ -141,9 +141,18 @@ func (p *PackageRunner) Build() error {
 	p.logger.Debug("Compiling", "packagePath", p.packagePath, "binaryPath", p.binaryPath)
 	buildCmd := exec.Command("go", "build", "-ldflags", "-s -w", "-o", p.binaryPath, p.packagePath) //nolint:gosec
 
+	// Redirect standard output and error to display the output in the console (optional)
+	if p.options.StdOut != nil {
+		buildCmd.Stdout = p.options.StdOut
+	}
+
+	if p.options.StdErr != nil {
+		buildCmd.Stderr = p.options.StdErr
+	}
+
 	err := buildCmd.Run()
 	if err != nil {
-		return fmt.Errorf("whilte building the package: %w", err)
+		return fmt.Errorf("while building the package: %w", err)
 	}
 
 	return nil

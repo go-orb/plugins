@@ -61,13 +61,14 @@ function run_linter() {
 
 	$(go env GOPATH)/bin/golangci-lint --version
 
-	print_msg "Running linters with $(nproc) procs"
+	print_msg "Running linters with $PROCS procs"
 	dirs=$1
 	failed="false"
-	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $(nproc) -- /usr/bin/env bash "${SCRIPT_DIR}/lib/run_lint.sh" || failed="true"
+	printf "%s\0" "${dirs[@]}" | xargs -0 -n1 -P $PROCS -- /usr/bin/env bash "${SCRIPT_DIR}/lib/run_lint.sh" || failed="true"
 
 	if [[ "x${failed}" != "xfalse" ]]; then
 		print_red_header "Lint failed"
+		exit 1
 	else
 		print_header "Lint OK"
 	fi

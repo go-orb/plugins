@@ -5,9 +5,9 @@ org:
         logger:
           plugin: slog
           format: json
-          level: INFO # DEBUG-1
+          level: TRACE # DEBUG-1
       service:
         logger:
           plugin: slog
           format: json
-          level: INFO # DEBUG-1
+          level: TRACE # DEBUG-1

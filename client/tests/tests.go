@@ -9,8 +9,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"log/slog"
-
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
@@ -207,20 +205,19 @@ func (s *TestSuite) SetupSuite() {
 
 	// Start a server
 	pro := []PackageRunnerOption{
-		WithOverwrite(),
 		// WithNumProcesses(5),
 		// WithRunEnv("GOMAXPROCS=1"),
 		WithRunEnv("GOMAXPROCS=" + os.Getenv("GOMAXPROCS")),
 		WithArgs("--config", filepath.Join(s.PluginsRoot, "client/tests/cmd/tests_server/config.yaml")),
 	}
-	if logger.Level() <= slog.LevelDebug {
-		pro = append(pro, WithStdOut(os.Stdout), WithStdErr(os.Stderr))
-	}
+	// if logger.Level() <= slog.LevelDebug {
+	pro = append(pro, WithStdOut(os.Stdout), WithStdErr(os.Stderr))
+	// }
 
 	s.serverRunner = NewPackageRunner(
 		logger,
 		filepath.Join(s.PluginsRoot, "client/tests/cmd/tests_server"),
-		filepath.Join(s.PluginsRoot, "client/tests/tmp/tests_server"),
+		"",
 		pro...,
 	)
 	s.Require().NoError(s.serverRunner.Build())
