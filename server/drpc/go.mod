@@ -5,6 +5,7 @@ go 1.21.4
 require (
 	github.com/go-orb/go-orb v0.0.0-20231205054835-5d5151ec921b
 	github.com/google/uuid v1.4.0
+	github.com/hashicorp/yamux v0.1.1
 	storj.io/drpc v0.0.33
 )
 

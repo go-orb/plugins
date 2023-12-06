@@ -71,8 +71,12 @@ github.com/go-orb/go-orb v0.0.0-20231205054835-5d5151ec921b h1:9lg1vas/UKYhd+SmI
 github.com/go-orb/go-orb v0.0.0-20231205054835-5d5151ec921b/go.mod h1:esPD35O0lg1ksWTaiiYFJaAtH+Srku8DuoN0L91fvp0=
 github.com/go-orb/plugins/client/orb v0.0.0-20231205052311-482ca12d811d h1:gGNdaIn86SK5dh8PM29bxnJERwIixmWLOIjQ+JBvas8=
 github.com/go-orb/plugins/client/orb v0.0.0-20231205052311-482ca12d811d/go.mod h1:l/PcMxCOSaY3Lm71obNbkhuBJZVq9wCd1L3EPQ94P4Q=
+github.com/go-orb/plugins/client/orb v0.0.0-20231206042754-386df184f3b8 h1:bmoCt8QGKBOMFRylCBFwunelLiflyUj8h+nWGltpsZI=
+github.com/go-orb/plugins/client/orb v0.0.0-20231206042754-386df184f3b8/go.mod h1:AwdEKO1R2RPXSPVGvPp0Z4YCaZJJCJIo+cVI6qlQZdM=
 github.com/go-orb/plugins/client/orb/transport/basehertz v0.0.0-20231205052311-482ca12d811d h1:08WFPgDpNgd2wFMVEoiLPh7beuNfFNP5Jh84s++9exE=
 github.com/go-orb/plugins/client/orb/transport/basehertz v0.0.0-20231205052311-482ca12d811d/go.mod h1:bsStSjTqzm1cjOtMThYkkxQCXerOTNwSkFV8V9DtEV4=
+github.com/go-orb/plugins/client/orb/transport/basehertz v0.0.0-20231206042754-386df184f3b8 h1:yh3LjEC+3yHv7Y1aAUzsi9oEX46xJGA265JcX1Jjq04=
+github.com/go-orb/plugins/client/orb/transport/basehertz v0.0.0-20231206042754-386df184f3b8/go.mod h1:jIilCtYh7Nzh6a8HdZIo831NBniHvbaBJuV0g87BWjk=
 github.com/go-orb/plugins/client/tests v0.0.0-20231205051152-a7c84fe79f05 h1:2ygm/mJfGtC/dNvrgXy7v57pSPDmAy3mitejcmouOCk=
 github.com/go-orb/plugins/client/tests v0.0.0-20231205051152-a7c84fe79f05/go.mod h1:OBpWNo8j7owv13FexdfA7u3yVGDq73XXt007cDLMUsA=
 github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231205052311-482ca12d811d h1:sLkCVFSIcM+wabC782u9fmvBnFXKvOXWTZVtOUKuqS8=

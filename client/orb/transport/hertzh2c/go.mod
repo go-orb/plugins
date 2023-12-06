@@ -5,8 +5,8 @@ go 1.21.4
 require (
 	github.com/cloudwego/hertz v0.7.2
 	github.com/go-orb/go-orb v0.0.0-20231205054835-5d5151ec921b
-	github.com/go-orb/plugins/client/orb v0.0.0-20231205052311-482ca12d811d
-	github.com/go-orb/plugins/client/orb/transport/basehertz v0.0.0-20231205052311-482ca12d811d
+	github.com/go-orb/plugins/client/orb v0.0.0-20231206042754-386df184f3b8
+	github.com/go-orb/plugins/client/orb/transport/basehertz v0.0.0-20231206042754-386df184f3b8
 	github.com/go-orb/plugins/client/tests v0.0.0-20231205051152-a7c84fe79f05
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231205052311-482ca12d811d
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20231205052311-482ca12d811d
@@ -16,6 +16,7 @@ require (
 	github.com/go-orb/plugins/registry/consul v0.0.0-20231205052311-482ca12d811d
 	github.com/go-orb/plugins/registry/mdns v0.0.0-20231205052311-482ca12d811d
 	github.com/go-orb/plugins/server/http v0.0.0-20231205052311-482ca12d811d
+	github.com/hertz-contrib/http2 v0.1.8
 	github.com/stretchr/testify v1.8.4
 )
 
@@ -50,7 +51,6 @@ require (
 	github.com/hashicorp/go-rootcerts v1.0.2 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
 	github.com/hashicorp/serf v0.10.1 // indirect
-	github.com/hertz-contrib/http2 v0.1.8 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.6 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
