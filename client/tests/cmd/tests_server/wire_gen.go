@@ -31,7 +31,6 @@ import (
 	_ "github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/lumberjack"
 	_ "github.com/go-orb/plugins/log/slog"
-	_ "github.com/go-orb/plugins/registry/consul"
 	_ "github.com/go-orb/plugins/registry/mdns"
 	_ "github.com/go-orb/plugins/server/http/router/chi"
 )
@@ -97,14 +96,14 @@ func provideConfigData(
 // TODO(jochumdev): We should simplify server opts.
 func provideServerOpts() ([]server.Option, error) {
 
-	ports, err := freeport.Take(7)
+	ports, err := freeport.Take(8)
 	if err != nil {
 		return nil, err
 	}
 
 	hInstance := new(handler.EchoHandler)
 
-	return []server.Option{hertz.WithEntrypoint(hertz.WithName("hertzhttp"), hertz.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[0])), hertz.WithInsecure(), hertz.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), hertz.WithEntrypoint(hertz.WithName("hertzh2c"), hertz.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[1])), hertz.WithInsecure(), hertz.WithAllowH2C(), hertz.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), grpc.WithEntrypoint(grpc.WithName("grpc"), grpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[2])), grpc.WithInsecure(true), grpc.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), http.WithEntrypoint(http.WithName("http"), http.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[3])), http.WithInsecure(), http.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), http.WithEntrypoint(http.WithName("h2c"), http.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[4])), http.WithInsecure(), http.WithAllowH2C(), http.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), http.WithEntrypoint(http.WithName("http3"), http.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[5])), http.WithHTTP3(), http.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), http.WithEntrypoint(http.WithName("https"), http.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[6])), http.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), drpc.WithEntrypoint(drpc.WithName("https"), drpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[6])), drpc.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)))}, nil
+	return []server.Option{hertz.WithEntrypoint(hertz.WithName("hertzhttp"), hertz.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[0])), hertz.WithInsecure(), hertz.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), hertz.WithEntrypoint(hertz.WithName("hertzh2c"), hertz.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[1])), hertz.WithInsecure(), hertz.WithAllowH2C(), hertz.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), grpc.WithEntrypoint(grpc.WithName("grpc"), grpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[2])), grpc.WithInsecure(true), grpc.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), http.WithEntrypoint(http.WithName("http"), http.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[3])), http.WithInsecure(), http.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), http.WithEntrypoint(http.WithName("h2c"), http.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[4])), http.WithInsecure(), http.WithAllowH2C(), http.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), http.WithEntrypoint(http.WithName("http3"), http.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[5])), http.WithHTTP3(), http.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), http.WithEntrypoint(http.WithName("https"), http.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[6])), http.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance))), drpc.WithEntrypoint(drpc.WithName("drpc"), drpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[7])), drpc.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)))}, nil
 }
 
 // provideComponents creates a slice of components out of the arguments.

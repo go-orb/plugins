@@ -46,7 +46,7 @@ func provideConfigData(
 // TODO(jochumdev): We should simplify server opts.
 func provideServerOpts() ([]server.Option, error) {
 	// Get some free ports
-	ports, err := freeport.Take(7)
+	ports, err := freeport.Take(8)
 	if err != nil {
 		return nil, err
 	}
@@ -99,8 +99,8 @@ func provideServerOpts() ([]server.Option, error) {
 			mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
 		),
 		drpc.WithEntrypoint(
-			drpc.WithName("https"),
-			drpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[6])),
+			drpc.WithName("drpc"),
+			drpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[7])),
 			drpc.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
 		),
 	}, nil
