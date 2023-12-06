@@ -1,8 +1,6 @@
 module github.com/go-orb/plugins/server/hertz
 
-go 1.21
-
-toolchain go1.21.5
+go 1.21.5
 
 require (
 	github.com/cloudwego/hertz v0.7.2

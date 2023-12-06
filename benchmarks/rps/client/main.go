@@ -35,14 +35,14 @@ import (
 	_ "github.com/go-orb/plugins/client/middleware/log"
 
 	// All transports.
-	_ "github.com/go-orb/plugins/client/orb/transport/drpc"
-	_ "github.com/go-orb/plugins/client/orb/transport/grpc"
-	_ "github.com/go-orb/plugins/client/orb/transport/h2c"
-	_ "github.com/go-orb/plugins/client/orb/transport/hertzh2c"
-	_ "github.com/go-orb/plugins/client/orb/transport/hertzhttp"
-	_ "github.com/go-orb/plugins/client/orb/transport/http"
-	_ "github.com/go-orb/plugins/client/orb/transport/http3"
-	_ "github.com/go-orb/plugins/client/orb/transport/https"
+	_ "github.com/go-orb/plugins/client/orb_transport/drpc"
+	_ "github.com/go-orb/plugins/client/orb_transport/grpc"
+	_ "github.com/go-orb/plugins/client/orb_transport/h2c"
+	_ "github.com/go-orb/plugins/client/orb_transport/hertzh2c"
+	_ "github.com/go-orb/plugins/client/orb_transport/hertzhttp"
+	_ "github.com/go-orb/plugins/client/orb_transport/http"
+	_ "github.com/go-orb/plugins/client/orb_transport/http3"
+	_ "github.com/go-orb/plugins/client/orb_transport/https"
 )
 
 const serverName = "benchmarks.rps.server"

@@ -1,4 +1,0 @@
-github.com/go-orb/go-orb/client
-github.com/go-orb/plugins/client/orb
-github.com/go-orb/plugins/client/orb/transport/basehttp
-github.com/go-orb/plugins/client/orb/transport/http3

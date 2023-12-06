@@ -5,7 +5,7 @@ go 1.21.5
 require (
 	github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078
 	github.com/go-orb/plugins/log/slog v0.0.0-20231205051152-a7c84fe79f05
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20231206224603-228e7b8dc217
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20231206234938-5c2c970f4417
 	github.com/go-orb/plugins/registry/tests v0.0.0-20231205051152-a7c84fe79f05
 	github.com/google/uuid v1.4.0
 	github.com/hashicorp/consul/api v1.26.1
@@ -19,7 +19,6 @@ require (
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fatih/color v1.16.0 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v1.6.1 // indirect
