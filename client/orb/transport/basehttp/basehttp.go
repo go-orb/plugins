@@ -71,12 +71,6 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 		return nil, orberrors.From(err)
 	}
 
-	t.logger.Trace(
-		"Making a request",
-		"url", fmt.Sprintf("%s://%s/%s", t.scheme, node.Address, req.Endpoint()),
-		"content-type", opts.ContentType,
-	)
-
 	// Set the connection timeout
 	ctx, cancel := context.WithTimeout(ctx, opts.ConnectionTimeout)
 	defer cancel()
@@ -134,13 +128,6 @@ func (t *Transport) call2(node *registry.Node, opts *client.CallOptions, req *cl
 		Body:        buff,
 		Headers:     make(map[string][]string),
 	}
-
-	t.logger.Trace(
-		"Got a result",
-		"url", fmt.Sprintf("%s://%s/%s", t.scheme, node.Address, req.Endpoint()),
-		"content-type", res.ContentType,
-		"size", resp.ContentLength,
-	)
 
 	// Copy headers to the RawResponse if wanted.
 	if opts.Headers {

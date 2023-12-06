@@ -75,12 +75,6 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 		return nil, orberrors.From(err)
 	}
 
-	t.logger.Trace(
-		"Making a request",
-		"url", fmt.Sprintf("%s://%s/%s", t.scheme, node.Address, req.Endpoint()),
-		"content-type", opts.ContentType,
-	)
-
 	// Create a hertz request.
 	hReq := &protocol.Request{}
 	hReq.SetMethod(consts.MethodPost)
@@ -148,12 +142,12 @@ func (t *Transport) call2(
 		Headers:     make(map[string][]string),
 	}
 
-	t.logger.Trace(
-		"Got a result",
-		"url", fmt.Sprintf("%s://%s/%s", t.scheme, node.Address, req.Endpoint()),
-		"content-type", res.ContentType,
-		"size", hRes.Header.Get(consts.HeaderContentLength),
-	)
+	// t.logger.Trace(
+	// 	"Got a result",
+	// 	"url", fmt.Sprintf("%s://%s/%s", t.scheme, node.Address, req.Endpoint()),
+	// 	"content-type", res.ContentType,
+	// 	"size", hRes.Header.Get(consts.HeaderContentLength),
+	// )
 
 	// Copy headers to the RawResponse if wanted.
 	// TODO(jochumdev): Implement me.

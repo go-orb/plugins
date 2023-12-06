@@ -102,15 +102,7 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(opts.RequestTimeout))
 	defer cancel()
 
-	t.logger.Trace(
-		"Making a request", "url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()), "content-type", opts.ContentType,
-	)
-
 	err = conn.Invoke(ctx, fmt.Sprintf("/%s", req.Endpoint()), &t.encoder, req.Request(), result)
-	t.logger.Trace(
-		"Got a result", "url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()), "content-type", opts.ContentType,
-	)
-
 	if err != nil {
 		return orberrors.From(err)
 	}

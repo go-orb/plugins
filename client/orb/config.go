@@ -12,7 +12,7 @@ import (
 const Name = "orb"
 
 func init() {
-	client.Register(Name, ProvideClientOrb)
+	client.Register(Name, ProvideClient)
 }
 
 // Config is the config for the orb client.

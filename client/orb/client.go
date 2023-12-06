@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"log/slog"
 
@@ -285,16 +286,15 @@ func New(cfg Config, log log.Logger, registry registry.Type) *Client {
 	cfg.PreferredTransports = nPTransports
 
 	return &Client{
-		config:      cfg,
-		logger:      log,
-		registry:    registry,
-		middlewares: []client.Middleware{},
-		transports:  container.NewSafeMap[string, Transport](),
+		config:     cfg,
+		logger:     log,
+		registry:   registry,
+		transports: container.NewSafeMap[string, Transport](),
 	}
 }
 
-// ProvideClientOrb is the wire provider for client.
-func ProvideClientOrb(
+// ProvideClient is the wire provider for client.
+func ProvideClient(
 	name types.ServiceName,
 	data types.ConfigData,
 	logger log.Logger,
@@ -307,11 +307,42 @@ func ProvideClientOrb(
 	}
 
 	sections := types.SplitServiceName(name)
-	if err := config.Parse(append(sections, client.DefaultConfigSection), data, &cfg); err != nil {
+	sections = append(sections, client.DefaultConfigSection)
+	if err := config.Parse(sections, data, &cfg); err != nil {
 		return client.Type{}, err
 	}
 
 	c := New(cfg, logger, registry)
+
+	if config.HasKey[[]any](sections, "middlewares", data) {
+		middlewares := []client.Middleware{}
+
+		for i := 0; ; i++ {
+			mCfg := &client.MiddlewareConfig{}
+			if err := config.Parse(append(sections, "middlewares", strconv.Itoa(i)), data, mCfg); err != nil || mCfg.Name == "" {
+				if errors.Is(err, config.ErrNotExistent) || mCfg.Name == "" {
+					break
+				}
+				return client.Type{}, err
+			}
+
+			fac, ok := client.Middlewares.Get(mCfg.Name)
+			if !ok {
+				return client.Type{}, fmt.Errorf("Client middleware '%s' not found, did you import it?", mCfg.Name)
+			}
+
+			m, err := fac(append(sections, "middlewares", strconv.Itoa(i)), data, client.Type{Client: c}, logger)
+			if err != nil {
+				return client.Type{}, err
+			}
+
+			middlewares = append(middlewares, m)
+		}
+
+		if len(middlewares) > 0 {
+			c.middlewares = middlewares
+		}
+	}
 
 	return client.Type{Client: c}, nil
 }

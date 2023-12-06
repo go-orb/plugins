@@ -14,7 +14,7 @@ const (
 	defaultConnections    = 256
 	defaultDuration       = 15
 	defaultTimeout        = 8
-	defaultTransport      = ""
+	defaultTransport      = "grpc"
 	defaultPackageSize    = 1000
 	defaultContentType    = "application/x-protobuf"
 )
