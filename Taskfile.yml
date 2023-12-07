@@ -24,11 +24,11 @@ tasks:
   # Runall helpers
   ###########################
   mod-tidy:
-    desc: Run "go mod tidy -go=1.21" in all packages
+    desc: Run "go mod tidy" in all packages
     cmds:
       - task: runall
         vars:
-          CLI_ARGS: go mod tidy -go=1.21
+          CLI_ARGS: go mod tidy
   fmt:
     desc: Run "go fmt" in all packages
     cmds:
