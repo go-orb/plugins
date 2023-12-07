@@ -1,6 +1,8 @@
 module github.com/go-orb/plugins/server/tests
 
-go 1.21
+go 1.21.4
+
+toolchain go1.21.5
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20231205050211-f64e9b008f76

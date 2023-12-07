@@ -1,6 +1,8 @@
 module github.com/go-orb/plugins/registry/nats
 
-go 1.21
+go 1.21.4
+
+toolchain go1.21.5
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078
