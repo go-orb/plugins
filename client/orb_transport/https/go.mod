@@ -4,8 +4,8 @@ go 1.21
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078
-	github.com/go-orb/plugins/client/orb v0.0.0-20231207005018-bbed223afb0a
-	github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20231207005018-bbed223afb0a
+	github.com/go-orb/plugins/client/orb v0.0.0-20231207005250-d82199510e5c
+	github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20231207005250-d82199510e5c
 	github.com/go-orb/plugins/client/tests v0.0.0-20231206234938-5c2c970f4417
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231206235910-b8f58c9e9018
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20231206234938-5c2c970f4417
