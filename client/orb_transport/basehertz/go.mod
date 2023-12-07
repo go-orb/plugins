@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/cloudwego/hertz v0.7.2
 	github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078
-	github.com/go-orb/plugins/client/orb v0.0.0-20231207010257-8aeb2d55e81f
+	github.com/go-orb/plugins/client/orb v0.0.0-20231207012411-f06c92b21588
 )
 
 require (

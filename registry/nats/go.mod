@@ -4,8 +4,8 @@ go 1.21
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078
-	github.com/go-orb/plugins/log/slog v0.0.0-20231207010257-8aeb2d55e81f
-	github.com/go-orb/plugins/registry/tests v0.0.0-20231207010257-8aeb2d55e81f
+	github.com/go-orb/plugins/log/slog v0.0.0-20231207012411-f06c92b21588
+	github.com/go-orb/plugins/registry/tests v0.0.0-20231207012411-f06c92b21588
 	github.com/google/uuid v1.4.0
 	github.com/nats-io/nats.go v1.31.0
 	github.com/pkg/errors v0.9.1

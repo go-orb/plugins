@@ -4,10 +4,10 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078 h1:cRqbKBDDZgpn4QrsBRR8zRO2boxQPWZWXAqDWPli/ic=
 github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078/go.mod h1:AfkWyLBdfn6QOYKu6Eeqx2L6Kqv3X3vMil9DaVf+OqY=
-github.com/go-orb/plugins/log/slog v0.0.0-20231207010257-8aeb2d55e81f h1:yTiai4R3wcBHLBSsR93myaW/NqS/vWdBgnxJrJOoGUk=
-github.com/go-orb/plugins/log/slog v0.0.0-20231207010257-8aeb2d55e81f/go.mod h1:EdVLx57PCul9ck4gSZ3UfLWChjYj01B8jlbWS9Nvy1Y=
-github.com/go-orb/plugins/registry/tests v0.0.0-20231207010257-8aeb2d55e81f h1:fq30+KxB8UKDxuFzOavYRW4c/3sS4xkfjLoRfmA0xNk=
-github.com/go-orb/plugins/registry/tests v0.0.0-20231207010257-8aeb2d55e81f/go.mod h1:mfYafEabvCHUuUJKTiVOazxYq+aFwBhlEiOr0OUitW0=
+github.com/go-orb/plugins/log/slog v0.0.0-20231207012411-f06c92b21588 h1:jgXRTyDgRDcmUMK79zDI7zwKYTtQrCb+DVLf1vORphI=
+github.com/go-orb/plugins/log/slog v0.0.0-20231207012411-f06c92b21588/go.mod h1:EdVLx57PCul9ck4gSZ3UfLWChjYj01B8jlbWS9Nvy1Y=
+github.com/go-orb/plugins/registry/tests v0.0.0-20231207012411-f06c92b21588 h1:LGeQZPQkBPEoNSWV2meZnxM/XOUkLHONt3DxgAnw8pM=
+github.com/go-orb/plugins/registry/tests v0.0.0-20231207012411-f06c92b21588/go.mod h1:mfYafEabvCHUuUJKTiVOazxYq+aFwBhlEiOr0OUitW0=
 github.com/google/uuid v1.4.0 h1:MtMxsa51/r9yyhkyLsVeVt0B+BGQZzpQiTQ4eHZ8bc4=
 github.com/google/uuid v1.4.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
