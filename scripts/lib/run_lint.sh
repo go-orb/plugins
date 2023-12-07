@@ -8,7 +8,7 @@ function run() {
 		exit 1
 	fi
 
-	$(go env GOPATH)/bin/golangci-lint run --out-format github-actions -c "${2}/.golangci.yaml"
+	$(go env GOPATH)/bin/golangci-lint run --out-format github-actions
 
 	# Keep track of exit code of linter
 	if [[ $? -ne 0 ]]; then
@@ -19,7 +19,7 @@ function run() {
     exit 0
 }
 
-out="$(run $1 "${ORB_ROOT}" 2>&1)"
+out="$(run $1 2>&1)"
 rc=$?
 
 printf "%s\n" "${out}"

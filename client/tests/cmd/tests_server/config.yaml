@@ -1,1 +1,13 @@
-config_mdns.yaml
+org:
+  orb:
+    svc:
+      client:
+        logger:
+          plugin: slog
+          format: json
+          level: TRACE # DEBUG-1
+      service:
+        logger:
+          plugin: slog
+          format: json
+          level: TRACE # DEBUG-1
