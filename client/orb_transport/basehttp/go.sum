@@ -8,6 +8,8 @@ github.com/go-orb/plugins/client/orb v0.0.0-20231206234938-5c2c970f4417 h1:2oNAB
 github.com/go-orb/plugins/client/orb v0.0.0-20231206234938-5c2c970f4417/go.mod h1:gByC8gW8hzUDquTWZlSSo/YTECdEBs4zmCrCApmlaa8=
 github.com/go-orb/plugins/client/orb v0.0.0-20231206235910-b8f58c9e9018 h1:wFH+ddod6wJS+gBFMWyk6fZtJpwwr0ZHL+ISZfMuKZo=
 github.com/go-orb/plugins/client/orb v0.0.0-20231206235910-b8f58c9e9018/go.mod h1:sUFPDuMZgdYYY6sKrkYab+1zvpq/QLodoM90wZDXRNk=
+github.com/go-orb/plugins/client/orb v0.0.0-20231207001307-6bf78e510437 h1:IF3RtB/wZbPU/AmgbLEwDgLJ7SjAZyrLv/KZQwymk+U=
+github.com/go-orb/plugins/client/orb v0.0.0-20231207001307-6bf78e510437/go.mod h1:sUFPDuMZgdYYY6sKrkYab+1zvpq/QLodoM90wZDXRNk=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
