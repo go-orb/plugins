@@ -20,7 +20,7 @@ import (
 
 func newSuite() *tests.TestSuite {
 	_, filename, _, _ := runtime.Caller(0)
-	pluginsRoot := filepath.Join(filepath.Dir(filename), "../../../../")
+	pluginsRoot := filepath.Join(filepath.Dir(filename), "../../../")
 
 	return tests.NewSuite(pluginsRoot, []string{Name})
 }
