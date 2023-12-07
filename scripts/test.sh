@@ -55,11 +55,11 @@ function get_dirs() {
 
 # Run GoLangCi Linters.
 function run_linter() {
-	if [[ ! -e $(go env GOPATH)/bin/golangci-lint ]]; then
-		curl -sSfL "https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh" | sh -s -- -b $(go env GOPATH)/bin
+	if [[ ! -e /tmp/bin/golangci-lint ]]; then
+		curl -sSfL "https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh" | sh -s -- -b /tmp
 	fi
 
-	$(go env GOPATH)/bin/golangci-lint --version
+	/tmp/golangci-lint --version
 
 	print_msg "Running linters with $PROCS procs"
 	dirs=$1
