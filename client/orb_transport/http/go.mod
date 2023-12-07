@@ -1,11 +1,11 @@
 module github.com/go-orb/plugins/client/orb_transport/http
 
-go 1.21.5
+go 1.21
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078
-	github.com/go-orb/plugins/client/orb v0.0.0-20231207005739-31a8d9c28736
-	github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20231207005739-31a8d9c28736
+	github.com/go-orb/plugins/client/orb v0.0.0-20231207005948-ed5f274b0386
+	github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20231207005948-ed5f274b0386
 	github.com/go-orb/plugins/client/tests v0.0.0-20231206234938-5c2c970f4417
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231206235910-b8f58c9e9018
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20231206234938-5c2c970f4417
