@@ -216,7 +216,7 @@ func (s *TestSuite) SetupSuite() {
 
 	s.serverRunner = NewPackageRunner(
 		logger,
-		filepath.Join(s.PluginsRoot, "client/tests/cmd/tests_server"),
+		"github.com/go-orb/plugins/client/tests/cmd/tests_server",
 		"",
 		pro...,
 	)
