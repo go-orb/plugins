@@ -1,6 +1,6 @@
 module github.com/go-orb/plugins/server/http
 
-go 1.21.5
+go 1.21
 
 require (
 	github.com/go-chi/chi v1.5.5
