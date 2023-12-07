@@ -43,6 +43,8 @@ github.com/go-orb/plugins/registry/regutil v0.0.0-20231207001307-6bf78e510437 h1
 github.com/go-orb/plugins/registry/regutil v0.0.0-20231207001307-6bf78e510437/go.mod h1:P91V8bsg96CpqnsHo8i4xgSj/aADS31wgI+ktCtaSz8=
 github.com/go-orb/plugins/registry/regutil v0.0.0-20231207004543-835cc5bde3e3 h1:dLnEYWNeA8pSfpGaFwWG9Da472DyqvZ7xRuj62scX8k=
 github.com/go-orb/plugins/registry/regutil v0.0.0-20231207004543-835cc5bde3e3/go.mod h1:7zIV1On4VUhLyZe/2ZXNT8PWAiyzhKiDSIegUm1UI/A=
+github.com/go-orb/plugins/registry/regutil v0.0.0-20231207004823-a5f483dc449d h1:H5wt+9uxP3D3ADUDh8hnIHfNgacb+nlKw6DqAm68Kvo=
+github.com/go-orb/plugins/registry/regutil v0.0.0-20231207004823-a5f483dc449d/go.mod h1:7zIV1On4VUhLyZe/2ZXNT8PWAiyzhKiDSIegUm1UI/A=
 github.com/go-orb/plugins/registry/tests v0.0.0-20231205051152-a7c84fe79f05 h1:HL6/6l+Ezio0mdvZo+fCK6ssGFFrk4EucqCKXwGGlIU=
 github.com/go-orb/plugins/registry/tests v0.0.0-20231205051152-a7c84fe79f05/go.mod h1:Nvf7DoZwRN7beKCb3ty4ydfI4eJeQR1x6LkckEjMsoQ=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=

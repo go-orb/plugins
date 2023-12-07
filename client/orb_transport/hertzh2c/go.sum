@@ -75,12 +75,16 @@ github.com/go-orb/plugins/client/orb v0.0.0-20231207001307-6bf78e510437 h1:IF3Rt
 github.com/go-orb/plugins/client/orb v0.0.0-20231207001307-6bf78e510437/go.mod h1:sUFPDuMZgdYYY6sKrkYab+1zvpq/QLodoM90wZDXRNk=
 github.com/go-orb/plugins/client/orb v0.0.0-20231207004543-835cc5bde3e3 h1:eH5/4Tr8q3t7jcYnTsGvBRSwPGK9J9tOhthMsytU64c=
 github.com/go-orb/plugins/client/orb v0.0.0-20231207004543-835cc5bde3e3/go.mod h1:GG0Yz7G9+ocLqzXb5Fegm534bo+RYt1hvWEAbtoBNgY=
+github.com/go-orb/plugins/client/orb v0.0.0-20231207004823-a5f483dc449d h1:Ml9F4aGB3d62HrvVAFRxkmuuDBWAVsTVNZipPFpVKD0=
+github.com/go-orb/plugins/client/orb v0.0.0-20231207004823-a5f483dc449d/go.mod h1:GG0Yz7G9+ocLqzXb5Fegm534bo+RYt1hvWEAbtoBNgY=
 github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20231206235910-b8f58c9e9018 h1:RFC59GQazZvgi2lMWyvOKcahGD7N5hFMC69oPKw8utM=
 github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20231206235910-b8f58c9e9018/go.mod h1:k1IyNtSIHX1dm+9CXJRrccRcH3atb4Lm0XXZXIBAlGw=
 github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20231207001307-6bf78e510437 h1:4oN5Mg9qTKRw4Q0w4UG6zcE8qmPf8fGWAvyZTkYlMGE=
 github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20231207001307-6bf78e510437/go.mod h1:7hcu99wmK5usaweWfwp3ovNijvwTfoNJSNx3WhFvCO4=
 github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20231207004543-835cc5bde3e3 h1:40MiLhjjypD8fLaw6qAagau+ql7ekrezAcC8Eo4KwZ0=
 github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20231207004543-835cc5bde3e3/go.mod h1:yXxU/dI9OYeqEnqvMXxtB2sUGJeCCs3PhiXnVT8BM+I=
+github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20231207004823-a5f483dc449d h1:L7oUm5KIRFzfO3cXTCa+8eSKACZ/txMjHEz1oth1Q/E=
+github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20231207004823-a5f483dc449d/go.mod h1:hbn0q4oF31X/Wa1uAsNM8y4V9Wn+GLUzNzkv9vvo6Vw=
 github.com/go-orb/plugins/client/tests v0.0.0-20231206234938-5c2c970f4417 h1:R0w4VNORPGbEYhTA/bouTRlnXj0MIUrkUfbtDc5iBVc=
 github.com/go-orb/plugins/client/tests v0.0.0-20231206234938-5c2c970f4417/go.mod h1:cbuDXrYqr6X4qI1+hKyAjQfRZTZzL0XdYaNe89NYhb8=
 github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231206235910-b8f58c9e9018 h1:HB9V5jSulY5hNTxVKXSpuxEMJ+Y+9V5GIHwl/+Xc/ls=

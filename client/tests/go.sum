@@ -53,6 +53,8 @@ github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231207001307-6bf78e510437 h1:29
 github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231207001307-6bf78e510437/go.mod h1:lstCTjj+cP+6Tx/UgWUuUiv6sPCxZ9EunA6wa6jAI9c=
 github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231207004543-835cc5bde3e3 h1:VRXtw3rHTm50gYfX+c1oTAYMSKrTYYxQrK8T1B+YJqY=
 github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231207004543-835cc5bde3e3/go.mod h1:GGZXc5L58XmcM0f482soTGrvxolZzmchHM027R1H62o=
+github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231207004823-a5f483dc449d h1:gkBTWNzlasyVMuebtcmda0AUMezXErHK1NlWfryVg0k=
+github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231207004823-a5f483dc449d/go.mod h1:GGZXc5L58XmcM0f482soTGrvxolZzmchHM027R1H62o=
 github.com/go-orb/plugins/codecs/proto v0.0.0-20231206234938-5c2c970f4417 h1:3Wle8l9XKLh/xPz1gucfdFvxcnee+sh7ImBCO3h9jaw=
 github.com/go-orb/plugins/codecs/proto v0.0.0-20231206234938-5c2c970f4417/go.mod h1:QkMhT9Px1hAF519UEiFPG0Zg7Mi4TE40PvN2zPBGMMA=
 github.com/go-orb/plugins/codecs/proto v0.0.0-20231206235910-b8f58c9e9018 h1:8Re4sRJriNzbh730m6jvIa8xl8dQG0wM2uIqBKkrqx4=
@@ -61,6 +63,8 @@ github.com/go-orb/plugins/codecs/proto v0.0.0-20231207001307-6bf78e510437 h1:SiH
 github.com/go-orb/plugins/codecs/proto v0.0.0-20231207001307-6bf78e510437/go.mod h1:sKFnjRBq/p8w1aYsJEtqQJYMe6dsY1fIpuAuctBQOco=
 github.com/go-orb/plugins/codecs/proto v0.0.0-20231207004543-835cc5bde3e3 h1:/9bmIwjaDT42zaUQyu4di3cnRXzVhEw5LAxyfjdy7lY=
 github.com/go-orb/plugins/codecs/proto v0.0.0-20231207004543-835cc5bde3e3/go.mod h1:89iMUVip822z6kkZuIhNYbofKRl1eNtxHT6qrKr30cg=
+github.com/go-orb/plugins/codecs/proto v0.0.0-20231207004823-a5f483dc449d h1:dNuoc0oi9DPdywoT8UNOTK5xTn6fpWuvSxLMemVpPFA=
+github.com/go-orb/plugins/codecs/proto v0.0.0-20231207004823-a5f483dc449d/go.mod h1:89iMUVip822z6kkZuIhNYbofKRl1eNtxHT6qrKr30cg=
 github.com/go-orb/plugins/codecs/yaml v0.0.0-20231206234938-5c2c970f4417 h1:XZDmiu3np8vkTp2gosxfG1WFJYN63t8BqXdkAjS7OkM=
 github.com/go-orb/plugins/codecs/yaml v0.0.0-20231206234938-5c2c970f4417/go.mod h1:MXJELVXzjoeb1qnkhByOsQQT1JwCCCf42wArgb/w/rg=
 github.com/go-orb/plugins/codecs/yaml v0.0.0-20231206235910-b8f58c9e9018 h1:Q8DSjzEJlMsKTPwqPJEv4ZQhKHJX59o5SOBh4CfT//E=
@@ -69,6 +73,8 @@ github.com/go-orb/plugins/codecs/yaml v0.0.0-20231207001307-6bf78e510437 h1:aidw
 github.com/go-orb/plugins/codecs/yaml v0.0.0-20231207001307-6bf78e510437/go.mod h1:q94LssYC8HlVQ5Lk2ygpiny/R27QeZxQOGZlCiTI8Rc=
 github.com/go-orb/plugins/codecs/yaml v0.0.0-20231207004543-835cc5bde3e3 h1:N7zWgcMQV7VzRaowPv5lZnJ0g+emGyo4IaRmuErTcbE=
 github.com/go-orb/plugins/codecs/yaml v0.0.0-20231207004543-835cc5bde3e3/go.mod h1:rX8JrykFTHJq0ZY4akAWY3FpTu/4hkw5gypt9ZH+kxc=
+github.com/go-orb/plugins/codecs/yaml v0.0.0-20231207004823-a5f483dc449d h1:xoBsaE7D00Ne3hC7CHx8J9ZvSCTbK/bCXoxiCmgOvcM=
+github.com/go-orb/plugins/codecs/yaml v0.0.0-20231207004823-a5f483dc449d/go.mod h1:rX8JrykFTHJq0ZY4akAWY3FpTu/4hkw5gypt9ZH+kxc=
 github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231206234938-5c2c970f4417 h1:pj0g53plLOpiUp4jjPs7g4xQjViv9YYUEfs7XFsHj2o=
 github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231206234938-5c2c970f4417/go.mod h1:pLDf1iZn2o89FewuLZQ+BYLB9FsvKAn+x1guQi9PX/0=
 github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231206235910-b8f58c9e9018 h1:qIleTBVUZdujx7o5jY+hH9ObRzDKMZL0Y7yK0kw1ECQ=
@@ -77,6 +83,8 @@ github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231207001307-6bf78e5
 github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231207001307-6bf78e510437/go.mod h1:jgDVBzhfG/hgFVoJJQdt3Q4EuO0YtXPbgaapsLlMCZo=
 github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231207004543-835cc5bde3e3 h1:z7RuCpLYbFx4+rnMN/tZcvBKszcxaWQzJUWBp7qywoE=
 github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231207004543-835cc5bde3e3/go.mod h1:qyTdKkntpXSHeL04Cq5tYYrENTSE1KlyNGuw068NK8o=
+github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231207004823-a5f483dc449d h1:0+AUfq+6Q/onyFuvt2oXAUDCaLuSLOtJ/qEPxX0hqU0=
+github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231207004823-a5f483dc449d/go.mod h1:qyTdKkntpXSHeL04Cq5tYYrENTSE1KlyNGuw068NK8o=
 github.com/go-orb/plugins/config/source/file v0.0.0-20231206234938-5c2c970f4417 h1:5atM1be+/Rl9rePl+UeB1wKFaZoP5XCjrB00niLuePk=
 github.com/go-orb/plugins/config/source/file v0.0.0-20231206234938-5c2c970f4417/go.mod h1:vlE6xdlC2EaNtuOMYPEesZH+4GHH7LhjLFBqBiEfj+k=
 github.com/go-orb/plugins/config/source/file v0.0.0-20231206235910-b8f58c9e9018 h1:/Xq8hqJQrdIfQR+1f2ZFGkBgtX/XOKvwwTfmaETipHI=
@@ -85,6 +93,8 @@ github.com/go-orb/plugins/config/source/file v0.0.0-20231207001307-6bf78e510437 
 github.com/go-orb/plugins/config/source/file v0.0.0-20231207001307-6bf78e510437/go.mod h1:6j7AaGUMWkg9GK11/ZHbFCO/TA14U6QHMt1q71R3UpE=
 github.com/go-orb/plugins/config/source/file v0.0.0-20231207004543-835cc5bde3e3 h1:JFYowchHVgv2BO7U9fQbh0h1xgQGpM+JINQbF4COXhY=
 github.com/go-orb/plugins/config/source/file v0.0.0-20231207004543-835cc5bde3e3/go.mod h1:+brLI5FTMvjwPfw1oMSp48pg8pQ9qdDFDD/ab0Qm+00=
+github.com/go-orb/plugins/config/source/file v0.0.0-20231207004823-a5f483dc449d h1:2HdbkJWT4JgzTKE4Dsis3qRkCKJeAfm9gMCcYVK5VOE=
+github.com/go-orb/plugins/config/source/file v0.0.0-20231207004823-a5f483dc449d/go.mod h1:+brLI5FTMvjwPfw1oMSp48pg8pQ9qdDFDD/ab0Qm+00=
 github.com/go-orb/plugins/log/lumberjack v0.0.0-20231206234938-5c2c970f4417 h1:+CUwnPxRVrApcmNi/oXDp9VP01Bu0CKvoq4Ns+aYHi0=
 github.com/go-orb/plugins/log/lumberjack v0.0.0-20231206234938-5c2c970f4417/go.mod h1:Tc3mBbr7Gveaphw+G9EgBG+Kvv5fwV/PZtJhTB1LkMA=
 github.com/go-orb/plugins/log/lumberjack v0.0.0-20231206235910-b8f58c9e9018 h1:7ZD44WozNu5Ejho9jVhzpB0XJF/dBeTDlwfBHyfCK1Q=
@@ -93,6 +103,8 @@ github.com/go-orb/plugins/log/lumberjack v0.0.0-20231207001307-6bf78e510437 h1:V
 github.com/go-orb/plugins/log/lumberjack v0.0.0-20231207001307-6bf78e510437/go.mod h1:w8DPxfaKX3WmpJgWkzHGgZFcQUou7kBqym9s/DLs6Y8=
 github.com/go-orb/plugins/log/lumberjack v0.0.0-20231207004543-835cc5bde3e3 h1:+jfxaCmGwcuO6ATz8MaLOSYVa4r3otVAoQfZXaOtV/U=
 github.com/go-orb/plugins/log/lumberjack v0.0.0-20231207004543-835cc5bde3e3/go.mod h1:M5os6miUKV1ZSBHXE2DTzxGUw+YmgncSZwrrJ7zo124=
+github.com/go-orb/plugins/log/lumberjack v0.0.0-20231207004823-a5f483dc449d h1:Pk6KfLQk+QsW8QjMlVUzAeONGqCoLxEYpMFjz2ZGCSI=
+github.com/go-orb/plugins/log/lumberjack v0.0.0-20231207004823-a5f483dc449d/go.mod h1:M5os6miUKV1ZSBHXE2DTzxGUw+YmgncSZwrrJ7zo124=
 github.com/go-orb/plugins/log/slog v0.0.0-20231206234938-5c2c970f4417 h1:qX9IwV0C1e1yfyhMT5TFtGugyXZ1bt2xpWxtG889SdA=
 github.com/go-orb/plugins/log/slog v0.0.0-20231206234938-5c2c970f4417/go.mod h1:jJjEPQQqOs033VXiA8mdmABE/lsQdGYjeINP7Ra6WGY=
 github.com/go-orb/plugins/log/slog v0.0.0-20231206235910-b8f58c9e9018 h1:FPM5cZoPUuyEMu2pMPfC8cIaFJmLpYAvcNk2s64MSgo=
@@ -101,6 +113,8 @@ github.com/go-orb/plugins/log/slog v0.0.0-20231207001307-6bf78e510437 h1:Yop6WRc
 github.com/go-orb/plugins/log/slog v0.0.0-20231207001307-6bf78e510437/go.mod h1:qdCrfIq0O8B7uRY3ixcWiSl7qK1YbD+2A2AVnYxwqtg=
 github.com/go-orb/plugins/log/slog v0.0.0-20231207004543-835cc5bde3e3 h1:ddsJsor5J/+lmmVN0zOFmHk+dmXgoc1/o1PSBHFW+oM=
 github.com/go-orb/plugins/log/slog v0.0.0-20231207004543-835cc5bde3e3/go.mod h1:EdVLx57PCul9ck4gSZ3UfLWChjYj01B8jlbWS9Nvy1Y=
+github.com/go-orb/plugins/log/slog v0.0.0-20231207004823-a5f483dc449d h1:hQyRJjehKRTFls9A22i37jaMFlbyyJrVBFolQRDAlsc=
+github.com/go-orb/plugins/log/slog v0.0.0-20231207004823-a5f483dc449d/go.mod h1:EdVLx57PCul9ck4gSZ3UfLWChjYj01B8jlbWS9Nvy1Y=
 github.com/go-orb/plugins/registry/mdns v0.0.0-20231206234938-5c2c970f4417 h1:u46u6S1dFylXlNJTrDLnah+h9xqESMgTqdxJCBc6E+A=
 github.com/go-orb/plugins/registry/mdns v0.0.0-20231206234938-5c2c970f4417/go.mod h1:20pr716uA6acGrTT/lLozlOCrt3q74G2U9txvhFYQfg=
 github.com/go-orb/plugins/registry/mdns v0.0.0-20231206235910-b8f58c9e9018 h1:8BiPxO452RLEw4Z4Jzh5ZMnx0w+FnWdVZ63mKATI/q8=
@@ -109,6 +123,8 @@ github.com/go-orb/plugins/registry/mdns v0.0.0-20231207001307-6bf78e510437 h1:mD
 github.com/go-orb/plugins/registry/mdns v0.0.0-20231207001307-6bf78e510437/go.mod h1:20pr716uA6acGrTT/lLozlOCrt3q74G2U9txvhFYQfg=
 github.com/go-orb/plugins/registry/mdns v0.0.0-20231207004543-835cc5bde3e3 h1:BNqinslXx1FjsVe7Ad8IhygZsx4+Rvm0IONssJDeywE=
 github.com/go-orb/plugins/registry/mdns v0.0.0-20231207004543-835cc5bde3e3/go.mod h1:XyGkqHytn9zMNCLGsUiZGcYG8zVvvqZJWQm2GN6bUbQ=
+github.com/go-orb/plugins/registry/mdns v0.0.0-20231207004823-a5f483dc449d h1:ohA5gVAuqcu9uw6janM0H/jlHH66nRqAIHjxdS8Eqnk=
+github.com/go-orb/plugins/registry/mdns v0.0.0-20231207004823-a5f483dc449d/go.mod h1:otYTgUYW8x1TGcVB32n+VtUPuxYQs8Ra2bKL0zlEQxw=
 github.com/go-orb/plugins/registry/tests v0.0.0-20231205051152-a7c84fe79f05 h1:HL6/6l+Ezio0mdvZo+fCK6ssGFFrk4EucqCKXwGGlIU=
 github.com/go-orb/plugins/registry/tests v0.0.0-20231205051152-a7c84fe79f05/go.mod h1:Nvf7DoZwRN7beKCb3ty4ydfI4eJeQR1x6LkckEjMsoQ=
 github.com/go-orb/plugins/server/drpc v0.0.0-20231206234938-5c2c970f4417 h1:FajS90CjUBi4rGoM1GMJ13o6SQT8JJ5rhF3igJMilk0=
@@ -119,6 +135,8 @@ github.com/go-orb/plugins/server/drpc v0.0.0-20231207001307-6bf78e510437 h1:28Tf
 github.com/go-orb/plugins/server/drpc v0.0.0-20231207001307-6bf78e510437/go.mod h1:59IAW0G24rWw9LokrgN3UZhr6WcT0z5jfJfO8aTpw9A=
 github.com/go-orb/plugins/server/drpc v0.0.0-20231207004543-835cc5bde3e3 h1:d7bWXM8GbsTvEkj9Rkb4U5GsAke+l2UhOeJJrM47/Hc=
 github.com/go-orb/plugins/server/drpc v0.0.0-20231207004543-835cc5bde3e3/go.mod h1:V14X5Ki1SC34dLyoxUmrZQHJjVpfBHTzhY7oESuEtmo=
+github.com/go-orb/plugins/server/drpc v0.0.0-20231207004823-a5f483dc449d h1:9kZI/GkCPR12gvva1MD/V0y5TptDj49WFeA9XW/ljlg=
+github.com/go-orb/plugins/server/drpc v0.0.0-20231207004823-a5f483dc449d/go.mod h1:V14X5Ki1SC34dLyoxUmrZQHJjVpfBHTzhY7oESuEtmo=
 github.com/go-orb/plugins/server/grpc v0.0.0-20231206234938-5c2c970f4417 h1:QqmJzSwE1z+tUxH4eEDQAevd0zL8ytENjCuMxaQ84fc=
 github.com/go-orb/plugins/server/grpc v0.0.0-20231206234938-5c2c970f4417/go.mod h1:kKyGqWRps5n2LnB/e7gqJO6fz5keDQvwMIO8zR23k28=
 github.com/go-orb/plugins/server/grpc v0.0.0-20231206235910-b8f58c9e9018 h1:kNOfWyzLNArPnLSXPT86XzRa4SWLpBp+Af4fEYMu5lM=
@@ -127,6 +145,8 @@ github.com/go-orb/plugins/server/grpc v0.0.0-20231207001307-6bf78e510437 h1:cV/c
 github.com/go-orb/plugins/server/grpc v0.0.0-20231207001307-6bf78e510437/go.mod h1:xsLG89GqI8HI8YfDR8A5JORd2Q+dmTVjNdzNquWG7/A=
 github.com/go-orb/plugins/server/grpc v0.0.0-20231207004543-835cc5bde3e3 h1:p6kd9prnhTmPJdHZgSQN6yYWLyQNMf8x8YHRy1nzM7c=
 github.com/go-orb/plugins/server/grpc v0.0.0-20231207004543-835cc5bde3e3/go.mod h1:pgRfPgSSx1nGEdi17zgTQMu3BEpotBdJbTDw/3khzgI=
+github.com/go-orb/plugins/server/grpc v0.0.0-20231207004823-a5f483dc449d h1:IWl5kkqPQSR8IrUn2k3wVosKHuVNAWj6IP2pp//BEGQ=
+github.com/go-orb/plugins/server/grpc v0.0.0-20231207004823-a5f483dc449d/go.mod h1:i5k2rjqMqRgoOL1OIGL0RIfKyrSXrksi9ZOgg0n1QCQ=
 github.com/go-orb/plugins/server/hertz v0.0.0-20231206234938-5c2c970f4417 h1:xKi61Vnp5ctGs3zPvLaODkpC7VB+UopCi2ZI65Ful6Q=
 github.com/go-orb/plugins/server/hertz v0.0.0-20231206234938-5c2c970f4417/go.mod h1:uqlhyz72MbwCFRx6gZciSCACuiZz/5zsUYBRqiun3PY=
 github.com/go-orb/plugins/server/hertz v0.0.0-20231206235910-b8f58c9e9018 h1:Qf+waiREHvo2ObnnY375YRBWkRrKbUEztrAi+EEY3Qs=
@@ -135,6 +155,8 @@ github.com/go-orb/plugins/server/hertz v0.0.0-20231207001307-6bf78e510437 h1:id8
 github.com/go-orb/plugins/server/hertz v0.0.0-20231207001307-6bf78e510437/go.mod h1:iyayru9+VlMSUdF18wCFFkVRaaQ9nB4lP6dSErHC86s=
 github.com/go-orb/plugins/server/hertz v0.0.0-20231207004543-835cc5bde3e3 h1:DpNqkqIaI7yYpOjE4YHgbQJw11JYiDZ+sfxu//1NH6s=
 github.com/go-orb/plugins/server/hertz v0.0.0-20231207004543-835cc5bde3e3/go.mod h1:KnHqRpD4Hggym/WGjXvCpLx2G4ltoHKyIoVnvC9Yd5c=
+github.com/go-orb/plugins/server/hertz v0.0.0-20231207004823-a5f483dc449d h1:m64yQB8pkugcedGZf5/S11/8AfyxbBEFu1oBgtFm7do=
+github.com/go-orb/plugins/server/hertz v0.0.0-20231207004823-a5f483dc449d/go.mod h1:KnHqRpD4Hggym/WGjXvCpLx2G4ltoHKyIoVnvC9Yd5c=
 github.com/go-orb/plugins/server/http v0.0.0-20231206234938-5c2c970f4417 h1:I0nlRb8cK8hcqLllxQV/ewuhTCb6fKvwp/jFJk9F/bI=
 github.com/go-orb/plugins/server/http v0.0.0-20231206234938-5c2c970f4417/go.mod h1:iI/d2pzyIwCQFXRngbC7xrE6zYRGZCV/QrtcjmSI10M=
 github.com/go-orb/plugins/server/http v0.0.0-20231206235910-b8f58c9e9018 h1:Z59jOv+AO+oCd+cbSoUJmBCfuv5zw9vxQmXoVMjv0RQ=
@@ -143,6 +165,8 @@ github.com/go-orb/plugins/server/http v0.0.0-20231207001307-6bf78e510437 h1:zA4x
 github.com/go-orb/plugins/server/http v0.0.0-20231207001307-6bf78e510437/go.mod h1:iI/d2pzyIwCQFXRngbC7xrE6zYRGZCV/QrtcjmSI10M=
 github.com/go-orb/plugins/server/http v0.0.0-20231207004543-835cc5bde3e3 h1:0tTuu04Z+czLZgGPcUaADqXzuOFcDEoaljy/pYlNMLc=
 github.com/go-orb/plugins/server/http v0.0.0-20231207004543-835cc5bde3e3/go.mod h1:gFUiRlWG3N7qQJLQenczdCrMsoEQPiEf6OMmvjuJT/c=
+github.com/go-orb/plugins/server/http v0.0.0-20231207004823-a5f483dc449d h1:HVnAiJ5BaIKcKJW1w/5Zu0sjllML6rkh7RrLcMTBT7k=
+github.com/go-orb/plugins/server/http v0.0.0-20231207004823-a5f483dc449d/go.mod h1:Zy5cIRQordHuRHB6p8aOlpHqtpd/Lk6Bnl3kMKocdrg=
 github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 h1:tfuBGBXKqDEevZMzYi5KSi8KkcZtzBcTgAUUtapy0OI=
 github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572/go.mod h1:9Pwr4B2jHnOSGXyyzV8ROjYa2ojvAY6HCGYYfMoC3Ls=
 github.com/golang/protobuf v1.3.2/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=

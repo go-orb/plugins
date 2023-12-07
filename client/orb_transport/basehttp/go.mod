@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078
-	github.com/go-orb/plugins/client/orb v0.0.0-20231207004543-835cc5bde3e3
+	github.com/go-orb/plugins/client/orb v0.0.0-20231207004823-a5f483dc449d
 )
 
 require github.com/cornelk/hashmap v1.0.8 // indirect
