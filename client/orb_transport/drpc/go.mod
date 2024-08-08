@@ -3,8 +3,8 @@ module github.com/go-orb/plugins/client/orb_transport/drpc
 go 1.21
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078
-	github.com/go-orb/plugins/client/orb v0.0.0-20231207012411-f06c92b21588
+	github.com/go-orb/go-orb v0.0.0-20231208102541-4dcda5cab878
+	github.com/go-orb/plugins/client/orb v0.0.0-20231207045031-b87209ef10dd
 	github.com/go-orb/plugins/client/tests v0.0.0-20231207012411-f06c92b21588
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231207012411-f06c92b21588
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20231207012411-f06c92b21588
@@ -13,8 +13,8 @@ require (
 	github.com/go-orb/plugins/log/slog v0.0.0-20231207012411-f06c92b21588
 	github.com/go-orb/plugins/registry/mdns v0.0.0-20231207012411-f06c92b21588
 	github.com/stretchr/testify v1.8.4
-	google.golang.org/protobuf v1.31.0
-	storj.io/drpc v0.0.33
+	google.golang.org/protobuf v1.34.2
+	storj.io/drpc v0.0.34
 )
 
 require (

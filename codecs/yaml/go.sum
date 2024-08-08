@@ -1,8 +1,8 @@
 github.com/cornelk/hashmap v1.0.8 h1:nv0AWgw02n+iDcawr5It4CjQIAcdMMKRrs10HOJYlrc=
 github.com/cornelk/hashmap v1.0.8/go.mod h1:RfZb7JO3RviW/rT6emczVuC/oxpdz4UsSB2LJSclR1k=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
-github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078 h1:cRqbKBDDZgpn4QrsBRR8zRO2boxQPWZWXAqDWPli/ic=
-github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078/go.mod h1:AfkWyLBdfn6QOYKu6Eeqx2L6Kqv3X3vMil9DaVf+OqY=
+github.com/go-orb/go-orb v0.0.0-20231208102541-4dcda5cab878 h1:DZw6sY3oe+lk4dldL6iX+mNf8hbancEll/t5RgkyGtk=
+github.com/go-orb/go-orb v0.0.0-20231208102541-4dcda5cab878/go.mod h1:AfkWyLBdfn6QOYKu6Eeqx2L6Kqv3X3vMil9DaVf+OqY=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
