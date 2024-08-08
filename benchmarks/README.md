@@ -25,3 +25,41 @@ GLOBAL OPTIONS:
    --config value [ --config value ]                          Config file
    --help, -h                                                 show help
 ```
+
+## Run
+
+### Server
+
+```bash
+./registry/consul/test/bin/linux_amd64/consul agent -dev
+go run ./server/... -- --registry="consul"
+```
+
+### Client
+
+```bash
+pushd client
+go build .
+./client --transport="grpc" -- --registry="consul"
+popd
+```
+
+## A note about Benchmark "ERROR" messages
+
+Currently there are context canceled ERRORS this is a known issue and a wip.
+
+## jochumdev results:
+
+```bash
+for transport in "hertzh2c" "http3" "http" "h2c" "grpc" "drpc" "hertzhttp"; do
+   ./client --transport="${transport}" --threads=4 --connections=32 -- --registry="consul" 2>&1 | grep "Summary"
+done
+```
+
+time=2024-08-08T03:33:09.923+02:00 level=INFO msg=Summary bypass_registry=1 connections=32 duration=15 timeout=8 threads=4 transport=hertzh2c package_size=1000 content_type=application/x-protobuf reqsOk=557247 reqsError=27
+time=2024-08-08T13:30:00.156+02:00 level=INFO msg=Summary bypass_registry=1 connections=32 duration=15 timeout=8 threads=4 transport=http3 package_size=1000 content_type=application/x-protobuf reqsOk=686080 reqsError=0
+time=2024-08-08T03:34:10.958+02:00 level=INFO msg=Summary bypass_registry=1 connections=32 duration=15 timeout=8 threads=4 transport=http package_size=1000 content_type=application/x-protobuf reqsOk=1172285 reqsError=0
+time=2024-08-08T03:34:41.473+02:00 level=INFO msg=Summary bypass_registry=1 connections=32 duration=15 timeout=8 threads=4 transport=h2c package_size=1000 content_type=application/x-protobuf reqsOk=1168378 reqsError=0
+time=2024-08-08T03:35:11.987+02:00 level=INFO msg=Summary bypass_registry=1 connections=32 duration=15 timeout=8 threads=4 transport=grpc package_size=1000 content_type=application/x-protobuf reqsOk=1291629 reqsError=8
+time=2024-08-08T03:33:40.440+02:00 level=INFO msg=Summary bypass_registry=1 connections=32 duration=15 timeout=8 threads=4 transport=drpc package_size=1000 content_type=application/x-protobuf reqsOk=1874516 reqsError=10
+time=2024-08-08T03:35:42.503+02:00 level=INFO msg=Summary bypass_registry=1 connections=32 duration=15 timeout=8 threads=4 transport=hertzhttp package_size=1000 content_type=application/x-protobuf reqsOk=2168585 reqsError=2

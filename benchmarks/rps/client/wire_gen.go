@@ -20,12 +20,11 @@ import (
 )
 
 import (
+	_ "github.com/go-orb/plugins/client/middleware/log"
 	_ "github.com/go-orb/plugins/client/orb"
 	_ "github.com/go-orb/plugins/client/orb_transport/drpc"
 	_ "github.com/go-orb/plugins/client/orb_transport/grpc"
 	_ "github.com/go-orb/plugins/client/orb_transport/h2c"
-	_ "github.com/go-orb/plugins/client/orb_transport/hertzh2c"
-	_ "github.com/go-orb/plugins/client/orb_transport/hertzhttp"
 	_ "github.com/go-orb/plugins/client/orb_transport/http"
 	_ "github.com/go-orb/plugins/client/orb_transport/http3"
 	_ "github.com/go-orb/plugins/client/orb_transport/https"
@@ -36,6 +35,7 @@ import (
 	_ "github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/slog"
 	_ "github.com/go-orb/plugins/registry/consul"
+	_ "github.com/go-orb/plugins/registry/mdns"
 )
 
 // Injectors from wire.go:
