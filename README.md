@@ -14,6 +14,19 @@ This project is a work in progress, please do not use yet!
 
 We do not accept commit's with a "replace" line in a go.mod.
 
+### Run the tests
+
+- all:
+
+  ```bash
+  ./scripts/test.sh test all
+  ```
+
+- or just one:
+  ```bash
+   ./scripts/test.sh test client/orb_transport/grpc
+  ```
+
 ### Quirks
 
 #### It's not allowed to import plugins in github.com/go-orb/go-orb
