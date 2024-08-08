@@ -3,9 +3,9 @@ module github.com/go-orb/plugins/client/orb_transport/http3
 go 1.21
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231206042514-b8eae8c79078
-	github.com/go-orb/plugins/client/orb v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20231207012411-f06c92b21588
+	github.com/go-orb/go-orb v0.0.0-20231208102541-4dcda5cab878
+	github.com/go-orb/plugins/client/orb v0.0.0-20231207045031-b87209ef10dd
+	github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20231207045031-b87209ef10dd
 	github.com/go-orb/plugins/client/tests v0.0.0-20231207012411-f06c92b21588
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231207012411-f06c92b21588
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20231207012411-f06c92b21588
@@ -15,7 +15,7 @@ require (
 	github.com/go-orb/plugins/registry/consul v0.0.0-20231207012411-f06c92b21588
 	github.com/go-orb/plugins/registry/mdns v0.0.0-20231207012411-f06c92b21588
 	github.com/go-orb/plugins/server/http v0.0.0-20231207012411-f06c92b21588
-	github.com/quic-go/quic-go v0.40.0
+	github.com/quic-go/quic-go v0.46.0
 	github.com/stretchr/testify v1.8.4
 )
 
@@ -38,9 +38,9 @@ require (
 	github.com/go-orb/plugins/registry/regutil v0.0.0-20231207012411-f06c92b21588 // indirect
 	github.com/go-orb/plugins/server/drpc v0.0.0-20231207012411-f06c92b21588 // indirect
 	github.com/go-orb/plugins/server/hertz v0.0.0-20231207012411-f06c92b21588 // indirect
-	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
+	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/google/pprof v0.0.0-20231205033806-a5a03c77bf08 // indirect
+	github.com/google/pprof v0.0.0-20240727154555-813a5fbdbec8 // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/hashicorp/consul/api v1.26.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -60,29 +60,29 @@ require (
 	github.com/mitchellh/hashstructure v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/nyaruka/phonenumbers v1.2.2 // indirect
-	github.com/onsi/ginkgo/v2 v2.13.2 // indirect
+	github.com/onsi/ginkgo/v2 v2.20.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect
-	github.com/quic-go/qtls-go1-20 v0.4.1 // indirect
 	github.com/tidwall/gjson v1.17.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/zeebo/errs v1.3.0 // indirect
-	go.uber.org/mock v0.3.0 // indirect
+	go.uber.org/mock v0.4.0 // indirect
 	golang.org/x/arch v0.6.0 // indirect
-	golang.org/x/crypto v0.16.0 // indirect
-	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb // indirect
-	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.19.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/tools v0.16.0 // indirect
+	golang.org/x/crypto v0.26.0 // indirect
+	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
+	golang.org/x/mod v0.20.0 // indirect
+	golang.org/x/net v0.28.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
+	golang.org/x/sys v0.23.0 // indirect
+	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/tools v0.24.0 // indirect
 	google.golang.org/genproto v0.0.0-20231127180814-3a041ad873d4 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20231127180814-3a041ad873d4 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231127180814-3a041ad873d4 // indirect
 	google.golang.org/grpc v1.59.0 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
+	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	storj.io/drpc v0.0.33 // indirect
 )

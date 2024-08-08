@@ -6,9 +6,7 @@ package http
 import (
 	"context"
 	"errors"
-	"net"
 	"net/http"
-	"sync/atomic"
 
 	"github.com/quic-go/quic-go"
 	"github.com/quic-go/quic-go/http3"
@@ -35,10 +33,10 @@ func (s *ServerHTTP) newHTTP3Server() *http3server {
 		TLSConfig:      s.Config.TLS.Config,
 		MaxHeaderBytes: s.Config.MaxHeaderBytes,
 
-		// TODO(davincible): remove this config when draft versions are no longer supported (we have no need to support drafts)
-		QuicConfig: &quic.Config{
+		QUICConfig: &quic.Config{
 			MaxIncomingStreams: int64(s.Config.MaxConcurrentStreams),
-			Versions:           []quic.VersionNumber{quic.Version1, quic.Version2},
+			// TODO(davincible): remove this config when draft versions are no longer supported (we have no need to support drafts)
+			Versions: []quic.Version{quic.Version1, quic.Version2},
 		},
 	}
 
@@ -47,10 +45,8 @@ func (s *ServerHTTP) newHTTP3Server() *http3server {
 
 func (h3 *http3server) Start() error {
 	h3ln, err := quic.ListenEarly(h3.s.listenerUDP, http3.ConfigureTLSConfig(h3.s.Config.TLS.Config), &quic.Config{
-		Allow0RTT: true,
-		RequireAddressValidation: func(clientAddr net.Addr) bool {
-			return atomic.LoadInt64(&h3.s.activeRequests) > int64(h3.s.Config.MaxConcurrentStreams)
-		},
+		Allow0RTT:          true,
+		MaxIncomingStreams: int64(h3.s.Config.MaxConcurrentStreams),
 	})
 	if err != nil {
 		return err

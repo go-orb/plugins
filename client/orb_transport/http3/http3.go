@@ -28,7 +28,7 @@ func NewTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, error)
 		&http.Client{
 			Timeout: cfg.ConnectionTimeout,
 			Transport: &http3.RoundTripper{
-				QuicConfig: &quic.Config{
+				QUICConfig: &quic.Config{
 					MaxIncomingStreams:         int64(cfg.PoolSize),
 					MaxIncomingUniStreams:      int64(cfg.PoolSize),
 					MaxStreamReceiveWindow:     3 * (1 << 20),   // 3 MB
