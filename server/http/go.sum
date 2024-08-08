@@ -8,6 +8,8 @@ github.com/go-logr/logr v1.4.2 h1:6pFjapn8bFcIbiKo3XT4j/BhANplGihG6tvd+8rYgrY=
 github.com/go-logr/logr v1.4.2/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-orb/go-orb v0.0.0-20231208102541-4dcda5cab878 h1:DZw6sY3oe+lk4dldL6iX+mNf8hbancEll/t5RgkyGtk=
 github.com/go-orb/go-orb v0.0.0-20231208102541-4dcda5cab878/go.mod h1:AfkWyLBdfn6QOYKu6Eeqx2L6Kqv3X3vMil9DaVf+OqY=
+github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af h1:OiJ62ZLgz831+Ubv5wrC+5prZzS6LvYswUQGcAIXa7o=
+github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af/go.mod h1:1QerXe4TRJ0YMR2cQlyPhfdKUCVwD/kAHvsuYcwoTfw=
 github.com/go-orb/plugins/codecs/form v0.0.0-20231207012411-f06c92b21588 h1:py8BwRCEKkOn8Zaepq3zQsLHUZckAMalRNIh/j02nPs=
 github.com/go-orb/plugins/codecs/form v0.0.0-20231207012411-f06c92b21588/go.mod h1:PGDlcRZAXwO+CZ/HYCxXKKqSOG/zczXgLs98c+iDUts=
 github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231207012411-f06c92b21588 h1:zqMYjfubd9yHvb/abHiDN7HDyNQqU/MGdVasoap8KP0=
@@ -28,6 +30,7 @@ github.com/go-playground/assert/v2 v2.0.1 h1:MsBgLAaY856+nPRTKrp3/OZK38U/wa0CcBY
 github.com/go-playground/assert/v2 v2.0.1/go.mod h1:VDjEfimB/XKnb+ZQfWdccd7VUvScMdVu0Titje2rxJ4=
 github.com/go-playground/form/v4 v4.2.1 h1:HjdRDKO0fftVMU5epjPW2SOREcZ6/wLUzEobqUGJuPw=
 github.com/go-playground/form/v4 v4.2.1/go.mod h1:q1a2BY+AQUUzhl6xA/6hBetay6dEIhMHjgvJiGo6K7U=
+github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 h1:tfuBGBXKqDEevZMzYi5KSi8KkcZtzBcTgAUUtapy0OI=
 github.com/go-task/slim-sprig/v3 v3.0.0 h1:sUs3vkvUymDpBKi3qH1YSqBQk9+9D/8M2mN1vB6EwHI=
 github.com/go-task/slim-sprig/v3 v3.0.0/go.mod h1:W848ghGpv3Qj3dhTPRyJypKRiqCdHZiAzKg9hl15HA8=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=

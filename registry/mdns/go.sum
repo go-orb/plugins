@@ -4,6 +4,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-orb/go-orb v0.0.0-20231208102541-4dcda5cab878 h1:DZw6sY3oe+lk4dldL6iX+mNf8hbancEll/t5RgkyGtk=
 github.com/go-orb/go-orb v0.0.0-20231208102541-4dcda5cab878/go.mod h1:AfkWyLBdfn6QOYKu6Eeqx2L6Kqv3X3vMil9DaVf+OqY=
+github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af h1:OiJ62ZLgz831+Ubv5wrC+5prZzS6LvYswUQGcAIXa7o=
+github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af/go.mod h1:1QerXe4TRJ0YMR2cQlyPhfdKUCVwD/kAHvsuYcwoTfw=
 github.com/go-orb/plugins/log/slog v0.0.0-20231207012411-f06c92b21588 h1:jgXRTyDgRDcmUMK79zDI7zwKYTtQrCb+DVLf1vORphI=
 github.com/go-orb/plugins/log/slog v0.0.0-20231207012411-f06c92b21588/go.mod h1:EdVLx57PCul9ck4gSZ3UfLWChjYj01B8jlbWS9Nvy1Y=
 github.com/go-orb/plugins/registry/tests v0.0.0-20231207012411-f06c92b21588 h1:LGeQZPQkBPEoNSWV2meZnxM/XOUkLHONt3DxgAnw8pM=

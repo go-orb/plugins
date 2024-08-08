@@ -3,19 +3,19 @@ module github.com/go-orb/plugins/client/tests
 go 1.21
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231208102541-4dcda5cab878
-	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231207045031-b87209ef10dd
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20231207045031-b87209ef10dd
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231207045031-b87209ef10dd
-	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231207045031-b87209ef10dd
-	github.com/go-orb/plugins/config/source/file v0.0.0-20231207045031-b87209ef10dd
-	github.com/go-orb/plugins/log/lumberjack v0.0.0-20231207045031-b87209ef10dd
-	github.com/go-orb/plugins/log/slog v0.0.0-20231207045031-b87209ef10dd
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20231207045031-b87209ef10dd
-	github.com/go-orb/plugins/server/drpc v0.0.0-20231207045031-b87209ef10dd
-	github.com/go-orb/plugins/server/grpc v0.0.0-20231207045031-b87209ef10dd
-	github.com/go-orb/plugins/server/hertz v0.0.0-20231207045031-b87209ef10dd
-	github.com/go-orb/plugins/server/http v0.0.0-20231207045031-b87209ef10dd
+	github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af
+	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20240808121627-cff27c7b4e65
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20240808121627-cff27c7b4e65
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20240808121627-cff27c7b4e65
+	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20240808121627-cff27c7b4e65
+	github.com/go-orb/plugins/config/source/file v0.0.0-20240808121627-cff27c7b4e65
+	github.com/go-orb/plugins/log/lumberjack v0.0.0-20240808121627-cff27c7b4e65
+	github.com/go-orb/plugins/log/slog v0.0.0-20240808121627-cff27c7b4e65
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20240808121627-cff27c7b4e65
+	github.com/go-orb/plugins/server/drpc v0.0.0-20240808121627-cff27c7b4e65
+	github.com/go-orb/plugins/server/grpc v0.0.0-20240808121627-cff27c7b4e65
+	github.com/go-orb/plugins/server/hertz v0.0.0-20240808121627-cff27c7b4e65
+	github.com/go-orb/plugins/server/http v0.0.0-20240808121627-cff27c7b4e65
 	github.com/google/wire v0.6.0
 	github.com/hashicorp/consul/sdk v0.16.1
 	github.com/stretchr/testify v1.9.0

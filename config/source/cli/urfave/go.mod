@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/config/source/cli/urfave
 go 1.21
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231208102541-4dcda5cab878
+	github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/stretchr/testify v1.8.4
 	github.com/urfave/cli/v2 v2.27.3

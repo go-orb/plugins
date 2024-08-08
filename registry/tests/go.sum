@@ -5,6 +5,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-orb/go-orb v0.0.0-20231208102541-4dcda5cab878 h1:DZw6sY3oe+lk4dldL6iX+mNf8hbancEll/t5RgkyGtk=
 github.com/go-orb/go-orb v0.0.0-20231208102541-4dcda5cab878/go.mod h1:AfkWyLBdfn6QOYKu6Eeqx2L6Kqv3X3vMil9DaVf+OqY=
+github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af h1:OiJ62ZLgz831+Ubv5wrC+5prZzS6LvYswUQGcAIXa7o=
+github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af/go.mod h1:1QerXe4TRJ0YMR2cQlyPhfdKUCVwD/kAHvsuYcwoTfw=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=

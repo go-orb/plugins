@@ -3,9 +3,9 @@ module github.com/go-orb/plugins/client/orb_transport/h2c
 go 1.21
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20231208102541-4dcda5cab878
-	github.com/go-orb/plugins/client/orb v0.0.0-20231207045031-b87209ef10dd
-	github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20231207045031-b87209ef10dd
+	github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af
+	github.com/go-orb/plugins/client/orb v0.0.0-20240808121627-cff27c7b4e65
+	github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20240808121627-cff27c7b4e65
 	github.com/go-orb/plugins/client/tests v0.0.0-20231207012411-f06c92b21588
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231207012411-f06c92b21588
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20231207012411-f06c92b21588
@@ -71,13 +71,13 @@ require (
 	github.com/zeebo/errs v1.3.0 // indirect
 	go.uber.org/mock v0.3.0 // indirect
 	golang.org/x/arch v0.6.0 // indirect
-	golang.org/x/crypto v0.16.0 // indirect
+	golang.org/x/crypto v0.26.0 // indirect
 	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb // indirect
-	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.19.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/tools v0.16.0 // indirect
+	golang.org/x/mod v0.20.0 // indirect
+	golang.org/x/net v0.28.0 // indirect
+	golang.org/x/sys v0.23.0 // indirect
+	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/tools v0.24.0 // indirect
 	google.golang.org/genproto v0.0.0-20231127180814-3a041ad873d4 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20231127180814-3a041ad873d4 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231127180814-3a041ad873d4 // indirect
