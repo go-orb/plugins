@@ -13,17 +13,12 @@ function run() {
     if [[ "x${ORB_NODOWNLOAD}" == "x" ]]; then
         print_msg "Downloading go modules"
         go mod download &>/dev/null 2>&1
-        echo ""
+        print_msg "done"
     fi
 
     # Run tests.
-    if [[ -f "COVERPKGS" ]]; then
-        echo $(go env GOPATH)/bin/go test ./...  -v -benchmem -bench=. -cover -coverpkg="$(cat COVERPKGS | tr '\n' ',')"
-        $(go env GOPATH)/bin/richgo test ./... -v -benchmem -bench=. -cover -coverpkg="$(cat COVERPKGS | tr '\n' ',')"
-    else
-        echo $(go env GOPATH)/bin/go test ./... -v -benchmem -bench=. -cover
-        $(go env GOPATH)/bin/richgo test ./... -v -benchmem -bench=. -cover
-    fi
+    echo $(go env GOPATH)/bin/go test ./...  -v -benchmem -bench=.
+    $(go env GOPATH)/bin/richgo test ./... -v -benchmem -bench=.
 
     rc=$?
 

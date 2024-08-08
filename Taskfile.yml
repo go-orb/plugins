@@ -60,7 +60,7 @@ tasks:
       - ./scripts/test.sh test all
 
   test.sh:
-    desc: "Run test.sh with the given arguments: go-task test.sh -- test codecs/form"
+    desc: "Run test.sh with the given arguments: task test.sh -- test codecs/form"
     cmds:
       - ./scripts/test.sh {{.CLI_ARGS}}
     env:

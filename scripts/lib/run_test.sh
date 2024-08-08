@@ -11,9 +11,9 @@ function run() {
     pushd "${dir}" >/dev/null || exit
 
     if [[ "x${ORB_NODOWNLOAD}" == "x" ]]; then
-        print_msg "Downloading go modules"
+        print_msg "Downloading go modules..."
         go mod download &>/dev/null 2>&1
-        echo ""
+        print_msg "done"
     fi
 
     # Run tests.

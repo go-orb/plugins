@@ -45,7 +45,9 @@ function get_dirs() {
 		# path with realpath.
 		for dir in "${@}"; do
 			if [[ ! -d ${dir} ]]; then
-				echo -n "${ORB_ROOT}/${dir} "
+				if [[ -d "${ORB_ROOT}/${dir}" ]]; then
+					echo -n "${ORB_ROOT}/${dir} "
+				fi
 			else
 				echo -n "$(realpath "${dir}") "
 			fi
@@ -229,7 +231,7 @@ case $1 in
 	exit 1
 	;;
 *)
-	printf "Command not found: $1. Select one of [lint, test, summary]"
+	printf "Command not found: $1. Select one of [lint, test, bench, summary]"
 	exit 1
 	;;
 esac
