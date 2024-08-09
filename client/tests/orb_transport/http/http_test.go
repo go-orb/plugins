@@ -1,4 +1,4 @@
-package drpc
+package http
 
 import (
 	"os"
@@ -9,21 +9,22 @@ import (
 	"github.com/go-orb/plugins/client/tests"
 	"github.com/stretchr/testify/suite"
 
+	o "github.com/go-orb/plugins/client/orb_transport/http"
+
 	_ "github.com/go-orb/plugins/codecs/jsonpb"
 	_ "github.com/go-orb/plugins/codecs/proto"
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	_ "github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/slog"
 	_ "github.com/go-orb/plugins/registry/mdns"
+	_ "github.com/go-orb/plugins/server/http/router/chi"
 )
 
 func newSuite() *tests.TestSuite {
 	_, filename, _, _ := runtime.Caller(0)
-	pluginsRoot := filepath.Join(filepath.Dir(filename), "../../../")
+	pluginsRoot := filepath.Join(filepath.Dir(filename), "../../../../")
 
-	s := tests.NewSuite(pluginsRoot, []string{Name})
-	// s.Debug = true
-	return s
+	return tests.NewSuite(pluginsRoot, []string{o.Name})
 }
 
 func TestSuite(t *testing.T) {

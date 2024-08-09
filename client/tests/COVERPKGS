@@ -1,0 +1,12 @@
+github.com/go-orb/go-orb/client
+github.com/go-orb/plugins/client/orb
+github.com/go-orb/plugins/client/orb_transport/basehertz
+github.com/go-orb/plugins/client/orb_transport/basehttp
+github.com/go-orb/plugins/client/orb_transport/drpc
+github.com/go-orb/plugins/client/orb_transport/grpc
+github.com/go-orb/plugins/client/orb_transport/h2c
+github.com/go-orb/plugins/client/orb_transport/herrtzh2c
+github.com/go-orb/plugins/client/orb_transport/herrtzhttp
+github.com/go-orb/plugins/client/orb_transport/http
+github.com/go-orb/plugins/client/orb_transport/http3
+github.com/go-orb/plugins/client/orb_transport/https
