@@ -4,8 +4,8 @@ go 1.21
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af
-	github.com/go-orb/plugins/client/orb v0.0.0-20240808121627-cff27c7b4e65
-	github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20240808121627-cff27c7b4e65
+	github.com/go-orb/plugins/client/orb v0.0.0-20240809105731-a8ee45a15344
+	github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20240809105731-a8ee45a15344
 	github.com/quic-go/quic-go v0.46.0
 )
 
@@ -17,11 +17,11 @@ require (
 	github.com/quic-go/qpack v0.4.0 // indirect
 	go.uber.org/mock v0.4.0 // indirect
 	golang.org/x/crypto v0.26.0 // indirect
-	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
+	golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa // indirect
 	golang.org/x/mod v0.20.0 // indirect
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.23.0 // indirect
+	golang.org/x/sys v0.24.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect
 )

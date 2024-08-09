@@ -11,23 +11,23 @@ require (
 	github.com/go-orb/plugins/client/orb_transport/hertzhttp v0.0.0-20240808123200-284ebdd40dc7
 	github.com/go-orb/plugins/client/orb_transport/http v0.0.0-20240808123200-284ebdd40dc7
 	github.com/go-orb/plugins/client/orb_transport/https v0.0.0-20240808123200-284ebdd40dc7
-	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20240808123200-284ebdd40dc7
-	github.com/go-orb/plugins/config/source/file v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/log/lumberjack v0.0.0-20240808123200-284ebdd40dc7
-	github.com/go-orb/plugins/log/slog v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/server/drpc v0.0.0-20240808123200-284ebdd40dc7
-	github.com/go-orb/plugins/server/grpc v0.0.0-20240808123200-284ebdd40dc7
-	github.com/go-orb/plugins/server/hertz v0.0.0-20240808123200-284ebdd40dc7
-	github.com/go-orb/plugins/server/http v0.0.0-20240808123200-284ebdd40dc7
+	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20240809105731-a8ee45a15344
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20240809105731-a8ee45a15344
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20240809105731-a8ee45a15344
+	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20240809105731-a8ee45a15344
+	github.com/go-orb/plugins/config/source/file v0.0.0-20240809105731-a8ee45a15344
+	github.com/go-orb/plugins/log/lumberjack v0.0.0-20240809105731-a8ee45a15344
+	github.com/go-orb/plugins/log/slog v0.0.0-20240809105731-a8ee45a15344
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20240809105731-a8ee45a15344
+	github.com/go-orb/plugins/server/drpc v0.0.0-20240809105731-a8ee45a15344
+	github.com/go-orb/plugins/server/grpc v0.0.0-20240809105731-a8ee45a15344
+	github.com/go-orb/plugins/server/hertz v0.0.0-20240809105731-a8ee45a15344
+	github.com/go-orb/plugins/server/http v0.0.0-20240809105731-a8ee45a15344
 	github.com/google/wire v0.6.0
 	github.com/hashicorp/consul/sdk v0.16.1
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
-	google.golang.org/genproto/googleapis/api v0.0.0-20240805194559-2c9e96a0b5d4
+	golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa
+	google.golang.org/genproto/googleapis/api v0.0.0-20240808171019-573a1156607a
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
 	storj.io/drpc v0.0.34
@@ -60,7 +60,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hertz-contrib/http2 v0.1.8 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.8 // indirect
-	github.com/miekg/dns v1.1.57 // indirect
+	github.com/miekg/dns v1.1.61 // indirect
 	github.com/nyaruka/phonenumbers v1.4.0 // indirect
 	github.com/onsi/ginkgo/v2 v2.20.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
@@ -81,10 +81,10 @@ require (
 	golang.org/x/mod v0.20.0 // indirect
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.23.0 // indirect
+	golang.org/x/sys v0.24.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240805194559-2c9e96a0b5d4 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240808171019-573a1156607a // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
