@@ -48,7 +48,7 @@ popd
 
 Currently there are context canceled ERRORS this is a known issue and a wip.
 
-## jochumdev results:
+## jochumdev results
 
 ```bash
 for transport in "hertzh2c" "http3" "http" "h2c" "grpc" "drpc" "hertzhttp"; do
