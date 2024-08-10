@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/server/drpc
 go 1.21
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af
+	github.com/go-orb/go-orb v0.0.0-20240810234651-a01190e49d61
 	github.com/google/uuid v1.6.0
 	storj.io/drpc v0.0.34
 )

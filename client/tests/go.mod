@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/client/tests
 go 1.21
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af
+	github.com/go-orb/go-orb v0.0.0-20240810234651-a01190e49d61
 	github.com/go-orb/plugins/client/orb_transport/drpc v0.0.0-20240808123200-284ebdd40dc7
 	github.com/go-orb/plugins/client/orb_transport/grpc v0.0.0-20240808123200-284ebdd40dc7
 	github.com/go-orb/plugins/client/orb_transport/h2c v0.0.0-20240808123200-284ebdd40dc7
@@ -11,18 +11,18 @@ require (
 	github.com/go-orb/plugins/client/orb_transport/hertzhttp v0.0.0-20240808123200-284ebdd40dc7
 	github.com/go-orb/plugins/client/orb_transport/http v0.0.0-20240808123200-284ebdd40dc7
 	github.com/go-orb/plugins/client/orb_transport/https v0.0.0-20240808123200-284ebdd40dc7
-	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20240809105731-a8ee45a15344
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20240809105731-a8ee45a15344
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20240809105731-a8ee45a15344
-	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20240809105731-a8ee45a15344
-	github.com/go-orb/plugins/config/source/file v0.0.0-20240809105731-a8ee45a15344
-	github.com/go-orb/plugins/log/lumberjack v0.0.0-20240809105731-a8ee45a15344
-	github.com/go-orb/plugins/log/slog v0.0.0-20240809105731-a8ee45a15344
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20240809105731-a8ee45a15344
-	github.com/go-orb/plugins/server/drpc v0.0.0-20240809105731-a8ee45a15344
-	github.com/go-orb/plugins/server/grpc v0.0.0-20240809105731-a8ee45a15344
-	github.com/go-orb/plugins/server/hertz v0.0.0-20240809105731-a8ee45a15344
-	github.com/go-orb/plugins/server/http v0.0.0-20240809105731-a8ee45a15344
+	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20240810233646-0b3616b1829d
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20240810233646-0b3616b1829d
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20240810233646-0b3616b1829d
+	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20240810233646-0b3616b1829d
+	github.com/go-orb/plugins/config/source/file v0.0.0-20240810233646-0b3616b1829d
+	github.com/go-orb/plugins/log/lumberjack v0.0.0-20240810233646-0b3616b1829d
+	github.com/go-orb/plugins/log/slog v0.0.0-20240810233646-0b3616b1829d
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20240810233646-0b3616b1829d
+	github.com/go-orb/plugins/server/drpc v0.0.0-20240810233646-0b3616b1829d
+	github.com/go-orb/plugins/server/grpc v0.0.0-20240810233646-0b3616b1829d
+	github.com/go-orb/plugins/server/hertz v0.0.0-20240810233646-0b3616b1829d
+	github.com/go-orb/plugins/server/http v0.0.0-20240810233646-0b3616b1829d
 	github.com/google/wire v0.6.0
 	github.com/hashicorp/consul/sdk v0.16.1
 	github.com/stretchr/testify v1.9.0

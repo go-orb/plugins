@@ -4,9 +4,9 @@ go 1.21
 
 require (
 	github.com/cloudwego/hertz v0.9.2
-	github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af
-	github.com/go-orb/plugins/client/orb v0.0.0-20240809105731-a8ee45a15344
-	github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20240809105731-a8ee45a15344
+	github.com/go-orb/go-orb v0.0.0-20240810234651-a01190e49d61
+	github.com/go-orb/plugins/client/orb v0.0.0-20240810233646-0b3616b1829d
+	github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20240810233646-0b3616b1829d
 	github.com/hertz-contrib/http2 v0.1.8
 )
 

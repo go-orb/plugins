@@ -4,8 +4,12 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af h1:OiJ62ZLgz831+Ubv5wrC+5prZzS6LvYswUQGcAIXa7o=
 github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af/go.mod h1:1QerXe4TRJ0YMR2cQlyPhfdKUCVwD/kAHvsuYcwoTfw=
+github.com/go-orb/go-orb v0.0.0-20240810234651-a01190e49d61 h1:Kw94tna2x4TywAwUKRs10+oZ/9fGy8av9KbNygsm9IE=
+github.com/go-orb/go-orb v0.0.0-20240810234651-a01190e49d61/go.mod h1:1QerXe4TRJ0YMR2cQlyPhfdKUCVwD/kAHvsuYcwoTfw=
 github.com/go-orb/plugins/client/orb v0.0.0-20240809105731-a8ee45a15344 h1:zq877xERb7sxXZpJWl/E75aoOikgX82VOmPIn3y5/2E=
 github.com/go-orb/plugins/client/orb v0.0.0-20240809105731-a8ee45a15344/go.mod h1:2FSjbWXkZDsPkV2Zm2B1UXf9OHGQTxrjUlK3p55kuAk=
+github.com/go-orb/plugins/client/orb v0.0.0-20240810233646-0b3616b1829d h1:1gcD2tRPCoiXw6bqQL2tYHtcDDCcRqTjmOmyv3Z8mRw=
+github.com/go-orb/plugins/client/orb v0.0.0-20240810233646-0b3616b1829d/go.mod h1:2FSjbWXkZDsPkV2Zm2B1UXf9OHGQTxrjUlK3p55kuAk=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=

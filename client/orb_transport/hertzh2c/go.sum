@@ -40,10 +40,16 @@ github.com/fsnotify/fsnotify v1.7.0 h1:8JEhPFa5W2WU7YfeZzPNqzMP6Lwt7L2715Ggo0nos
 github.com/fsnotify/fsnotify v1.7.0/go.mod h1:40Bi/Hjc2AVfZrqy+aj+yEI+/bRxZnMJyTJwOpGvigM=
 github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af h1:OiJ62ZLgz831+Ubv5wrC+5prZzS6LvYswUQGcAIXa7o=
 github.com/go-orb/go-orb v0.0.0-20240808121121-1f65fceb24af/go.mod h1:1QerXe4TRJ0YMR2cQlyPhfdKUCVwD/kAHvsuYcwoTfw=
+github.com/go-orb/go-orb v0.0.0-20240810234651-a01190e49d61 h1:Kw94tna2x4TywAwUKRs10+oZ/9fGy8av9KbNygsm9IE=
+github.com/go-orb/go-orb v0.0.0-20240810234651-a01190e49d61/go.mod h1:1QerXe4TRJ0YMR2cQlyPhfdKUCVwD/kAHvsuYcwoTfw=
 github.com/go-orb/plugins/client/orb v0.0.0-20240809105731-a8ee45a15344 h1:zq877xERb7sxXZpJWl/E75aoOikgX82VOmPIn3y5/2E=
 github.com/go-orb/plugins/client/orb v0.0.0-20240809105731-a8ee45a15344/go.mod h1:2FSjbWXkZDsPkV2Zm2B1UXf9OHGQTxrjUlK3p55kuAk=
+github.com/go-orb/plugins/client/orb v0.0.0-20240810233646-0b3616b1829d h1:1gcD2tRPCoiXw6bqQL2tYHtcDDCcRqTjmOmyv3Z8mRw=
+github.com/go-orb/plugins/client/orb v0.0.0-20240810233646-0b3616b1829d/go.mod h1:2FSjbWXkZDsPkV2Zm2B1UXf9OHGQTxrjUlK3p55kuAk=
 github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20240809105731-a8ee45a15344 h1:pQ0yK2SUsRqDEiyz4pdy6D78yuP0uts81FX1hrhOH5s=
 github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20240809105731-a8ee45a15344/go.mod h1:L9yqoe3P/BQbWc38wuLu7mqSAG+k6Sv5OvV5zUe7mpY=
+github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20240810233646-0b3616b1829d h1:JfKlH+M5g11G0cCzX/oefg3d+JzuGpx3GZnP9FDnx1Y=
+github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20240810233646-0b3616b1829d/go.mod h1:9gE+UTSTdcP2ZO9Q3jvDmZJHsViPh0hrZmvgCOqzsoc=
 github.com/golang/protobuf v1.3.2/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
