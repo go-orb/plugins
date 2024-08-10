@@ -39,8 +39,8 @@ type Config struct {
 	registry.Config `yaml:",inline"`
 
 	Addresses []string    `json:"addresses,omitempty" yaml:"addresses,omitempty"`
-	Secure    bool        `json:"secure,omitempty" yaml:"secure,omitempty"`
-	TLSConfig *tls.Config `json:"-" yaml:"-"`
+	Secure    bool        `json:"secure,omitempty"    yaml:"secure,omitempty"`
+	TLSConfig *tls.Config `json:"-"                   yaml:"-"`
 
 	Quorum int `json:"quorum,omitempty" yaml:"quorum,omitempty"`
 

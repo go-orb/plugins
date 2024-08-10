@@ -20,56 +20,56 @@ import (
 func createServer() (*tests.TestSuite, func() error, error) {
 	logger, err := log.New()
 	if err != nil {
-		log.Error("failed to create logger", err)
-		os.Exit(1)
+		log.Error("failed to create logger", "err", err)
+		return nil, func() error { return nil }, err
 	}
 
 	server, err := createServer1(&testing.T{})
 	if err != nil {
-		logger.Error("failed to create a consul server", err)
-		os.Exit(1)
+		logger.Error("failed to create a consul server", "err", err)
+		return nil, func() error { return nil }, err
 	}
 
 	cfg1, err := NewConfig(types.ServiceName("test1.service"), nil, WithAddress(server.HTTPAddr))
 	if err != nil {
-		log.Error("failed to create config", err)
+		log.Error("failed to create config", "err", err)
 		server.Stop() //nolint:errcheck
-		os.Exit(1)
+		return nil, func() error { return nil }, err
 	}
 
 	reg1 := New("", "", cfg1, logger)
 	if err := reg1.Start(); err != nil {
-		log.Error("failed to connect registry one to Consul server", err)
+		log.Error("failed to connect registry one to Consul server", "err", err)
 		server.Stop() //nolint:errcheck
-		os.Exit(1)
+		return nil, func() error { return nil }, err
 	}
 
 	cfg2, err := NewConfig(types.ServiceName("test2.service"), nil, WithAddress(server.HTTPAddr))
 	if err != nil {
-		log.Error("failed to create config", err)
+		log.Error("failed to create config", "err", err)
 		server.Stop() //nolint:errcheck
-		os.Exit(1)
+		return nil, func() error { return nil }, err
 	}
 
 	reg2 := New("", "", cfg2, logger)
 	if err := reg2.Start(); err != nil {
-		log.Error("failed to connect registry two to Consul server", err)
+		log.Error("failed to connect registry two to Consul server", "err", err)
 		server.Stop() //nolint:errcheck
-		os.Exit(1)
+		return nil, func() error { return nil }, err
 	}
 
 	cfg3, err := NewConfig(types.ServiceName("test3.service"), nil, WithAddress(server.HTTPAddr))
 	if err != nil {
 		log.Error("failed to create config", err)
 		server.Stop() //nolint:errcheck
-		os.Exit(1)
+		return nil, func() error { return nil }, err
 	}
 
 	reg3 := New("", "", cfg3, logger)
 	if err := reg3.Start(); err != nil {
-		log.Error("failed to connect registry three to Consul server", err)
+		log.Error("failed to connect registry three to Consul server", "err", err)
 		server.Stop() //nolint:errcheck
-		os.Exit(1)
+		return nil, func() error { return nil }, err
 	}
 
 	cleanup := func() error {
@@ -80,7 +80,9 @@ func createServer() (*tests.TestSuite, func() error, error) {
 	return tests.CreateSuite(logger, []registry.Registry{reg1, reg2, reg3}, 0, 1), cleanup, nil
 }
 
-func createServer1(t testing.TB) (*testutil.TestServer, error) {
+func createServer1(tb testing.TB) (*testutil.TestServer, error) {
+	tb.Helper()
+
 	// Compile our consul path.
 	myConsulPath, err := filepath.Abs(filepath.Join("./test/bin/", runtime.GOOS+"_"+runtime.GOARCH))
 	if err != nil {
@@ -89,9 +91,9 @@ func createServer1(t testing.TB) (*testutil.TestServer, error) {
 
 	// Prepend path with our consul path.
 	path := os.Getenv("PATH")
-	t.Setenv("PATH", myConsulPath+":"+path)
+	tb.Setenv("PATH", myConsulPath+":"+path)
 
-	server, err := testutil.NewTestServerConfigT(t, func(c *testutil.TestServerConfig) {
+	server, err := testutil.NewTestServerConfigT(tb, func(c *testutil.TestServerConfig) {
 		c.EnableDebug = true
 	})
 	if err != nil {
@@ -99,7 +101,7 @@ func createServer1(t testing.TB) (*testutil.TestServer, error) {
 	}
 
 	// Revert path.
-	t.Setenv("PATH", path)
+	tb.Setenv("PATH", path)
 
 	return server, nil
 }

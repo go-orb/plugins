@@ -42,7 +42,7 @@ func (c *Client) Start() error {
 func (c *Client) Stop(ctx context.Context) error {
 	hasError := false
 
-	c.transports.Range(func(name string, t Transport) bool {
+	c.transports.Range(func(_ string, t Transport) bool {
 		if err := t.Stop(ctx); err != nil {
 			c.logger.Error("failed to stop a transport", "error", err)
 

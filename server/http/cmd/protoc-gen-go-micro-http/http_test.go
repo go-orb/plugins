@@ -25,6 +25,7 @@ func TestSingleParam(t *testing.T) {
 }
 
 func TestTwoParametersReplacement(t *testing.T) {
+	//nolint:goconst
 	path := "/test/{message.id}/{message.name=messages/*}"
 	m := buildPathVars(path)
 	if len(m) != 2 {

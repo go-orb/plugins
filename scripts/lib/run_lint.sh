@@ -8,7 +8,7 @@ function run() {
 		exit 1
 	fi
 
-	/tmp/golangci-lint run --out-format github-actions
+	/tmp/golangci-lint run
 
 	# Keep track of exit code of linter
 	if [[ $? -ne 0 ]]; then

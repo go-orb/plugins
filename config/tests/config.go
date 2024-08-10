@@ -2,10 +2,10 @@
 package test
 
 type logConfig struct {
-	Plugin          string         `json:"plugin" yaml:"plugin"`
-	Enabled         bool           `json:"enabled" yaml:"enabled"`
-	Level           string         `json:"level" yaml:"level"`
-	Fields          map[string]any `json:"fields" yaml:"fields"`
+	Plugin          string         `json:"plugin"          yaml:"plugin"`
+	Enabled         bool           `json:"enabled"         yaml:"enabled"`
+	Level           string         `json:"level"           yaml:"level"`
+	Fields          map[string]any `json:"fields"          yaml:"fields"`
 	CallerSkipFrame int            `json:"callerSkipFrame" yaml:"callerSkipFrame"`
 }
 
@@ -19,10 +19,10 @@ func newLogConfig() *logConfig {
 }
 
 type registryConfig struct {
-	Plugin  string     `json:"plugin" yaml:"plugin"`
+	Plugin  string     `json:"plugin"  yaml:"plugin"`
 	Enabled bool       `json:"enabled" yaml:"enabled"`
 	Timeout int        `json:"timeout" yaml:"timeout"`
-	Log     *logConfig `json:"log" yaml:"log"`
+	Log     *logConfig `json:"log"     yaml:"log"`
 }
 
 // newRegistryConfig creates a new config with defaults.
@@ -53,7 +53,7 @@ type registryNatsConfig struct {
 	*registryConfig `yaml:",inline"`
 
 	Addresses []string `json:"addresses" yaml:"addresses"`
-	Secure    bool     `json:"secure" yaml:"secure"`
+	Secure    bool     `json:"secure"    yaml:"secure"`
 
 	QueryTopic string `json:"queryTopic" yaml:"queryTopic"`
 	WatchTopic string `json:"watchTopic" yaml:"watchTopic"`

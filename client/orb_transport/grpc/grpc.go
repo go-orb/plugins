@@ -3,7 +3,6 @@ package grpc
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"time"
 
 	"google.golang.org/grpc"
@@ -67,7 +66,7 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 	}
 
 	if t.pool == nil {
-		factory := func(ctx context.Context, addr string, tlsConfig *tls.Config) (*grpc.ClientConn, error) {
+		factory := func(_ context.Context, addr string, tlsConfig *tls.Config) (*grpc.ClientConn, error) {
 			gopts := []grpc.DialOption{}
 
 			if tlsConfig != nil {
@@ -76,10 +75,8 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 				gopts = append(gopts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 			}
 
-			dialctx, cancel := context.WithTimeout(ctx, opts.ConnectionTimeout)
-			defer cancel()
-
-			return grpc.DialContext(dialctx, addr, gopts...)
+			// TODO(jochumdev): Bring back opts.DialTimeout
+			return grpc.NewClient(addr, gopts...)
 		}
 
 		pool, err := pool.New(factory, opts.PoolSize, opts.PoolTTL)
@@ -98,7 +95,7 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(opts.RequestTimeout))
 	defer cancel()
 
-	err = conn.Invoke(ctx, fmt.Sprintf("/%s", req.Endpoint()), req.Request(), result)
+	err = conn.Invoke(ctx, "/"+req.Endpoint(), req.Request(), result)
 	if err != nil {
 		gErr, ok := status.FromError(err)
 		if !ok {

@@ -73,6 +73,9 @@ func newHealthCheck(node, name, status string) *api.HealthCheck {
 	}
 }
 
+// newServiceEntry.
+//
+//nolint:unparam
 func newServiceEntry(node, address, name, version, scheme string, checks []*api.HealthCheck) *api.ServiceEntry {
 	md := map[string]string{metaTransportKey: scheme}
 	return &api.ServiceEntry{

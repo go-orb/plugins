@@ -289,7 +289,7 @@ func (m *RegistryMDNS) Deregister(service *registry.Service, _ ...registry.Dereg
 		for _, node := range service.Nodes {
 			if node.ID == entry.id {
 				if err := entry.node.Shutdown(); err != nil {
-					m.logger.Error("Failed to shutdown node", err)
+					m.logger.Error("Failed to shutdown node", "err", err)
 				}
 
 				remove = true
@@ -307,7 +307,7 @@ func (m *RegistryMDNS) Deregister(service *registry.Service, _ ...registry.Dereg
 	// last entry is the wildcard for list queries. Remove it.
 	if len(newEntries) == 1 && newEntries[0].id == "*" {
 		if err := newEntries[0].node.Shutdown(); err != nil {
-			m.logger.Error("failed to shutdown node", err)
+			m.logger.Error("failed to shutdown node", "err", err)
 		}
 
 		delete(m.services, service.Name)
@@ -578,7 +578,7 @@ func (m *RegistryMDNS) watch() {
 
 		// Start listening, blocking call
 		if err := client.Listen(ch, exit); err != nil {
-			m.logger.Error("Failed to listen", err)
+			m.logger.Error("Failed to listen", "err", err)
 		} else {
 			m.logger.Info("Listening")
 		}

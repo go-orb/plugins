@@ -161,7 +161,7 @@ func (s *ServerHTTP) Start() error {
 
 	go func() {
 		if err = s.httpServer.Start(s.listenerTCP); err != nil {
-			s.Logger.Error("failed to start HTTP server: %w", err)
+			s.Logger.Error("failed to start HTTP server: %w", "err", err)
 		}
 	}()
 

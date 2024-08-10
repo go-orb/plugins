@@ -34,7 +34,7 @@ func encodeData(obj interface{}) ([]byte, error) {
 
 func newMockServer(rg *mockRegistry, l net.Listener) {
 	mux := http.NewServeMux()
-	mux.HandleFunc(rg.url, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(rg.url, func(w http.ResponseWriter, _ *http.Request) {
 		if rg.err != nil {
 			http.Error(w, rg.err.Error(), http.StatusInternalServerError)
 			return

@@ -2,7 +2,6 @@ package mdns
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -106,14 +105,14 @@ func createServer() (*tests.TestSuite, func() error, error) {
 	logger, err := log.New()
 	if err != nil {
 		log.Error("failed to create logger", err)
-		os.Exit(1)
+		return nil, func() error { return nil }, err
 	}
 
 	cfg, err := NewConfig("test.service", nil, WithDomain("mdns.test.local"))
 	r := New("", "", cfg, logger)
 	if err != nil {
-		logger.Error("failed to create registry config", err)
-		os.Exit(1)
+		logger.Error("failed to create registry config", "err", err)
+		return nil, func() error { return nil }, err
 	}
 
 	cleanup := func() error {

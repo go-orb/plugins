@@ -51,5 +51,5 @@ func WriteError(w http.ResponseWriter, err error) {
 
 	orbe := orberrors.From(err)
 	w.WriteHeader(orbe.Code)
-	fmt.Fprint(w, orbe.Error())
+	fmt.Fprint(w, orbe.Error()) //nolint:errcheck
 }

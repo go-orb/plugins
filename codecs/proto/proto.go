@@ -57,6 +57,7 @@ func (p *Proto) NewDecoder(reader io.Reader) codecs.Decoder {
 		if err != nil {
 			return err
 		}
+
 		return p.Decode(buffer, value)
 	})
 }
@@ -68,6 +69,7 @@ func (p *Proto) NewEncoder(writer io.Writer) codecs.Encoder {
 		if err != nil {
 			return err
 		}
+
 		_, err = writer.Write(buffer)
 		if err != nil {
 			return err

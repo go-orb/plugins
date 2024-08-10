@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 
 	"google.golang.org/protobuf/compiler/protogen"
@@ -15,7 +16,11 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Fprintf(os.Stdout, "protoc-gen-go-http %v\n", release)
+		_, err := fmt.Fprintf(os.Stdout, "protoc-gen-go-micro-http %v\n", release)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		return
 	}
 
@@ -26,6 +31,7 @@ func main() {
 			if !f.Generate {
 				continue
 			}
+
 			generateFile(gen, f, *omitempty)
 		}
 

@@ -2,6 +2,7 @@
 package zone
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -42,7 +43,7 @@ type MDNSService struct {
 // hdomain name (more specifically, a hostname).
 func validateFQDN(s string) error {
 	if len(s) == 0 {
-		return fmt.Errorf("FQDN must not be blank")
+		return errors.New("FQDN must not be blank")
 	}
 
 	if s[len(s)-1] != '.' {
@@ -68,15 +69,15 @@ func NewMDNSService(
 ) (*MDNSService, error) {
 	// Sanity check inputs
 	if instance == "" {
-		return nil, fmt.Errorf("missing service instance name")
+		return nil, errors.New("missing service instance name")
 	}
 
 	if service == "" {
-		return nil, fmt.Errorf("missing service name")
+		return nil, errors.New("missing service name")
 	}
 
 	if port == 0 {
-		return nil, fmt.Errorf("missing service port")
+		return nil, errors.New("missing service port")
 	}
 
 	// Set default domain
@@ -97,7 +98,7 @@ func NewMDNSService(
 			return nil, fmt.Errorf("could not determine host: %w", err)
 		}
 
-		hostName = fmt.Sprintf("%s.", hostName)
+		hostName += "."
 	}
 
 	if err := validateFQDN(hostName); err != nil {

@@ -129,7 +129,7 @@ type Config struct {
 	// Logger allows you to dynamically change the log level and plugin for a
 	// specific entrypoint.
 	Logger struct {
-		Level  slog.Level `json:"level,omitempty" yaml:"level,omitempty"` // TODO(davincible): change with custom level
+		Level  slog.Level `json:"level,omitempty"  yaml:"level,omitempty"` // TODO(davincible): change with custom level
 		Plugin string     `json:"plugin,omitempty" yaml:"plugin,omitempty"`
 	} `json:"logger" yaml:"logger"`
 }

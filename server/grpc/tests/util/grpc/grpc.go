@@ -45,6 +45,8 @@ func SetupServer(opts ...mgrpc.Option) (*mgrpc.ServerGRPC, func(t *testing.T), e
 	}
 
 	cleanup := func(t *testing.T) {
+		t.Helper()
+
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 		defer cancel()
 
@@ -94,7 +96,7 @@ func MakeStreamRequest(addr, name string, s int, tlsConfig *tls.Config) error {
 	if err != nil {
 		return err
 	}
-	defer msg.CloseSend() //nolint:errcheck,wsl
+	defer msg.CloseSend() //nolint:errcheck
 
 	for i := 0; i < s; i++ {
 		if err := msg.Send(&proto.CallRequest{Name: name}); err != nil {
@@ -123,7 +125,7 @@ func dial(addr string, tlsConfig *tls.Config) (*grpc.ClientConn, error) {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 
-	conn, err := grpc.Dial(addr, opts...)
+	conn, err := grpc.NewClient(addr, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to dial: %w", err)
 	}

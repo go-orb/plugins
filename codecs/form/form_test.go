@@ -18,13 +18,13 @@ import (
 )
 
 type LoginRequest struct {
-	Username string `json:"username,omitempty" form:"username,omitempty"`
-	Password string `json:"password,omitempty" form:"password,omitempty"`
+	Username string `form:"username,omitempty" json:"username,omitempty"`
+	Password string `form:"password,omitempty" json:"password,omitempty"`
 }
 
 type TestModel struct {
-	ID   int32  `json:"id"   form:"id"`
-	Name string `json:"name" form:"name"`
+	ID   int32  `form:"id"   json:"id"`
+	Name string `form:"name" json:"name"`
 }
 
 var marshalTests = []struct {
@@ -173,6 +173,8 @@ func TestOptional(t *testing.T) {
 }
 
 func getCodec(t *testing.T) *Form {
+	t.Helper()
+
 	codec, ok := codecs.Plugins.Get(Name)
 	require.True(t, ok)
 

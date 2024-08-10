@@ -162,7 +162,7 @@ func (s *TestSuite) SetupSuite() {
 
 	cURLs := []*url.URL{}
 
-	curl, err := url.Parse(fmt.Sprintf("file://%s", filepath.Join(s.PluginsRoot, "client/tests/cmd/tests_server/config.yaml")))
+	curl, err := url.Parse("file://" + filepath.Join(s.PluginsRoot, "client/tests/cmd/tests_server/config.yaml"))
 	s.Require().NoError(err, "while parsing a url")
 
 	cURLs = append(cURLs, curl)
@@ -314,6 +314,7 @@ func (s *TestSuite) TestRunRequests() {
 
 				node, err := s.client.Config().Selector(ctx, req.Service, nodes, s.Transports, false)
 				s.Require().NoError(err)
+
 				req.URL = fmt.Sprintf("%s://%s", node.Transport, node.Address)
 			}
 

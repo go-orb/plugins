@@ -96,7 +96,7 @@ func RefreshClients() {
 	httpH2CClient = &http.Client{
 		Transport: &http2.Transport{
 			AllowHTTP: true,
-			DialTLS: func(network, addr string, cfg *tls.Config) (net.Conn, error) {
+			DialTLS: func(network, addr string, _ *tls.Config) (net.Conn, error) {
 				return net.Dial(network, addr)
 			},
 		},
@@ -104,10 +104,12 @@ func RefreshClients() {
 }
 
 // TestGetRequest makes a GET request to the echo endpoint.
-func TestGetRequest(t testing.TB, addr string, reqT ReqType) error {
+func TestGetRequest(tb testing.TB, addr string, reqT ReqType) error {
+	tb.Helper()
+
 	url := fmt.Sprintf("%s/echo?name=%s", addr, testName)
 
-	body, err := switchRequest(t, url, "", nil, makeGetReq, reqT)
+	body, err := switchRequest(tb, url, "", nil, makeGetReq, reqT)
 	if err != nil {
 		return err
 	}
@@ -116,16 +118,18 @@ func TestGetRequest(t testing.TB, addr string, reqT ReqType) error {
 }
 
 // TestPostRequestJSON makes a POST request to the echo endpoint.
-func TestPostRequestJSON(t testing.TB, addr string, reqT ReqType) error {
+func TestPostRequestJSON(tb testing.TB, addr string, reqT ReqType) error {
+	tb.Helper()
+
 	msg, err := json.Marshal(map[string]string{"name": testName})
 	if err != nil {
-		t.Fatal("failed to marshall json", err)
+		tb.Fatal("failed to marshall json", err)
 	}
 
 	addr += "/echo"
 	ct := headers.JSONContentType
 
-	body, err := switchRequest(t, addr, ct, msg, makePostReq, reqT)
+	body, err := switchRequest(tb, addr, ct, msg, makePostReq, reqT)
 	if err != nil {
 		return err
 	}
@@ -134,7 +138,9 @@ func TestPostRequestJSON(t testing.TB, addr string, reqT ReqType) error {
 }
 
 // TestPostRequestProto makes a POST request to the echo endpoint.
-func TestPostRequestProto(t testing.TB, addr, ct string, reqT ReqType) error {
+func TestPostRequestProto(tb testing.TB, addr, ct string, reqT ReqType) error {
+	tb.Helper()
+
 	name := "Alex"
 
 	msg, err := proto.Marshal(&pb.CallRequest{Name: name})
@@ -144,7 +150,7 @@ func TestPostRequestProto(t testing.TB, addr, ct string, reqT ReqType) error {
 
 	addr += "/echo"
 
-	body, err := switchRequest(t, addr, ct, msg, makePostReq, reqT)
+	body, err := switchRequest(tb, addr, ct, msg, makePostReq, reqT)
 	if err != nil {
 		return err
 	}
@@ -153,8 +159,9 @@ func TestPostRequestProto(t testing.TB, addr, ct string, reqT ReqType) error {
 }
 
 // TestTLSProto temporary test stuff.
-func TestTLSProto(t testing.TB, addr string) error {
-	t.Log("Testing TLS")
+func TestTLSProto(tb testing.TB, addr string) error {
+	tb.Helper()
+	tb.Log("Testing TLS")
 
 	conn, err := tls.Dial("tcp", addr, &tls.Config{
 		InsecureSkipVerify: true, //nolint:gosec
@@ -165,7 +172,7 @@ func TestTLSProto(t testing.TB, addr string) error {
 	}
 
 	state := conn.ConnectionState()
-	t.Log(state.NegotiatedProtocol)
+	tb.Log(state.NegotiatedProtocol)
 
 	return nil
 }
@@ -196,7 +203,7 @@ func checkProtoResponse(body []byte, name string) error {
 	return nil
 }
 
-func makeGetReq(t testing.TB, addr, _ string, _ []byte, client *http.Client) ([]byte, error) {
+func makeGetReq(tb testing.TB, addr, _ string, _ []byte, client *http.Client) ([]byte, error) {
 	// NOTE: this would be nice to use, but gices TCP errors
 	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	// defer cancel()
@@ -207,6 +214,8 @@ func makeGetReq(t testing.TB, addr, _ string, _ []byte, client *http.Client) ([]
 	// }
 	//
 	// resp, err := client.Do(req)
+	tb.Helper()
+
 	resp, err := client.Get(addr) //nolint:noctx
 	if err != nil {
 		return nil, fmt.Errorf("failed to make GET request: %w", err)
@@ -214,7 +223,7 @@ func makeGetReq(t testing.TB, addr, _ string, _ []byte, client *http.Client) ([]
 
 	defer func() {
 		if err = resp.Body.Close(); err != nil {
-			t.Errorf("failed to close body: %v", err)
+			tb.Errorf("failed to close body: %v", err)
 		}
 	}()
 
@@ -223,7 +232,7 @@ func makeGetReq(t testing.TB, addr, _ string, _ []byte, client *http.Client) ([]
 		return nil, err
 	}
 
-	logResponse(t, resp, body)
+	logResponse(tb, resp, body)
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("GET request failed, status not OK: %+v", resp)
@@ -232,7 +241,7 @@ func makeGetReq(t testing.TB, addr, _ string, _ []byte, client *http.Client) ([]
 	return body, nil
 }
 
-func makePostReq(t testing.TB, addr, ct string, data []byte, client *http.Client) ([]byte, error) {
+func makePostReq(tb testing.TB, addr, ct string, data []byte, client *http.Client) ([]byte, error) {
 	// NOTE: this would be nice to use, but gices TCP errors when a context with timeout is passed in.
 	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	// // ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*10))
@@ -248,6 +257,8 @@ func makePostReq(t testing.TB, addr, ct string, data []byte, client *http.Client
 	// // req.Close = true
 	//
 	// resp, err := client.Do(req)
+	tb.Helper()
+
 	resp, err := client.Post(addr, ct, bytes.NewReader(data)) //nolint:noctx
 	if err != nil {
 		return nil, fmt.Errorf("failed to make POST request: %w", err)
@@ -255,7 +266,7 @@ func makePostReq(t testing.TB, addr, ct string, data []byte, client *http.Client
 
 	defer func() {
 		if err = resp.Body.Close(); err != nil {
-			t.Errorf("failed to close body: %v", err)
+			tb.Errorf("failed to close body: %v", err)
 		}
 	}()
 
@@ -264,7 +275,7 @@ func makePostReq(t testing.TB, addr, ct string, data []byte, client *http.Client
 		return nil, err
 	}
 
-	logResponse(t, resp, body)
+	logResponse(tb, resp, body)
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New("Post request failed")
@@ -274,6 +285,8 @@ func makePostReq(t testing.TB, addr, ct string, data []byte, client *http.Client
 }
 
 func switchRequest(tb testing.TB, url, ct string, msg []byte, reqFunc ReqFunc, reqT ReqType) ([]byte, error) {
+	tb.Helper()
+
 	var (
 		body []byte
 		err  error
@@ -296,6 +309,8 @@ func switchRequest(tb testing.TB, url, ct string, msg []byte, reqFunc ReqFunc, r
 }
 
 func logResponse(tb testing.TB, resp *http.Response, body []byte) {
+	tb.Helper()
+
 	// only log if not benchmark
 	if t, ok := tb.(*testing.T); ok && len(os.Getenv("MICRO_DEBUG")) > 0 {
 		t.Logf(

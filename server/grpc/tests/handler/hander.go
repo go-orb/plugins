@@ -47,14 +47,14 @@ func (c *EchoHandler) Stream(in proto.Streams_StreamServer) error {
 	for {
 		msg, err := in.Recv()
 		if err != nil && !errors.Is(err, io.EOF) {
-			slog.Error("failed to receive message", err)
+			slog.Error("failed to receive message", "err", err)
 			return err
 		} else if err != nil && errors.Is(err, io.EOF) {
 			return nil
 		}
 
 		if err := in.Send(&proto.CallResponse{Msg: "hello " + msg.GetName()}); err != nil {
-			slog.Error("failed to send message", err)
+			slog.Error("failed to send message", "err", err)
 			return err
 		}
 	}

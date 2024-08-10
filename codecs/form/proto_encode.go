@@ -67,6 +67,7 @@ func encodeByField(urlVal url.Values, path string, m protoreflect.Message) (gErr
 					gErr = err
 					return false
 				}
+
 				urlVal[newPath] = list
 			}
 		case fieldDesc.IsMap():
@@ -94,6 +95,7 @@ func encodeByField(urlVal url.Values, path string, m protoreflect.Message) (gErr
 				gErr = err
 				return false
 			}
+
 			urlVal[newPath] = []string{value}
 		}
 
@@ -126,11 +128,14 @@ func encodeMapField(fieldDescriptor protoreflect.FieldDescriptor, mp protoreflec
 		if err != nil {
 			return false
 		}
+
 		value, err := EncodeField(fieldDescriptor.MapValue(), v)
 		if err != nil {
 			return false
 		}
+
 		m[key] = value
+
 		return true
 	})
 
@@ -214,8 +219,10 @@ func EncodeFieldMask(m protoreflect.Message) (query string) {
 			} else {
 				query = fd.TextName() + "=" + value
 			}
+
 			return false
 		}
+
 		return true
 	})
 

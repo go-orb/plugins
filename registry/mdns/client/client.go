@@ -3,6 +3,7 @@ package client
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"strings"
@@ -152,6 +153,7 @@ func Listen(entries chan<- *ServiceEntry, exit chan struct{}) error {
 				m := new(dns.Msg)
 				m.SetQuestion(e.Name, dns.TypePTR)
 				m.RecursionDesired = false
+
 				if err := client.sendQuery(m); err != nil {
 					log.Error("[mdns] failed to query instance %s: %v", err, e.Name)
 				}
@@ -195,7 +197,7 @@ func newClient() (*client, error) { //nolint:funlen,gocyclo
 	}
 
 	if uconn4 == nil && uconn6 == nil {
-		return nil, fmt.Errorf("failed to bind to any unicast udp port")
+		return nil, errors.New("failed to bind to any unicast udp port")
 	}
 
 	if uconn4 == nil {
@@ -214,7 +216,7 @@ func newClient() (*client, error) { //nolint:funlen,gocyclo
 	}
 
 	if mconn4 == nil && mconn6 == nil {
-		return nil, fmt.Errorf("failed to bind to any multicast udp port")
+		return nil, errors.New("failed to bind to any multicast udp port")
 	}
 
 	if mconn4 == nil {
@@ -259,7 +261,7 @@ func newClient() (*client, error) { //nolint:funlen,gocyclo
 	}
 
 	if !success {
-		return nil, fmt.Errorf("failed to join multicast group on all interfaces")
+		return nil, errors.New("failed to join multicast group on all interfaces")
 	}
 
 	c := &client{
@@ -420,6 +422,7 @@ func (c *client) query(params *QueryParam) error {
 				m := new(dns.Msg)
 				m.SetQuestion(inp.Name, inp.Type)
 				m.RecursionDesired = false
+
 				if err := c.sendQuery(m); err != nil {
 					log.Error("[mdns] failed to query instance %s", err, inp.Name)
 				}

@@ -4,7 +4,6 @@ package drpc
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"time"
 
@@ -87,7 +86,7 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 		return orberrors.From(err)
 	}
 
-	dial := func(ctx context.Context, address string) (drpcpool.Conn, error) {
+	dial := func(_ context.Context, address string) (drpcpool.Conn, error) {
 		// dial the drpc server
 		rawconn, err := net.Dial("tcp", address)
 		if err != nil {
@@ -102,7 +101,7 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(opts.RequestTimeout))
 	defer cancel()
 
-	err = conn.Invoke(ctx, fmt.Sprintf("/%s", req.Endpoint()), &t.encoder, req.Request(), result)
+	err = conn.Invoke(ctx, "/"+req.Endpoint(), &t.encoder, req.Request(), result)
 	if err != nil {
 		return orberrors.From(err)
 	}

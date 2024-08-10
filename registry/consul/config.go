@@ -44,15 +44,15 @@ type Config struct {
 	registry.Config `yaml:",inline"`
 
 	Addresses []string    `json:"addresses,omitempty" yaml:"addresses,omitempty"`
-	Secure    bool        `json:"secure,omitempty" yaml:"secure,omitempty"`
-	TLSConfig *tls.Config `json:"-" yaml:"-"`
+	Secure    bool        `json:"secure,omitempty"    yaml:"secure,omitempty"`
+	TLSConfig *tls.Config `json:"-"                   yaml:"-"`
 
 	Connect bool `json:"connect,omitempty" yaml:"connect,omitempty"`
 
-	ConsulConfig *consul.Config       `json:"-" yaml:"-"`
+	ConsulConfig *consul.Config       `json:"-"                    yaml:"-"`
 	AllowStale   bool                 `json:"allowStale,omitempty" yaml:"allowStale,omitempty"`
-	QueryOptions *consul.QueryOptions `json:"-" yaml:"-"`
-	TCPCheck     time.Duration        `json:"tcpCheck,omitempty" yaml:"tcpCheck,omitempty"`
+	QueryOptions *consul.QueryOptions `json:"-"                    yaml:"-"`
+	TCPCheck     time.Duration        `json:"tcpCheck,omitempty"   yaml:"tcpCheck,omitempty"`
 }
 
 // NewConfig creates a new config object.

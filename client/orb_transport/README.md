@@ -2,6 +2,6 @@
 
 This folder contains various transports for the ORB client.
 
-## Why not a subfolder.
+## Why not a subfolder
 
 We had troubles with orb/transport/\*.

@@ -107,7 +107,7 @@ func (s *ServerHTTP) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		defer atomic.AddInt64(&s.activeRequests, -1)
 
 		if req.ProtoMajor < 3 {
-			err := s.http3Server.SetQuicHeaders(resp.Header())
+			err := s.http3Server.SetQUICHeaders(resp.Header())
 			if err != nil {
 				s.Logger.Error("setting HTTP/3 Alt-Svc header", "error", err)
 			}

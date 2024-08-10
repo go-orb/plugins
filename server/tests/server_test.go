@@ -429,7 +429,7 @@ func (m *EntrypointMock) EntrypointID() string {
 		return m.entrypointID
 	}
 
-	m.entrypointID = fmt.Sprintf("unknown-%s", uuid.New().String())
+	m.entrypointID = "unknown-" + uuid.New().String()
 
 	return m.entrypointID
 }

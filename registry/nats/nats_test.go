@@ -26,6 +26,7 @@ func createServer() (*tests.TestSuite, func() error, error) {
 	logger, err := log.New()
 	if err != nil {
 		log.Error("while creating a logger", err)
+		return nil, func() error { return nil }, errors.New("while creating a logger")
 	}
 
 	var (

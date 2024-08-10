@@ -52,15 +52,21 @@ func (m *Middleware) Call(
 			return nil, orberrors.From(err)
 		}
 
-		m.logger.Trace(
-			"Making a request", "url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()), "content-type", opts.ContentType,
+		m.logger.TraceContext(
+			ctx,
+			"Making a request",
+			"url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()),
+			"content-type", opts.ContentType,
 		)
 
 		// The actual call.
 		rsp, err := next(ctx, req, opts)
 
-		m.logger.Trace(
-			"Got a result", "url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()), "content-type", opts.ContentType,
+		m.logger.TraceContext(
+			ctx,
+			"Got a result",
+			"url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()),
+			"content-type", opts.ContentType,
 		)
 
 		return rsp, err
@@ -77,14 +83,20 @@ func (m *Middleware) CallNoCodec(
 			return orberrors.From(err)
 		}
 
-		m.logger.Trace(
-			"Making a request", "url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()), "content-type", opts.ContentType,
+		m.logger.TraceContext(
+			ctx,
+			"Making a request",
+			"url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()),
+			"content-type", opts.ContentType,
 		)
 
 		err = next(ctx, req, result, opts)
 
-		m.logger.Trace(
-			"Got a result", "url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()), "content-type", opts.ContentType,
+		m.logger.TraceContext(
+			ctx,
+			"Got a result",
+			"url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()),
+			"content-type", opts.ContentType,
 		)
 
 		return err

@@ -49,7 +49,7 @@ type Config struct {
 
 	// Format is the log format, either json or text.
 	Format string `json:"format" yaml:"format"`
-	File   string `json:"file" yaml:"file"`
+	File   string `json:"file"   yaml:"file"`
 }
 
 // NewConfig creates a new config.

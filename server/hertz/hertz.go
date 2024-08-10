@@ -3,6 +3,7 @@ package hertz
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"log/slog"
@@ -104,7 +105,7 @@ func (s *Server) Stop(ctx context.Context) error {
 		return err
 	}
 
-	stopCtx, cancel := context.WithTimeoutCause(ctx, s.Config.StopTimeout, fmt.Errorf("timeout while stopping the hertz server"))
+	stopCtx, cancel := context.WithTimeoutCause(ctx, s.Config.StopTimeout, errors.New("timeout while stopping the hertz server"))
 	defer cancel()
 
 	s.started = false

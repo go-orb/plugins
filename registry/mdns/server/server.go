@@ -2,6 +2,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"net"
@@ -107,7 +108,7 @@ func NewServer(config *Config) (*Server, error) { //nolint:gocyclo,funlen
 	ipv6List, _ := net.ListenUDP("udp6", MDNSWildcardAddrIPv6) //nolint:errcheck
 
 	if ipv4List == nil && ipv6List == nil {
-		return nil, fmt.Errorf("mdns: failed to bind to any udp port")
+		return nil, errors.New("mdns: failed to bind to any udp port")
 	}
 
 	if ipv4List == nil {
@@ -157,11 +158,12 @@ func NewServer(config *Config) (*Server, error) { //nolint:gocyclo,funlen
 			if err := connIPv6.JoinGroup(&i, &net.UDPAddr{IP: MDNSGroupIPv6}); err != nil {
 				continue
 			}
+
 			success = true
 		}
 
 		if !success {
-			return nil, fmt.Errorf("failed to join multicast group on all interfaces")
+			return nil, errors.New("failed to join multicast group on all interfaces")
 		}
 	}
 
