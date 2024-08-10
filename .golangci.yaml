@@ -39,7 +39,8 @@ output:
   # Example: "checkstyle:report.json,colored-line-number"
   #
   # Default: colored-line-number
-  format: colored-line-number
+  formats:
+    - format: colored-line-number
   # Print lines of code with issue.
   # Default: true
   print-issued-lines: true
@@ -68,9 +69,6 @@ linters-settings:
     # Default: 5
     max-distance: 26
     ignore-names:
-      - t
-      - req
-      - resp
       - err
       - id
       - ch
@@ -176,48 +174,41 @@ linters:
   disable-all: false
   fast: false
   disable:
-    - golint
-    - varcheck
-    - ifshort
-    - structcheck
-    - deadcode
-    - nosnakecase
-    - interfacer
-    - maligned
-    - scopelint
-    - exhaustivestruct
     - testpackage
     - promlinter
     - nonamedreturns
     - makezero
     - gofumpt
     - nlreturn
-    - thelper
+    - gci
 
     # Can be considered to be enabled
     - gochecknoinits
+    # - gochecknoglobals # RIP
     - dogsled
     - wrapcheck
     - paralleltest
     - ireturn
     - gomnd
-    - goerr113
+    - err113
     - exhaustruct
     - containedctx
     - godox
     - forcetypeassert
-    - gci
 
     - rowserrcheck # generics
     - sqlclosecheck # generics
     - wastedassign # generics
-    - typecheck # generics
 
     # Not configured yet
     - depguard
 
-    # Don't like it
-    - tagalign
+    - execinquery
+    - copyloopvar # go 1.22
+    - intrange # go 1.22
+
+    # Magic number
+    - mnd
 
 issues:
   # List of regexps of issue texts to exclude, empty list by default.
@@ -241,12 +232,7 @@ issues:
         - funlen
         - varnamelen
         - wsl
-        - gocognit
-        - cyclop
-        - maintidx
         - gochecknoglobals
-        - goconst
-        - unparam
 
   # Independently from option `exclude` we use default exclude patterns,
   # it can be disabled by this option. To list all
