@@ -21,7 +21,7 @@ import (
 	"github.com/go-orb/go-orb/types"
 
 	// Own imports.
-	echoproto "github.com/go-orb/plugins/benchmarks/rps/proto/echo"
+	echoproto "github.com/go-orb/plugins/benchmarks/rps_no_hertz/proto/echo"
 
 	_ "github.com/go-orb/plugins/client/orb"
 	_ "github.com/go-orb/plugins/codecs/jsonpb"
@@ -39,8 +39,6 @@ import (
 	_ "github.com/go-orb/plugins/client/orb_transport/drpc"
 	_ "github.com/go-orb/plugins/client/orb_transport/grpc"
 	_ "github.com/go-orb/plugins/client/orb_transport/h2c"
-	_ "github.com/go-orb/plugins/client/orb_transport/hertzh2c"
-	_ "github.com/go-orb/plugins/client/orb_transport/hertzhttp"
 	_ "github.com/go-orb/plugins/client/orb_transport/http"
 	_ "github.com/go-orb/plugins/client/orb_transport/http3"
 	_ "github.com/go-orb/plugins/client/orb_transport/https"
@@ -98,6 +96,7 @@ func connection(
 			}
 
 			logger.Error("while requesting", "error", err)
+
 			reqsError++
 
 			continue
@@ -106,6 +105,7 @@ func connection(
 		// Check if response equals.
 		if !bytes.Equal(req.GetPayload(), resp.GetPayload()) {
 			logger.Error("request and response are not the same")
+
 			reqsError++
 
 			continue

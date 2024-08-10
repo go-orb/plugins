@@ -78,7 +78,7 @@ func init2() {
 		"threads",
 		defaultThreads,
 		cli.ConfigPathSlice([]string{configSection, "threads"}),
-		cli.Usage("Number of threads to use"),
+		cli.Usage("Number of threads to use = runtime.GOMAXPROCS()"),
 		cli.EnvVars("THREADS"),
 	))
 	if err != nil && !errors.Is(err, cli.ErrFlagExists) {
@@ -121,11 +121,11 @@ func init2() {
 
 type clientConfig struct {
 	BypassRegistry int    `json:"bypassRegistry" yaml:"bypassRegistry"`
-	Connections    int    `json:"connections" yaml:"connections"`
-	Duration       int    `json:"duration" yaml:"duration"`
-	Timeout        int    `json:"timeout" yaml:"timeout"`
-	Threads        int    `json:"threads" yaml:"threads"`
-	Transport      string `json:"transport" yaml:"transport"`
-	PackageSize    int    `json:"packageSize" yaml:"packageSize"`
-	ContentType    string `json:"contentType" yaml:"contentType"`
+	Connections    int    `json:"connections"    yaml:"connections"`
+	Duration       int    `json:"duration"       yaml:"duration"`
+	Timeout        int    `json:"timeout"        yaml:"timeout"`
+	Threads        int    `json:"threads"        yaml:"threads"`
+	Transport      string `json:"transport"      yaml:"transport"`
+	PackageSize    int    `json:"packageSize"    yaml:"packageSize"`
+	ContentType    string `json:"contentType"    yaml:"contentType"`
 }
