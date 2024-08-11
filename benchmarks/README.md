@@ -51,7 +51,7 @@ go install github.com/go-orb/plugins/benchmarks/rps/cmd/orb-rps-client
 ### Server
 
 ```bash
-GOMAXPROCS=4 ./orb-rps-server
+GOMAXPROCS=4 orb-rps-server
 ```
 
 ### Client
