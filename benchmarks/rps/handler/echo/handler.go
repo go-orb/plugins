@@ -7,12 +7,10 @@ import (
 	"github.com/go-orb/plugins/benchmarks/rps/proto/echo"
 )
 
-var _ echo.EchoServer = (*Handler)(nil)
+var _ echo.EchoHandler = (*Handler)(nil)
 
 // Handler is a test handler.
-type Handler struct {
-	echo.UnsafeEchoServer
-}
+type Handler struct{}
 
 // Echo implements the echo method.
 func (c *Handler) Echo(_ context.Context, req *echo.Req) (*echo.Resp, error) {

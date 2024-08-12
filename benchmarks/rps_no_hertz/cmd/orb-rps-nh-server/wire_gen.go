@@ -16,8 +16,6 @@ import (
 	"github.com/go-orb/plugins/benchmarks/rps_no_hertz/handler/echo"
 	echo2 "github.com/go-orb/plugins/benchmarks/rps_no_hertz/proto/echo"
 	"github.com/go-orb/plugins/server/drpc"
-	"github.com/go-orb/plugins/server/grpc"
-	"github.com/go-orb/plugins/server/http"
 	"github.com/hashicorp/consul/sdk/freeport"
 	"net/url"
 )
@@ -103,7 +101,7 @@ func provideServerOpts() ([]server.Option, error) {
 
 	hInstance := new(echo.Handler)
 
-	return []server.Option{grpc.WithEntrypoint(grpc.WithName("grpc"), grpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[0])), grpc.WithInsecure(true), grpc.WithRegistration("Streams", echo2.OrbRegister(hInstance))), http.WithEntrypoint(http.WithName("http"), http.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[3])), http.WithInsecure(), http.WithRegistration("Streams", echo2.OrbRegister(hInstance))), http.WithEntrypoint(http.WithName("h2c"), http.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[4])), http.WithInsecure(), http.WithAllowH2C(), http.WithRegistration("Streams", echo2.OrbRegister(hInstance))), http.WithEntrypoint(http.WithName("http3"), http.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[5])), http.WithHTTP3(), http.WithRegistration("Streams", echo2.OrbRegister(hInstance))), http.WithEntrypoint(http.WithName("https"), http.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[6])), http.WithRegistration("Streams", echo2.OrbRegister(hInstance))), drpc.WithEntrypoint(drpc.WithName("dprc"), drpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[7])), drpc.WithRegistration("Streams", echo2.OrbRegister(hInstance)))}, nil
+	return []server.Option{drpc.WithEntrypoint(drpc.WithName("dprc"), drpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[7])), drpc.WithRegistration("Streams", echo2.RegisterEchoService(hInstance)))}, nil
 }
 
 // provideComponents creates a slice of components out of the arguments.

@@ -199,7 +199,7 @@ func bench(
 		logger.Info("Using transport", "transport", node.Transport)
 	}
 
-	// Create random bytes to ping-pong on each request.
+	// Create random bytes once to ping-pong on each request.
 	msg := make([]byte, cfg.PackageSize)
 	if _, err := rand.Reader.Read(msg); err != nil {
 		logger.Error("Failed to make a request", "error", err)

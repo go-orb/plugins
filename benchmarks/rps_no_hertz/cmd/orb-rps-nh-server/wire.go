@@ -58,36 +58,36 @@ func provideServerOpts() ([]server.Option, error) {
 			mgrpc.WithName("grpc"),
 			mgrpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[0])),
 			mgrpc.WithInsecure(true),
-			mgrpc.WithRegistration("Streams", echopb.OrbRegister(hInstance)),
+			mgrpc.WithRegistration("Streams", echopb.RegisterEchoService(hInstance)),
 		),
 		mhttp.WithEntrypoint(
 			mhttp.WithName("http"),
 			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[3])),
 			mhttp.WithInsecure(),
-			mhttp.WithRegistration("Streams", echopb.OrbRegister(hInstance)),
+			mhttp.WithRegistration("Streams", echopb.RegisterEchoService(hInstance)),
 		),
 		mhttp.WithEntrypoint(
 			mhttp.WithName("h2c"),
 			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[4])),
 			mhttp.WithInsecure(),
 			mhttp.WithAllowH2C(),
-			mhttp.WithRegistration("Streams", echopb.OrbRegister(hInstance)),
+			mhttp.WithRegistration("Streams", echopb.RegisterEchoService(hInstance)),
 		),
 		mhttp.WithEntrypoint(
 			mhttp.WithName("http3"),
 			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[5])),
 			mhttp.WithHTTP3(),
-			mhttp.WithRegistration("Streams", echopb.OrbRegister(hInstance)),
+			mhttp.WithRegistration("Streams", echopb.RegisterEchoService(hInstance)),
 		),
 		mhttp.WithEntrypoint(
 			mhttp.WithName("https"),
 			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[6])),
-			mhttp.WithRegistration("Streams", echopb.OrbRegister(hInstance)),
+			mhttp.WithRegistration("Streams", echopb.RegisterEchoService(hInstance)),
 		),
 		drpc.WithEntrypoint(
 			drpc.WithName("dprc"),
 			drpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[7])),
-			drpc.WithRegistration("Streams", echopb.OrbRegister(hInstance)),
+			drpc.WithRegistration("Streams", echopb.RegisterEchoService(hInstance)),
 		),
 	}, nil
 }
