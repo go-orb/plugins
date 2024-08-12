@@ -1,6 +1,6 @@
 module github.com/go-orb/plugins/benchmarks/rps
 
-go 1.21
+go 1.22.5
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20240810234651-a01190e49d61
@@ -29,7 +29,6 @@ require (
 	github.com/go-orb/plugins/server/http v0.0.0-20240810233646-0b3616b1829d
 	github.com/google/wire v0.6.0
 	github.com/hashicorp/consul/sdk v0.16.1
-	google.golang.org/genproto/googleapis/api v0.0.0-20240808171019-573a1156607a
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
 	storj.io/drpc v0.0.34

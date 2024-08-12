@@ -1,6 +1,6 @@
 module github.com/go-orb/plugins/client/orb_transport/http3
 
-go 1.21
+go 1.22.5
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20240810234651-a01190e49d61

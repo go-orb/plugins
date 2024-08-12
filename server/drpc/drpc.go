@@ -20,8 +20,8 @@ import (
 
 var _ orbserver.Entrypoint = (*Server)(nil)
 
-// Name is the plugin name.
-const Name = "drpc"
+// Plugin is the plugin name.
+const Plugin = "drpc"
 
 // Server is the drpc Server for go-orb.
 type Server struct {
@@ -135,7 +135,7 @@ func (s *Server) EntrypointID() string {
 
 // String returns the entrypoint type; http.
 func (s *Server) String() string {
-	return Name
+	return Plugin
 }
 
 // Name returns the entrypoint name.

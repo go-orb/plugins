@@ -8,8 +8,8 @@ import (
 )
 
 func init() {
-	server.Plugins.Add(Name, pluginProvider)
-	server.NewDefaults.Add(Name, newDefaultConfig)
+	server.Plugins.Add(Plugin, pluginProvider)
+	server.NewDefaults.Add(Plugin, newDefaultConfig)
 }
 
 func pluginProvider(

@@ -34,7 +34,7 @@ const (
 
 	// DefaultConfigSection is the section key used in config files used to
 	// configure the server options.
-	DefaultConfigSection = Name
+	DefaultConfigSection = Plugin
 )
 
 // DefaultCodecWhitelist is the default allowed list of codecs to be used for
@@ -179,7 +179,7 @@ func WithLogPlugin(plugin string) Option {
 // WithDefaults sets default options to use on the creation of new HTTP entrypoints.
 func WithDefaults(options ...Option) server.Option {
 	return func(c *server.Config) {
-		cfg, ok := c.Defaults[Name].(*Config)
+		cfg, ok := c.Defaults[Plugin].(*Config)
 		if !ok {
 			// Should never happen.
 			panic(fmt.Errorf("http.WithDefaults received invalid type, not *server.Config, but '%T'", cfg))
@@ -187,14 +187,14 @@ func WithDefaults(options ...Option) server.Option {
 
 		cfg.ApplyOptions(options...)
 
-		c.Defaults[Name] = cfg
+		c.Defaults[Plugin] = cfg
 	}
 }
 
 // WithEntrypoint adds an HTTP entrypoint with the provided options.
 func WithEntrypoint(options ...Option) server.Option {
 	return func(c *server.Config) {
-		cfgAny, ok := c.Defaults[Name]
+		cfgAny, ok := c.Defaults[Plugin]
 		if !ok {
 			// Should never happen, but just in case.
 			panic("no defaults for http entrypoint found")
@@ -206,7 +206,7 @@ func WithEntrypoint(options ...Option) server.Option {
 
 		c.Templates[cfg.Name] = server.EntrypointTemplate{
 			Enabled: true,
-			Type:    Name,
+			Type:    Plugin,
 			Config:  cfg,
 		}
 	}
