@@ -20,7 +20,7 @@ var Version string //nolint:gochecknoglobals
 // Config will be set by orb/main.
 type Config struct {
 	Protolib string
-	Json     bool
+	JSON     bool
 }
 
 func protocVersion(gen *protogen.Plugin) string {
@@ -160,7 +160,7 @@ func (d *drpc) generateEncoding(conf Config) {
 		d.P("}")
 		d.P()
 
-		if conf.Json {
+		if conf.JSON {
 			d.P("func (", d.EncodingName(), ") JSONMarshal(msg ", d.Ident("storj.io/drpc", "Message"), ") ([]byte, error) {")
 			d.P("return ", d.Ident("google.golang.org/protobuf/encoding/protojson", "Marshal"), "(msg.(", d.Ident("google.golang.org/protobuf/proto", "Message"), "))")
 			d.P("}")
@@ -183,7 +183,7 @@ func (d *drpc) generateEncoding(conf Config) {
 		d.P("}")
 		d.P()
 
-		if conf.Json {
+		if conf.JSON {
 			d.P("func (", d.EncodingName(), ") JSONMarshal(msg ", d.Ident("storj.io/drpc", "Message"), ") ([]byte, error) {")
 			d.P("var buf ", d.Ident("bytes", "Buffer"))
 			d.P("err := new(", d.Ident("github.com/gogo/protobuf/jsonpb", "Marshaler"), ").Marshal(&buf, msg.(", d.Ident("github.com/gogo/protobuf/proto", "Message"), "))")
@@ -211,7 +211,7 @@ func (d *drpc) generateEncoding(conf Config) {
 		d.P("}")
 		d.P()
 
-		if conf.Json {
+		if conf.JSON {
 			d.P("func (", d.EncodingName(), ") JSONMarshal(msg ", d.Ident("storj.io/drpc", "Message"), ") ([]byte, error) {")
 			d.P("return ", d.Ident(conf.Protolib, "JSONMarshal"), "(msg)")
 			d.P("}")

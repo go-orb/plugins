@@ -54,7 +54,7 @@ func main() {
 	servers = flags.String("supported_servers", "drpc;grpc;hertz;http", "semicolon separated list of servers to generate for")
 
 	flags.StringVar(&drpcConf.Protolib, "protolib", "google.golang.org/protobuf", "which protobuf library to use for encoding")
-	flags.BoolVar(&drpcConf.Json, "json", true, "generate encoders with json support")
+	flags.BoolVar(&drpcConf.JSON, "json", true, "generate encoders with json support")
 
 	protogen.Options{
 		ParamFunc: flags.Set,
