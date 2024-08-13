@@ -309,10 +309,9 @@ func (n *RegistryNATS) query(s string, quorum int) ([]*registry.Service, error) 
 			return
 		}
 
-		timeout := time.After(time.Millisecond * time.Duration(n.config.Timeout))
 		select {
 		case response <- service:
-		case <-timeout:
+		case <-time.After(time.Millisecond * time.Duration(n.config.Timeout)):
 		}
 	})
 	if err != nil {
@@ -350,7 +349,10 @@ loop:
 				serviceMap[key] = service
 			}
 
-			if quorum > 0 && len(serviceMap[key].Nodes) >= quorum {
+			if quorum == 0 {
+				break loop
+			}
+			if len(serviceMap[key].Nodes) >= quorum {
 				break loop
 			}
 		case <-timeout:

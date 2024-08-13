@@ -157,11 +157,12 @@ func (r *TestSuite) TestGetServiceWithNoNodes() {
 
 // BenchmarkGetService benchmarks.
 func (r *TestSuite) BenchmarkGetService(b *testing.B) {
+	b.Helper()
+
 	r.SetT(&testing.T{})
 	r.SetupSuite()
 
 	b.ResetTimer()
-	b.StartTimer()
 
 	for n := 0; n < b.N; n++ {
 		services, err := r.registries[0].GetService(r.services[0].Name)
@@ -170,25 +171,26 @@ func (r *TestSuite) BenchmarkGetService(b *testing.B) {
 		require.Equal(b, r.services[0].Name, services[0].Name)
 		require.Equal(b, len(r.services[0].Nodes), len(services[0].Nodes))
 	}
-	b.StopTimer()
 
+	b.StopTimer()
 	r.TearDownSuite()
 }
 
-// BenchmarkGetServiceWithNoNodes benchmarks.
+// BenchmarkGetServiceWithNoNodes is a 404 benchmark.
 func (r *TestSuite) BenchmarkGetServiceWithNoNodes(b *testing.B) {
+	b.Helper()
+
 	r.SetT(&testing.T{})
 	r.SetupSuite()
 
 	b.ResetTimer()
-	b.StartTimer()
 
 	for n := 0; n < b.N; n++ {
 		services, err := r.registries[0].GetService("missing")
 		require.NoError(b, err)
 		require.Empty(b, services)
 	}
-	b.StopTimer()
 
+	b.StopTimer()
 	r.TearDownSuite()
 }

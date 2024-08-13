@@ -94,7 +94,7 @@ func createServer1(tb testing.TB) (*testutil.TestServer, error) {
 	tb.Setenv("PATH", myConsulPath+":"+path)
 
 	server, err := testutil.NewTestServerConfigT(tb, func(c *testutil.TestServerConfig) {
-		c.EnableDebug = true
+		c.EnableDebug = false
 	})
 	if err != nil {
 		return nil, err
@@ -117,6 +117,15 @@ func TestSuite(t *testing.T) {
 }
 
 func BenchmarkGetService(b *testing.B) {
+	s, cleanup, err := createServer()
+	require.NoError(b, err, "while creating a server")
+
+	s.BenchmarkGetService(b)
+
+	require.NoError(b, cleanup(), "while cleaning up")
+}
+
+func BenchmarkParallelGetService(b *testing.B) {
 	s, cleanup, err := createServer()
 	require.NoError(b, err, "while creating a server")
 

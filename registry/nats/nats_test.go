@@ -23,7 +23,7 @@ import (
 )
 
 func createServer() (*tests.TestSuite, func() error, error) {
-	logger, err := log.New()
+	logger, err := log.New(log.WithLevel("DEBUG"))
 	if err != nil {
 		log.Error("while creating a logger", err)
 		return nil, func() error { return nil }, errors.New("while creating a logger")
@@ -71,7 +71,7 @@ func createServer() (*tests.TestSuite, func() error, error) {
 
 	if !started {
 		log.Error("failed to start NATS server", err)
-		os.Exit(1)
+		return nil, func() error { return nil }, errors.New("failed to start nats server")
 	}
 
 	s := tests.CreateSuite(logger, []registry.Registry{regOne, regTwo, regThree}, 0, 0)
@@ -186,6 +186,8 @@ func BenchmarkGetService(b *testing.B) {
 }
 
 func BenchmarkGetServiceWithNoNodes(b *testing.B) {
+	b.StopTimer()
+
 	s, cleanup, err := createServer()
 	require.NoError(b, err, "while creating a server")
 

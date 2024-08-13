@@ -219,6 +219,8 @@ func TestSuite(t *testing.T) {
 }
 
 func BenchmarkGetService(b *testing.B) {
+	b.StopTimer()
+
 	s, cleanup, err := createServer()
 	require.NoError(b, err, "while creating a server")
 
@@ -228,6 +230,8 @@ func BenchmarkGetService(b *testing.B) {
 }
 
 func BenchmarkGetServiceWithNoNodes(b *testing.B) {
+	b.StopTimer()
+
 	s, cleanup, err := createServer()
 	require.NoError(b, err, "while creating a server")
 
