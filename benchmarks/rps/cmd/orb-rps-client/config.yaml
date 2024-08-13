@@ -1,0 +1,16 @@
+benchmarks:
+  rps:
+    client:
+      logger:
+        plugin: slog
+        format: json
+        level: INFO
+      registry:
+        plugin: consul
+      # client:
+      #   middlewares:
+      #     - name: log
+      #       logger:
+      #         plugin: slog
+      #         format: json
+      #         level: INFO
