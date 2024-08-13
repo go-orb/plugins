@@ -16,9 +16,9 @@ runtimes:
 lint:
   enabled:
     - osv-scanner@1.8.3
-    - checkov@3.2.219
+    - checkov@3.2.220
     - trivy@0.54.1
-    - trufflehog@3.81.7
+    - trufflehog@3.81.8
     - yamllint@1.35.1
     - actionlint@1.7.1
     - markdownlint@0.41.0
