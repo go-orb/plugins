@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strings"
 
 	hclient "github.com/cloudwego/hertz/pkg/app/client"
 	"github.com/cloudwego/hertz/pkg/protocol"
@@ -13,11 +14,13 @@ import (
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/log"
-	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/client/orb"
 )
+
+// orbHeader is the prefix for every orb HTTP header.
+const orbHeader = "__orb-"
 
 var _ (orb.Transport) = (*Transport)(nil)
 
@@ -61,13 +64,13 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 ) (*client.RawResponse, error) {
 	codec, err := codecs.GetEncoder(opts.ContentType, req.Request())
 	if err != nil {
-		return nil, orberrors.ErrBadRequest.Wrap(err)
+		return nil, fmt.Errorf("%w: %w", orberrors.ErrBadRequest, err)
 	}
 
 	// Encode the request into a *bytes.Buffer{}.
 	buff := bytes.NewBuffer(nil)
 	if err := codec.NewEncoder(buff).Encode(req.Request()); err != nil {
-		return nil, orberrors.ErrBadRequest.Wrap(err)
+		return nil, fmt.Errorf("%w: %w", orberrors.ErrBadRequest, err)
 	}
 
 	node, err := req.Node(ctx, opts)
@@ -84,11 +87,10 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 	hReq.SetRequestURI(fmt.Sprintf("%s://%s/%s", t.scheme, node.Address, req.Endpoint()))
 
 	// Set metadata key=value to request headers.
-	// TODO(jochumdev): Should we only allow a list of known headers?
 	md, ok := metadata.From(ctx)
 	if ok {
 		for name, value := range md {
-			hReq.Header.Set(name, value)
+			hReq.Header.Set(orbHeader+name, value)
 		}
 	}
 
@@ -102,7 +104,7 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 		t.hclient = hclient
 	}
 
-	return t.call2(ctx, node, opts, req, hReq)
+	return t.call2(ctx, opts, hReq)
 }
 
 type hresBodyCloserWrapper struct {
@@ -119,9 +121,7 @@ func (h *hresBodyCloserWrapper) Close() error {
 
 func (t *Transport) call2(
 	ctx context.Context,
-	_ *registry.Node,
 	opts *client.CallOptions,
-	_ *client.Request[any, any],
 	hReq *protocol.Request,
 ) (*client.RawResponse, error) {
 	// Run the request.
@@ -139,26 +139,21 @@ func (t *Transport) call2(
 	res := &client.RawResponse{
 		ContentType: hRes.Header.Get("Content-Type"),
 		Body:        &hresBodyCloserWrapper{buff: buff},
-		Headers:     make(map[string][]string),
+		Metadata:    make(metadata.Metadata),
 	}
-
-	// t.logger.Trace(
-	// 	"Got a result",
-	// 	"url", fmt.Sprintf("%s://%s/%s", t.scheme, node.Address, req.Endpoint()),
-	// 	"content-type", res.ContentType,
-	// 	"size", hRes.Header.Get(consts.HeaderContentLength),
-	// )
-
-	// Copy headers to the RawResponse if wanted.
-	// TODO(jochumdev): Implement me.
-	// if opts.Headers {
-	// 	for k, v := range hRes.Header.Al {
-	// 		res.Headers[k] = v
-	// 	}
-	// }
 
 	if hRes.StatusCode() != consts.StatusOK {
 		return res, orberrors.NewHTTP(hRes.StatusCode())
+	}
+
+	// Copy headers to the RawResponse.
+	for _, v := range hRes.Header.GetHeaders() {
+		k := string(v.GetKey())
+		if !strings.HasPrefix(strings.ToLower(k), orbHeader) {
+			continue
+		}
+
+		res.Metadata[k[len(orbHeader):]] = string(v.GetValue())
 	}
 
 	return res, nil

@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/codecs"
@@ -17,6 +19,9 @@ import (
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/client/orb"
 )
+
+// orbHeader is the prefix for every orb HTTP header.
+const orbHeader = "__orb-"
 
 var _ (orb.Transport) = (*Transport)(nil)
 
@@ -56,13 +61,13 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 ) (*client.RawResponse, error) {
 	codec, err := codecs.GetEncoder(opts.ContentType, req.Request())
 	if err != nil {
-		return nil, orberrors.ErrBadRequest.Wrap(err)
+		return nil, fmt.Errorf("%w: %w", orberrors.ErrBadRequest, err)
 	}
 
 	// Encode the request into a *bytes.Buffer{}.
 	buff := bytes.NewBuffer(nil)
 	if err := codec.NewEncoder(buff).Encode(req.Request()); err != nil {
-		return nil, orberrors.ErrBadRequest.Wrap(err)
+		return nil, fmt.Errorf("%w: %w", orberrors.ErrBadRequest, err)
 	}
 
 	node, err := req.Node(ctx, opts)
@@ -82,7 +87,7 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 		buff,
 	)
 	if err != nil {
-		return nil, orberrors.ErrBadRequest.Wrap(err)
+		return nil, fmt.Errorf("%w: %w", orberrors.ErrBadRequest, err)
 	}
 
 	// Set headers.
@@ -90,19 +95,17 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 	hReq.Header.Set("Accept", opts.ContentType)
 
 	// Set metadata key=value to request headers.
-	// TODO(jochumdev): Should we only allow a list of known headers?
 	md, ok := metadata.From(ctx)
 	if ok {
 		for name, value := range md {
-			hReq.Header.Set(name, value)
+			hReq.Header.Set(orbHeader+name, value)
 		}
 	}
 
-	return t.call2(opts, hReq)
+	return t.call2(hReq)
 }
 
-func (t *Transport) call2(opts *client.CallOptions, hReq *http.Request,
-) (*client.RawResponse, error) {
+func (t *Transport) call2(hReq *http.Request) (*client.RawResponse, error) {
 	// Run the request.
 	resp, err := t.hclient.Do(hReq)
 	if err != nil {
@@ -125,13 +128,24 @@ func (t *Transport) call2(opts *client.CallOptions, hReq *http.Request,
 	res := &client.RawResponse{
 		ContentType: resp.Header.Get("Content-Type"),
 		Body:        buff,
-		Headers:     make(map[string][]string),
+		Metadata:    make(metadata.Metadata),
 	}
 
-	// Copy headers to the RawResponse if wanted.
-	if opts.Headers {
-		for k, v := range resp.Header {
-			res.Headers[k] = v
+	// Copy headers to the RawResponse.
+	for k, v := range resp.Header {
+		if !strings.HasPrefix(strings.ToLower(k), orbHeader) {
+			continue
+		}
+
+		k = k[len(orbHeader):]
+
+		if len(v) == 1 {
+			res.Metadata[k] = v[0]
+		} else {
+			res.Metadata[k] = v[0]
+			for i := 1; i < len(v); i++ {
+				res.Metadata[k+"-"+strconv.Itoa(i)] = v[i]
+			}
 		}
 	}
 
