@@ -4,7 +4,7 @@ package chi
 import (
 	"net/http"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 
 	"github.com/go-orb/plugins/server/http/router"
 )
