@@ -42,9 +42,9 @@ func CreateSuite(logger log.Logger, registries []registry.Registry, updateTime t
 	r.nodes = append(r.nodes, &registry.Node{ID: "node1-grpc", Address: "10.0.0.11:1234", Transport: "grpc"})
 	r.nodes = append(r.nodes, &registry.Node{ID: "node1-frpc", Address: "10.0.0.11:1234", Transport: "frpc"})
 
-	r.services = append(r.services, &registry.Service{Name: "micro.test.svc.0", Version: "v1", Nodes: []*registry.Node{r.nodes[0]}})
-	r.services = append(r.services, &registry.Service{Name: "micro.test.svc.1", Version: "v1", Nodes: []*registry.Node{r.nodes[1]}})
-	r.services = append(r.services, &registry.Service{Name: "micro.test.svc.2", Version: "v1", Nodes: []*registry.Node{r.nodes[2]}})
+	r.services = append(r.services, &registry.Service{Name: "orb.test.svc.0", Version: "v1", Nodes: []*registry.Node{r.nodes[0]}})
+	r.services = append(r.services, &registry.Service{Name: "orb.test.svc.1", Version: "v1", Nodes: []*registry.Node{r.nodes[1]}})
+	r.services = append(r.services, &registry.Service{Name: "orb.test.svc.2", Version: "v1", Nodes: []*registry.Node{r.nodes[2]}})
 
 	return r
 }
@@ -69,7 +69,7 @@ func (r *TestSuite) TearDownSuite() {
 
 // TestRegister tests registering.
 func (r *TestSuite) TestRegister() {
-	service := registry.Service{Name: "micro.test.svc.3", Version: "v1.0.0", Nodes: []*registry.Node{r.nodes[3]}}
+	service := registry.Service{Name: "orb.test.svc.3", Version: "v1.0.0", Nodes: []*registry.Node{r.nodes[3]}}
 	r.Require().NoError(r.registries[0].Register(&service))
 	time.Sleep(r.updateTime)
 
@@ -98,8 +98,8 @@ func (r *TestSuite) TestRegister() {
 
 // TestDeregister tests deregistering.
 func (r *TestSuite) TestDeregister() {
-	service1 := registry.Service{Name: "micro.test.svc.4", Version: "v1", Nodes: []*registry.Node{r.nodes[4]}}
-	service2 := registry.Service{Name: "micro.test.svc.4", Version: "v2", Nodes: []*registry.Node{r.nodes[5]}}
+	service1 := registry.Service{Name: "orb.test.svc.4", Version: "v1", Nodes: []*registry.Node{r.nodes[4]}}
+	service2 := registry.Service{Name: "orb.test.svc.4", Version: "v2", Nodes: []*registry.Node{r.nodes[5]}}
 
 	r.Require().NoError(r.registries[0].Register(&service1))
 	time.Sleep(r.updateTime)

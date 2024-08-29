@@ -18,8 +18,8 @@ const Name = "nats"
 //nolint:gochecknoglobals
 var (
 	DefaultAddresses  = []string{"nats://localhost:4222"}
-	DefaultQueryTopic = "micro.registry.nats.query"
-	DefaultWatchTopic = "micro.registry.nats.watch"
+	DefaultQueryTopic = "orb.registry.query"
+	DefaultWatchTopic = "orb.registry.watch"
 )
 
 func init() {

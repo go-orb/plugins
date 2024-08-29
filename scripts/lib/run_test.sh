@@ -13,7 +13,7 @@ function run() {
     if [[ "x${ORB_NODOWNLOAD}" == "x" ]]; then
         print_msg "Downloading go modules..."
         go mod download &>/dev/null 2>&1
-        print_msg "done"
+        print_msg "done, now running the test..."
     fi
 
     # Run tests.

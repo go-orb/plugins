@@ -349,10 +349,7 @@ loop:
 				serviceMap[key] = service
 			}
 
-			if quorum == 0 {
-				break loop
-			}
-			if len(serviceMap[key].Nodes) >= quorum {
+			if quorum > 0 && len(serviceMap[key].Nodes) >= quorum {
 				break loop
 			}
 		case <-timeout:
