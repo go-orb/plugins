@@ -11,7 +11,7 @@ import (
 	"github.com/go-orb/go-orb/codecs"
 )
 
-// TODO(davincible): decode body now also does content type setting, maybe separate that out
+// TODO(jochumdev): decode body now also does content type setting, maybe separate that out
 
 // GetContentType parses the content type from the header value.
 func GetContentType(header string) (string, error) {

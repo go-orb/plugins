@@ -53,14 +53,6 @@ const (
 	// DefaultStopTimeout sets the timeout for ServerHertz.Stop().
 	DefaultStopTimeout = time.Second
 
-	// DefaultEnableGzip enables gzip response compression server wide onall responses.
-	// Only use this if your messages are sufficiently large. For small messages
-	// the compute overhead is not worth the reduction in transport time.
-	//
-	// Alternatively, you can send a gzip compressed request, and the server
-	// will send back a gzip compressed respponse.
-	DefaultEnableGzip = false
-
 	// DefaultConfigSection is the section key used in config files used to
 	// configure the server options.
 	DefaultConfigSection = Name
@@ -136,14 +128,6 @@ type Config struct {
 	// HTTP2 dicates whether to also allow HTTP/2 connections. Defaults to true.
 	HTTP2 bool `json:"http2" yaml:"http2"`
 
-	// Gzip enables gzip response compression server wide onall responses.
-	// Only use this if your messages are sufficiently large. For small messages
-	// the compute overhead is not worth the reduction in transport time.
-	//
-	// Alternatively, you can send a gzip compressed request, and the server
-	// will send back a gzip compressed respponse.
-	Gzip bool `json:"gzip" yaml:"gzip"`
-
 	// MaxConcurrentStreams for HTTP2.
 	MaxConcurrentStreams int `json:"maxConcurrentStreams" yaml:"maxConcurrentStreams"`
 
@@ -208,7 +192,6 @@ func NewConfig(options ...Option) *Config {
 		MaxHeaderBytes:       DefaultMaxHeaderBytes,
 		H2C:                  DefaultAllowH2C,
 		HTTP2:                DefaultHTTP2,
-		Gzip:                 DefaultEnableGzip,
 		CodecWhitelist:       DefaultCodecWhitelist(),
 		ReadTimeout:          DefaultReadTimeout,
 		WriteTimeout:         DefaultWriteTimeout,
@@ -310,18 +293,6 @@ func WithInsecure() Option {
 func WithDisableHTTP2() Option {
 	return func(c *Config) {
 		c.HTTP2 = false
-	}
-}
-
-// WithGzip enables gzip response compression server wide onall responses.
-// Only use this if your messages are sufficiently large. For small messages
-// the compute overhead is not worth the reduction in transport time.
-//
-// Alternatively, you can send a gzip compressed request, and the server
-// will send back a gzip compressed respponse.
-func WithGzip() Option {
-	return func(c *Config) {
-		c.Gzip = true
 	}
 }
 
