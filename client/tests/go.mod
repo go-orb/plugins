@@ -11,18 +11,18 @@ require (
 	github.com/go-orb/plugins/client/orb_transport/hertzhttp v0.0.0-20240808123200-284ebdd40dc7
 	github.com/go-orb/plugins/client/orb_transport/http v0.0.0-20240808123200-284ebdd40dc7
 	github.com/go-orb/plugins/client/orb_transport/https v0.0.0-20240808123200-284ebdd40dc7
-	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20240813014945-73f2d5bdd053
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20240813014945-73f2d5bdd053
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20240813014945-73f2d5bdd053
-	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20240813014945-73f2d5bdd053
-	github.com/go-orb/plugins/config/source/file v0.0.0-20240813014945-73f2d5bdd053
-	github.com/go-orb/plugins/log/lumberjack v0.0.0-20240813014945-73f2d5bdd053
-	github.com/go-orb/plugins/log/slog v0.0.0-20240813014945-73f2d5bdd053
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20240813014945-73f2d5bdd053
-	github.com/go-orb/plugins/server/drpc v0.0.0-20240813014945-73f2d5bdd053
-	github.com/go-orb/plugins/server/grpc v0.0.0-20240813014945-73f2d5bdd053
-	github.com/go-orb/plugins/server/hertz v0.0.0-20240813014945-73f2d5bdd053
-	github.com/go-orb/plugins/server/http v0.0.0-20240813014945-73f2d5bdd053
+	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20240830032123-023e305ad393
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20240830032123-023e305ad393
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20240830032123-023e305ad393
+	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20240830032123-023e305ad393
+	github.com/go-orb/plugins/config/source/file v0.0.0-20240830045737-af32bbd0b5d7
+	github.com/go-orb/plugins/log/lumberjack v0.0.0-20240830032123-023e305ad393
+	github.com/go-orb/plugins/log/slog v0.0.0-20240830032123-023e305ad393
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20240830032123-023e305ad393
+	github.com/go-orb/plugins/server/drpc v0.0.0-20240830032123-023e305ad393
+	github.com/go-orb/plugins/server/grpc v0.0.0-20240830032123-023e305ad393
+	github.com/go-orb/plugins/server/hertz v0.0.0-20240830045737-af32bbd0b5d7
+	github.com/go-orb/plugins/server/http v0.0.0-20240830045737-af32bbd0b5d7
 	github.com/google/wire v0.6.0
 	github.com/hashicorp/consul/sdk v0.16.1
 	github.com/stretchr/testify v1.9.0
@@ -48,7 +48,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/go-chi/chi v1.5.5 // indirect
+	github.com/go-chi/chi/v5 v5.1.0 // indirect
 	github.com/go-orb/plugins/client/orb v0.0.0-20240808121627-cff27c7b4e65 // indirect
 	github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20240808121627-cff27c7b4e65 // indirect
 	github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20240808121627-cff27c7b4e65 // indirect
