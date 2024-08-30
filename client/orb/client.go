@@ -165,7 +165,7 @@ func (c *Client) makeOptions(opts ...client.CallOption) *client.CallOptions {
 func (c *Client) transportForReq(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (Transport, error) {
 	node, err := req.Node(ctx, opts)
 	if err != nil {
-		return nil, orberrors.ErrInternalServerError.Wrap(err)
+		return nil, fmt.Errorf("%w: %w", orberrors.ErrInternalServerError, err)
 	}
 
 	// Try to fetch the transport from the internal registry.
@@ -176,7 +176,7 @@ func (c *Client) transportForReq(ctx context.Context, req *client.Request[any, a
 		tcreator, ok := Transports.Get(node.Transport)
 		if !ok {
 			c.logger.Error("Failed to create a transport", slog.String("service", req.Service()), slog.String("transport", node.Transport))
-			return nil, orberrors.ErrInternalServerError.Wrap(fmt.Errorf("%w (%s)", client.ErrFailedToCreateTransport, node.Transport))
+			return nil, fmt.Errorf("%w: %w (%s)", orberrors.ErrInternalServerError, client.ErrFailedToCreateTransport, node.Transport)
 		}
 
 		transport, err = tcreator(c.logger.With("transport", node.Transport), &c.config)
@@ -188,7 +188,7 @@ func (c *Client) transportForReq(ctx context.Context, req *client.Request[any, a
 				slog.Any("error", err),
 			)
 
-			return nil, orberrors.ErrInternalServerError.Wrap(fmt.Errorf("%w (%s)", client.ErrFailedToCreateTransport, node.Transport))
+			return nil, fmt.Errorf("%w: %w (%s)", orberrors.ErrInternalServerError, client.ErrFailedToCreateTransport, node.Transport)
 		}
 
 		if err := transport.Start(); err != nil {
