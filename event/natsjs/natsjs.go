@@ -127,7 +127,7 @@ func (n *NatsJS) HandleRequest(
 		return nil, event.ErrMissingTopic
 	}
 
-	outChan := make(chan event.Call[[]byte, []byte])
+	outChan := make(chan event.Call[[]byte, []byte], 16)
 
 	_, err := n.nc.Subscribe(topic, func(msg *nats.Msg) {
 		req := event.Call[[]byte, []byte]{}
@@ -138,23 +138,28 @@ func (n *NatsJS) HandleRequest(
 			return
 		}
 
-		req.SetReplyFunc(func(result []byte, inErr *orberrors.Error) error {
+		req.SetReplyFunc(func(ctx context.Context, result []byte, inErr error) {
+			md, ok := metadata.From(ctx)
+			if !ok {
+				md = make(metadata.Metadata)
+			}
+
 			reply := &replyMessage{
-				Metadata: metadata.Metadata{},
+				Metadata: md,
 				Data:     result,
 				Err:      inErr,
 			}
 
 			b, err := n.codec.Encode(reply)
 			if err != nil {
-				return err
+				n.logger.Error("failed to encode reply, error was", "err", err)
+				return
 			}
 
 			if err = msg.Respond(b); err != nil {
-				return err
+				n.logger.Error("failed to send reply, error was", "err", err)
+				return
 			}
-
-			return nil
 		})
 
 		outChan <- req
