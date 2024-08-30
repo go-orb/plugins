@@ -11,18 +11,18 @@ require (
 	github.com/go-orb/plugins/client/orb_transport/hertzhttp v0.0.0-20240808123200-284ebdd40dc7
 	github.com/go-orb/plugins/client/orb_transport/http v0.0.0-20240808123200-284ebdd40dc7
 	github.com/go-orb/plugins/client/orb_transport/https v0.0.0-20240808123200-284ebdd40dc7
-	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20240830032123-023e305ad393
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20240830032123-023e305ad393
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20240830032123-023e305ad393
-	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20240830032123-023e305ad393
-	github.com/go-orb/plugins/config/source/file v0.0.0-20240830045737-af32bbd0b5d7
-	github.com/go-orb/plugins/log/lumberjack v0.0.0-20240830032123-023e305ad393
-	github.com/go-orb/plugins/log/slog v0.0.0-20240830032123-023e305ad393
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20240830032123-023e305ad393
-	github.com/go-orb/plugins/server/drpc v0.0.0-20240830032123-023e305ad393
-	github.com/go-orb/plugins/server/grpc v0.0.0-20240830032123-023e305ad393
-	github.com/go-orb/plugins/server/hertz v0.0.0-20240830045737-af32bbd0b5d7
-	github.com/go-orb/plugins/server/http v0.0.0-20240830045737-af32bbd0b5d7
+	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20240830050506-2f41aa643dae
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20240830050506-2f41aa643dae
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20240830050506-2f41aa643dae
+	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20240830050506-2f41aa643dae
+	github.com/go-orb/plugins/config/source/file v0.0.0-20240830050506-2f41aa643dae
+	github.com/go-orb/plugins/log/lumberjack v0.0.0-20240830050506-2f41aa643dae
+	github.com/go-orb/plugins/log/slog v0.0.0-20240830050506-2f41aa643dae
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20240830050506-2f41aa643dae
+	github.com/go-orb/plugins/server/drpc v0.0.0-20240830050506-2f41aa643dae
+	github.com/go-orb/plugins/server/grpc v0.0.0-20240830050506-2f41aa643dae
+	github.com/go-orb/plugins/server/hertz v0.0.0-20240830050506-2f41aa643dae
+	github.com/go-orb/plugins/server/http v0.0.0-20240830050506-2f41aa643dae
 	github.com/google/wire v0.6.0
 	github.com/hashicorp/consul/sdk v0.16.1
 	github.com/stretchr/testify v1.9.0
