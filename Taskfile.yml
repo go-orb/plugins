@@ -41,6 +41,13 @@ tasks:
         vars:
           CLI_ARGS: go get -u ./...
 
+  mod-update-orb:
+    desc: Run "go get github.com/go-orb/go-orb@main" in all packages
+    cmds:
+      - task: runall
+        vars:
+          CLI_ARGS: go get github.com/go-orb/go-orb@main
+
   bench:
     desc: Run "go test ./... -v -benchmem -bench=." in all packages
     cmds:
