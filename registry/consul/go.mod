@@ -6,14 +6,14 @@ toolchain go1.23.0
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7
-	github.com/go-orb/plugins/log/slog v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20240831182221-29f9ff439430
-	github.com/go-orb/plugins/registry/tests v0.0.0-20231207012411-f06c92b21588
+	github.com/go-orb/plugins/log/slog v0.0.0-20240831184917-808b5ccd97c1
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20240831184917-808b5ccd97c1
+	github.com/go-orb/plugins/registry/tests v0.0.0-20240831184917-808b5ccd97c1
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/consul/api v1.29.4
 	github.com/hashicorp/consul/sdk v0.16.1
 	github.com/mitchellh/hashstructure v1.1.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
@@ -28,7 +28,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-rootcerts v1.0.2 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
-	github.com/hashicorp/go-version v1.2.1 // indirect
+	github.com/hashicorp/go-version v1.7.0 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
 	github.com/hashicorp/serf v0.10.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

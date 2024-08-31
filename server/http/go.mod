@@ -7,17 +7,17 @@ toolchain go1.23.0
 require (
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7
-	github.com/go-orb/plugins/codecs/form v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/config/source/file v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/log/slog v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20231207012411-f06c92b21588
+	github.com/go-orb/plugins/codecs/form v0.0.0-20240831184917-808b5ccd97c1
+	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20240831184917-808b5ccd97c1
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20240831184917-808b5ccd97c1
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20240831184917-808b5ccd97c1
+	github.com/go-orb/plugins/config/source/file v0.0.0-20240831184917-808b5ccd97c1
+	github.com/go-orb/plugins/log/slog v0.0.0-20240831184917-808b5ccd97c1
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20240831184917-808b5ccd97c1
 	github.com/google/uuid v1.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/quic-go/quic-go v0.46.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	golang.org/x/net v0.28.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240827150818-7e3bb234dfed
 	google.golang.org/grpc v1.66.0
@@ -33,7 +33,7 @@ require (
 	github.com/google/pprof v0.0.0-20240829160300-da1f7e9f2b25 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/miekg/dns v1.1.57 // indirect
+	github.com/miekg/dns v1.1.62 // indirect
 	github.com/onsi/ginkgo/v2 v2.20.2 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect

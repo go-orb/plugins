@@ -7,7 +7,7 @@ toolchain go1.23.0
 require (
 	github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.4
 	golang.org/x/exp v0.0.0-20240823005443-9b4947da3948
 )

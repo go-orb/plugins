@@ -35,11 +35,11 @@ tasks:
           CLI_ARGS: go fmt
 
   mod-update:
-    desc: Run "go get -u ./..." in all packages
+    desc: Run "go get -u -t ./..." in all packages
     cmds:
       - task: runall
         vars:
-          CLI_ARGS: go get -u ./...
+          CLI_ARGS: go get -u -t ./...
 
   mod-update-orb:
     desc: Run "go get github.com/go-orb/go-orb@main" in all packages

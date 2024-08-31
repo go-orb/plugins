@@ -151,7 +151,7 @@ function create_summary() {
 		add_summary "\n### ${dir}\n"
 
 		# Download all modules.
-		go get -v -t -d ./...
+		go get -v -t ./...
 
 		go test ./... ${GO_TEST_FLAGS} -json |
 			tparse -notests -format=markdown >>"${GITHUB_STEP_SUMMARY}"

@@ -6,12 +6,12 @@ toolchain go1.23.0
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/config/source/file v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/log/slog v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20231207012411-f06c92b21588
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20240831184917-808b5ccd97c1
+	github.com/go-orb/plugins/config/source/file v0.0.0-20240831184917-808b5ccd97c1
+	github.com/go-orb/plugins/log/slog v0.0.0-20240831184917-808b5ccd97c1
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20240831184917-808b5ccd97c1
 	github.com/google/uuid v1.6.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	google.golang.org/grpc v1.66.0
 	google.golang.org/protobuf v1.34.2
 )
@@ -21,7 +21,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/miekg/dns v1.1.57 // indirect
+	github.com/miekg/dns v1.1.62 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/sanity-io/litter v1.5.5 // indirect
 	golang.org/x/exp v0.0.0-20240823005443-9b4947da3948 // indirect
