@@ -5,7 +5,7 @@ go 1.23
 toolchain go1.23.0
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20240829233908-425ee5e7273c
+	github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/protobuf v1.34.2

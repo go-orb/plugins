@@ -4,8 +4,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.3 h1:qMCsGGgs+MAzDFyp9LpAe1Lqy/fY/qCovCm0q
 github.com/cpuguy83/go-md2man/v2 v2.0.3/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/go-orb/go-orb v0.0.0-20240829233908-425ee5e7273c h1:FPODQiPh3x+ko+6bn8nl4jGXom04h9SU3y5AE8FgEdk=
-github.com/go-orb/go-orb v0.0.0-20240829233908-425ee5e7273c/go.mod h1:1QerXe4TRJ0YMR2cQlyPhfdKUCVwD/kAHvsuYcwoTfw=
+github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7 h1:9ZCjLkvUlwDSwIhkVRij0nLuP38BMJAJCv4cX1TP3Mg=
+github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7/go.mod h1:DdL+EYRtGU8OMU4H7NSQvRxRVzL+GBliOVWC0QHKuy0=
 github.com/go-orb/plugins/codecs/yaml v0.0.0-20231207012411-f06c92b21588 h1:Loj6pjeZfq1CaFreFg8duX6mVLAzpmQXVtrsAEbwGfI=
 github.com/go-orb/plugins/codecs/yaml v0.0.0-20231207012411-f06c92b21588/go.mod h1:rX8JrykFTHJq0ZY4akAWY3FpTu/4hkw5gypt9ZH+kxc=
 github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20231207012411-f06c92b21588 h1:CkgeJxTYBhbpuwt/1ylhWj9k+3SvUUAKEyxMbY+IcPU=

@@ -6,7 +6,7 @@ toolchain go1.23.0
 
 require (
 	github.com/go-chi/chi/v5 v5.1.0
-	github.com/go-orb/go-orb v0.0.0-20240829233908-425ee5e7273c
+	github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7
 	github.com/go-orb/plugins/codecs/form v0.0.0-20231207012411-f06c92b21588
 	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20231207012411-f06c92b21588
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20231207012411-f06c92b21588
