@@ -13,14 +13,14 @@ require (
 	github.com/go-orb/plugins/client/orb_transport/hertzhttp v0.0.0-20240808123200-284ebdd40dc7
 	github.com/go-orb/plugins/client/orb_transport/http v0.0.0-20240808123200-284ebdd40dc7
 	github.com/go-orb/plugins/client/orb_transport/https v0.0.0-20240808123200-284ebdd40dc7
-	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20240830050506-2f41aa643dae
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20240830050506-2f41aa643dae
+	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20240831182221-29f9ff439430
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20240831182016-aedb2c01ddf8
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20240830050506-2f41aa643dae
-	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20240830050506-2f41aa643dae
+	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20240831182016-aedb2c01ddf8
 	github.com/go-orb/plugins/config/source/file v0.0.0-20240830050506-2f41aa643dae
 	github.com/go-orb/plugins/log/lumberjack v0.0.0-20240830050506-2f41aa643dae
 	github.com/go-orb/plugins/log/slog v0.0.0-20240830050506-2f41aa643dae
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20240830050506-2f41aa643dae
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20240831181827-def480c13d60
 	github.com/go-orb/plugins/server/drpc v0.0.0-20240830050506-2f41aa643dae
 	github.com/go-orb/plugins/server/grpc v0.0.0-20240830050506-2f41aa643dae
 	github.com/go-orb/plugins/server/hertz v0.0.0-20240830050506-2f41aa643dae

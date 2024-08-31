@@ -10,6 +10,7 @@ github.com/go-orb/plugins/client/orb v0.0.0-20240830050506-2f41aa643dae h1:odVRN
 github.com/go-orb/plugins/client/orb v0.0.0-20240830050506-2f41aa643dae/go.mod h1:Ui/otujEi7yuXysKmfVp2rg+gQD6DhlP5VVtbfKpqps=
 github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20240830050506-2f41aa643dae h1:jTyx38BYkZXt1oFCJLjkbHxBPP8F1mVPCB9yCm3QLeg=
 github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20240830050506-2f41aa643dae/go.mod h1:UH5Bk2Nu8JeMJ5bwBMyPFIw1H86I9rH7TctwMrksHLA=
+github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 h1:tfuBGBXKqDEevZMzYi5KSi8KkcZtzBcTgAUUtapy0OI=
 github.com/go-task/slim-sprig/v3 v3.0.0 h1:sUs3vkvUymDpBKi3qH1YSqBQk9+9D/8M2mN1vB6EwHI=
 github.com/go-task/slim-sprig/v3 v3.0.0/go.mod h1:W848ghGpv3Qj3dhTPRyJypKRiqCdHZiAzKg9hl15HA8=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=

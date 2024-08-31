@@ -7,7 +7,7 @@ toolchain go1.23.0
 require (
 	github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7
 	github.com/go-orb/plugins/log/slog v0.0.0-20231207012411-f06c92b21588
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20240830050506-2f41aa643dae
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20240831182221-29f9ff439430
 	github.com/go-orb/plugins/registry/tests v0.0.0-20231207012411-f06c92b21588
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/consul/api v1.29.4
