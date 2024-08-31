@@ -290,7 +290,7 @@ func (m *MDNSService) instanceRecords(question dns.Question) []dns.RR { //nolint
 			},
 			Priority: 10,
 			Weight:   1,
-			Port:     uint16(m.Port),
+			Port:     uint16(m.Port), //nolint:gosec
 			Target:   m.HostName,
 		}
 		recs := []dns.RR{srv}

@@ -43,7 +43,7 @@ func (s *ServerHTTP) newHTTPServer(router router.Router) (*httpServer, error) {
 
 	if s.Config.H2C {
 		s.handler = h2c.NewHandler(s.handler, &http2.Server{
-			MaxConcurrentStreams: uint32(s.Config.MaxConcurrentStreams),
+			MaxConcurrentStreams: uint32(s.Config.MaxConcurrentStreams), //nolint:gosec
 		})
 	}
 
@@ -69,7 +69,7 @@ func (s *ServerHTTP) newHTTPServer(router router.Router) (*httpServer, error) {
 		}
 
 		h2 := http2.Server{
-			MaxConcurrentStreams: uint32(s.Config.MaxConcurrentStreams),
+			MaxConcurrentStreams: uint32(s.Config.MaxConcurrentStreams), //nolint:gosec
 			NewWriteScheduler:    func() http2.WriteScheduler { return http2.NewPriorityWriteScheduler(nil) },
 		}
 

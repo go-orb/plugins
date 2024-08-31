@@ -23,7 +23,7 @@ type EchoHandler struct {
 // Call implements the call method.
 func (c *EchoHandler) Call(_ context.Context, in *proto.CallRequest) (*proto.CallResponse, error) {
 	if in.GetSleep() != 0 {
-		time.Sleep(time.Second * time.Duration(in.GetSleep()))
+		time.Sleep(time.Second * time.Duration(in.GetSleep())) //nolint:gosec
 	}
 
 	switch in.GetName() {

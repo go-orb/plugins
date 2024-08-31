@@ -187,7 +187,7 @@ func parseField(fieldDesc protoreflect.FieldDescriptor, value string) (protorefl
 				return protoreflect.Value{}, fmt.Errorf("%q is not a valid value", value)
 			}
 
-			if v = enum.Descriptor().Values().ByNumber(protoreflect.EnumNumber(i)); v == nil {
+			if v = enum.Descriptor().Values().ByNumber(protoreflect.EnumNumber(i)); v == nil { //nolint:gosec
 				return protoreflect.Value{}, fmt.Errorf("%q is not a valid value", value)
 			}
 		}
@@ -199,7 +199,7 @@ func parseField(fieldDesc protoreflect.FieldDescriptor, value string) (protorefl
 			return protoreflect.Value{}, err
 		}
 
-		return protoreflect.ValueOfInt32(int32(v)), nil
+		return protoreflect.ValueOfInt32(int32(v)), nil //nolint:gosec
 	case protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
 		v, err := strconv.ParseInt(value, 10, 64) //nolint:gomnd
 		if err != nil {
@@ -213,7 +213,7 @@ func parseField(fieldDesc protoreflect.FieldDescriptor, value string) (protorefl
 			return protoreflect.Value{}, err
 		}
 
-		return protoreflect.ValueOfUint32(uint32(v)), nil
+		return protoreflect.ValueOfUint32(uint32(v)), nil //nolint:gosec
 	case protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
 		v, err := strconv.ParseUint(value, 10, 64) //nolint:gomnd
 		if err != nil {
@@ -305,7 +305,7 @@ func parseMessage(messageDesc protoreflect.MessageDescriptor, value string) (pro
 			return protoreflect.Value{}, err
 		}
 
-		msg = wrapperspb.Int32(int32(v))
+		msg = wrapperspb.Int32(int32(v)) //nolint:gosec
 	case "google.protobuf.UInt64Value":
 		v, err := strconv.ParseUint(value, 10, 64) //nolint:gomnd
 		if err != nil {
@@ -319,7 +319,7 @@ func parseMessage(messageDesc protoreflect.MessageDescriptor, value string) (pro
 			return protoreflect.Value{}, err
 		}
 
-		msg = wrapperspb.UInt32(uint32(v))
+		msg = wrapperspb.UInt32(uint32(v)) //nolint:gosec
 	case "google.protobuf.BoolValue":
 		v, err := strconv.ParseBool(value)
 		if err != nil {

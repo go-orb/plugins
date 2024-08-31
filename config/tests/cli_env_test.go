@@ -43,9 +43,9 @@ func TestCLIEnv(t *testing.T) {
 	require.NoError(t, err)
 
 	// Set Environ variables.
-	require.NoError(t, os.Setenv("ORB_REGISTRY", "nats"))
-	require.NoError(t, os.Setenv("ORB_REGISTRY_TTL", "600"))
-	require.NoError(t, os.Setenv("ORB_REGISTRY_NATS_ADDRESS", "nats://localhost:4222"))
+	t.Setenv("ORB_REGISTRY", "nats")
+	t.Setenv("ORB_REGISTRY_TTL", "600")
+	t.Setenv("ORB_REGISTRY_NATS_ADDRESS", "nats://localhost:4222")
 
 	os.Args = []string{
 		"testapp",

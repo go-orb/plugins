@@ -11,30 +11,30 @@ actions:
 runtimes:
   enabled:
     - python@3.10.8
-    - go@1.22.0
+    - go@1.23.0
     - node@18.12.1
 lint:
   enabled:
-    - osv-scanner@1.8.3
-    - checkov@3.2.220
+    - osv-scanner@1.8.4
+    - checkov@3.2.239
     - trivy@0.54.1
-    - trufflehog@3.81.8
+    - trufflehog@3.81.10
     - yamllint@1.35.1
     - actionlint@1.7.1
     - markdownlint@0.41.0
     - git-diff-check
     - gitleaks@8.18.4
     - gofmt@1.20.5
-    - golangci-lint@1.59.1
+    - golangci-lint@1.60.3
     - prettier@3.3.3
   disabled:
     - gokart
     - shellcheck
     - shfmt
 cli:
-  version: 1.22.2
+  version: 1.22.4
 plugins:
   sources:
     - id: trunk
-      ref: v1.6.1
+      ref: v1.6.2
       uri: https://github.com/trunk-io/plugins

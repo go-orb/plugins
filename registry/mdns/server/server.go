@@ -424,7 +424,7 @@ func (s *Server) probe() {
 		},
 		Priority: 0,
 		Weight:   0,
-		Port:     uint16(mdnsService.Port),
+		Port:     uint16(mdnsService.Port), //nolint:gosec
 		Target:   mdnsService.HostName,
 	}
 	txt := &dns.TXT{
