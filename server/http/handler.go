@@ -27,7 +27,7 @@ func NewGRPCHandler[Tin any, Tout any](srv *ServerHTTP, fHandler func(context.Co
 
 		if _, err := srv.decodeBody(resp, req, inBody); err != nil {
 			srv.Logger.Error("failed to decode body", "error", err)
-			WriteError(resp, err)
+			WriteError(resp, orberrors.ErrBadRequest.Wrap(err))
 
 			return
 		}
@@ -84,6 +84,7 @@ func WriteError(w http.ResponseWriter, err error) {
 		w.WriteHeader(orbe.Code)
 		fmt.Fprint(w, orbe.Error()) //nolint:errcheck
 	} else {
+		w.WriteHeader(500)
 		fmt.Fprint(w, err.Error()) //nolint:errcheck
 	}
 }

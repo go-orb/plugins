@@ -64,13 +64,13 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 ) (*client.RawResponse, error) {
 	codec, err := codecs.GetEncoder(opts.ContentType, req.Request())
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", orberrors.ErrBadRequest, err)
+		return nil, orberrors.ErrBadRequest.Wrap(err)
 	}
 
 	// Encode the request into a *bytes.Buffer{}.
 	buff := bytes.NewBuffer(nil)
 	if err := codec.NewEncoder(buff).Encode(req.Request()); err != nil {
-		return nil, fmt.Errorf("%w: %w", orberrors.ErrBadRequest, err)
+		return nil, orberrors.ErrBadRequest.Wrap(err)
 	}
 
 	node, err := req.Node(ctx, opts)

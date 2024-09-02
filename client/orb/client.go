@@ -165,7 +165,7 @@ func (c *Client) makeOptions(opts ...client.CallOption) *client.CallOptions {
 func (c *Client) transportForReq(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (Transport, error) {
 	node, err := req.Node(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", orberrors.ErrInternalServerError, err)
+		return nil, orberrors.ErrInternalServerError.Wrap(err)
 	}
 
 	// Try to fetch the transport from the internal registry.

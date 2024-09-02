@@ -254,7 +254,7 @@ func TestServerInvalidMessage(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Logf("expected error: %v", string(body))
-	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode, string(body))
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode, string(body))
 	require.NoError(t, err)
 
 	// Close connection
