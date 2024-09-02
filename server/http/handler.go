@@ -84,7 +84,7 @@ func WriteError(w http.ResponseWriter, err error) {
 		w.WriteHeader(orbe.Code)
 		fmt.Fprint(w, orbe.Error()) //nolint:errcheck
 	} else {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, err.Error()) //nolint:errcheck
 	}
 }
