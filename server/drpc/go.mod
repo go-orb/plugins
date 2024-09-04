@@ -15,6 +15,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/zeebo/errs v1.3.0 // indirect
 	golang.org/x/exp v0.0.0-20240823005443-9b4947da3948 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

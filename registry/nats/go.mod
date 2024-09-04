@@ -6,8 +6,8 @@ toolchain go1.23.0
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7
-	github.com/go-orb/plugins/log/slog v0.0.0-20240831184917-808b5ccd97c1
-	github.com/go-orb/plugins/registry/tests v0.0.0-20240831184917-808b5ccd97c1
+	github.com/go-orb/plugins/log/slog v0.0.0-20240902051655-0791c4c590b6
+	github.com/go-orb/plugins/registry/tests v0.0.0-20240902051655-0791c4c590b6
 	github.com/google/uuid v1.6.0
 	github.com/nats-io/nats.go v1.37.0
 	github.com/pkg/errors v0.9.1

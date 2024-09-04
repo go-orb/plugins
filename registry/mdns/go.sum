@@ -4,14 +4,10 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7 h1:9ZCjLkvUlwDSwIhkVRij0nLuP38BMJAJCv4cX1TP3Mg=
 github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7/go.mod h1:DdL+EYRtGU8OMU4H7NSQvRxRVzL+GBliOVWC0QHKuy0=
-github.com/go-orb/plugins/log/slog v0.0.0-20231207012411-f06c92b21588 h1:jgXRTyDgRDcmUMK79zDI7zwKYTtQrCb+DVLf1vORphI=
-github.com/go-orb/plugins/log/slog v0.0.0-20231207012411-f06c92b21588/go.mod h1:EdVLx57PCul9ck4gSZ3UfLWChjYj01B8jlbWS9Nvy1Y=
-github.com/go-orb/plugins/log/slog v0.0.0-20240831184917-808b5ccd97c1 h1:PVJgcORKNOnCBsXz6HXkSV984h+j4eNciMwvUmd5Tyg=
-github.com/go-orb/plugins/log/slog v0.0.0-20240831184917-808b5ccd97c1/go.mod h1:TzDnUtAbc7jOgZBNwA++WVhL9RULube9Vd2K0abVzbo=
-github.com/go-orb/plugins/registry/tests v0.0.0-20231207012411-f06c92b21588 h1:LGeQZPQkBPEoNSWV2meZnxM/XOUkLHONt3DxgAnw8pM=
-github.com/go-orb/plugins/registry/tests v0.0.0-20231207012411-f06c92b21588/go.mod h1:mfYafEabvCHUuUJKTiVOazxYq+aFwBhlEiOr0OUitW0=
-github.com/go-orb/plugins/registry/tests v0.0.0-20240831184917-808b5ccd97c1 h1:4UP0saycZOoObadGYTPyxoN1TLzjm6LTzIsEg0npTHo=
-github.com/go-orb/plugins/registry/tests v0.0.0-20240831184917-808b5ccd97c1/go.mod h1:zwXfOFO2hzeAwzFKWSJE/NaPH4nsGTI10i4NxJBpKYM=
+github.com/go-orb/plugins/log/slog v0.0.0-20240902051655-0791c4c590b6 h1:PJHFhvwbSFUdXQGkGRoZDOSOK440bcdjp1ydN+AW0SA=
+github.com/go-orb/plugins/log/slog v0.0.0-20240902051655-0791c4c590b6/go.mod h1:i8IVEflSA0tUSw6C+VhY7WGGWixlX2CtxmgFcoPo6AQ=
+github.com/go-orb/plugins/registry/tests v0.0.0-20240902051655-0791c4c590b6 h1:O7b28ph2lYnY4J8kimZZ+l6sz3gCNOwyqQJAlM7uYtM=
+github.com/go-orb/plugins/registry/tests v0.0.0-20240902051655-0791c4c590b6/go.mod h1:zwXfOFO2hzeAwzFKWSJE/NaPH4nsGTI10i4NxJBpKYM=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
@@ -24,8 +20,6 @@ github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRI
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rogpeppe/go-internal v1.11.0 h1:cWPaGQEPrBb5/AsnsZesgZZ9yb1OQ+GOISoDNXVBh4M=
 github.com/rogpeppe/go-internal v1.11.0/go.mod h1:ddIwULY96R17DhadqLgMfk9H9tvdUzkipdSkR5nkCZA=
-github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
-github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 golang.org/x/mod v0.20.0 h1:utOm6MM3R3dnawAiJgn0y+xvuYRsm1RKM/4giyfDgV0=

@@ -6,9 +6,9 @@ toolchain go1.23.0
 
 require (
 	github.com/cloudwego/hertz v0.9.2
-	github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7
-	github.com/go-orb/plugins/client/orb v0.0.0-20240831184917-808b5ccd97c1
-	github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20240831184917-808b5ccd97c1
+	github.com/go-orb/go-orb v0.0.0-20240902034447-508ce5c54a46
+	github.com/go-orb/plugins/client/orb v0.0.0-20240902051655-0791c4c590b6
+	github.com/go-orb/plugins/client/orb_transport/basehertz v0.0.0-20240902051655-0791c4c590b6
 	github.com/hertz-contrib/http2 v0.1.8
 )
 

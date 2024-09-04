@@ -6,9 +6,9 @@ toolchain go1.23.0
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7
-	github.com/go-orb/plugins/log/slog v0.0.0-20240831184917-808b5ccd97c1
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20240831184917-808b5ccd97c1
-	github.com/go-orb/plugins/registry/tests v0.0.0-20240831184917-808b5ccd97c1
+	github.com/go-orb/plugins/log/slog v0.0.0-20240902051655-0791c4c590b6
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20240902051655-0791c4c590b6
+	github.com/go-orb/plugins/registry/tests v0.0.0-20240902051655-0791c4c590b6
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/consul/api v1.29.4
 	github.com/hashicorp/consul/sdk v0.16.1
@@ -33,7 +33,7 @@ require (
 	github.com/hashicorp/serf v0.10.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/miekg/dns v1.1.57 // indirect
+	github.com/miekg/dns v1.1.62 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -41,5 +41,8 @@ require (
 	golang.org/x/exp v0.0.0-20240823005443-9b4947da3948 // indirect
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sys v0.24.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240827150818-7e3bb234dfed // indirect
+	google.golang.org/grpc v1.66.0 // indirect
+	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
