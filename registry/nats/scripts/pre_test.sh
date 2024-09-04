@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 set -e; set -o pipefail
 
-# Import util.sh
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-source ${SCRIPT_DIR}/../../../scripts/lib/util.sh
+
+# https://gist.github.com/lukechilds/a83e1d7127b78fef38c2914c4ececc3c
+function get_latest_gh_release() {
+  curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
+    grep '"tag_name":' |                                            # Get tag line
+    sed -E 's/.*"([^"]+)".*/\1/'                                    # Pluck JSON value
+}
 
 GOOS=$(go env GOOS)
 GOARCH=$(go env GOARCH)
@@ -17,7 +22,7 @@ mkdir -p "${WORKDIR}"
 pushd "${WORKDIR}"
 
 if [[ ! -x nats-server ]]; then
-    print_msg "Downloading NATS ${VERSION}"
+    echo "Downloading NATS ${VERSION}"
 
     curl -s -L https://github.com/nats-io/nats-server/releases/download/${VERSION}/${ZIPFILE}.zip -o nats.zip
 	unzip nats.zip "*/nats-server" 1>/dev/null

@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 set -e; set -o pipefail
 
-# Import util.sh
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-source ${SCRIPT_DIR}/../../../scripts/lib/util.sh
+
+# https://gist.github.com/lukechilds/a83e1d7127b78fef38c2914c4ececc3c
+function get_latest_gh_release() {
+  curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
+    grep '"tag_name":' |                                            # Get tag line
+    sed -E 's/.*"([^"]+)".*/\1/'                                    # Pluck JSON value
+}
 
 GOOS=$(go env GOOS)
 GOARCH=$(go env GOARCH)
@@ -17,7 +22,7 @@ mkdir -p "${WORKDIR}"
 pushd "${WORKDIR}"
 
 if [[ ! -x consul ]]; then
-	print_msg "Downloading curl ${VERSION}"
+	echo "Downloading consul ${VERSION}"
 
 	curl -s -L https://releases.hashicorp.com/consul/${VERSION}/consul_${VERSION}_${GOOS}_${GOARCH}.zip -o consul.zip
 	unzip consul.zip 1>/dev/null

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/go-orb/go-orb/client"
@@ -104,9 +103,6 @@ var (
 type TestSuite struct {
 	suite.Suite
 
-	// The path of plugins/
-	PluginsRoot string
-
 	// Transports is the list of preferred transports for all requests
 	Transports []string
 
@@ -128,7 +124,6 @@ type TestSuite struct {
 func NewSuite(pluginsRoot string, transports []string, requests ...TestRequest) *TestSuite {
 	s := new(TestSuite)
 
-	s.PluginsRoot = pluginsRoot
 	s.Transports = transports
 
 	if len(requests) == 0 {
@@ -161,11 +156,6 @@ func (s *TestSuite) SetupSuite() {
 	version := types.ServiceVersion("v1.0.0")
 
 	cURLs := []*url.URL{}
-
-	curl, err := url.Parse("file://" + filepath.Join(s.PluginsRoot, "client/tests/cmd/tests_server/config.yaml"))
-	s.Require().NoError(err, "while parsing a url")
-
-	cURLs = append(cURLs, curl)
 
 	cfgData, err := config.Read(cURLs, nil)
 	if err != nil {
@@ -208,7 +198,7 @@ func (s *TestSuite) SetupSuite() {
 		// WithNumProcesses(5),
 		// WithRunEnv("GOMAXPROCS=1"),
 		WithRunEnv("GOMAXPROCS=" + os.Getenv("GOMAXPROCS")),
-		WithArgs("--config", filepath.Join(s.PluginsRoot, "client/tests/cmd/tests_server/config.yaml")),
+		WithArgs("--config", "../../cmd/tests_server/config.yaml"),
 	}
 	// if logger.Level() <= slog.LevelDebug {
 	pro = append(pro, WithStdOut(os.Stdout), WithStdErr(os.Stderr))
