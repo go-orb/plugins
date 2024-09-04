@@ -5,51 +5,31 @@ on:
       - main
 permissions: read-all
 jobs:
-  golangci:
+  lint:
     name: Lint
     runs-on: [self-hosted, linux, x64]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v3
+      - name: Lint files
+        uses: dagger/dagger-for-github@v6
         with:
-          go-version: "1.23"
-          check-latest: true
-      - name: Run Linters
-        run: ./scripts/test.sh lint all
-        env:
-          PROCS: 1
-          GOMAXPROGS: 1
+          version: "latest"
+          verb: call
+          args: lint --root=.
+          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
   test:
     name: Unit Tests
     runs-on: [self-hosted, linux, x64]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v3
+      - name: Lint files
+        uses: dagger/dagger-for-github@v6
         with:
-          go-version: "1.23"
-          check-latest: true
-      - name: Run Unit Tests
-        run: ./scripts/test.sh test all
-        env:
-          PROCS: 1
-          GOMAXPROGS: 1
-  summary:
-    name: Summary
-    runs-on: [self-hosted, linux, x64]
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-go@v3
-        with:
-          go-version: "1.23"
-          check-latest: true
-      - name: Create Summary
-        run: ./scripts/test.sh summary all
-        env:
-          PROCS: 1
-          GOMAXPROGS: 1
+          version: "latest"
+          verb: call
+          args: test --root=.
+          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}

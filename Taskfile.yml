@@ -1,0 +1,22 @@
+version: '3'
+
+tasks:
+  lint:
+    desc: Run "golangci-lint" in all packages
+    cmds:
+      - cmd: dagger call lint --root=.
+
+  mod-tidy:
+    desc: Run "go mod tidy" in all packages
+    cmds:
+      - cmd: dagger call tidy --root=. source export --path=.
+  
+  mod-update:
+    desc: Run "go get -u -t ./..." in all packages
+    cmds:
+      - cmd: dagger call update --root=. source export --path=.
+
+  test:
+    desc: Run "go test ./..." in all packages
+    cmds:
+      - cmd: dagger call test --root=.

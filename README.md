@@ -16,16 +16,17 @@ We do not accept commit's with a "replace" line in a go.mod.
 
 ### Run the tests
 
-- all:
+Install [dagger](https://docs.dagger.io/quickstart/cli)
 
-  ```bash
-  ./scripts/test.sh test all
-  ```
+```sh
+dagger call test --root=.
+```
 
-- or just one:
-  ```bash
-   ./scripts/test.sh test client/orb_transport/grpc
-  ```
+### Check linting
+
+```sh
+dagger call lint --root=.
+```
 
 ### Quirks
 
