@@ -111,7 +111,12 @@ func (m *GoOrb) Modules(ctx context.Context, root *dagger.Directory) ([]string, 
 }
 
 // Lints all modules starting from `root` with golangci-lint
-func (m *GoOrb) Lint(ctx context.Context, root *dagger.Directory) (*AllResult, error) {
+func (m *GoOrb) Lint(
+	ctx context.Context,
+	root *dagger.Directory,
+	// +defaultPath="/.golangci.yaml"
+	golangciConfig *dagger.File,
+) (*AllResult, error) {
 	lintWorker := func(ctx context.Context, wg *sync.WaitGroup, input <-chan string, res chan<- *WorkerResult, root *dagger.Directory) {
 		defer wg.Done()
 		for dir := range input {
@@ -120,8 +125,6 @@ func (m *GoOrb) Lint(ctx context.Context, root *dagger.Directory) (*AllResult, e
 				return
 			default:
 			}
-
-			config := dag.CurrentModule().Source().File(".golangci.yaml")
 
 			out, err := dag.Container().From("golangci/golangci-lint").
 				WithMountedCache("/go/pkg/mod",
@@ -141,7 +144,7 @@ func (m *GoOrb) Lint(ctx context.Context, root *dagger.Directory) (*AllResult, e
 				WithMountedCache("/root/.cache/golangci-lint", dag.CacheVolume("golangci-lint")).
 				WithDirectory("/work/src", root.Directory(dir)).
 				WithWorkdir("/work/src").
-				WithMountedFile("/work/config", config).
+				WithMountedFile("/work/config", golangciConfig).
 				WithExec([]string{"golangci-lint", "run", "--config", "/work/config"}).
 				Stdout(ctx)
 
