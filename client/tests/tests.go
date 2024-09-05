@@ -121,7 +121,7 @@ type TestSuite struct {
 }
 
 // NewSuite creates a new test suite.
-func NewSuite(pluginsRoot string, transports []string, requests ...TestRequest) *TestSuite {
+func NewSuite(_ string, transports []string, requests ...TestRequest) *TestSuite {
 	s := new(TestSuite)
 
 	s.Transports = transports

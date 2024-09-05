@@ -47,6 +47,3 @@ require (
 	golang.org/x/tools v0.24.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240903143218-8af14fe29dc1 // indirect
 )
-
-// Fixing ambiguous import: found package google.golang.org/genproto/googleapis/api/annotations in multiple modules.
-exclude google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1

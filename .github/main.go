@@ -94,7 +94,8 @@ func (m *GoOrb) Modules(ctx context.Context, root *dagger.Directory) ([]string, 
 	}
 
 	for i, mod := range mods {
-		if strings.HasPrefix(mod, "dagger") {
+		// Ignore dagger
+		if strings.HasPrefix(mod, ".github") {
 			mods[i] = ""
 			continue
 		}
@@ -120,6 +121,8 @@ func (m *GoOrb) Lint(ctx context.Context, root *dagger.Directory) (*AllResult, e
 			default:
 			}
 
+			config := dag.CurrentModule().Source().File(".golangci.yaml")
+
 			out, err := dag.Container().From("golangci/golangci-lint").
 				WithMountedCache("/go/pkg/mod",
 					dag.CacheVolume("go-mod"),
@@ -138,7 +141,8 @@ func (m *GoOrb) Lint(ctx context.Context, root *dagger.Directory) (*AllResult, e
 				WithMountedCache("/root/.cache/golangci-lint", dag.CacheVolume("golangci-lint")).
 				WithDirectory("/work/src", root.Directory(dir)).
 				WithWorkdir("/work/src").
-				WithExec([]string{"golangci-lint", "run"}).
+				WithMountedFile("/work/config", config).
+				WithExec([]string{"golangci-lint", "run", "--config", "/work/config"}).
 				Stdout(ctx)
 
 			res <- &WorkerResult{Module: dir, Logs: out, Err: err}
