@@ -24,6 +24,7 @@ import (
 )
 
 import (
+	_ "github.com/go-orb/plugins-experimental/registry/mdns"
 	_ "github.com/go-orb/plugins/codecs/jsonpb"
 	_ "github.com/go-orb/plugins/codecs/proto"
 	_ "github.com/go-orb/plugins/codecs/yaml"
@@ -31,7 +32,6 @@ import (
 	_ "github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/lumberjack"
 	_ "github.com/go-orb/plugins/log/slog"
-	_ "github.com/go-orb/plugins/registry/mdns"
 	_ "github.com/go-orb/plugins/server/http/router/chi"
 )
 

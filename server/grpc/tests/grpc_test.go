@@ -23,10 +23,10 @@ import (
 	"github.com/go-orb/plugins/server/grpc/tests/proto"
 	tgrpc "github.com/go-orb/plugins/server/grpc/tests/util/grpc"
 
+	_ "github.com/go-orb/plugins-experimental/registry/mdns"
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	_ "github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/slog"
-	_ "github.com/go-orb/plugins/registry/mdns"
 )
 
 func init() {

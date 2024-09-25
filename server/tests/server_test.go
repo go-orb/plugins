@@ -10,10 +10,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 
+	_ "github.com/go-orb/plugins-experimental/registry/mdns"
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	"github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/slog"
-	_ "github.com/go-orb/plugins/registry/mdns"
 
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"

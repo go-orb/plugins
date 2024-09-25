@@ -4,10 +4,10 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-orb/go-orb v0.0.0-20240902034447-508ce5c54a46 h1:kynKV0pnA25VVy4Ek3HxPwnLszjlheDnAZJRS0nvsTI=
 github.com/go-orb/go-orb v0.0.0-20240902034447-508ce5c54a46/go.mod h1:DdL+EYRtGU8OMU4H7NSQvRxRVzL+GBliOVWC0QHKuy0=
-github.com/go-orb/plugins/client/orb v0.0.0-20240902051655-0791c4c590b6 h1:ApLZEVY4Y2LjM+UXQuzvo4jIAEctuGLWWid0jVHapN8=
-github.com/go-orb/plugins/client/orb v0.0.0-20240902051655-0791c4c590b6/go.mod h1:Qg5XnIGP+Jj8pf72HX7veXL+juDjTauvJyyiHsoHx3Q=
-github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20240902051655-0791c4c590b6 h1:SsreAOpca3mhajJkMzj7tf4+jw8m2upzvM2g/t62vNI=
-github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20240902051655-0791c4c590b6/go.mod h1:Uu4iagAXCdI2kIYk4m1LUKzZppxeT2NAFZeVtf2dZvc=
+github.com/go-orb/plugins/client/orb v0.0.0-20240925070424-371b8463d2d6 h1:D+rAvna8tsbHHPbOHbQZKX7mj8sokRop7jdA4bJ2GVo=
+github.com/go-orb/plugins/client/orb v0.0.0-20240925070424-371b8463d2d6/go.mod h1:BEgwqPPMVPQbiM/Bg8DP4lKtUMiSRgmQmkysqfwyqYU=
+github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20240925070424-371b8463d2d6 h1:Yg77wwflEKgqLF5BBXxqxFWZmUBIvpGNaFIg1yLzswQ=
+github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20240925070424-371b8463d2d6/go.mod h1:PmXuv0RTm1fidP1aBciqmzsxsGHN399dwPM+xd0MG+I=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
