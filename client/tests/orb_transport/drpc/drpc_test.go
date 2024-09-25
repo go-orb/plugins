@@ -9,7 +9,7 @@ import (
 	"github.com/go-orb/plugins/client/tests"
 	"github.com/stretchr/testify/suite"
 
-	o "github.com/go-orb/plugins/client/orb_transport/drpc"
+	o "github.com/go-orb/plugins/client/orb/transport/drpc"
 
 	_ "github.com/go-orb/plugins/codecs/jsonpb"
 	_ "github.com/go-orb/plugins/codecs/proto"
