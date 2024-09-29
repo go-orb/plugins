@@ -348,15 +348,15 @@ func TestServerIntegration(t *testing.T) {
 	name := types.ServiceName("com.example.test")
 	version := types.ServiceVersion("v1.0.0")
 
-	logger, err := log.ProvideLogger(name, nil)
+	logger, err := log.Provide(name, nil)
 	require.NoError(t, err, "failed to setup the logger")
 
-	reg, err := registry.ProvideRegistry(name, version, nil, logger)
+	reg, err := registry.Provide(name, version, nil, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
 	h := new(handler.EchoHandler)
 
-	srv, err := server.ProvideServer(name, nil, logger, reg,
+	srv, err := server.Provide(name, nil, logger, reg,
 		mhttp.WithEntrypoint(
 			mhttp.WithName("test-ep-1"),
 			mhttp.WithAddress(":48081"),
@@ -419,14 +419,14 @@ func TestServerFileConfig(t *testing.T) {
 	config, err := config.Read([]*url.URL{fURL}, nil)
 	require.NoError(t, err, "failed to read file config")
 
-	logger, err := log.ProvideLogger(name, nil)
+	logger, err := log.Provide(name, nil)
 	require.NoError(t, err, "failed to setup the logger")
 
-	reg, err := registry.ProvideRegistry(name, version, nil, logger)
+	reg, err := registry.Provide(name, version, nil, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
 	h := new(handler.EchoHandler)
-	srv, err := server.ProvideServer(name, config, logger, reg,
+	srv, err := server.Provide(name, config, logger, reg,
 		// TODO(davincible): test defaults
 		mhttp.WithEntrypoint(
 			mhttp.WithName("static-ep-1"),
@@ -436,7 +436,6 @@ func TestServerFileConfig(t *testing.T) {
 		),
 		mhttp.WithEntrypoint(
 			mhttp.WithName("test-ep-5"),
-			mhttp.WithMiddleware("middleware-3", func(h http.Handler) http.Handler { return h }),
 		),
 	)
 	require.NoError(t, err, "failed to setup server")
@@ -482,7 +481,6 @@ func TestServerFileConfig(t *testing.T) {
 	ep = e.(*mhttp.ServerHTTP) //nolint:errcheck
 	require.True(t, strings.HasSuffix(ep.Config.Address, ":4516"))
 	require.Len(t, ep.Config.HandlerRegistrations, 3, "Registration len")
-	require.Len(t, ep.Config.Middleware, 4, "Middleware len")
 	makeRequests(t, "https://"+e.Address(), thttp.TypeHTTP2)
 
 	require.NoError(t, srv.Stop(context.Background()), "failed to start server")
@@ -675,12 +673,12 @@ func setupServer(tb testing.TB, nolog bool, opts ...mhttp.Option) (*mhttp.Server
 
 	cancel := func() {}
 
-	logger, err := log.ProvideLogger(name, nil, lopts...)
+	logger, err := log.Provide(name, nil, lopts...)
 	if err != nil {
 		return nil, cancel, fmt.Errorf("failed to setup logger: %w", err)
 	}
 
-	reg, err := registry.ProvideRegistry("app", "v1.0.0", nil, logger)
+	reg, err := registry.Provide("app", "v1.0.0", nil, logger)
 	if err != nil {
 		return nil, nil, fmt.Errorf("setup registry: %w", err)
 	}
@@ -692,7 +690,7 @@ func setupServer(tb testing.TB, nolog bool, opts ...mhttp.Option) (*mhttp.Server
 
 	cfg := mhttp.NewConfig(opts...)
 
-	server, err := mhttp.ProvideServerHTTP(name, logger, reg, *cfg)
+	server, err := mhttp.Provide(name, logger, reg, *cfg)
 	if err != nil {
 		return nil, cancel, fmt.Errorf("failed to provide http server: %w", err)
 	}

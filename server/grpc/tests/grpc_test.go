@@ -136,13 +136,13 @@ func TestGrpcIntegration(t *testing.T) {
 	name := types.ServiceName("com.example.test")
 	version := types.ServiceVersion("v1.0.0")
 
-	logger, err := log.ProvideLogger(name, nil)
+	logger, err := log.Provide(name, nil)
 	require.NoError(t, err, "failed to setup logger")
 
-	reg, err := registry.ProvideRegistry(name, version, nil, logger)
+	reg, err := registry.Provide(name, version, nil, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
-	srv, err := server.ProvideServer(name, nil, logger, reg,
+	srv, err := server.Provide(name, nil, logger, reg,
 		mgrpc.WithDefaults(
 			mgrpc.WithGRPCReflection(false),
 			mgrpc.WithInsecure(true),
@@ -222,13 +222,13 @@ func TestServerFileConfig(t *testing.T) {
 	config, err := config.Read([]*url.URL{fURL}, nil)
 	require.NoError(t, err, "failed to read file config")
 
-	logger, err := log.ProvideLogger(name, nil)
+	logger, err := log.Provide(name, nil)
 	require.NoError(t, err, "failed to setup logger")
 
-	reg, err := registry.ProvideRegistry(name, version, nil, logger)
+	reg, err := registry.Provide(name, version, nil, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
-	srv, err := server.ProvideServer(name, config, logger, reg,
+	srv, err := server.Provide(name, config, logger, reg,
 		mgrpc.WithEntrypoint(
 			mgrpc.WithName("static-ep-1"),
 			mgrpc.WithAddress(":48081"),

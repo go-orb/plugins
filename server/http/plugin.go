@@ -23,7 +23,7 @@ func pluginProvider(
 		return nil, ErrInvalidConfigType
 	}
 
-	return ProvideServerHTTP(service, logger, reg, *cfg)
+	return Provide(service, logger, reg, *cfg)
 }
 
 func newDefaultConfig() server.EntrypointConfig {

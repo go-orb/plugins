@@ -23,18 +23,20 @@ import (
 
 {{- range .Services }}
 type {{.Type}}Handler interface {
-	{{.Type}}(ctx context.Context, req *Req) (*Resp, error)
+	{{- range .Methods }}
+	{{.Name}}(ctx context.Context, req *{{.Request}}) (*{{.Reply}}, error)
+	{{ end -}}
 }
 
 {{- if $.ServerDRPC }}
 
 func register{{.Type}}DRPCHandler(srv *mdrpc.Server, handler {{.Type}}Handler) error {
-	desc := DRPCEchoDescription{}
+	desc := DRPC{{.Type}}Description{}
 
 	// Register with DRPC.
 	r := srv.Router()
 
-	// Register with the drpcmux.
+	// Register with the server/drpc(.Mux).
 	err := r.Register(handler, desc)
 	if err != nil {
 		return err
@@ -56,8 +58,8 @@ func register{{.Type}}DRPCHandler(srv *mdrpc.Server, handler {{.Type}}Handler) e
 // register{{.Type}}HTTPHandler registers the service to an HTTP server.
 func register{{.Type}}HTTPHandler(srv *mhttp.ServerHTTP, handler {{.Type}}Handler) {
 	r := srv.Router()
-	{{- range .Methods}}
-	r.{{.Method}}("{{.Path}}", mhttp.NewGRPCHandler(srv, handler.{{.Name}}))
+	{{$method := .}}{{- range .Methods}}
+	r.{{.Method}}("{{.Path}}", mhttp.NewGRPCHandler(srv, handler.{{.Name}}, "{{$method.Name}}", "{{.Name}}"))
 	{{- end}}
 }
 
@@ -68,16 +70,16 @@ func register{{.Type}}HTTPHandler(srv *mhttp.ServerHTTP, handler {{.Type}}Handle
 // register{{.Type}}HertzHandler registers the service to an Hertz server.
 func register{{.Type}}HertzHandler(srv *mhertz.Server, handler {{.Type}}Handler) {
 	r := srv.Router()
-	{{- range .Methods}}
-	r.{{.MethodUpper}}("{{.Path}}", mhertz.NewGRPCHandler(srv, handler.{{.Name}}))
+	{{$method := .}}{{- range .Methods}}
+	r.{{.MethodUpper}}("{{.Path}}", mhertz.NewGRPCHandler(srv, handler.{{.Name}}, "{{$method.Name}}", "{{.Name}}"))
 	{{- end}}
 }
 
 {{ end -}}
 
-// Register{{.Type}}Service will return a registration function that can be
+// Register{{.Type}}Handler will return a registration function that can be
 // provided to entrypoints as a handler registration.
-func Register{{.Type}}Service(handler {{.Type}}Handler) server.RegistrationFunc {
+func Register{{.Type}}Handler(handler {{.Type}}Handler) server.RegistrationFunc {
 	return server.RegistrationFunc(func(s any) {
 		switch srv := s.(type) {
 		{{ if $.ServerGRPC }}
@@ -116,7 +118,7 @@ type protoFile struct {
 }
 
 func (p protoFile) Render() string {
-	tmpl, err := template.New("http").Parse(strings.TrimSpace(orbTemplate))
+	tmpl, err := template.New("orb").Parse(strings.TrimSpace(orbTemplate))
 	if err != nil {
 		panic(err)
 	}

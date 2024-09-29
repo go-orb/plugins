@@ -5,15 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
-	"strings"
 
 	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
 )
 
-// orbHeader is the prefix for every orb HTTP header.
-const orbHeader = "__orb-"
+var stdHeaders = []string{"Accept", "Accept-Encoding", "Content-Length", "Content-Type", "User-Agent"} //nolint:gochecknoglobals
 
 // Errors.
 var (
@@ -21,26 +20,31 @@ var (
 )
 
 // NewGRPCHandler will wrap a gRPC function with a HTTP handler.
-func NewGRPCHandler[Tin any, Tout any](srv *ServerHTTP, fHandler func(context.Context, *Tin) (*Tout, error)) http.HandlerFunc {
+func NewGRPCHandler[Tin any, Tout any](
+	srv *ServerHTTP,
+	fHandler func(context.Context, *Tin) (*Tout, error),
+	service string,
+	method string,
+) http.HandlerFunc {
 	return func(resp http.ResponseWriter, req *http.Request) {
 		inBody := new(Tin)
 
 		if _, err := srv.decodeBody(resp, req, inBody); err != nil {
-			srv.Logger.Error("failed to decode body", "error", err)
+			srv.Logger.Error("failed to decode request body", "error", err)
 			WriteError(resp, orberrors.ErrBadRequest.Wrap(err))
 
 			return
 		}
 
 		// Copy metadata from req Headers into the req.Context.
-		reqMd := make(metadata.Metadata)
+		ctx := metadata.EnsureIncoming(req.Context())
+		ctx = metadata.EnsureOutgoing(ctx)
+		reqMd, _ := metadata.IncomingFrom(ctx)
 
 		for k, v := range req.Header {
-			if !strings.HasPrefix(strings.ToLower(k), orbHeader) {
+			if slices.Contains(stdHeaders, k) {
 				continue
 			}
-
-			k = k[len(orbHeader):]
 
 			if len(v) == 1 {
 				reqMd[k] = v[0]
@@ -52,7 +56,19 @@ func NewGRPCHandler[Tin any, Tout any](srv *ServerHTTP, fHandler func(context.Co
 			}
 		}
 
-		out, err := fHandler(reqMd.To(req.Context()), inBody)
+		reqMd[metadata.Service] = service
+		reqMd[metadata.Method] = method
+
+		// Apply middleware.
+		h := func(ctx context.Context, req any) (any, error) {
+			return fHandler(ctx, req.(*Tin))
+		}
+		for _, m := range srv.middlewares {
+			h = m.Call(h)
+		}
+
+		// The actual call.
+		out, err := h(ctx, inBody)
 		if err != nil {
 			srv.Logger.Error("RPC request failed", "error", err)
 			WriteError(resp, err)
@@ -60,13 +76,15 @@ func NewGRPCHandler[Tin any, Tout any](srv *ServerHTTP, fHandler func(context.Co
 			return
 		}
 
-		// Write back metadata to headers.
-		for k, v := range reqMd {
-			resp.Header().Set(orbHeader+k, v)
+		// Write outgoing metadata.
+		if md, ok := metadata.OutgoingFrom(ctx); ok {
+			for k, v := range md {
+				resp.Header().Set(k, v)
+			}
 		}
 
 		if err := srv.encodeBody(resp, req, out); err != nil {
-			srv.Logger.Error("failed to encode body", "error", err)
+			srv.Logger.Error("failed to encode response body", "error", err)
 			WriteError(resp, err)
 
 			return

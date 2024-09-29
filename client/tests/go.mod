@@ -24,12 +24,11 @@ require (
 	github.com/go-orb/plugins/server/drpc v0.0.0-20240925073122-2250c978d160
 	github.com/go-orb/plugins/server/grpc v0.0.0-20240925073122-2250c978d160
 	github.com/go-orb/plugins/server/hertz v0.0.0-20240925070424-371b8463d2d6
-	github.com/go-orb/plugins/server/http v0.0.0-20240925070424-371b8463d2d6
+	github.com/go-orb/plugins/server/http v0.0.0-20240925074005-17c0b37c3d6b
 	github.com/google/wire v0.6.0
 	github.com/hashicorp/consul/sdk v0.16.1
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0
-	google.golang.org/genproto/googleapis/api v0.0.0-20240924160255-9d4c2d233b61
 	google.golang.org/grpc v1.67.0
 	google.golang.org/protobuf v1.34.2
 	storj.io/drpc v0.0.34

@@ -51,8 +51,8 @@ type ServerGRPC struct {
 	started bool
 }
 
-// ProvideServerGRPC creates a gRPC server by options.
-func ProvideServerGRPC(
+// Provide creates a gRPC server by options.
+func Provide(
 	_ types.ServiceName,
 	logger log.Logger,
 	reg registry.Type,

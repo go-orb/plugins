@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"net"
 
-	"storj.io/drpc/drpcmux"
 	"storj.io/drpc/drpcserver"
 
 	"github.com/go-orb/go-orb/log"
@@ -16,6 +15,8 @@ import (
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/addr"
 	"github.com/google/uuid"
+
+	"github.com/gammazero/workerpool"
 )
 
 var _ orbserver.Entrypoint = (*Server)(nil)
@@ -32,8 +33,10 @@ type Server struct {
 	ctx        context.Context
 	cancelFunc context.CancelFunc
 
-	mux    *drpcmux.Mux
+	mux    *Mux
 	server *drpcserver.Server
+
+	middlewares []orbserver.Middleware
 
 	endpoints []string
 
@@ -41,6 +44,7 @@ type Server struct {
 	entrypointID string
 
 	started bool
+	wp      *workerpool.WorkerPool
 }
 
 // Start will create the listeners and start the server on the entrypoint.
@@ -52,7 +56,7 @@ func (s *Server) Start() error {
 	s.logger.Info("Starting", "address", s.config.Address)
 
 	// create a drpc RPC mux
-	s.mux = drpcmux.New()
+	s.mux = newMux(s)
 
 	// Register handlers.
 	for _, h := range s.config.HandlerRegistrations {
@@ -71,14 +75,33 @@ func (s *Server) Start() error {
 		}
 	}
 
-	go func(s *Server, listener net.Listener) {
-		err := s.server.Serve(s.ctx, listener)
-		s.logger.Error("While serving", "error", err)
-	}(s, listener)
+	s.ctx, s.cancelFunc = context.WithCancel(context.Background())
+
+	s.wp = workerpool.New(256)
+	go s.run(s.ctx, listener)
 
 	s.started = true
 
 	return s.registryRegister()
+}
+
+func (s *Server) run(ctx context.Context, lis net.Listener) {
+	for {
+		conn, err := lis.Accept()
+		if err != nil {
+			if ctx.Err() != nil {
+				return
+			}
+
+			continue
+		}
+
+		s.wp.Submit(func() {
+			if err = s.server.ServeOne(ctx, conn); err != nil {
+				s.logger.Error("while serving", "err", err, "addr", conn.RemoteAddr())
+			}
+		})
+	}
 }
 
 // Stop will stop the Hertz server(s).
@@ -89,6 +112,7 @@ func (s *Server) Stop(_ context.Context) error {
 
 	// Stops the dRPC Server.
 	s.cancelFunc()
+	s.wp.Stop()
 
 	return s.registryDeregister()
 }
@@ -149,7 +173,7 @@ func (s *Server) Type() string {
 }
 
 // Router returns the drpc mux.
-func (s *Server) Router() *drpcmux.Mux {
+func (s *Server) Router() *Mux {
 	return s.mux
 }
 
@@ -196,9 +220,9 @@ func (s *Server) registryDeregister() error {
 	return s.registry.Deregister(rService)
 }
 
-// ProvideServer creates a new entrypoint for a single address. You can create
+// Provide creates a new entrypoint for a single address. You can create
 // multiple entrypoints for multiple addresses and ports.
-func ProvideServer(
+func Provide(
 	_ types.ServiceName,
 	logger log.Logger,
 	reg registry.Type,
@@ -222,12 +246,23 @@ func ProvideServer(
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
 
+	mws := []orbserver.Middleware{}
+
+	for _, m := range cfg.Middlewares {
+		if mw, ok := orbserver.Middlewares.Get(m); ok {
+			mws = append(mws, mw)
+		} else {
+			logger.Error("unknown middleware given", "middleware", m)
+		}
+	}
+
 	entrypoint := Server{
-		config:     cfg,
-		logger:     logger,
-		registry:   reg,
-		ctx:        ctx,
-		cancelFunc: cancelFunc,
+		config:      cfg,
+		logger:      logger,
+		registry:    reg,
+		middlewares: mws,
+		ctx:         ctx,
+		cancelFunc:  cancelFunc,
 	}
 
 	return &entrypoint, nil

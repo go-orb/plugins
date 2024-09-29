@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
 	"strconv"
-	"strings"
 
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/codecs"
@@ -20,8 +20,8 @@ import (
 	"github.com/go-orb/plugins/client/orb"
 )
 
-// orbHeader is the prefix for every orb HTTP header.
-const orbHeader = "__orb-"
+//nolint:gochecknoglobals
+var stdHeaders = []string{"Content-Length", "Content-Type", "Date", "Server"}
 
 var _ (orb.Transport) = (*Transport)(nil)
 
@@ -95,17 +95,17 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 	hReq.Header.Set("Accept", opts.ContentType)
 
 	// Set metadata key=value to request headers.
-	md, ok := metadata.From(ctx)
+	md, ok := metadata.OutgoingFrom(ctx)
 	if ok {
 		for name, value := range md {
-			hReq.Header.Set(orbHeader+name, value)
+			hReq.Header.Set(name, value)
 		}
 	}
 
-	return t.call2(hReq)
+	return t.call2(hReq, opts)
 }
 
-func (t *Transport) call2(hReq *http.Request) (*client.RawResponse, error) {
+func (t *Transport) call2(hReq *http.Request, opts *client.CallOptions) (*client.RawResponse, error) {
 	// Run the request.
 	resp, err := t.hclient.Do(hReq)
 	if err != nil {
@@ -128,23 +128,26 @@ func (t *Transport) call2(hReq *http.Request) (*client.RawResponse, error) {
 	res := &client.RawResponse{
 		ContentType: resp.Header.Get("Content-Type"),
 		Body:        buff,
-		Metadata:    make(metadata.Metadata),
 	}
 
-	// Copy headers to the RawResponse.
-	for k, v := range resp.Header {
-		if !strings.HasPrefix(strings.ToLower(k), orbHeader) {
-			continue
-		}
+	if opts.Headers != nil {
+		md := opts.Headers
 
-		k = k[len(orbHeader):]
+		// Copy headers to opts.Header
+		for k, v := range resp.Header {
+			// Skip std headers.
+			if slices.Contains(stdHeaders, k) {
+				continue
+			}
 
-		if len(v) == 1 {
-			res.Metadata[k] = v[0]
-		} else {
-			res.Metadata[k] = v[0]
-			for i := 1; i < len(v); i++ {
-				res.Metadata[k+"-"+strconv.Itoa(i)] = v[i]
+			if len(v) == 1 {
+				md[k] = v[0]
+			} else {
+				md[k] = v[0]
+
+				for i := 1; i < len(v); i++ {
+					md[k+"-"+strconv.Itoa(i)] = v[i]
+				}
 			}
 		}
 	}

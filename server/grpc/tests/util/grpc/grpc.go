@@ -30,12 +30,12 @@ func SetupServer(opts ...mgrpc.Option) (*mgrpc.ServerGRPC, func(t *testing.T), e
 		return nil, nil, fmt.Errorf("setup logger: %w", err)
 	}
 
-	reg, err := registry.ProvideRegistry("app", "v1.0.0", nil, logger)
+	reg, err := registry.Provide("app", "v1.0.0", nil, logger)
 	if err != nil {
 		return nil, nil, fmt.Errorf("setup registry: %w", err)
 	}
 
-	srv, err := mgrpc.ProvideServerGRPC("", logger, reg, *cfg, opts...)
+	srv, err := mgrpc.Provide("", logger, reg, *cfg, opts...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("setup gRPC server: %w", err)
 	}

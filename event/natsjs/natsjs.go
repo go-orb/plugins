@@ -21,7 +21,7 @@ import (
 var _ event.Events = (*NatsJS)(nil)
 
 type replyMessage struct {
-	Metadata metadata.Metadata `json:"metadata"`
+	Metadata map[string]string `json:"metadata"`
 	Data     []byte            `json:"data"`
 	Err      error             `json:"err"`
 }
@@ -139,9 +139,9 @@ func (n *NatsJS) HandleRequest(
 		}
 
 		req.SetReplyFunc(func(ctx context.Context, result []byte, inErr error) {
-			md, ok := metadata.From(ctx)
+			md, ok := metadata.OutgoingFrom(ctx)
 			if !ok {
-				md = make(metadata.Metadata)
+				md = make(map[string]string)
 			}
 
 			reply := &replyMessage{

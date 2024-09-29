@@ -3,15 +3,14 @@ package hertz
 import (
 	"context"
 	"errors"
-	"strings"
+	"slices"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
 )
 
-// orbHeader is the prefix for every orb HTTP header.
-const orbHeader = "__orb-"
+var stdHeaders = []string{"Accept", "Accept-Encoding", "Content-Length", "Content-Type", "User-Agent"} //nolint:gochecknoglobals
 
 // Errors.
 var (
@@ -21,12 +20,14 @@ var (
 // NewGRPCHandler wraps a gRPC function with a Hertz handler.
 func NewGRPCHandler[Tin any, Tout any](
 	srv *Server,
-	f func(context.Context, *Tin) (*Tout, error),
+	fHandler func(context.Context, *Tin) (*Tout, error),
+	service string,
+	method string,
 ) func(c context.Context, ctx *app.RequestContext) {
 	return func(ctx context.Context, apCtx *app.RequestContext) {
-		in := new(Tin)
+		request := new(Tin)
 
-		if _, err := srv.decodeBody(apCtx, in); err != nil {
+		if _, err := srv.decodeBody(apCtx, request); err != nil {
 			srv.Logger.Error("failed to decode body", "error", err)
 			WriteError(apCtx, err)
 
@@ -34,19 +35,31 @@ func NewGRPCHandler[Tin any, Tout any](
 		}
 
 		// Copy metadata from req Headers into the req.Context.
-		reqMd := make(metadata.Metadata)
+		ctx = metadata.EnsureIncoming(ctx)
+		ctx = metadata.EnsureOutgoing(ctx)
+		reqMd, _ := metadata.IncomingFrom(ctx)
 
 		apCtx.VisitAllHeaders(func(k, v []byte) {
 			sk := string(k)
-			if !strings.HasPrefix(strings.ToLower(sk), orbHeader) {
+			if slices.Contains(stdHeaders, sk) {
 				return
 			}
 
-			sk = sk[len(orbHeader):]
 			reqMd[sk] = string(v)
 		})
 
-		out, err := f(reqMd.To(ctx), in)
+		reqMd[metadata.Service] = service
+		reqMd[metadata.Method] = method
+
+		// Apply middleware.
+		h := func(ctx context.Context, req any) (any, error) {
+			return fHandler(ctx, req.(*Tin))
+		}
+		for _, m := range srv.middlewares {
+			h = m.Call(h)
+		}
+
+		out, err := h(ctx, request)
 		if err != nil {
 			srv.Logger.Error("RPC request failed", "error", err)
 			WriteError(apCtx, err)
@@ -54,9 +67,11 @@ func NewGRPCHandler[Tin any, Tout any](
 			return
 		}
 
-		// Write back metadata to headers.
-		for k, v := range reqMd {
-			apCtx.Header(orbHeader+k, v)
+		// Write outgoing metadata.
+		if md, ok := metadata.OutgoingFrom(ctx); ok {
+			for k, v := range md {
+				apCtx.Header(k, v)
+			}
 		}
 
 		if err := srv.encodeBody(apCtx, out); err != nil {

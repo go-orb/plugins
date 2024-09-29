@@ -13,6 +13,8 @@ import (
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
+	"github.com/go-orb/go-orb/util/metadata"
+	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/client/tests/proto"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/exp/slices"
@@ -166,13 +168,13 @@ func (s *TestSuite) SetupSuite() {
 	s.clientName = types.ServiceName("org.orb.svc.client")
 
 	// Logger
-	logger, err := log.ProvideLogger(s.clientName, cfgData)
+	logger, err := log.Provide(s.clientName, cfgData)
 	s.Require().NoError(err, "while setting up logger")
 	s.Require().NoError(logger.Start())
 	s.logger = logger
 
 	// Registry
-	reg, err := registry.ProvideRegistry(s.clientName, version, cfgData, logger)
+	reg, err := registry.Provide(s.clientName, version, cfgData, logger)
 	if err != nil {
 		s.Require().NoError(err, "while creating a registry")
 	}
@@ -181,7 +183,7 @@ func (s *TestSuite) SetupSuite() {
 	s.registry = reg
 
 	// Client
-	c, err := client.ProvideClient(s.clientName, cfgData, logger, reg)
+	c, err := client.Provide(s.clientName, cfgData, logger, reg)
 	if err != nil {
 		s.Require().NoError(err, "while creating a client")
 	}
@@ -311,4 +313,41 @@ func (s *TestSuite) TestRunRequests() {
 			s.doRequest(ctx, &req, s.client)
 		})
 	}
+}
+
+// TestFailingAuthorization tests an authorization call that must fail.
+func (s *TestSuite) TestFailingAuthorization() {
+	responseMd := make(map[string]string)
+	ctx := context.Background()
+	_, err := client.Call[proto.CallResponse](
+		ctx,
+		s.client,
+		string(ServiceName),
+		"echo.Streams/AuthorizedCall",
+		&proto.CallRequest{Name: "empty"},
+		client.Headers(responseMd),
+	)
+	s.Require().ErrorIs(err, orberrors.ErrUnauthorized)
+}
+
+// TestMetadata checks if metadata gets transported over the wire.
+func (s *TestSuite) TestMetadata() {
+	ctx := context.Background()
+	ctx, md := metadata.WithOutgoing(ctx)
+	md["authorization"] = "bearer pleaseHackMe"
+
+	responseMd := make(map[string]string)
+	_, err := client.Call[proto.CallResponse](
+		ctx,
+		s.client,
+		string(ServiceName),
+		"echo.Streams/AuthorizedCall",
+		&proto.CallRequest{Name: "empty"},
+		client.Headers(responseMd),
+	)
+	s.Require().NoError(err)
+
+	rspHandler, ok := responseMd["tracing-id"]
+	s.Require().True(ok, "Transport does not transport metadata - tracing-id")
+	s.Require().Equal("asfdjhladhsfashf", rspHandler)
 }

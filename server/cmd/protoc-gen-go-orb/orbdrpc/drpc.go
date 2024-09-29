@@ -265,11 +265,6 @@ func (d *drpc) generateService(service *protogen.Service) {
 	d.P("}")
 	d.P()
 
-	// Registration helper
-	d.P("func DRPCRegister", service.GoName, "(mux ", d.Ident("storj.io/drpc", "Mux"), ", impl ", d.ServerIface(service), ") error {")
-	d.P("return mux.Register(impl, ", d.ServerDesc(service), "{})")
-	d.P("}")
-
 	// Server methods
 	for _, method := range service.Methods {
 		d.generateServerMethod(method)

@@ -135,10 +135,10 @@ func TestMockConfigFile(t *testing.T) {
 	logger, err := log.New()
 	require.NoError(t, err, "failed to setup logger")
 
-	reg, err := registry.ProvideRegistry(service, version, nil, logger)
+	reg, err := registry.Provide(service, version, nil, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
-	srv, err := server.ProvideServer(service, data, logger, reg,
+	srv, err := server.Provide(service, data, logger, reg,
 		WithMockDefaults(WithTest(t)),
 		WithMockEntrypoint(
 			WithMockName("static-ep-1"),
@@ -193,10 +193,10 @@ func TestMockConfigFile(t *testing.T) {
 	logger, err = log.New()
 	require.NoError(t, err, "failed to setup the logger")
 
-	reg, err = registry.ProvideRegistry(service, version, nil, logger)
+	reg, err = registry.Provide(service, version, nil, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
-	srv, err = server.ProvideServer(service, data, logger, reg, WithMockDefaults(WithTest(t)))
+	srv, err = server.Provide(service, data, logger, reg, WithMockDefaults(WithTest(t)))
 	require.NoError(t, err, "failed to setup server")
 	require.NoError(t, srv.Start(), "failed to start server")
 
@@ -216,7 +216,7 @@ func TestMockConfigFile(t *testing.T) {
 		logger, err = log.New()
 		require.NoError(t, err, "failed to setup logger")
 
-		srv, err = server.ProvideServer(service, data, logger, reg, WithMockDefaults(WithTest(t)))
+		srv, err = server.Provide(service, data, logger, reg, WithMockDefaults(WithTest(t)))
 		t.Logf("expected error: %v", err)
 		require.Error(t, err, "should fail to setup server for "+service)
 	}
@@ -279,12 +279,12 @@ func setupServer(opts ...server.Option) (server.Server, error) {
 		return server.Server{}, fmt.Errorf("failed to setup logger: %w", err)
 	}
 
-	reg, err := registry.ProvideRegistry(service, version, nil, logger)
+	reg, err := registry.Provide(service, version, nil, logger)
 	if err != nil {
 		return server.Server{}, fmt.Errorf("failed to setup registry: %w", err)
 	}
 
-	srv, err := server.ProvideServer(service, nil, logger, reg, opts...)
+	srv, err := server.Provide(service, nil, logger, reg, opts...)
 	if err != nil {
 		return srv, fmt.Errorf("failed to setup server: %w", err)
 	}

@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"strings"
+	"slices"
 
 	hclient "github.com/cloudwego/hertz/pkg/app/client"
 	"github.com/cloudwego/hertz/pkg/protocol"
@@ -19,8 +19,8 @@ import (
 	"github.com/go-orb/plugins/client/orb"
 )
 
-// orbHeader is the prefix for every orb HTTP header.
-const orbHeader = "__orb-"
+//nolint:gochecknoglobals
+var stdHeaders = []string{"Content-Length", "Content-Type", "Date", "Server"}
 
 var _ (orb.Transport) = (*Transport)(nil)
 
@@ -87,10 +87,10 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 	hReq.SetRequestURI(fmt.Sprintf("%s://%s/%s", t.scheme, node.Address, req.Endpoint()))
 
 	// Set metadata key=value to request headers.
-	md, ok := metadata.From(ctx)
+	md, ok := metadata.OutgoingFrom(ctx)
 	if ok {
 		for name, value := range md {
-			hReq.Header.Set(orbHeader+name, value)
+			hReq.Header.Set(name, value)
 		}
 	}
 
@@ -139,21 +139,23 @@ func (t *Transport) call2(
 	res := &client.RawResponse{
 		ContentType: hRes.Header.Get("Content-Type"),
 		Body:        &hresBodyCloserWrapper{buff: buff},
-		Metadata:    make(metadata.Metadata),
 	}
 
 	if hRes.StatusCode() != consts.StatusOK {
 		return res, orberrors.NewHTTP(hRes.StatusCode())
 	}
 
-	// Copy headers to the RawResponse.
-	for _, v := range hRes.Header.GetHeaders() {
-		k := string(v.GetKey())
-		if !strings.HasPrefix(strings.ToLower(k), orbHeader) {
-			continue
-		}
+	if opts.Headers != nil {
+		for _, v := range hRes.Header.GetHeaders() {
+			k := string(v.GetKey())
 
-		res.Metadata[k[len(orbHeader):]] = string(v.GetValue())
+			// Skip std headers.
+			if slices.Contains(stdHeaders, k) {
+				continue
+			}
+
+			opts.Headers[k] = string(v.GetValue())
+		}
 	}
 
 	return res, nil

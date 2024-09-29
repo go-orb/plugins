@@ -6,6 +6,8 @@ import (
 	"crypto/rand"
 	"errors"
 
+	"github.com/go-orb/go-orb/util/metadata"
+	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/client/tests/proto"
 )
 
@@ -17,8 +19,8 @@ type EchoHandler struct {
 }
 
 // Call implements the call method.
-func (c *EchoHandler) Call(_ context.Context, in *proto.CallRequest) (*proto.CallResponse, error) {
-	switch in.GetName() {
+func (c *EchoHandler) Call(_ context.Context, request *proto.CallRequest) (*proto.CallResponse, error) {
+	switch request.GetName() {
 	case "error":
 		return nil, errors.New("you asked for an error, here you go")
 	case "32byte":
@@ -35,8 +37,21 @@ func (c *EchoHandler) Call(_ context.Context, in *proto.CallRequest) (*proto.Cal
 			return nil, err
 		}
 
-		return &proto.CallResponse{Msg: "Hello " + in.GetName(), Payload: msg}, nil
+		return &proto.CallResponse{Msg: "Hello " + request.GetName(), Payload: msg}, nil
 	default:
-		return &proto.CallResponse{Msg: "Hello " + in.GetName()}, nil
+		return &proto.CallResponse{Msg: "Hello " + request.GetName()}, nil
 	}
+}
+
+// AuthorizedCall requires Authorization by metadata.
+func (c *EchoHandler) AuthorizedCall(ctx context.Context, _ *proto.CallRequest) (*proto.CallResponse, error) {
+	mdout, _ := metadata.OutgoingFrom(ctx)
+	mdout["tracing-id"] = "asfdjhladhsfashf"
+
+	mdin, _ := metadata.IncomingFrom(ctx)
+	if mdin["authorization"] != "bearer pleaseHackMe" {
+		return nil, orberrors.ErrUnauthorized
+	}
+
+	return &proto.CallResponse{Msg: "Hello World"}, nil
 }

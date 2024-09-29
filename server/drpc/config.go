@@ -5,8 +5,7 @@ import (
 	"net"
 	"time"
 
-	"log/slog"
-
+	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/server"
 	"github.com/google/uuid"
 )
@@ -75,12 +74,12 @@ type Config struct {
 	// Handlers global, and setting them explicitly in the config.
 	HandlerRegistrations server.HandlerRegistrations `json:"handlers" yaml:"handlers"`
 
+	// Middlewares is a list of middleware to use.
+	Middlewares []string `json:"middlewares" yaml:"middlewares"`
+
 	// Logger allows you to dynamically change the log level and plugin for a
 	// specific entrypoint.
-	Logger struct {
-		Level  slog.Level `json:"level,omitempty"  yaml:"level,omitempty"` // TODO(davincible): change with custom level
-		Plugin string     `json:"plugin,omitempty" yaml:"plugin,omitempty"`
-	} `json:"logger" yaml:"logger"`
+	Logger log.Config `json:"logger" yaml:"logger"`
 }
 
 // NewConfig will create a new default config for the entrypoint.
@@ -89,6 +88,7 @@ func NewConfig(options ...Option) *Config {
 		Name:                 "dprc-" + uuid.NewString(),
 		Address:              DefaultAddress,
 		HandlerRegistrations: make(server.HandlerRegistrations),
+		Middlewares:          []string{},
 	}
 
 	cfg.ApplyOptions(options...)
@@ -163,7 +163,7 @@ func WithRegistration(name string, registration server.RegistrationFunc) Option 
 }
 
 // WithLogLevel changes the log level from the inherited logger.
-func WithLogLevel(level slog.Level) Option {
+func WithLogLevel(level string) Option {
 	return func(c *Config) {
 		c.Logger.Level = level
 	}
@@ -209,5 +209,16 @@ func WithEntrypoint(options ...Option) server.Option {
 			Type:    Plugin,
 			Config:  cfg,
 		}
+	}
+}
+
+// WithMiddleware appends middlewares to the server.
+// You can use any standard Go HTTP middleware.
+//
+// Each middlware is uniquely identified with a name. The name provided here
+// can be used to dynamically add middlware to an entrypoint in a config.
+func WithMiddleware(middlewares ...string) Option {
+	return func(c *Config) {
+		c.Middlewares = append(c.Middlewares, middlewares...)
 	}
 }

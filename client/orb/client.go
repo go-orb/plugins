@@ -211,25 +211,24 @@ func (c *Client) Call(
 ) (resp *client.RawResponse, err error) {
 	co := c.makeOptions(opts...)
 
+	// Add metadata to the context.
+	ctx = metadata.EnsureIncoming(ctx)
+	ctx = metadata.EnsureOutgoing(ctx)
+
+	transport, err := c.transportForReq(ctx, req, co)
+	if err != nil {
+		return nil, err
+	}
+
 	// Wrap middlewares
-	call := c.call
+	call := func(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (*client.RawResponse, error) {
+		return transport.Call(ctx, req, opts)
+	}
 	for _, m := range c.middlewares {
 		call = m.Call(call)
 	}
 
 	return call(ctx, req, co)
-}
-
-func (c *Client) call(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (resp *client.RawResponse, err error) {
-	transport, err := c.transportForReq(ctx, req, opts)
-	if err != nil {
-		return nil, err
-	}
-
-	// Add metadata to the context.
-	ctx = metadata.Ensure(ctx)
-
-	return transport.Call(ctx, req, opts)
 }
 
 // CallNoCodec does the actual call without codecs.
@@ -241,25 +240,24 @@ func (c *Client) CallNoCodec(
 ) error {
 	co := c.makeOptions(opts...)
 
-	// Wrap middlewares
-	call := c.callNoCodec
-	for _, m := range c.middlewares {
-		call = m.CallNoCodec(call)
-	}
-
 	// Add metadata to the context.
-	ctx = metadata.Ensure(ctx)
+	ctx = metadata.EnsureIncoming(ctx)
+	ctx = metadata.EnsureOutgoing(ctx)
 
-	return call(ctx, req, result, co)
-}
-
-func (c *Client) callNoCodec(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) (err error) {
-	transport, err := c.transportForReq(ctx, req, opts)
+	transport, err := c.transportForReq(ctx, req, co)
 	if err != nil {
 		return err
 	}
 
-	return transport.CallNoCodec(ctx, req, result, opts)
+	// Wrap middlewares
+	call := func(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) error {
+		return transport.CallNoCodec(ctx, req, result, opts)
+	}
+	for _, m := range c.middlewares {
+		call = m.CallNoCodec(call)
+	}
+
+	return call(ctx, req, result, co)
 }
 
 // New creates a new orb client. This functions should rarely be called manually.
@@ -293,8 +291,8 @@ func New(cfg Config, log log.Logger, registry registry.Type) *Client {
 	}
 }
 
-// ProvideClient is the wire provider for client.
-func ProvideClient(
+// Provide is the wire provider for client.
+func Provide(
 	name types.ServiceName,
 	data types.ConfigData,
 	logger log.Logger,

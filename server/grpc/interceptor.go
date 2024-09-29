@@ -2,21 +2,48 @@ package grpc
 
 import (
 	"context"
+	"slices"
+	"strings"
 
+	"github.com/go-orb/go-orb/util/metadata"
+	"github.com/go-orb/go-orb/util/orberrors"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	gmetadata "google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
+
+//nolint:gochecknoglobals
+var stdHeaders = []string{"content-type", "user-agent"}
 
 func (s *ServerGRPC) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+		ctx = metadata.EnsureIncoming(ctx)
+		ctx = metadata.EnsureOutgoing(ctx)
+
+		reqMd, _ := metadata.IncomingFrom(ctx)
+
+		// Copy incoming metadata from grpc to orb.
+		if gReqMd, ok := gmetadata.FromIncomingContext(ctx); ok {
+			for k, v := range gReqMd {
+				if slices.Contains(stdHeaders, k) {
+					continue
+				}
+
+				reqMd[k] = v[0]
+			}
+		}
+
+		fmSplit := strings.Split(info.FullMethod, "/")
+		if len(fmSplit) >= 3 {
+			reqMd[metadata.Service] = fmSplit[1]
+			reqMd[metadata.Method] = fmSplit[2]
+		}
+
 		var cancel func()
 		if s.config.Timeout > 0 {
 			ctx, cancel = context.WithTimeout(ctx, s.config.Timeout)
 			defer cancel()
-		}
-
-		// Directly execute handler if no middleware is defined.
-		if s.unaryMiddleware == 0 {
-			return handler(ctx, req)
 		}
 
 		h := func(ctx context.Context, req any, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
@@ -29,7 +56,33 @@ func (s *ServerGRPC) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 			h = chainUnaryInterceptors(next)
 		}
 
-		return h(ctx, req, info, handler)
+		result, err := h(ctx, req, info, handler)
+
+		outMd, _ := metadata.OutgoingFrom(ctx)
+		if len(outMd) > 0 {
+			gOutMd := make(gmetadata.MD)
+
+			for k, v := range outMd {
+				gOutMd[k] = []string{v}
+			}
+
+			if err := grpc.SendHeader(ctx, gOutMd); err != nil {
+				return nil, status.Errorf(codes.Internal, "internal error while sending headers")
+			}
+		}
+
+		if err != nil {
+			oErr := orberrors.From(err)
+			gCode := HTTPStatusToCode(oErr.Code)
+
+			if oErr.Wrapped != nil {
+				return nil, status.Errorf(gCode, "%s: %s", oErr.Message, oErr.Wrapped.Error())
+			}
+
+			return nil, status.Errorf(gCode, "%s", oErr.Message)
+		}
+
+		return result, nil
 	}
 }
 

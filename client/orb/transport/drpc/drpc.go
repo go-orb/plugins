@@ -9,14 +9,18 @@ import (
 
 	"storj.io/drpc"
 	"storj.io/drpc/drpcconn"
+	"storj.io/drpc/drpcerr"
+	"storj.io/drpc/drpcmetadata"
 	"storj.io/drpc/drpcpool"
 
 	"google.golang.org/protobuf/proto"
 
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/client/orb"
+	"github.com/go-orb/plugins/server/drpc/message"
 )
 
 var _ drpc.Encoding = (*encoder)(nil)
@@ -98,12 +102,30 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 
 	conn := t.pool.Get(ctx, node.Address, dial)
 
+	// Add metadata to drpc.
+	md, ok := metadata.OutgoingFrom(ctx)
+	if ok {
+		ctx = drpcmetadata.AddPairs(ctx, md)
+	}
+
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(opts.RequestTimeout))
 	defer cancel()
 
-	err = conn.Invoke(ctx, "/"+req.Endpoint(), &t.encoder, req.Request(), result)
-	if err != nil {
+	mdResult := &message.Response{}
+	if err := conn.Invoke(ctx, "/"+req.Endpoint(), &t.encoder, req.Request(), mdResult); err != nil {
+		return orberrors.New(int(drpcerr.Code(err)), err.Error()) //nolint:gosec
+	}
+
+	// Unmarshal the result.
+	if err := mdResult.GetData().UnmarshalTo(result.(proto.Message)); err != nil {
 		return orberrors.From(err)
+	}
+
+	// Retrieve metadata from drpc.
+	if opts.Headers != nil {
+		for k, v := range mdResult.GetMetadata() {
+			opts.Headers[k] = v
+		}
 	}
 
 	err = conn.Close()

@@ -44,12 +44,12 @@ func newComponents(serviceName types.ServiceName, serviceVersion types.ServiceVe
 		return nil, err
 	}
 	v := _wireValue
-	logger, err := log.ProvideLogger(serviceName, configData, v...)
+	logger, err := log.Provide(serviceName, configData, v...)
 	if err != nil {
 		return nil, err
 	}
 	v2 := _wireValue2
-	registryType, err := registry.ProvideRegistry(serviceName, serviceVersion, configData, logger, v2...)
+	registryType, err := registry.Provide(serviceName, serviceVersion, configData, logger, v2...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func newComponents(serviceName types.ServiceName, serviceVersion types.ServiceVe
 	if err != nil {
 		return nil, err
 	}
-	serverServer, err := server.ProvideServer(serviceName, configData, logger, registryType, v3...)
+	serverServer, err := server.Provide(serviceName, configData, logger, registryType, v3...)
 	if err != nil {
 		return nil, err
 	}

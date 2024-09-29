@@ -2,17 +2,11 @@ syntax = "proto3";
 
 package echo;
 
-import "google/api/annotations.proto";
-
 option go_package = "./proto;proto";
 
 service Streams {
-  rpc Call(CallRequest) returns (CallResponse) {
-    option (google.api.http) = {
-      post : "/echo.Streams/Call"
-      body : "*"
-    };
-  }
+  rpc Call(CallRequest) returns (CallResponse);
+  rpc AuthorizedCall(CallRequest) returns (CallResponse);
 }
 
 message CallRequest { string name = 1; }

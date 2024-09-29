@@ -19,8 +19,8 @@ import (
 // RegisterStreamsHTTPHandler registers the service to an HTTP server.
 func RegisterStreamsHTTPHandler(srv *mhttp.ServerHTTP, handler StreamsServer) {
 	r := srv.Router()
-	r.Get("/echo", mhttp.NewGRPCHandler(srv, handler.Call))
-	r.Post("/echo", mhttp.NewGRPCHandler(srv, handler.Call))
+	r.Get("/echo", mhttp.NewGRPCHandler(srv, handler.Call, "echo", "Call"))
+	r.Post("/echo", mhttp.NewGRPCHandler(srv, handler.Call, "echo", "Call"))
 }
 
 // RegisterStreamsHandler will return a registration function that can be

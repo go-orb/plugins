@@ -35,6 +35,8 @@ type Server struct {
 	Logger   log.Logger
 	Registry registry.Type
 
+	middlewares []orbserver.Middleware
+
 	hServer *server.Hertz
 
 	// entrypointID is the entrypointID (uuid) of this entrypoint in the registry.
@@ -210,10 +212,10 @@ func (s *Server) registryDeregister() error {
 	return s.Registry.Deregister(rService)
 }
 
-// ProvideServer creates a new entrypoint for a single address. You can create
+// Provide creates a new entrypoint for a single address. You can create
 // multiple entrypoints for multiple addresses and ports. One entrypoint
 // can serve a HTTP1 and HTTP2/H2C server.
-func ProvideServer(
+func Provide(
 	_ types.ServiceName,
 	logger log.Logger,
 	reg registry.Type,
@@ -240,11 +242,22 @@ func ProvideServer(
 
 	logger = logger.With(slog.String("entrypoint", cfg.Name))
 
+	mws := []orbserver.Middleware{}
+
+	for _, m := range cfg.Middlewares {
+		if mw, ok := orbserver.Middlewares.Get(m); ok {
+			mws = append(mws, mw)
+		} else {
+			logger.Error("unknown middleware given", "middleware", m)
+		}
+	}
+
 	entrypoint := Server{
-		Config:   cfg,
-		Logger:   logger,
-		Registry: reg,
-		codecs:   codecs,
+		Config:      cfg,
+		Logger:      logger,
+		Registry:    reg,
+		middlewares: mws,
+		codecs:      codecs,
 	}
 
 	return &entrypoint, nil

@@ -47,6 +47,8 @@ type ServerHTTP struct {
 	Logger   log.Logger
 	Registry registry.Type
 
+	middlewares []server.Middleware
+
 	// entrypointID is the entrypointID (uuid) of this entrypoint in the registry.
 	entrypointID string
 
@@ -69,11 +71,11 @@ type ServerHTTP struct {
 	activeRequests int64 // accessed atomically
 }
 
-// ProvideServerHTTP creates a new entrypoint for a single address. You can create
+// Provide creates a new entrypoint for a single address. You can create
 // multiple entrypoints for multiple addresses and ports. One entrypoint
 // can serve a HTTP1, HTTP2 and HTTP3 server. If you enable HTTP3 it will listen
 // on both TCP and UDP on the same port.
-func ProvideServerHTTP(
+func Provide(
 	_ types.ServiceName,
 	logger log.Logger,
 	reg registry.Type,
@@ -105,12 +107,23 @@ func ProvideServerHTTP(
 
 	logger = logger.With(slog.String("entrypoint", cfg.Name))
 
+	mws := []server.Middleware{}
+
+	for _, m := range cfg.Middlewares {
+		if mw, ok := server.Middlewares.Get(m); ok {
+			mws = append(mws, mw)
+		} else {
+			logger.Error("unknown middleware given", "middleware", m)
+		}
+	}
+
 	entrypoint := ServerHTTP{
-		Config:   cfg,
-		Logger:   logger,
-		Registry: reg,
-		codecs:   codecs,
-		router:   router,
+		Config:      cfg,
+		Logger:      logger,
+		Registry:    reg,
+		middlewares: mws,
+		codecs:      codecs,
+		router:      router,
 	}
 
 	entrypoint.Config.TLS, err = entrypoint.setupTLS()
@@ -139,10 +152,6 @@ func (s *ServerHTTP) Start() error {
 	var err error
 
 	s.Logger.Info("Starting", "address", s.Config.Address)
-
-	for _, middleware := range s.Config.Middleware {
-		s.router.Use(middleware)
-	}
 
 	for _, h := range s.Config.HandlerRegistrations {
 		h(s)

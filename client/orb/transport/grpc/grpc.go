@@ -8,10 +8,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+	gmetadata "google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/client/orb"
 	"github.com/go-orb/plugins/client/orb/transport/grpc/pool"
@@ -59,6 +61,8 @@ func (t *Transport) Call(_ context.Context, _ *client.Request[any, any], _ *clie
 }
 
 // CallNoCodec does the actual rpc call to the server.
+//
+//nolint:funlen
 func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) error {
 	node, err := req.Node(ctx, opts)
 	if err != nil {
@@ -92,10 +96,22 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 		return orberrors.From(err)
 	}
 
+	// Append go-orb metadata to grpc.
+	if md, ok := metadata.OutgoingFrom(ctx); ok {
+		kv := []string{}
+		for k, v := range md {
+			kv = append(kv, k, v)
+		}
+
+		ctx = gmetadata.AppendToOutgoingContext(ctx, kv...)
+	}
+
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(opts.RequestTimeout))
 	defer cancel()
 
-	err = conn.Invoke(ctx, "/"+req.Endpoint(), req.Request(), result)
+	resMeta := gmetadata.MD{}
+
+	err = conn.Invoke(ctx, "/"+req.Endpoint(), req.Request(), result, grpc.Header(&resMeta))
 	if err != nil {
 		gErr, ok := status.FromError(err)
 		if !ok {
@@ -109,6 +125,12 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 		_ = conn.Close() //nolint:errcheck
 
 		return orberrors.New(httpStatusCode, gErr.Message())
+	}
+
+	if opts.Headers != nil {
+		for k, v := range resMeta {
+			opts.Headers[k] = v[0]
+		}
 	}
 
 	err = conn.Close()
