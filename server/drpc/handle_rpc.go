@@ -92,10 +92,10 @@ func (m *Mux) HandleRPC(stream drpc.Stream, rpc string) (err error) {
 		oErr := orberrors.From(err)
 
 		if oErr.Wrapped != nil {
-			return drpcerr.WithCode(fmt.Errorf("%s: %s", oErr.Message, oErr.Wrapped.Error()), uint64(oErr.Code))
+			return drpcerr.WithCode(fmt.Errorf("%s: %s", oErr.Message, oErr.Wrapped.Error()), uint64(oErr.Code)) //nolint:gosec
 		}
 
-		return drpcerr.WithCode(errors.New(oErr.Message), uint64(oErr.Code))
+		return drpcerr.WithCode(errors.New(oErr.Message), uint64(oErr.Code)) //nolint:gosec
 	case out != nil && !reflect.ValueOf(out).IsNil():
 		outData, err := anypb.New(out.(proto.Message))
 		if err != nil {

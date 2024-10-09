@@ -81,19 +81,7 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 }
 
 func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
-	return func(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-		// h := func(srv any, ss grpc.ServerStream, _ *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-		// 	return handler(srv, ss)
-		// }
-
-		// // Add user defined middleware if the route requires.
-		// if next := s.config.StreamInterceptors.Match(info.FullMethod); len(next) > 0 {
-		// 	next = append(next, h)
-		// 	h = chainStreamInterceptors(next)
-		// }
-
-		// return h(srv, ss, info, handler)
-
+	return func(srv any, ss grpc.ServerStream, _ *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 		return handler(srv, ss)
 	}
 }
