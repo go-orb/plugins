@@ -2,8 +2,8 @@ github.com/cornelk/hashmap v1.0.8 h1:nv0AWgw02n+iDcawr5It4CjQIAcdMMKRrs10HOJYlrc
 github.com/cornelk/hashmap v1.0.8/go.mod h1:RfZb7JO3RviW/rT6emczVuC/oxpdz4UsSB2LJSclR1k=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7 h1:9ZCjLkvUlwDSwIhkVRij0nLuP38BMJAJCv4cX1TP3Mg=
-github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7/go.mod h1:DdL+EYRtGU8OMU4H7NSQvRxRVzL+GBliOVWC0QHKuy0=
+github.com/go-orb/go-orb v0.0.0-20241009125109-7ec5aad2d35c h1:W2PzOE+9UOKw1dbfFdKsuZMth29sPwM+Z9y1X1pItv4=
+github.com/go-orb/go-orb v0.0.0-20241009125109-7ec5aad2d35c/go.mod h1:59wJps2KJS+ggIwA9Y9NIcI+X83BkEyHSnuoXrEb3v8=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=

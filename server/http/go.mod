@@ -8,12 +8,12 @@ require (
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-orb/go-orb v0.0.0-20241009125109-7ec5aad2d35c
 	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20240917083021-b19ae7b88452
-	github.com/go-orb/plugins/codecs/form v0.0.0-20240929171344-670e42ce5186
-	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20240929171344-670e42ce5186
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20240929171344-670e42ce5186
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20240929171344-670e42ce5186
-	github.com/go-orb/plugins/config/source/file v0.0.0-20240929171344-670e42ce5186
-	github.com/go-orb/plugins/log/slog v0.0.0-20240929171344-670e42ce5186
+	github.com/go-orb/plugins/codecs/form v0.0.0-20241009130715-06bd8407d801
+	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20241009130715-06bd8407d801
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20241009130715-06bd8407d801
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20241009130715-06bd8407d801
+	github.com/go-orb/plugins/config/source/file v0.0.0-20241009130715-06bd8407d801
+	github.com/go-orb/plugins/log/slog v0.0.0-20241009130715-06bd8407d801
 	github.com/google/uuid v1.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/quic-go/quic-go v0.47.0

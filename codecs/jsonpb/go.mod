@@ -5,7 +5,7 @@ go 1.23
 toolchain go1.23.0
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20240831182006-95fb90a9afe7
+	github.com/go-orb/go-orb v0.0.0-20241009125109-7ec5aad2d35c
 	google.golang.org/protobuf v1.35.1
 )
 
