@@ -16,12 +16,10 @@ import (
 //nolint:gochecknoglobals
 var stdHeaders = []string{"content-type", "user-agent"}
 
-func (s *ServerGRPC) unaryServerInterceptor() grpc.UnaryServerInterceptor {
+func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
-		ctx = metadata.EnsureIncoming(ctx)
-		ctx = metadata.EnsureOutgoing(ctx)
-
-		reqMd, _ := metadata.IncomingFrom(ctx)
+		ctx, reqMd := metadata.WithIncoming(ctx)
+		ctx, outMd := metadata.WithOutgoing(ctx)
 
 		// Copy incoming metadata from grpc to orb.
 		if gReqMd, ok := gmetadata.FromIncomingContext(ctx); ok {
@@ -46,19 +44,15 @@ func (s *ServerGRPC) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 			defer cancel()
 		}
 
-		h := func(ctx context.Context, req any, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+		h := func(ctx context.Context, req any) (any, error) {
 			return handler(ctx, req)
 		}
-
-		// Add user defined middleware if the route requires.
-		if next := s.config.UnaryInterceptors.Match(info.FullMethod); len(next) > 0 {
-			next = append(next, h)
-			h = chainUnaryInterceptors(next)
+		for _, m := range s.config.OptMiddlewares {
+			h = m.Call(h)
 		}
 
-		result, err := h(ctx, req, info, handler)
+		result, err := h(ctx, req)
 
-		outMd, _ := metadata.OutgoingFrom(ctx)
 		if len(outMd) > 0 {
 			gOutMd := make(gmetadata.MD)
 
@@ -86,62 +80,64 @@ func (s *ServerGRPC) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 	}
 }
 
-func (s *ServerGRPC) streamServerInterceptor() grpc.StreamServerInterceptor {
+func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
 	return func(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-		h := func(srv any, ss grpc.ServerStream, _ *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-			return handler(srv, ss)
-		}
+		// h := func(srv any, ss grpc.ServerStream, _ *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		// 	return handler(srv, ss)
+		// }
 
-		// Add user defined middleware if the route requires.
-		if next := s.config.StreamInterceptors.Match(info.FullMethod); len(next) > 0 {
-			next = append(next, h)
-			h = chainStreamInterceptors(next)
-		}
+		// // Add user defined middleware if the route requires.
+		// if next := s.config.StreamInterceptors.Match(info.FullMethod); len(next) > 0 {
+		// 	next = append(next, h)
+		// 	h = chainStreamInterceptors(next)
+		// }
 
-		return h(srv, ss, info, handler)
+		// return h(srv, ss, info, handler)
+
+		return handler(srv, ss)
 	}
 }
 
-// Source: from https://github.com/grpc/grpc-go/blob/v1.51.0/server.go
-func chainUnaryInterceptors(interceptors []grpc.UnaryServerInterceptor) grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
-		var state struct {
-			i    int
-			next grpc.UnaryHandler
-		}
+// // Source: from https://github.com/grpc/grpc-go/blob/v1.51.0/server.go
+// func chainUnaryInterceptors(interceptors []grpc.UnaryServerInterceptor) grpc.UnaryServerInterceptor {
+// 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+// 		var state struct {
+// 			i    int
+// 			next grpc.UnaryHandler
+// 		}
 
-		state.next = func(ctx context.Context, req any) (any, error) {
-			if state.i == len(interceptors)-1 {
-				return interceptors[state.i](ctx, req, info, handler)
-			}
+// 		state.next = func(ctx context.Context, req any) (any, error) {
+// 			if state.i == len(interceptors)-1 {
+// 				return interceptors[state.i](ctx, req, info, handler)
+// 			}
 
-			state.i++
+// 			state.i++
 
-			return interceptors[state.i-1](ctx, req, info, state.next)
-		}
+// 			return interceptors[state.i-1](ctx, req, info, state.next)
+// 		}
 
-		return state.next(ctx, req)
-	}
-}
+// 		return state.next(ctx, req)
+// 	}
+// }
 
-// Source: from https://github.com/grpc/grpc-go/blob/v1.51.0/server.go
-func chainStreamInterceptors(interceptors []grpc.StreamServerInterceptor) grpc.StreamServerInterceptor {
-	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-		var state struct {
-			i    int
-			next grpc.StreamHandler
-		}
+// // Source: from https://github.com/grpc/grpc-go/blob/v1.51.0/server.go
+// func chainStreamInterceptors(interceptors []grpc.StreamServerInterceptor) grpc.StreamServerInterceptor {
+// 	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+// 		var state struct {
+// 			i    int
+// 			next grpc.StreamHandler
+// 		}
 
-		state.next = func(srv interface{}, ss grpc.ServerStream) error {
-			if state.i == len(interceptors)-1 {
-				return interceptors[state.i](srv, ss, info, handler)
-			}
+// 		state.next = func(srv interface{}, ss grpc.ServerStream) error {
+// 			if state.i == len(interceptors)-1 {
+// 				return interceptors[state.i](srv, ss, info, handler)
+// 			}
 
-			state.i++
+// 			state.i++
 
-			return interceptors[state.i-1](srv, ss, info, state.next)
-		}
+// 			return interceptors[state.i-1](srv, ss, info, state.next)
+// 		}
 
-		return state.next(srv, ss)
-	}
-}
+// 		return state.next(srv, ss)
+// 	}
+// }

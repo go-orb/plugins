@@ -18,18 +18,22 @@ import (
 	_ "github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/lumberjack"
 	_ "github.com/go-orb/plugins/log/slog"
+	_ "github.com/go-orb/plugins/server/drpc"
+	_ "github.com/go-orb/plugins/server/grpc"
+	_ "github.com/go-orb/plugins/server/hertz"
+	_ "github.com/go-orb/plugins/server/http"
 	_ "github.com/go-orb/plugins/server/http/router/chi"
 )
 
 func main() {
 	var (
-		serviceName    = types.ServiceName("org.orb.svc.service")
+		serviceName    = types.ServiceName("service")
 		serviceVersion = types.ServiceVersion("v0.0.1")
 	)
 
 	components, err := newComponents(serviceName, serviceVersion)
 	if err != nil {
-		log.Error("while creating components", err)
+		log.Error("while creating components", "err", err)
 		os.Exit(1)
 	}
 

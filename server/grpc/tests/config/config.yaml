@@ -2,35 +2,41 @@ com:
   example:
     test:
       server:
-        grpc:
-          insecure: true
-          handlers:
-            - Streams
-          middleware:
-            - middleware-1
-            - middleware-2
-          streamMiddleware:
-            - middleware-S1
-          entrypoints:
-            - name: test-ep-1
-              address: :4512
-              reflection: false
-            - name: test-ep-2
-              address: :4513
-              health: false
-            - name: test-ep-3
-              address: :4514
-              inherit: test-ep-1
-              health: false
-              timeout: 11s
-            - name: test-ep-4
-              address: :4515
-              enabled: false
-            - name: test-ep-5
-              address: :4516
-              handlers:
-                - handler-1
-                - handler-2
-              middleware:
-                - middleware-1
-                - middleware-4
+        handlers:
+          - Streams
+        middleware:
+          - middleware-1
+          - middleware-2
+        entrypoints:
+          - name: test-ep-1
+            plugin: grpc
+            address: :4512
+            insecure: true
+            reflection: false
+          - name: test-ep-2
+            plugin: grpc
+            address: :4513
+            health: false
+            insecure: true
+          - name: test-ep-3
+            plugin: grpc
+            address: :4514
+            inherit: test-ep-1
+            health: false
+            insecure: true
+            reflection: false
+            timeout: 11s
+          - name: test-ep-4
+            plugin: grpc
+            address: :4515
+            enabled: false
+          - name: test-ep-5
+            plugin: grpc
+            address: :4516
+            insecure: true
+            handlers:
+              - handler-1
+              - handler-2
+            middleware:
+              - middleware-1
+              - middleware-4

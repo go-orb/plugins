@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
@@ -21,7 +22,7 @@ var (
 
 // NewGRPCHandler will wrap a gRPC function with a HTTP handler.
 func NewGRPCHandler[Tin any, Tout any](
-	srv *ServerHTTP,
+	srv *Server,
 	fHandler func(context.Context, *Tin) (*Tout, error),
 	service string,
 	method string,
@@ -30,16 +31,15 @@ func NewGRPCHandler[Tin any, Tout any](
 		inBody := new(Tin)
 
 		if _, err := srv.decodeBody(resp, req, inBody); err != nil {
-			srv.Logger.Error("failed to decode request body", "error", err)
+			srv.logger.Error("failed to decode request body", "error", err)
 			WriteError(resp, orberrors.ErrBadRequest.Wrap(err))
 
 			return
 		}
 
 		// Copy metadata from req Headers into the req.Context.
-		ctx := metadata.EnsureIncoming(req.Context())
-		ctx = metadata.EnsureOutgoing(ctx)
-		reqMd, _ := metadata.IncomingFrom(ctx)
+		ctx, reqMd := metadata.WithIncoming(req.Context())
+		ctx, outMd := metadata.WithOutgoing(ctx)
 
 		for k, v := range req.Header {
 			if slices.Contains(stdHeaders, k) {
@@ -47,11 +47,11 @@ func NewGRPCHandler[Tin any, Tout any](
 			}
 
 			if len(v) == 1 {
-				reqMd[k] = v[0]
+				reqMd[strings.ToLower(k)] = v[0]
 			} else {
-				reqMd[k] = v[0]
+				reqMd[strings.ToLower(k)] = v[0]
 				for i := 1; i < len(v); i++ {
-					reqMd[k+"-"+strconv.Itoa(i)] = v[i]
+					reqMd[strings.ToLower(k)+"-"+strconv.Itoa(i)] = v[i]
 				}
 			}
 		}
@@ -63,28 +63,26 @@ func NewGRPCHandler[Tin any, Tout any](
 		h := func(ctx context.Context, req any) (any, error) {
 			return fHandler(ctx, req.(*Tin))
 		}
-		for _, m := range srv.middlewares {
+		for _, m := range srv.config.OptMiddlewares {
 			h = m.Call(h)
 		}
 
 		// The actual call.
 		out, err := h(ctx, inBody)
 		if err != nil {
-			srv.Logger.Error("RPC request failed", "error", err)
+			srv.logger.Error("RPC request failed", "error", err)
 			WriteError(resp, err)
 
 			return
 		}
 
 		// Write outgoing metadata.
-		if md, ok := metadata.OutgoingFrom(ctx); ok {
-			for k, v := range md {
-				resp.Header().Set(k, v)
-			}
+		for k, v := range outMd {
+			resp.Header().Set(k, v)
 		}
 
 		if err := srv.encodeBody(resp, req, out); err != nil {
-			srv.Logger.Error("failed to encode response body", "error", err)
+			srv.logger.Error("failed to encode response body", "error", err)
 			WriteError(resp, err)
 
 			return

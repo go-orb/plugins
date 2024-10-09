@@ -22,7 +22,7 @@ import (
 
 //nolint:gochecknoglobals
 var (
-	ServiceName     = types.ServiceName("org.orb.svc.service")
+	ServiceName     = types.ServiceName("service")
 	DefaultRequests = []TestRequest{
 		{
 			Name:     "32byte",
@@ -165,7 +165,7 @@ func (s *TestSuite) SetupSuite() {
 	}
 
 	s.configData = cfgData
-	s.clientName = types.ServiceName("org.orb.svc.client")
+	s.clientName = types.ServiceName("client")
 
 	// Logger
 	logger, err := log.Provide(s.clientName, cfgData)
@@ -319,13 +319,13 @@ func (s *TestSuite) TestRunRequests() {
 func (s *TestSuite) TestFailingAuthorization() {
 	responseMd := make(map[string]string)
 	ctx := context.Background()
-	_, err := client.Call[proto.CallResponse](
+	streamsClient := proto.NewStreamsClient(s.client)
+
+	_, err := streamsClient.AuthorizedCall(
 		ctx,
-		s.client,
 		string(ServiceName),
-		"echo.Streams/AuthorizedCall",
 		&proto.CallRequest{Name: "empty"},
-		client.Headers(responseMd),
+		client.WithResponseMetadata(responseMd),
 	)
 	s.Require().ErrorIs(err, orberrors.ErrUnauthorized)
 }
@@ -334,16 +334,15 @@ func (s *TestSuite) TestFailingAuthorization() {
 func (s *TestSuite) TestMetadata() {
 	ctx := context.Background()
 	ctx, md := metadata.WithOutgoing(ctx)
-	md["authorization"] = "bearer pleaseHackMe"
+	md["authorization"] = "Bearer pleaseHackMe"
 
 	responseMd := make(map[string]string)
-	_, err := client.Call[proto.CallResponse](
+	streamsClient := proto.NewStreamsClient(s.client)
+	_, err := streamsClient.AuthorizedCall(
 		ctx,
-		s.client,
 		string(ServiceName),
-		"echo.Streams/AuthorizedCall",
 		&proto.CallRequest{Name: "empty"},
-		client.Headers(responseMd),
+		client.WithResponseMetadata(responseMd),
 	)
 	s.Require().NoError(err)
 

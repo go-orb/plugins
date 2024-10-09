@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/codecs"
@@ -95,7 +96,7 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 	hReq.Header.Set("Accept", opts.ContentType)
 
 	// Set metadata key=value to request headers.
-	md, ok := metadata.OutgoingFrom(ctx)
+	md, ok := metadata.Outgoing(ctx)
 	if ok {
 		for name, value := range md {
 			hReq.Header.Set(name, value)
@@ -130,8 +131,8 @@ func (t *Transport) call2(hReq *http.Request, opts *client.CallOptions) (*client
 		Body:        buff,
 	}
 
-	if opts.Headers != nil {
-		md := opts.Headers
+	if opts.ResponseMetadata != nil {
+		md := opts.ResponseMetadata
 
 		// Copy headers to opts.Header
 		for k, v := range resp.Header {
@@ -141,12 +142,12 @@ func (t *Transport) call2(hReq *http.Request, opts *client.CallOptions) (*client
 			}
 
 			if len(v) == 1 {
-				md[k] = v[0]
+				md[strings.ToLower(k)] = v[0]
 			} else {
-				md[k] = v[0]
+				md[strings.ToLower(k)] = v[0]
 
 				for i := 1; i < len(v); i++ {
-					md[k+"-"+strconv.Itoa(i)] = v[i]
+					md[strings.ToLower(k)+"-"+strconv.Itoa(i)] = v[i]
 				}
 			}
 		}

@@ -97,7 +97,7 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 	}
 
 	// Append go-orb metadata to grpc.
-	if md, ok := metadata.OutgoingFrom(ctx); ok {
+	if md, ok := metadata.Outgoing(ctx); ok {
 		kv := []string{}
 		for k, v := range md {
 			kv = append(kv, k, v)
@@ -127,9 +127,9 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 		return orberrors.New(httpStatusCode, gErr.Message())
 	}
 
-	if opts.Headers != nil {
+	if opts.ResponseMetadata != nil {
 		for k, v := range resMeta {
-			opts.Headers[k] = v[0]
+			opts.ResponseMetadata[k] = v[0]
 		}
 	}
 

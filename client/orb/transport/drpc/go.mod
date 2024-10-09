@@ -5,10 +5,10 @@ go 1.23
 toolchain go1.23.0
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20240902034447-508ce5c54a46
-	github.com/go-orb/plugins/client/orb v0.0.0-20240902051655-0791c4c590b6
-	github.com/go-orb/plugins/server/drpc v0.0.0-20240929170217-b2492959ca42
-	google.golang.org/protobuf v1.34.2
+	github.com/go-orb/go-orb v0.0.0-20241009125109-7ec5aad2d35c
+	github.com/go-orb/plugins/client/orb v0.0.0-20240929171344-670e42ce5186
+	github.com/go-orb/plugins/server/drpc v0.0.0-20240929171344-670e42ce5186
+	google.golang.org/protobuf v1.35.1
 	storj.io/drpc v0.0.34
 )
 

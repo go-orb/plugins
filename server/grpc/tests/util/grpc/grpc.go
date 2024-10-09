@@ -16,15 +16,14 @@ import (
 
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
+	"github.com/go-orb/go-orb/server"
 
 	mgrpc "github.com/go-orb/plugins/server/grpc"
 	"github.com/go-orb/plugins/server/grpc/tests/proto"
 )
 
 // SetupServer will create a gRPC test server.
-func SetupServer(opts ...mgrpc.Option) (*mgrpc.ServerGRPC, func(t *testing.T), error) {
-	cfg := mgrpc.NewConfig()
-
+func SetupServer(opts ...server.Option) (server.Entrypoint, func(t *testing.T), error) {
 	logger, err := log.New()
 	if err != nil {
 		return nil, nil, fmt.Errorf("setup logger: %w", err)
@@ -35,7 +34,7 @@ func SetupServer(opts ...mgrpc.Option) (*mgrpc.ServerGRPC, func(t *testing.T), e
 		return nil, nil, fmt.Errorf("setup registry: %w", err)
 	}
 
-	srv, err := mgrpc.Provide("", logger, reg, *cfg, opts...)
+	srv, err := mgrpc.New(mgrpc.NewConfig(opts...), logger, reg)
 	if err != nil {
 		return nil, nil, fmt.Errorf("setup gRPC server: %w", err)
 	}
@@ -66,51 +65,16 @@ func MakeRequest(addr, name string, tlsConfig *tls.Config) error {
 	}
 	defer conn.Close() //nolint:errcheck
 
-	client := proto.NewStreamsClient(conn)
+	resp := &proto.CallResponse{}
 
-	resp, err := client.Call(context.Background(), &proto.CallRequest{
+	if err = conn.Invoke(context.Background(), "/echo.Streams/Call", &proto.CallRequest{
 		Name: name,
-	})
-	if err != nil {
+	}, resp); err != nil {
 		return fmt.Errorf("grpc call: %w", err)
 	}
 
 	if resp.GetMsg() != "Hello "+name {
 		return errors.New("message invalid")
-	}
-
-	return nil
-}
-
-// MakeStreamRequest makes a streaming test request to the Echo endpoint.
-func MakeStreamRequest(addr, name string, s int, tlsConfig *tls.Config) error {
-	conn, err := dial(addr, tlsConfig)
-	if err != nil {
-		return err
-	}
-	defer conn.Close() //nolint:errcheck
-
-	client := proto.NewStreamsClient(conn)
-
-	msg, err := client.Stream(context.Background())
-	if err != nil {
-		return err
-	}
-	defer msg.CloseSend() //nolint:errcheck
-
-	for i := 0; i < s; i++ {
-		if err := msg.Send(&proto.CallRequest{Name: name}); err != nil {
-			return err
-		}
-
-		m, err := msg.Recv()
-		if err != nil {
-			return err
-		}
-
-		if m.GetMsg() != "hello "+name {
-			return errors.New("invalid message received")
-		}
 	}
 
 	return nil

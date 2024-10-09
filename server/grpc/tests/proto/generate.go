@@ -2,4 +2,4 @@
 package proto
 
 // Generate proto files
-//go:generate protoc -I . --go-grpc_out=paths=source_relative:.  --go_out=paths=source_relative:. ./echo.proto
+//go:generate protoc -I . --go-orb_out=paths=source_relative:. --go-orb_opt=supported_servers=grpc echo.proto

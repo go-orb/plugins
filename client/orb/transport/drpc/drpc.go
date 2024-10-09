@@ -103,7 +103,7 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 	conn := t.pool.Get(ctx, node.Address, dial)
 
 	// Add metadata to drpc.
-	md, ok := metadata.OutgoingFrom(ctx)
+	md, ok := metadata.Outgoing(ctx)
 	if ok {
 		ctx = drpcmetadata.AddPairs(ctx, md)
 	}
@@ -122,9 +122,9 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 	}
 
 	// Retrieve metadata from drpc.
-	if opts.Headers != nil {
+	if opts.ResponseMetadata != nil {
 		for k, v := range mdResult.GetMetadata() {
-			opts.Headers[k] = v
+			opts.ResponseMetadata[k] = v
 		}
 	}
 

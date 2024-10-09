@@ -15,7 +15,6 @@ var _ proto.StreamsServer = (*EchoHandler)(nil)
 
 // EchoHandler is a test handler.
 type EchoHandler struct {
-	proto.UnsafeStreamsServer
 }
 
 // Call implements the call method.
@@ -45,13 +44,13 @@ func (c *EchoHandler) Call(_ context.Context, request *proto.CallRequest) (*prot
 
 // AuthorizedCall requires Authorization by metadata.
 func (c *EchoHandler) AuthorizedCall(ctx context.Context, _ *proto.CallRequest) (*proto.CallResponse, error) {
-	mdout, _ := metadata.OutgoingFrom(ctx)
-	mdout["tracing-id"] = "asfdjhladhsfashf"
-
-	mdin, _ := metadata.IncomingFrom(ctx)
-	if mdin["authorization"] != "bearer pleaseHackMe" {
+	_, mdin := metadata.WithIncoming(ctx)
+	if mdin["authorization"] != "Bearer pleaseHackMe" {
 		return nil, orberrors.ErrUnauthorized
 	}
+
+	_, mdout := metadata.WithOutgoing(ctx)
+	mdout["tracing-id"] = "asfdjhladhsfashf"
 
 	return &proto.CallResponse{Msg: "Hello World"}, nil
 }

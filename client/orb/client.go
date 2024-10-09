@@ -212,8 +212,7 @@ func (c *Client) Call(
 	co := c.makeOptions(opts...)
 
 	// Add metadata to the context.
-	ctx = metadata.EnsureIncoming(ctx)
-	ctx = metadata.EnsureOutgoing(ctx)
+	ctx, _ = metadata.WithOutgoing(ctx)
 
 	transport, err := c.transportForReq(ctx, req, co)
 	if err != nil {
@@ -241,8 +240,7 @@ func (c *Client) CallNoCodec(
 	co := c.makeOptions(opts...)
 
 	// Add metadata to the context.
-	ctx = metadata.EnsureIncoming(ctx)
-	ctx = metadata.EnsureOutgoing(ctx)
+	ctx, _ = metadata.WithOutgoing(ctx)
 
 	transport, err := c.transportForReq(ctx, req, co)
 	if err != nil {

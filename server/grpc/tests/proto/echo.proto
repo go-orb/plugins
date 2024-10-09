@@ -6,7 +6,6 @@ option go_package = "./proto;proto";
 
 service Streams {
   rpc Call(CallRequest) returns (CallResponse) {}
-  rpc Stream(stream CallRequest) returns (stream CallResponse) {}
 }
 
 message CallRequest {

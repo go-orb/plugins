@@ -5,6 +5,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
+	"strconv"
 
 	"log/slog"
 
@@ -14,6 +16,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/go-orb/go-orb/codecs"
+	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	orbserver "github.com/go-orb/go-orb/server"
@@ -26,17 +29,13 @@ import (
 
 var _ orbserver.Entrypoint = (*Server)(nil)
 
-// Name is the plugin name.
-const Name = "hertz"
-
 // Server is the hertz Server for go-orb.
 type Server struct {
-	Config   Config
-	Logger   log.Logger
-	Registry registry.Type
+	config   *Config
+	logger   log.Logger
+	registry registry.Type
 
-	middlewares []orbserver.Middleware
-
+	address string
 	hServer *server.Hertz
 
 	// entrypointID is the entrypointID (uuid) of this entrypoint in the registry.
@@ -53,27 +52,37 @@ func (s *Server) Start() error {
 		return nil
 	}
 
-	s.Logger.Info("Starting", "address", s.Config.Address)
+	s.logger.Info("Starting", "address", s.config.Address)
 
-	// for _, middleware := range s.Config.Middleware {
-	// 	s.router.Use(middleware)
-	// }
+	// Listen and close on that address, to see which port we get.
+	l, err := net.Listen("tcp", s.config.Address)
+	if err != nil {
+		return err
+	}
 
-	hlog.SetLogger(orblog.NewLogger(s.Logger))
+	s.address = l.Addr().String()
 
-	hopts := []hconfig.Option{server.WithHostPorts(s.Config.Address)}
-	if s.Config.H2C {
+	if err := l.Close(); err != nil {
+		return err
+	}
+
+	s.logger.Info("Got address", "address", s.address)
+
+	hlog.SetLogger(orblog.NewLogger(s.logger))
+
+	hopts := []hconfig.Option{server.WithHostPorts(s.address)}
+	if s.config.H2C {
 		hopts = append(hopts, server.WithH2C(true))
 	}
 
 	s.hServer = server.Default(hopts...)
 
 	// Register handlers.
-	for _, h := range s.Config.HandlerRegistrations {
+	for _, h := range s.config.OptHandlers {
 		h(s)
 	}
 
-	if s.Config.H2C || s.Config.HTTP2 {
+	if s.config.H2C || s.config.HTTP2 {
 		// register http2 server factory
 		s.hServer.AddProtocol("h2", factory.NewServerFactory())
 	}
@@ -84,7 +93,7 @@ func (s *Server) Start() error {
 	}(s.hServer, errCh)
 
 	if err := s.registryRegister(); err != nil {
-		return fmt.Errorf("failed to register the HTTP server: %w", err)
+		return fmt.Errorf("failed to register the hertz server: %w", err)
 	}
 
 	s.started = true
@@ -101,13 +110,13 @@ func (s *Server) Stop(ctx context.Context) error {
 	errChan := make(chan error)
 	defer close(errChan)
 
-	s.Logger.Debug("Stopping")
+	s.logger.Debug("Stopping")
 
 	if err := s.registryDeregister(); err != nil {
 		return err
 	}
 
-	stopCtx, cancel := context.WithTimeoutCause(ctx, s.Config.StopTimeout, errors.New("timeout while stopping the hertz server"))
+	stopCtx, cancel := context.WithTimeoutCause(ctx, s.config.StopTimeout, errors.New("timeout while stopping the hertz server"))
 	defer cancel()
 
 	s.started = false
@@ -122,14 +131,14 @@ func (s *Server) Register(register orbserver.RegistrationFunc) {
 
 // Address returns the address the entrypoint is listening on.
 func (s *Server) Address() string {
-	return s.Config.Address
+	return s.address
 }
 
 // Transport returns the client transport to use.
 func (s *Server) Transport() string {
-	if s.Config.H2C {
+	if s.config.H2C {
 		return "hertzh2c"
-	} else if !s.Config.Insecure {
+	} else if !s.config.Insecure {
 		return "hertzhttps"
 	}
 
@@ -142,24 +151,29 @@ func (s *Server) EntrypointID() string {
 		return s.entrypointID
 	}
 
-	s.entrypointID = fmt.Sprintf("%s-%s", s.Registry.ServiceName(), uuid.New().String())
+	s.entrypointID = fmt.Sprintf("%s-%s", s.registry.ServiceName(), uuid.New().String())
 
 	return s.entrypointID
 }
 
 // String returns the entrypoint type; http.
 func (s *Server) String() string {
-	return Name
+	return Plugin
+}
+
+// Enabled returns if this entrypoint has been enbaled in config.
+func (s *Server) Enabled() bool {
+	return s.config.Enabled
 }
 
 // Name returns the entrypoint name.
 func (s *Server) Name() string {
-	return s.Config.Name
+	return s.config.Name
 }
 
 // Type returns the component type.
 func (s *Server) Type() string {
-	return orbserver.ComponentType
+	return orbserver.EntrypointType
 }
 
 // Router returns the hertz server.
@@ -173,7 +187,7 @@ func (s *Server) getEndpoints() []*registry.Endpoint {
 	result := make([]*registry.Endpoint, len(routes))
 
 	for _, r := range routes {
-		s.Logger.Trace("found endpoint", slog.String("name", r.Path[1:]))
+		s.logger.Trace("found endpoint", slog.String("name", r.Path[1:]))
 
 		result = append(result, &registry.Endpoint{
 			Name:     r.Path[1:],
@@ -193,8 +207,8 @@ func (s *Server) registryService() *registry.Service {
 	}
 
 	return &registry.Service{
-		Name:      s.Registry.ServiceName(),
-		Version:   s.Registry.ServiceVersion(),
+		Name:      s.registry.ServiceName(),
+		Version:   s.registry.ServiceVersion(),
 		Nodes:     []*registry.Node{node},
 		Endpoints: s.getEndpoints(),
 	}
@@ -203,32 +217,71 @@ func (s *Server) registryService() *registry.Service {
 func (s *Server) registryRegister() error {
 	rService := s.registryService()
 
-	return s.Registry.Register(rService)
+	return s.registry.Register(rService)
 }
 
 func (s *Server) registryDeregister() error {
 	rService := s.registryService()
 
-	return s.Registry.Deregister(rService)
+	return s.registry.Deregister(rService)
 }
 
 // Provide creates a new entrypoint for a single address. You can create
 // multiple entrypoints for multiple addresses and ports. One entrypoint
 // can serve a HTTP1 and HTTP2/H2C server.
 func Provide(
-	_ types.ServiceName,
+	sections []string,
+	configs types.ConfigData,
 	logger log.Logger,
 	reg registry.Type,
-	cfg Config,
-	options ...Option,
-) (*Server, error) {
-	cfg.ApplyOptions(options...)
+	opts ...orbserver.Option,
+) (orbserver.Entrypoint, error) {
+	cfg := NewConfig(opts...)
+
+	if err := config.Parse(sections, configs, cfg); err != nil {
+		return nil, err
+	}
+
+	// Configure Middlewares.
+	for idx, cfgMw := range cfg.Middlewares {
+		pFunc, ok := orbserver.Middlewares.Get(cfgMw.Plugin)
+		if !ok {
+			return nil, fmt.Errorf("%w: '%s', did you register it?", orbserver.ErrUnknownMiddleware, cfgMw.Plugin)
+		}
+
+		mw, err := pFunc(append(sections, "middlewares", strconv.Itoa(idx)), configs, logger)
+		if err != nil {
+			return nil, err
+		}
+
+		cfg.OptMiddlewares = append(cfg.OptMiddlewares, mw)
+	}
+
+	// Get handlers.
+	for _, k := range cfg.Handlers {
+		h, ok := orbserver.Handlers.Get(k)
+		if !ok {
+			return nil, fmt.Errorf("%w: '%s', did you register it?", orbserver.ErrUnknownHandler, k)
+		}
+
+		cfg.OptHandlers = append(cfg.OptHandlers, h)
+	}
+
+	return New(cfg, logger, reg)
+}
+
+// New creates a hertz server by options.
+func New(acfg any, logger log.Logger, reg registry.Type) (orbserver.Entrypoint, error) {
+	cfg, ok := acfg.(*Config)
+	if !ok {
+		return nil, fmt.Errorf("hertz invalid config: %v", cfg)
+	}
 
 	var err error
 
 	cfg.Address, err = addr.GetAddress(cfg.Address)
 	if err != nil {
-		return nil, fmt.Errorf("http validate addr '%s': %w", cfg.Address, err)
+		return nil, fmt.Errorf("hertz validate addr '%s': %w", cfg.Address, err)
 	}
 
 	if err := addr.ValidateAddress(cfg.Address); err != nil {
@@ -240,24 +293,13 @@ func Provide(
 		return nil, fmt.Errorf("create codec map: %w", err)
 	}
 
-	logger = logger.With(slog.String("entrypoint", cfg.Name))
-
-	mws := []orbserver.Middleware{}
-
-	for _, m := range cfg.Middlewares {
-		if mw, ok := orbserver.Middlewares.Get(m); ok {
-			mws = append(mws, mw)
-		} else {
-			logger.Error("unknown middleware given", "middleware", m)
-		}
-	}
+	logger = logger.With(slog.String("component", orbserver.ComponentType), slog.String("plugin", Plugin), slog.String("entrypoint", cfg.Name))
 
 	entrypoint := Server{
-		Config:      cfg,
-		Logger:      logger,
-		Registry:    reg,
-		middlewares: mws,
-		codecs:      codecs,
+		config:   cfg,
+		logger:   logger,
+		registry: reg,
+		codecs:   codecs,
 	}
 
 	return &entrypoint, nil

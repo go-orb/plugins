@@ -89,8 +89,6 @@ func WithAddress(n ...string) registry.Option {
 		cfg, ok := c.(*Config)
 		if ok {
 			cfg.Addresses = n
-		} else {
-			panic(fmt.Sprintf("wrong type: %T", c))
 		}
 	}
 }

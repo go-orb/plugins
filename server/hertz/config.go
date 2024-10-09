@@ -3,7 +3,6 @@ package hertz
 import (
 	"crypto/tls"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/go-orb/go-orb/codecs"
@@ -16,10 +15,7 @@ import (
 
 const (
 	// DefaultAddress to use for new Hertz servers.
-	// If set to "random", the default, a random address will be selected,
-	// preferably on a private interface (XX subet). TODO: implement.
-	// TODO(davincible): revisit default address, probably use random addr.
-	DefaultAddress = "0.0.0.0:43069"
+	DefaultAddress = ":0"
 
 	// DefaultInsecure will create an HTTP server without TLS, for insecure connections.
 	// Note: as a result you can only make insecure HTTP requests, and no HTTP2
@@ -54,7 +50,7 @@ const (
 
 	// DefaultConfigSection is the section key used in config files used to
 	// configure the server options.
-	DefaultConfigSection = Name
+	DefaultConfigSection = Plugin
 
 	// DefaultMaxHeaderBytes is the maximum size to parse from a client's
 	// HTTP request headers.
@@ -77,15 +73,9 @@ var (
 	ErrNoMatchingCodecs    = errors.New("no matching codecs found, did you register the codec plugins?")
 )
 
-// Option is a functional option to provide custom values to the config.
-type Option func(*Config)
-
 // Config provides options to the entrypoint.
 type Config struct {
-	// Name is the entrypoint name.
-	//
-	// The default name is 'http-<random uuid>'
-	Name string `json:"name" yaml:"name"`
+	server.EntrypointConfig `yaml:",inline"`
 
 	// Address to listen on.
 	// TODO(davincible): implement this, and the address method.
@@ -165,16 +155,11 @@ type Config struct {
 	// StopTimeout is the timeout for ServerHertz.Stop().
 	StopTimeout time.Duration `json:"stopTimeout" yaml:"stopTimeout"`
 
-	// HandlerRegistrations are all handler registration functions that will be
-	// registered to the server upon startup.
-	//
-	// You can statically add handlers by using the fuctional server options.
-	// Optionally, you can dynamically add handlers by registering them to the
-	// Handlers global, and setting them explicitly in the config.
-	HandlerRegistrations server.HandlerRegistrations `json:"handlers" yaml:"handlers"`
-
 	// Middlewares is a list of middleware to use.
-	Middlewares []string `json:"middlewares" yaml:"middlewares"`
+	Middlewares []server.MiddlewareConfig `json:"middlewares" yaml:"middlewares"`
+
+	// Handlers is a list of pre-registered handlers.
+	Handlers []string `json:"handlers" yaml:"handlers"`
 
 	// Logger allows you to dynamically change the log level and plugin for a
 	// specific entrypoint.
@@ -182,9 +167,13 @@ type Config struct {
 }
 
 // NewConfig will create a new default config for the entrypoint.
-func NewConfig(options ...Option) *Config {
-	cfg := Config{
-		Name:                 "hertz-" + uuid.NewString(),
+func NewConfig(options ...server.Option) *Config {
+	cfg := &Config{
+		EntrypointConfig: server.EntrypointConfig{
+			Name:    Plugin + "-" + uuid.NewString(),
+			Plugin:  Plugin,
+			Enabled: true,
+		},
 		Address:              DefaultAddress,
 		Insecure:             DefaultInsecure,
 		MaxConcurrentStreams: DefaultMaxConcurrentStreams,
@@ -196,30 +185,13 @@ func NewConfig(options ...Option) *Config {
 		WriteTimeout:         DefaultWriteTimeout,
 		IdleTimeout:          DefaultIdleTimeout,
 		StopTimeout:          DefaultStopTimeout,
-		HandlerRegistrations: make(server.HandlerRegistrations),
-		Middlewares:          []string{},
 	}
 
-	cfg.ApplyOptions(options...)
-
-	return &cfg
-}
-
-// GetAddress returns the entrypoint address.
-func (c Config) GetAddress() string {
-	return c.Address
-}
-
-// Copy creates a copy of the entrypoint config.
-func (c Config) Copy() server.EntrypointConfig {
-	return &c
-}
-
-// ApplyOptions applies a set of options to the config.
-func (c *Config) ApplyOptions(options ...Option) {
 	for _, option := range options {
-		option(c)
+		option(cfg)
 	}
+
+	return cfg
 }
 
 // NewCodecMap fetches the whitelisted codec plugins from the registered codecs
@@ -254,25 +226,34 @@ func (c *Config) NewCodecMap() (codecs.Map, error) {
 //
 // Setting a custom name allows you to dynamically reference the entrypoint in
 // the file config, and makes it easier to attribute the logs.
-func WithName(name string) Option {
-	return func(c *Config) {
-		c.Name = name
+func WithName(name string) server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.Name = name
+		}
 	}
 }
 
 // WithAddress specifies the address to listen on.
 // If you want to listen on all interfaces use the format ":8080"
 // If you want to listen on a specific interface/address use the full IP.
-func WithAddress(address string) Option {
-	return func(c *Config) {
-		c.Address = address
+func WithAddress(addr string) server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.Address = addr
+		}
 	}
 }
 
 // WithTLS sets a tls config.
-func WithTLS(tlsConfig *tls.Config) Option {
-	return func(c *Config) {
-		c.TLS = &mtls.Config{Config: tlsConfig}
+func WithTLS(config *tls.Config) server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.TLS = &mtls.Config{Config: config}
+		}
 	}
 }
 
@@ -283,57 +264,66 @@ func WithTLS(tlsConfig *tls.Config) Option {
 // WARNING: don't use this in production, unless you really know what you are
 // doing. this will result in unencrypted traffic. Really, it is even advised
 // against using this in testing environments.
-func WithInsecure() Option {
-	return func(c *Config) {
-		c.Insecure = true
+func WithInsecure() server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.Insecure = true
+		}
 	}
 }
 
 // WithDisableHTTP2 will prevent the creation of an HTTP2 server on the entrypoint.
-func WithDisableHTTP2() Option {
-	return func(c *Config) {
-		c.HTTP2 = false
+func WithDisableHTTP2() server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.HTTP2 = false
+		}
 	}
 }
 
 // WithAllowH2C will allow H2C connections on the entrypoint. H2C is HTTP2 without TLS.
 // It is not recommended to turn this on.
-func WithAllowH2C() Option {
-	return func(c *Config) {
-		c.H2C = true
-	}
-}
-
-// WithConfig will set replace the server config with config provided as argument.
-// Warning: any options applied previous to this option will be overwritten by
-// the contents of the config provided here.
-func WithConfig(config Config) Option {
-	return func(c *Config) {
-		*c = config
+func WithAllowH2C() server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.H2C = true
+		}
 	}
 }
 
 // WithMaxConcurrentStreams sets the concurrent streams limit for HTTP2.
-func WithMaxConcurrentStreams(value int) Option {
-	return func(c *Config) {
-		c.MaxConcurrentStreams = value
+func WithMaxConcurrentStreams(value int) server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.MaxConcurrentStreams = value
+		}
 	}
 }
 
 // WithCodecWhitelist sets the list of codecs allowed in the HTTP entrypoint.
 // If registered, any codecs set here will be imported into the server.
 // You still need to register the codec plugins by importing them.
-func WithCodecWhitelist(list []string) Option {
-	return func(c *Config) {
-		c.CodecWhitelist = list
+func WithCodecWhitelist(list []string) server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.CodecWhitelist = list
+		}
 	}
 }
 
 // WithReadTimeout sets the maximum duration for reading the entire request,
 // including the body. A zero or negative value means there will be no timeout.
-func WithReadTimeout(timeout time.Duration) Option {
-	return func(c *Config) {
-		c.ReadTimeout = timeout
+func WithReadTimeout(timeout time.Duration) server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.ReadTimeout = timeout
+		}
 	}
 }
 
@@ -341,91 +331,63 @@ func WithReadTimeout(timeout time.Duration) Option {
 // response. It is reset whenever a new request's header is read. Like
 // ReadTimeout, it does not let Handlers make decisions on a per-request basis.
 // A zero or negative value means there will be no timeout.
-func WithWriteTimeout(timeout time.Duration) Option {
-	return func(c *Config) {
-		c.WriteTimeout = timeout
+func WithWriteTimeout(timeout time.Duration) server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.WriteTimeout = timeout
+		}
 	}
 }
 
 // WithIdleTimeout is the maximum amount of time to wait for the next request when
 // keep-alives are enabled. If IdleTimeout is zero, the value of ReadTimeout is
 // used. If both are zero, there is no timeout.
-func WithIdleTimeout(timeout time.Duration) Option {
-	return func(c *Config) {
-		c.IdleTimeout = timeout
+func WithIdleTimeout(timeout time.Duration) server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.IdleTimeout = timeout
+		}
 	}
 }
 
-// WithRegistration adds a named registration function to the config.
-// The name set here allows you to dynamically add this handler to entrypoints
-// through a config.
-//
-// Registration functions are used to register handlers to a server.
-func WithRegistration(name string, registration server.RegistrationFunc) Option {
-	server.Handlers.Set(name, registration)
+// WithMiddleware adds a pre-registered middleware.
+func WithMiddleware(m string) server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.Middlewares = append(cfg.Middlewares, server.MiddlewareConfig{Plugin: m})
+		}
+	}
+}
 
-	return func(c *Config) {
-		c.HandlerRegistrations[name] = registration
+// WithHandlers adds custom handlers.
+func WithHandlers(h ...server.RegistrationFunc) server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.OptHandlers = append(cfg.OptHandlers, h...)
+		}
 	}
 }
 
 // WithLogLevel changes the log level from the inherited logger.
-func WithLogLevel(level string) Option {
-	return func(c *Config) {
-		c.Logger.Level = level
+func WithLogLevel(level string) server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.Logger.Level = level
+		}
 	}
 }
 
 // WithLogPlugin changes the log level from the inherited logger.
-func WithLogPlugin(plugin string) Option {
-	return func(c *Config) {
-		c.Logger.Plugin = plugin
-	}
-}
-
-// WithDefaults sets default options to use on the creation of new HTTP entrypoints.
-func WithDefaults(options ...Option) server.Option {
-	return func(c *server.Config) {
-		cfg, ok := c.Defaults[Name].(*Config)
-		if !ok {
-			// Should never happen.
-			panic(fmt.Errorf("http.WithDefaults received invalid type, not *server.Config, but '%T'", cfg))
+func WithLogPlugin(plugin string) server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.Logger.Plugin = plugin
 		}
-
-		cfg.ApplyOptions(options...)
-
-		c.Defaults[Name] = cfg
-	}
-}
-
-// WithEntrypoint adds an HTTP entrypoint with the provided options.
-func WithEntrypoint(options ...Option) server.Option {
-	return func(c *server.Config) {
-		cfgAny, ok := c.Defaults[Name]
-		if !ok {
-			// Should never happen, but just in case.
-			panic("no defaults for http entrypoint found")
-		}
-
-		cfg := cfgAny.Copy().(*Config) //nolint:errcheck
-
-		cfg.ApplyOptions(options...)
-
-		c.Templates[cfg.Name] = server.EntrypointTemplate{
-			Enabled: true,
-			Type:    Name,
-			Config:  cfg,
-		}
-	}
-}
-
-// WithMiddleware appends middlewares to the server.
-// You can use any standard Go HTTP middleware.
-//
-// Each middlware is uniquely identified with a name. The name provided here
-// can be used to dynamically add middlware to an entrypoint in a config.
-func WithMiddleware(middlewares ...string) Option {
-	return func(c *Config) {
-		c.Middlewares = append(c.Middlewares, middlewares...)
 	}
 }

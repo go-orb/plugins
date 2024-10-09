@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"slices"
+	"strings"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/go-orb/go-orb/util/metadata"
@@ -28,16 +29,15 @@ func NewGRPCHandler[Tin any, Tout any](
 		request := new(Tin)
 
 		if _, err := srv.decodeBody(apCtx, request); err != nil {
-			srv.Logger.Error("failed to decode body", "error", err)
+			srv.logger.Error("failed to decode body", "error", err)
 			WriteError(apCtx, err)
 
 			return
 		}
 
 		// Copy metadata from req Headers into the req.Context.
-		ctx = metadata.EnsureIncoming(ctx)
-		ctx = metadata.EnsureOutgoing(ctx)
-		reqMd, _ := metadata.IncomingFrom(ctx)
+		ctx, reqMd := metadata.WithIncoming(ctx)
+		ctx, outMd := metadata.WithOutgoing(ctx)
 
 		apCtx.VisitAllHeaders(func(k, v []byte) {
 			sk := string(k)
@@ -45,7 +45,7 @@ func NewGRPCHandler[Tin any, Tout any](
 				return
 			}
 
-			reqMd[sk] = string(v)
+			reqMd[strings.ToLower(sk)] = string(v)
 		})
 
 		reqMd[metadata.Service] = service
@@ -55,27 +55,25 @@ func NewGRPCHandler[Tin any, Tout any](
 		h := func(ctx context.Context, req any) (any, error) {
 			return fHandler(ctx, req.(*Tin))
 		}
-		for _, m := range srv.middlewares {
+		for _, m := range srv.config.OptMiddlewares {
 			h = m.Call(h)
 		}
 
 		out, err := h(ctx, request)
 		if err != nil {
-			srv.Logger.Error("RPC request failed", "error", err)
+			srv.logger.Error("RPC request failed", "error", err)
 			WriteError(apCtx, err)
 
 			return
 		}
 
 		// Write outgoing metadata.
-		if md, ok := metadata.OutgoingFrom(ctx); ok {
-			for k, v := range md {
-				apCtx.Header(k, v)
-			}
+		for k, v := range outMd {
+			apCtx.Header(k, v)
 		}
 
 		if err := srv.encodeBody(apCtx, out); err != nil {
-			srv.Logger.Error("failed to encode body", "error", err)
+			srv.logger.Error("failed to encode body", "error", err)
 			WriteError(apCtx, err)
 
 			return

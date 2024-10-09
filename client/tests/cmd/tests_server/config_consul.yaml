@@ -1,18 +1,15 @@
-org:
-  orb:
-    svc:
-      client:
-        logger:
-          plugin: slog
-          format: json
-          level: INFO # DEBUG-1
-        registry:
-          plugin: consul
-      service:
-        logger:
-          plugin: lumberjack
-          format: json
-          level: DEBUG-1 # INFO
-          file: /tmp/test_server.log
-        registry:
-          plugin: consul
+client:
+  logger:
+    plugin: slog
+    format: json
+    level: INFO # DEBUG-1
+  registry:
+    plugin: consul
+service:
+  logger:
+    plugin: lumberjack
+    format: json
+    level: DEBUG-1 # INFO
+    file: /tmp/test_server.log
+  registry:
+    plugin: consul

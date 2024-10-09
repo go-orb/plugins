@@ -33,7 +33,7 @@ type httpServer struct {
 	Server *http.Server
 }
 
-func (s *ServerHTTP) newHTTPServer(router router.Router) (*httpServer, error) {
+func (s *Server) newHTTPServer(router router.Router) (*httpServer, error) {
 	var ok bool
 	s.handler, ok = router.(http.Handler)
 
@@ -41,35 +41,35 @@ func (s *ServerHTTP) newHTTPServer(router router.Router) (*httpServer, error) {
 		return nil, ErrRouterHandlerInterface
 	}
 
-	if s.Config.H2C {
+	if s.config.H2C {
 		s.handler = h2c.NewHandler(s.handler, &http2.Server{
-			MaxConcurrentStreams: uint32(s.Config.MaxConcurrentStreams), //nolint:gosec
+			MaxConcurrentStreams: uint32(s.config.MaxConcurrentStreams), //nolint:gosec
 		})
 	}
 
 	server := http.Server{
 		Handler:           s,
-		ReadTimeout:       s.Config.ReadTimeout,
-		WriteTimeout:      s.Config.WriteTimeout,
-		IdleTimeout:       s.Config.IdleTimeout,
+		ReadTimeout:       s.config.ReadTimeout,
+		WriteTimeout:      s.config.WriteTimeout,
+		IdleTimeout:       s.config.IdleTimeout,
 		ReadHeaderTimeout: time.Second * 4,
 		// TODO(davincible): do we need to set this? would be nice but doesn't take interface
 		// ErrorLog:          httpServerLogger,
 	}
 
-	if !s.Config.Insecure && s.Config.TLS != nil {
-		server.TLSConfig = s.Config.TLS.Config
-	} else if !s.Config.Insecure && s.Config.TLS == nil {
+	if !s.config.Insecure && s.config.TLS != nil {
+		server.TLSConfig = s.config.TLS.Config
+	} else if !s.config.Insecure && s.config.TLS == nil {
 		return nil, ErrNoTLS
 	}
 
-	if s.Config.HTTP2 && !strings.Contains(os.Getenv("GODEBUG"), "http2server=0") {
-		if s.Config.TLS != nil {
-			s.Config.TLS.NextProtos = append([]string{"h2"}, s.Config.TLS.NextProtos...)
+	if s.config.HTTP2 && !strings.Contains(os.Getenv("GODEBUG"), "http2server=0") {
+		if s.config.TLS != nil {
+			s.config.TLS.NextProtos = append([]string{"h2"}, s.config.TLS.NextProtos...)
 		}
 
 		h2 := http2.Server{
-			MaxConcurrentStreams: uint32(s.Config.MaxConcurrentStreams), //nolint:gosec
+			MaxConcurrentStreams: uint32(s.config.MaxConcurrentStreams), //nolint:gosec
 			NewWriteScheduler:    func() http2.WriteScheduler { return http2.NewPriorityWriteScheduler(nil) },
 		}
 
@@ -97,7 +97,7 @@ func (s *httpServer) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (s *ServerHTTP) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (s *Server) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Server", "go-orb")
 
 	// advertise HTTP/3, if enabled
@@ -109,14 +109,14 @@ func (s *ServerHTTP) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		if req.ProtoMajor < 3 {
 			err := s.http3Server.SetQUICHeaders(resp.Header())
 			if err != nil {
-				s.Logger.Error("setting HTTP/3 Alt-Svc header", "error", err)
+				s.logger.Error("setting HTTP/3 Alt-Svc header", "error", err)
 			}
 		}
 	}
 
 	// reject very long methods; probably a mistake or an attack
 	if len(req.Method) > 32 {
-		s.Logger.Warn("rejecting request with long method",
+		s.logger.Warn("rejecting request with long method",
 			slog.String("method_trunc", req.Method[:32]),
 			slog.String("remote_addr", req.RemoteAddr))
 		resp.WriteHeader(http.StatusMethodNotAllowed)

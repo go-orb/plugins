@@ -20,21 +20,21 @@ var (
 type http3server struct {
 	*http3.Server
 
-	s *ServerHTTP
+	s *Server
 }
 
-func (s *ServerHTTP) newHTTP3Server() *http3server {
+func (s *Server) newHTTP3Server() *http3server {
 	h3 := http3server{
 		s: s,
 	}
 
 	h3.Server = &http3.Server{
 		Handler:        s,
-		TLSConfig:      s.Config.TLS.Config,
-		MaxHeaderBytes: s.Config.MaxHeaderBytes,
+		TLSConfig:      s.config.TLS.Config,
+		MaxHeaderBytes: s.config.MaxHeaderBytes,
 
 		QUICConfig: &quic.Config{
-			MaxIncomingStreams: int64(s.Config.MaxConcurrentStreams),
+			MaxIncomingStreams: int64(s.config.MaxConcurrentStreams),
 			// TODO(davincible): remove this config when draft versions are no longer supported (we have no need to support drafts)
 			Versions: []quic.Version{quic.Version1, quic.Version2},
 		},
@@ -44,9 +44,9 @@ func (s *ServerHTTP) newHTTP3Server() *http3server {
 }
 
 func (h3 *http3server) Start() error {
-	h3ln, err := quic.ListenEarly(h3.s.listenerUDP, http3.ConfigureTLSConfig(h3.s.Config.TLS.Config), &quic.Config{
+	h3ln, err := quic.ListenEarly(h3.s.listenerUDP, http3.ConfigureTLSConfig(h3.s.config.TLS.Config), &quic.Config{
 		Allow0RTT:          true,
-		MaxIncomingStreams: int64(h3.s.Config.MaxConcurrentStreams),
+		MaxIncomingStreams: int64(h3.s.config.MaxConcurrentStreams),
 	})
 	if err != nil {
 		return err

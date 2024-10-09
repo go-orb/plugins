@@ -54,24 +54,23 @@ func (m *Mux) HandleRPC(stream drpc.Stream, rpc string) (err error) {
 
 	ctx := stream.Context()
 
-	ctx = metadata.EnsureIncoming(ctx)
-	ctx = metadata.EnsureOutgoing(ctx)
+	ctx, reqMd := metadata.WithIncoming(ctx)
+	ctx, outMd := metadata.WithOutgoing(ctx)
 
 	dMeta, ok := drpcmetadata.Get(ctx)
 	if !ok {
 		dMeta = make(map[string]string)
 	}
 
-	incMd, _ := metadata.IncomingFrom(ctx)
 	for k, v := range dMeta {
-		incMd[k] = v
+		reqMd[k] = v
 	}
 
 	fmSplit := strings.Split(rpc, "/")
 
 	if len(fmSplit) >= 3 {
-		incMd[metadata.Service] = fmSplit[1]
-		incMd[metadata.Method] = fmSplit[2]
+		reqMd[metadata.Service] = fmSplit[1]
+		reqMd[metadata.Method] = fmSplit[2]
 	}
 
 	stream = &streamWrapper{Stream: stream, ctx: ctx}
@@ -98,8 +97,6 @@ func (m *Mux) HandleRPC(stream drpc.Stream, rpc string) (err error) {
 
 		return drpcerr.WithCode(errors.New(oErr.Message), uint64(oErr.Code))
 	case out != nil && !reflect.ValueOf(out).IsNil():
-		outMd, _ := metadata.OutgoingFrom(ctx)
-
 		outData, err := anypb.New(out.(proto.Message))
 		if err != nil {
 			return errs.Wrap(err)

@@ -6,11 +6,12 @@ import (
 	"text/template"
 )
 
-//nolint:gochecknoglobals
+//nolint:gochecknoglobals,lll
 var orbTemplate = `
 import (
 	"context"
 
+	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/server"
 
@@ -22,6 +23,29 @@ import (
 )
 
 {{- range .Services }}
+// Handler{{.Type}} is the name of a service, it's here to static type/reference.
+const Handler{{.Type}} = "{{.Name}}"
+{{- end }}
+
+{{- range .Services }}
+// {{.Type}}Client is the client for {{.Name}}
+type {{.Type}}Client struct {
+	client client.Client
+}
+
+// New{{.Type}}Client creates a new client for {{.Name}}
+func New{{.Type}}Client(client client.Client) *{{.Type}}Client {
+	return &{{.Type}}Client{client: client}
+}
+
+{{- $service := .}}{{ range .Methods }}
+// {{.Name}} calls {{.Name}}.
+func (c *{{$service.Type}}Client) {{.Name}}(ctx context.Context, service string, req *{{.Request}}, opts ...client.CallOption) (*{{.Reply}}, error) {
+	return client.Call[{{.Reply}}](ctx, c.client, service, "{{$service.Name}}/{{.Name}}", req, opts...)
+}
+{{- end }}
+
+// {{.Type}}Handler is the Handler for {{.Name}}
 type {{.Type}}Handler interface {
 	{{- range .Methods }}
 	{{.Name}}(ctx context.Context, req *{{.Request}}) (*{{.Reply}}, error)
@@ -30,6 +54,7 @@ type {{.Type}}Handler interface {
 
 {{- if $.ServerDRPC }}
 
+// register{{.Type}}DRPCHandler registers the service to an dRPC server.
 func register{{.Type}}DRPCHandler(srv *mdrpc.Server, handler {{.Type}}Handler) error {
 	desc := DRPC{{.Type}}Description{}
 
@@ -43,10 +68,9 @@ func register{{.Type}}DRPCHandler(srv *mdrpc.Server, handler {{.Type}}Handler) e
 	}
 
 	// Add each endpoint name of this handler to the orb drpc server.
-	for i := 0; i < desc.NumMethods(); i++ {
-		name, _, _, _, _ := desc.Method(i)
-		srv.AddEndpoint(name)
-	}
+	{{- $service := .}}{{ range .Methods}}
+	srv.AddEndpoint("{{.Path}}")
+	{{- end }}
 
 	return nil
 }
@@ -56,10 +80,10 @@ func register{{.Type}}DRPCHandler(srv *mdrpc.Server, handler {{.Type}}Handler) e
 {{- if $.ServerHTTP }}
 
 // register{{.Type}}HTTPHandler registers the service to an HTTP server.
-func register{{.Type}}HTTPHandler(srv *mhttp.ServerHTTP, handler {{.Type}}Handler) {
+func register{{.Type}}HTTPHandler(srv *mhttp.Server, handler {{.Type}}Handler) {
 	r := srv.Router()
-	{{$method := .}}{{- range .Methods}}
-	r.{{.Method}}("{{.Path}}", mhttp.NewGRPCHandler(srv, handler.{{.Name}}, "{{$method.Name}}", "{{.Name}}"))
+	{{- $service := .}}{{range .Methods}}
+	r.{{.Method}}("{{.Path}}", mhttp.NewGRPCHandler(srv, handler.{{.Name}}, Handler{{$service.Type}}, "{{.Name}}"))
 	{{- end}}
 }
 
@@ -70,17 +94,16 @@ func register{{.Type}}HTTPHandler(srv *mhttp.ServerHTTP, handler {{.Type}}Handle
 // register{{.Type}}HertzHandler registers the service to an Hertz server.
 func register{{.Type}}HertzHandler(srv *mhertz.Server, handler {{.Type}}Handler) {
 	r := srv.Router()
-	{{$method := .}}{{- range .Methods}}
-	r.{{.MethodUpper}}("{{.Path}}", mhertz.NewGRPCHandler(srv, handler.{{.Name}}, "{{$method.Name}}", "{{.Name}}"))
+	{{- $service := .}}{{ range .Methods}}
+	r.{{.MethodUpper}}("{{.Path}}", mhertz.NewGRPCHandler(srv, handler.{{.Name}}, Handler{{$service.Type}}, "{{.Name}}"))
 	{{- end}}
 }
-
-{{ end -}}
+{{- end }}
 
 // Register{{.Type}}Handler will return a registration function that can be
 // provided to entrypoints as a handler registration.
 func Register{{.Type}}Handler(handler {{.Type}}Handler) server.RegistrationFunc {
-	return server.RegistrationFunc(func(s any) {
+	return func(s any) {
 		switch srv := s.(type) {
 		{{ if $.ServerGRPC }}
 		case grpc.ServiceRegistrar:
@@ -95,13 +118,13 @@ func Register{{.Type}}Handler(handler {{.Type}}Handler) server.RegistrationFunc 
 			register{{.Type}}HertzHandler(srv, handler)
 		{{- end -}}
 		{{ if $.ServerHTTP }}
-		case *mhttp.ServerHTTP:
+		case *mhttp.Server:
 			register{{.Type}}HTTPHandler(srv, handler)
 		{{- end }}
 		default:
 			log.Warn("No provider for this server found", "proto", "{{.Metadata}}", "handler", "{{.Type}}", "server", s)
 		}
-	})
+	}
 }
 
 {{- end }}

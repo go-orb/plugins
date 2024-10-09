@@ -103,20 +103,6 @@ func RefreshClients() {
 	}
 }
 
-// TestGetRequest makes a GET request to the echo endpoint.
-func TestGetRequest(tb testing.TB, addr string, reqT ReqType) error {
-	tb.Helper()
-
-	url := fmt.Sprintf("%s/echo?name=%s", addr, testName)
-
-	body, err := switchRequest(tb, url, "", nil, makeGetReq, reqT)
-	if err != nil {
-		return err
-	}
-
-	return checkJSONResponse(body, testName)
-}
-
 // TestPostRequestJSON makes a POST request to the echo endpoint.
 func TestPostRequestJSON(tb testing.TB, addr string, reqT ReqType) error {
 	tb.Helper()
@@ -126,7 +112,7 @@ func TestPostRequestJSON(tb testing.TB, addr string, reqT ReqType) error {
 		tb.Fatal("failed to marshall json", err)
 	}
 
-	addr += "/echo"
+	addr += "/echo.Streams/Call"
 	ct := headers.JSONContentType
 
 	body, err := switchRequest(tb, addr, ct, msg, makePostReq, reqT)
@@ -148,7 +134,7 @@ func TestPostRequestProto(tb testing.TB, addr, ct string, reqT ReqType) error {
 		return err
 	}
 
-	addr += "/echo"
+	addr += "/echo.Streams/Call"
 
 	body, err := switchRequest(tb, addr, ct, msg, makePostReq, reqT)
 	if err != nil {
@@ -201,44 +187,6 @@ func checkProtoResponse(body []byte, name string) error {
 	}
 
 	return nil
-}
-
-func makeGetReq(tb testing.TB, addr, _ string, _ []byte, client *http.Client) ([]byte, error) {
-	// NOTE: this would be nice to use, but gices TCP errors
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	// defer cancel()
-	//
-	// req, err := http.NewRequestWithContext(ctx, http.MethodGet, addr, nil)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("create GET request failed: %w", err)
-	// }
-	//
-	// resp, err := client.Do(req)
-	tb.Helper()
-
-	resp, err := client.Get(addr) //nolint:noctx
-	if err != nil {
-		return nil, fmt.Errorf("failed to make GET request: %w", err)
-	}
-
-	defer func() {
-		if err = resp.Body.Close(); err != nil {
-			tb.Errorf("failed to close body: %v", err)
-		}
-	}()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	logResponse(tb, resp, body)
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("GET request failed, status not OK: %+v", resp)
-	}
-
-	return body, nil
 }
 
 func makePostReq(tb testing.TB, addr, ct string, data []byte, client *http.Client) ([]byte, error) {

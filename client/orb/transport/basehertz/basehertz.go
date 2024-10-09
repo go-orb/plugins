@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"strings"
 
 	hclient "github.com/cloudwego/hertz/pkg/app/client"
 	"github.com/cloudwego/hertz/pkg/protocol"
@@ -87,7 +88,7 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 	hReq.SetRequestURI(fmt.Sprintf("%s://%s/%s", t.scheme, node.Address, req.Endpoint()))
 
 	// Set metadata key=value to request headers.
-	md, ok := metadata.OutgoingFrom(ctx)
+	md, ok := metadata.Outgoing(ctx)
 	if ok {
 		for name, value := range md {
 			hReq.Header.Set(name, value)
@@ -145,7 +146,7 @@ func (t *Transport) call2(
 		return res, orberrors.NewHTTP(hRes.StatusCode())
 	}
 
-	if opts.Headers != nil {
+	if opts.ResponseMetadata != nil {
 		for _, v := range hRes.Header.GetHeaders() {
 			k := string(v.GetKey())
 
@@ -154,7 +155,7 @@ func (t *Transport) call2(
 				continue
 			}
 
-			opts.Headers[k] = string(v.GetValue())
+			opts.ResponseMetadata[strings.ToLower(k)] = string(v.GetValue())
 		}
 	}
 

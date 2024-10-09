@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"strconv"
 
 	"storj.io/drpc/drpcserver"
 
+	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	orbserver "github.com/go-orb/go-orb/server"
@@ -26,9 +28,11 @@ const Plugin = "drpc"
 
 // Server is the drpc Server for go-orb.
 type Server struct {
-	config   Config
+	config   *Config
 	logger   log.Logger
 	registry registry.Type
+
+	address string
 
 	ctx        context.Context
 	cancelFunc context.CancelFunc
@@ -36,6 +40,7 @@ type Server struct {
 	mux    *Mux
 	server *drpcserver.Server
 
+	handlers    []orbserver.RegistrationFunc
 	middlewares []orbserver.Middleware
 
 	endpoints []string
@@ -59,7 +64,7 @@ func (s *Server) Start() error {
 	s.mux = newMux(s)
 
 	// Register handlers.
-	for _, h := range s.config.HandlerRegistrations {
+	for _, h := range s.handlers {
 		h(s)
 	}
 
@@ -75,9 +80,13 @@ func (s *Server) Start() error {
 		}
 	}
 
+	s.address = listener.Addr().String()
+
+	s.logger.Info("Got address", "address", s.address)
+
 	s.ctx, s.cancelFunc = context.WithCancel(context.Background())
 
-	s.wp = workerpool.New(256)
+	s.wp = workerpool.New(s.config.MaxConcurrentStreams)
 	go s.run(s.ctx, listener)
 
 	s.started = true
@@ -138,7 +147,7 @@ func (s *Server) Address() string {
 		return ""
 	}
 
-	return s.config.Address
+	return s.address
 }
 
 // Transport returns the client transport to use: "drpc".
@@ -157,9 +166,14 @@ func (s *Server) EntrypointID() string {
 	return s.entrypointID
 }
 
-// String returns the entrypoint type; http.
+// String returns the entrypoint type.
 func (s *Server) String() string {
 	return Plugin
+}
+
+// Enabled returns if this entrypoint has been enbaled in config.
+func (s *Server) Enabled() bool {
+	return s.config.Enabled
 }
 
 // Name returns the entrypoint name.
@@ -169,7 +183,7 @@ func (s *Server) Name() string {
 
 // Type returns the component type.
 func (s *Server) Type() string {
-	return orbserver.ComponentType
+	return orbserver.EntrypointType
 }
 
 // Router returns the drpc mux.
@@ -223,19 +237,58 @@ func (s *Server) registryDeregister() error {
 // Provide creates a new entrypoint for a single address. You can create
 // multiple entrypoints for multiple addresses and ports.
 func Provide(
-	_ types.ServiceName,
+	sections []string,
+	configs types.ConfigData,
 	logger log.Logger,
 	reg registry.Type,
-	cfg Config,
-	options ...Option,
-) (*Server, error) {
-	cfg.ApplyOptions(options...)
+	opts ...orbserver.Option,
+) (orbserver.Entrypoint, error) {
+	cfg := NewConfig(opts...)
+
+	if err := config.Parse(sections, configs, cfg); err != nil {
+		return nil, err
+	}
+
+	// Configure Middlewares.
+	for idx, cfgMw := range cfg.Middlewares {
+		pFunc, ok := orbserver.Middlewares.Get(cfgMw.Plugin)
+		if !ok {
+			return nil, fmt.Errorf("%w: '%s', did you register it?", orbserver.ErrUnknownMiddleware, cfgMw.Plugin)
+		}
+
+		mw, err := pFunc(append(sections, "middlewares", strconv.Itoa(idx)), configs, logger)
+		if err != nil {
+			return nil, err
+		}
+
+		cfg.OptMiddlewares = append(cfg.OptMiddlewares, mw)
+	}
+
+	// Get handlers.
+	for _, k := range cfg.Handlers {
+		h, ok := orbserver.Handlers.Get(k)
+		if !ok {
+			return nil, fmt.Errorf("%w: '%s', did you register it?", orbserver.ErrUnknownHandler, k)
+		}
+
+		cfg.OptHandlers = append(cfg.OptHandlers, h)
+	}
+
+	return New(cfg, logger, reg)
+}
+
+// New creates a dRPC Server from a Config struct.
+func New(acfg any, logger log.Logger, reg registry.Type) (orbserver.Entrypoint, error) {
+	cfg, ok := acfg.(*Config)
+	if !ok {
+		return nil, fmt.Errorf("drpc invalid config: %v", cfg)
+	}
 
 	var err error
 
 	cfg.Address, err = addr.GetAddress(cfg.Address)
 	if err != nil {
-		return nil, fmt.Errorf("http validate addr '%s': %w", cfg.Address, err)
+		return nil, fmt.Errorf("drpc validate addr '%s': %w", cfg.Address, err)
 	}
 
 	if err := addr.ValidateAddress(cfg.Address); err != nil {
@@ -246,21 +299,12 @@ func Provide(
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
 
-	mws := []orbserver.Middleware{}
-
-	for _, m := range cfg.Middlewares {
-		if mw, ok := orbserver.Middlewares.Get(m); ok {
-			mws = append(mws, mw)
-		} else {
-			logger.Error("unknown middleware given", "middleware", m)
-		}
-	}
-
 	entrypoint := Server{
 		config:      cfg,
 		logger:      logger,
 		registry:    reg,
-		middlewares: mws,
+		handlers:    cfg.OptHandlers,
+		middlewares: cfg.OptMiddlewares,
 		ctx:         ctx,
 		cancelFunc:  cancelFunc,
 	}

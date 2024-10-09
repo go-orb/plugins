@@ -5,7 +5,6 @@
 package main
 
 import (
-	"fmt"
 	"net/url"
 
 	"github.com/go-orb/go-orb/config"
@@ -16,13 +15,7 @@ import (
 	"github.com/go-orb/plugins/client/tests/handler"
 	"github.com/go-orb/plugins/client/tests/proto"
 
-	"github.com/go-orb/plugins/server/drpc"
-	mgrpc "github.com/go-orb/plugins/server/grpc"
-	mhertz "github.com/go-orb/plugins/server/hertz"
-	mhttp "github.com/go-orb/plugins/server/http"
-
 	"github.com/google/wire"
-	"github.com/hashicorp/consul/sdk/freeport"
 )
 
 // provideConfigData reads the config from cli and returns it.
@@ -43,67 +36,62 @@ func provideConfigData(
 }
 
 // provideServerOpts provides options for the go-orb server.
-// TODO(jochumdev): We should simplify server opts.
-func provideServerOpts() ([]server.Option, error) {
-	// Get some free ports
-	ports, err := freeport.Take(8)
-	if err != nil {
-		return nil, err
-	}
+func provideServerOpts() ([]server.ConfigOption, error) {
 
-	// Our lonely handler
 	hInstance := new(handler.EchoHandler)
+	hRegister := proto.RegisterStreamsHandler(hInstance)
 
-	return []server.Option{
-		mhertz.WithEntrypoint(
-			mhertz.WithName("hertzhttp"),
-			mhertz.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[0])),
-			mhertz.WithInsecure(),
-			mhertz.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
-		),
-		mhertz.WithEntrypoint(
-			mhertz.WithName("hertzh2c"),
-			mhertz.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[1])),
-			mhertz.WithInsecure(),
-			mhertz.WithAllowH2C(),
-			mhertz.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
-		),
-		mgrpc.WithEntrypoint(
-			mgrpc.WithName("grpc"),
-			mgrpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[2])),
-			mgrpc.WithInsecure(true),
-			mgrpc.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
-		),
-		mhttp.WithEntrypoint(
-			mhttp.WithName("http"),
-			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[3])),
-			mhttp.WithInsecure(),
-			mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
-		),
-		mhttp.WithEntrypoint(
-			mhttp.WithName("h2c"),
-			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[4])),
-			mhttp.WithInsecure(),
-			mhttp.WithAllowH2C(),
-			mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
-		),
-		mhttp.WithEntrypoint(
-			mhttp.WithName("http3"),
-			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[5])),
-			mhttp.WithHTTP3(),
-			mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
-		),
-		mhttp.WithEntrypoint(
-			mhttp.WithName("https"),
-			mhttp.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[6])),
-			mhttp.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
-		),
-		drpc.WithEntrypoint(
-			drpc.WithName("drpc"),
-			drpc.WithAddress(fmt.Sprintf("127.0.0.1:%d", ports[7])),
-			drpc.WithRegistration("Streams", proto.RegisterStreamsHandler(hInstance)),
-		),
-	}, nil
+	server.Handlers.Add(proto.HandlerStreams, hRegister)
+
+	opts := []server.ConfigOption{}
+	// opts = append(opts, server.WithEntrypointConfig(mhertz.NewConfig(
+	// 	mhertz.WithName("hertzhttp"),
+	// 	mhertz.WithDisableHTTP2(),
+	// 	mhertz.WithInsecure(),
+	// 	mhertz.WithHandlers(hRegister),
+	// )))
+	// opts = append(opts, server.WithEntrypointConfig(mhertz.NewConfig(
+	// 	mhertz.WithName("hertzh2c"),
+	// 	mhertz.WithInsecure(),
+	// 	mhertz.WithAllowH2C(),
+	// 	mhertz.WithHandlers(hRegister),
+	// )))
+	// opts = append(opts, server.WithEntrypointConfig(mgrpc.NewConfig(
+	// 	mgrpc.WithName("grpc"),
+	// 	mgrpc.WithInsecure(),
+	// 	mgrpc.WithHandlers(hRegister),
+	// )))
+	// opts = append(opts, server.WithEntrypointConfig(mhttp.NewConfig(
+	// 	mhttp.WithName("http"),
+	// 	mhttp.WithInsecure(),
+	// 	mhttp.WithHandlers(hRegister),
+	// )))
+	// opts = append(opts, server.WithEntrypointConfig(mhttp.NewConfig(
+	// 	mhttp.WithName("https"),
+	// 	mhttp.WithDisableHTTP2(),
+	// 	mhttp.WithHandlers(hRegister),
+	// )))
+	// opts = append(opts, server.WithEntrypointConfig(mhttp.NewConfig(
+	// 	mhttp.WithName("h2c"),
+	// 	mhttp.WithInsecure(),
+	// 	mhttp.WithAllowH2C(),
+	// 	mhttp.WithHandlers(hRegister),
+	// )))
+	// opts = append(opts, server.WithEntrypointConfig(mhttp.NewConfig(
+	// 	mhttp.WithName("http2"),
+	// 	mhttp.WithHandlers(hRegister),
+	// )))
+	// opts = append(opts, server.WithEntrypointConfig(mhttp.NewConfig(
+	// 	mhttp.WithName("http3"),
+	// 	mhttp.WithHTTP3(),
+	// 	mhttp.WithHandlers(hRegister),
+	// )))
+	// opts = append(opts, server.WithEntrypointConfig(drpc.NewConfig(
+	// 	drpc.WithName("drpc"),
+	// 	drpc.WithHandlers(hRegister),
+	// )))
+
+	return opts, nil
 }
 
 // provideComponents creates a slice of components out of the arguments.
@@ -131,11 +119,11 @@ func newComponents(
 	panic(wire.Build(
 		provideConfigData,
 		wire.Value([]log.Option{}),
-		log.ProvideLogger,
+		log.Provide,
 		wire.Value([]registry.Option{}),
-		registry.ProvideRegistry,
+		registry.Provide,
 		provideServerOpts,
-		server.ProvideServer,
+		server.Provide,
 		provideComponents,
 	))
 }

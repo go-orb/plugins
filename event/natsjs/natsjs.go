@@ -139,7 +139,7 @@ func (n *NatsJS) HandleRequest(
 		}
 
 		req.SetReplyFunc(func(ctx context.Context, result []byte, inErr error) {
-			md, ok := metadata.OutgoingFrom(ctx)
+			md, ok := metadata.Outgoing(ctx)
 			if !ok {
 				md = make(map[string]string)
 			}

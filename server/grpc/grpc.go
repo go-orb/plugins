@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+	"strconv"
 
 	"log/slog"
 
@@ -14,6 +15,7 @@ import (
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
+	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
@@ -25,13 +27,13 @@ import (
 )
 
 // Interface guard.
-var _ server.Entrypoint = (*ServerGRPC)(nil)
+var _ server.Entrypoint = (*Server)(nil)
 
-// ServerGRPC is an entrypoint with a gRPC server.
-type ServerGRPC struct {
+// Server is an entrypoint with a gRPC server.
+type Server struct {
 	server *grpc.Server
 
-	config Config
+	config *Config
 
 	logger log.Logger
 
@@ -45,23 +47,59 @@ type ServerGRPC struct {
 	// health server implements the gRPC health protocol.
 	health *health.Server
 
-	// Cache the middleware count to prevent evaluation on every request.
-	unaryMiddleware int
-
 	started bool
 }
 
-// Provide creates a gRPC server by options.
+// Provide provides a gRPC server by config.
 func Provide(
-	_ types.ServiceName,
+	sections []string,
+	configs types.ConfigData,
 	logger log.Logger,
 	reg registry.Type,
-	cfg Config,
-	opts ...Option,
-) (*ServerGRPC, error) {
-	var err error
+	opts ...server.Option,
+) (server.Entrypoint, error) {
+	cfg := NewConfig(opts...)
 
-	cfg.ApplyOptions(opts...)
+	if err := config.Parse(sections, configs, cfg); err != nil {
+		return nil, err
+	}
+
+	// Configure Middlewares.
+	for idx, cfgMw := range cfg.Middlewares {
+		pFunc, ok := server.Middlewares.Get(cfgMw.Plugin)
+		if !ok {
+			return nil, fmt.Errorf("%w: '%s', did you register it?", server.ErrUnknownMiddleware, cfgMw.Plugin)
+		}
+
+		mw, err := pFunc(append(sections, "middlewares", strconv.Itoa(idx)), configs, logger)
+		if err != nil {
+			return nil, err
+		}
+
+		cfg.OptMiddlewares = append(cfg.OptMiddlewares, mw)
+	}
+
+	// Get handlers.
+	for _, k := range cfg.Handlers {
+		h, ok := server.Handlers.Get(k)
+		if !ok {
+			return nil, fmt.Errorf("%w: '%s', did you register it?", server.ErrUnknownHandler, k)
+		}
+
+		cfg.OptHandlers = append(cfg.OptHandlers, h)
+	}
+
+	return New(cfg, logger, reg)
+}
+
+// New creates a gRPC server by options.
+func New(acfg any, logger log.Logger, reg registry.Type) (server.Entrypoint, error) {
+	cfg, ok := acfg.(*Config)
+	if !ok {
+		return nil, fmt.Errorf("grpc invalid config: %v", cfg)
+	}
+
+	var err error
 
 	cfg.Address, err = addr.GetAddress(cfg.Address)
 	if err != nil {
@@ -70,7 +108,7 @@ func Provide(
 
 	logger = logger.With(slog.String("component", server.ComponentType), slog.String("plugin", Plugin), slog.String("entrypoint", cfg.Name))
 
-	srv := ServerGRPC{
+	srv := Server{
 		config:   cfg,
 		logger:   logger,
 		registry: reg,
@@ -81,16 +119,10 @@ func Provide(
 	return &srv, nil
 }
 
-func (s *ServerGRPC) setupgRPCServer() {
-	grpcOpts := []grpc.ServerOption{}
-
-	s.unaryMiddleware = s.config.UnaryInterceptors.Len()
-	if s.unaryMiddleware > 0 || s.config.Timeout > 0 {
-		grpcOpts = append(grpcOpts, grpc.UnaryInterceptor(s.unaryServerInterceptor()))
-	}
-
-	if s.config.StreamInterceptors.Len() > 0 {
-		grpcOpts = append(grpcOpts, grpc.StreamInterceptor(s.streamServerInterceptor()))
+func (s *Server) setupgRPCServer() {
+	grpcOpts := []grpc.ServerOption{
+		grpc.UnaryInterceptor(s.unaryServerInterceptor()),
+		grpc.StreamInterceptor(s.streamServerInterceptor()),
 	}
 
 	if len(s.config.GRPCOptions) > 0 {
@@ -110,13 +142,13 @@ func (s *ServerGRPC) setupgRPCServer() {
 }
 
 // Start start the gRPC server.
-func (s *ServerGRPC) Start() error {
+func (s *Server) Start() error {
 	if s.started {
 		return nil
 	}
 
 	// Register handlers.
-	for _, f := range s.config.HandlerRegistrations {
+	for _, f := range s.config.OptHandlers {
 		s.Register(f)
 	}
 
@@ -149,7 +181,7 @@ func (s *ServerGRPC) Start() error {
 }
 
 // Stop stop the gRPC server.
-func (s *ServerGRPC) Stop(ctx context.Context) error {
+func (s *Server) Stop(ctx context.Context) error {
 	if !s.started {
 		return nil
 	}
@@ -184,17 +216,13 @@ func (s *ServerGRPC) Stop(ctx context.Context) error {
 }
 
 // Config returns the server config.
-//
-// Note that this a copy and you cannot mutate it.
-// Some values such as arrays are pointers, but mutating them either results
-// in undefined behavior, or no change, as they are already processed.
-func (s *ServerGRPC) Config() Config {
+func (s *Server) Config() *Config {
 	return s.config
 }
 
 // Address returns the address the entypoint listens on,
 // for example: 127.0.0.1:8000 .
-func (s *ServerGRPC) Address() string {
+func (s *Server) Address() string {
 	if s.lis != nil {
 		return s.lis.Addr().String()
 	}
@@ -203,12 +231,12 @@ func (s *ServerGRPC) Address() string {
 }
 
 // Transport returns the client transport to use.
-func (s *ServerGRPC) Transport() string {
+func (s *Server) Transport() string {
 	return "grpc"
 }
 
 // EntrypointID returns the id (uuid) of this entrypoint in the registry.
-func (s *ServerGRPC) EntrypointID() string {
+func (s *Server) EntrypointID() string {
 	if s.entrypointID != "" {
 		return s.entrypointID
 	}
@@ -219,27 +247,32 @@ func (s *ServerGRPC) EntrypointID() string {
 }
 
 // Register executes a registration function on the entrypoint.
-func (s *ServerGRPC) Register(register server.RegistrationFunc) {
+func (s *Server) Register(register server.RegistrationFunc) {
 	register(s.server)
 }
 
 // String returns the entrypoint type; http.
-func (s *ServerGRPC) String() string {
+func (s *Server) String() string {
 	return Plugin
 }
 
+// Enabled returns if this entrypoint has been enbaled in config.
+func (s *Server) Enabled() bool {
+	return s.config.Enabled
+}
+
 // Name returns the entrypoint name.
-func (s *ServerGRPC) Name() string {
+func (s *Server) Name() string {
 	return s.config.Name
 }
 
 // Type returns the component type.
-func (s *ServerGRPC) Type() string {
-	return server.ComponentType
+func (s *Server) Type() string {
+	return server.EntrypointType
 }
 
 // listen creates a listener.
-func (s *ServerGRPC) listen() error {
+func (s *Server) listen() error {
 	if s.lis != nil {
 		return nil
 	}
@@ -268,7 +301,7 @@ func (s *ServerGRPC) listen() error {
 	return nil
 }
 
-func (s *ServerGRPC) getEndpoints() []*registry.Endpoint {
+func (s *Server) getEndpoints() []*registry.Endpoint {
 	sInfo := s.server.GetServiceInfo()
 
 	result := make([]*registry.Endpoint, len(sInfo))
@@ -285,7 +318,7 @@ func (s *ServerGRPC) getEndpoints() []*registry.Endpoint {
 	return result
 }
 
-func (s *ServerGRPC) registryService() *registry.Service {
+func (s *Server) registryService() *registry.Service {
 	node := &registry.Node{
 		ID:        s.EntrypointID(),
 		Address:   s.Address(),
@@ -303,10 +336,10 @@ func (s *ServerGRPC) registryService() *registry.Service {
 	}
 }
 
-func (s *ServerGRPC) register() error {
+func (s *Server) register() error {
 	return s.registry.Register(s.registryService())
 }
 
-func (s *ServerGRPC) deregister() error {
+func (s *Server) deregister() error {
 	return s.registry.Deregister(s.registryService())
 }

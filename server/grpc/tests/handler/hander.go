@@ -5,10 +5,7 @@ import (
 	"context"
 	"crypto/rand"
 	"errors"
-	"io"
 	"time"
-
-	"log/slog"
 
 	"github.com/go-orb/plugins/server/grpc/tests/proto"
 )
@@ -39,23 +36,5 @@ func (c *EchoHandler) Call(_ context.Context, in *proto.CallRequest) (*proto.Cal
 		return &proto.CallResponse{Msg: "Hello " + in.GetName(), Payload: msg}, nil
 	default:
 		return &proto.CallResponse{Msg: "Hello " + in.GetName()}, nil
-	}
-}
-
-// Stream will stream echo messages to a client.
-func (c *EchoHandler) Stream(in proto.Streams_StreamServer) error {
-	for {
-		msg, err := in.Recv()
-		if err != nil && !errors.Is(err, io.EOF) {
-			slog.Error("failed to receive message", "err", err)
-			return err
-		} else if err != nil && errors.Is(err, io.EOF) {
-			return nil
-		}
-
-		if err := in.Send(&proto.CallResponse{Msg: "hello " + msg.GetName()}); err != nil {
-			slog.Error("failed to send message", "err", err)
-			return err
-		}
 	}
 }

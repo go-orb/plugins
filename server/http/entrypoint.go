@@ -16,10 +16,12 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strconv"
 
 	"log/slog"
 
 	"github.com/go-orb/go-orb/codecs"
+	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
@@ -33,21 +35,19 @@ import (
 	mudp "github.com/go-orb/plugins/server/http/utils/udp"
 )
 
-var _ server.Entrypoint = (*ServerHTTP)(nil)
+var _ server.Entrypoint = (*Server)(nil)
 
 // Plugin is the plugin name.
 const Plugin = "http"
 
-// ServerHTTP represents a listener on one address. You can create multiple
+// Server represents a listener on one address. You can create multiple
 // entrypoints for multiple addresses and ports. This is e.g. useful if you
 // want to listen on multiple interfaces, or multiple ports in parallel, even
 // with the same handler.
-type ServerHTTP struct {
-	Config   Config
-	Logger   log.Logger
-	Registry registry.Type
-
-	middlewares []server.Middleware
+type Server struct {
+	config   *Config
+	logger   log.Logger
+	registry registry.Type
 
 	// entrypointID is the entrypointID (uuid) of this entrypoint in the registry.
 	entrypointID string
@@ -76,13 +76,52 @@ type ServerHTTP struct {
 // can serve a HTTP1, HTTP2 and HTTP3 server. If you enable HTTP3 it will listen
 // on both TCP and UDP on the same port.
 func Provide(
-	_ types.ServiceName,
+	sections []string,
+	configs types.ConfigData,
 	logger log.Logger,
 	reg registry.Type,
-	cfg Config,
-	options ...Option,
-) (*ServerHTTP, error) {
-	cfg.ApplyOptions(options...)
+	opts ...server.Option,
+) (server.Entrypoint, error) {
+	cfg := NewConfig(opts...)
+
+	if err := config.Parse(sections, configs, cfg); err != nil {
+		return nil, err
+	}
+
+	// Configure Middlewares.
+	for idx, cfgMw := range cfg.Middlewares {
+		pFunc, ok := server.Middlewares.Get(cfgMw.Plugin)
+		if !ok {
+			return nil, fmt.Errorf("%w: '%s', did you register it?", server.ErrUnknownMiddleware, cfgMw.Plugin)
+		}
+
+		mw, err := pFunc(append(sections, "middlewares", strconv.Itoa(idx)), configs, logger)
+		if err != nil {
+			return nil, err
+		}
+
+		cfg.OptMiddlewares = append(cfg.OptMiddlewares, mw)
+	}
+
+	// Get handlers.
+	for _, k := range cfg.Handlers {
+		h, ok := server.Handlers.Get(k)
+		if !ok {
+			return nil, fmt.Errorf("%w: '%s', did you register it?", server.ErrUnknownHandler, k)
+		}
+
+		cfg.OptHandlers = append(cfg.OptHandlers, h)
+	}
+
+	return New(cfg, logger, reg)
+}
+
+// New creates a http server by options.
+func New(acfg any, logger log.Logger, reg registry.Type) (server.Entrypoint, error) {
+	cfg, ok := acfg.(*Config)
+	if !ok {
+		return nil, fmt.Errorf("http invalid config: %v", cfg)
+	}
 
 	var err error
 
@@ -107,26 +146,15 @@ func Provide(
 
 	logger = logger.With(slog.String("entrypoint", cfg.Name))
 
-	mws := []server.Middleware{}
-
-	for _, m := range cfg.Middlewares {
-		if mw, ok := server.Middlewares.Get(m); ok {
-			mws = append(mws, mw)
-		} else {
-			logger.Error("unknown middleware given", "middleware", m)
-		}
+	entrypoint := Server{
+		config:   cfg,
+		logger:   logger,
+		registry: reg,
+		codecs:   codecs,
+		router:   router,
 	}
 
-	entrypoint := ServerHTTP{
-		Config:      cfg,
-		Logger:      logger,
-		Registry:    reg,
-		middlewares: mws,
-		codecs:      codecs,
-		router:      router,
-	}
-
-	entrypoint.Config.TLS, err = entrypoint.setupTLS()
+	entrypoint.config.TLS, err = entrypoint.setupTLS()
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +164,7 @@ func Provide(
 		return nil, fmt.Errorf("failed to create HTTP server: %w", err)
 	}
 
-	if entrypoint.Config.HTTP3 {
+	if entrypoint.config.HTTP3 {
 		entrypoint.http3Server = entrypoint.newHTTP3Server()
 	}
 
@@ -144,37 +172,40 @@ func Provide(
 }
 
 // Start will create the listeners and start the server on the entrypoint.
-func (s *ServerHTTP) Start() error {
+func (s *Server) Start() error {
 	if s.started {
 		return nil
 	}
 
 	var err error
 
-	s.Logger.Info("Starting", "address", s.Config.Address)
+	s.logger.Info("Starting", "address", s.config.Address)
 
-	for _, h := range s.Config.HandlerRegistrations {
-		h(s)
+	// Register handlers.
+	for _, f := range s.config.OptHandlers {
+		s.Register(f)
 	}
 
 	var tlsConfig *tls.Config
 
-	if s.Config.TLS != nil {
-		tlsConfig = s.Config.TLS.Config
+	if s.config.TLS != nil {
+		tlsConfig = s.config.TLS.Config
 	}
 
-	s.listenerTCP, err = mtcp.BuildListenerTCP(s.Config.Address, tlsConfig)
+	s.listenerTCP, err = mtcp.BuildListenerTCP(s.config.Address, tlsConfig)
 	if err != nil {
 		return err
 	}
 
+	s.logger.Info("Got address", "address", s.Address())
+
 	go func() {
 		if err = s.httpServer.Start(s.listenerTCP); err != nil {
-			s.Logger.Error("failed to start HTTP server: %w", "err", err)
+			s.logger.Error("failed to start HTTP server: %w", "err", err)
 		}
 	}()
 
-	if !s.Config.HTTP3 {
+	if !s.config.HTTP3 {
 		if err := s.register(); err != nil {
 			return fmt.Errorf("failed to register the HTTP server: %w", err)
 		}
@@ -185,14 +216,14 @@ func (s *ServerHTTP) Start() error {
 	}
 
 	// Listen on the same UDP port as TCP for HTTP3
-	s.listenerUDP, err = mudp.BuildListenerUDP(s.Config.Address)
+	s.listenerUDP, err = mudp.BuildListenerUDP(s.listenerTCP.Addr().String())
 	if err != nil {
 		return fmt.Errorf("failed to start UDP listener: %w", err)
 	}
 
 	go func() {
 		if err := s.http3Server.Start(); err != nil {
-			s.Logger.Error("failed to start HTTP3 server", "error", err)
+			s.logger.Error("failed to start HTTP3 server", "error", err)
 		}
 	}()
 
@@ -206,7 +237,7 @@ func (s *ServerHTTP) Start() error {
 }
 
 // Stop will stop the HTTP server(s).
-func (s *ServerHTTP) Stop(ctx context.Context) error {
+func (s *Server) Stop(ctx context.Context) error {
 	if !s.started {
 		return nil
 	}
@@ -214,14 +245,14 @@ func (s *ServerHTTP) Stop(ctx context.Context) error {
 	errChan := make(chan error)
 	defer close(errChan)
 
-	s.Logger.Debug("Stopping")
+	s.logger.Debug("Stopping")
 
 	if err := s.deregister(); err != nil {
 		return err
 	}
 
 	c := 1
-	if s.Config.HTTP3 {
+	if s.config.HTTP3 {
 		c++
 
 		go func() {
@@ -256,28 +287,33 @@ func (s *ServerHTTP) Stop(ctx context.Context) error {
 	return err
 }
 
+// Config returns a copy of the internal config.
+func (s *Server) Config() Config {
+	return *s.config
+}
+
 // Register executes a registration function on the entrypoint.
-func (s *ServerHTTP) Register(register server.RegistrationFunc) {
+func (s *Server) Register(register server.RegistrationFunc) {
 	register(s)
 }
 
 // Address returns the address the entrypoint is listening on.
-func (s *ServerHTTP) Address() string {
+func (s *Server) Address() string {
 	if s.listenerTCP != nil {
 		return s.listenerTCP.Addr().String()
 	}
 
-	return s.Config.Address
+	return s.config.Address
 }
 
 // Transport returns the client transport to use.
-func (s *ServerHTTP) Transport() string {
+func (s *Server) Transport() string {
 	//nolint:gocritic
-	if s.Config.H2C {
+	if s.config.H2C {
 		return "h2c"
-	} else if s.Config.HTTP3 {
+	} else if s.config.HTTP3 {
 		return "http3"
-	} else if !s.Config.Insecure {
+	} else if !s.config.Insecure {
 		return "https"
 	}
 
@@ -285,41 +321,46 @@ func (s *ServerHTTP) Transport() string {
 }
 
 // EntrypointID returns the id (uuid) of this entrypoint in the registry.
-func (s *ServerHTTP) EntrypointID() string {
+func (s *Server) EntrypointID() string {
 	if s.entrypointID != "" {
 		return s.entrypointID
 	}
 
-	s.entrypointID = fmt.Sprintf("%s-%s", s.Registry.ServiceName(), uuid.New().String())
+	s.entrypointID = fmt.Sprintf("%s-%s", s.registry.ServiceName(), uuid.New().String())
 
 	return s.entrypointID
 }
 
 // String returns the entrypoint type; http.
-func (s *ServerHTTP) String() string {
+func (s *Server) String() string {
 	return Plugin
 }
 
+// Enabled returns if this entrypoint has been enbaled in config.
+func (s *Server) Enabled() bool {
+	return s.config.Enabled
+}
+
 // Name returns the entrypoint name.
-func (s *ServerHTTP) Name() string {
-	return s.Config.Name
+func (s *Server) Name() string {
+	return s.config.Name
 }
 
 // Type returns the component type.
-func (s *ServerHTTP) Type() string {
-	return server.ComponentType
+func (s *Server) Type() string {
+	return server.EntrypointType
 }
 
 // Router returns the router used by the HTTP server.
 // You can use this to register extra handlers, or mount additional routers.
-func (s *ServerHTTP) Router() router.Router {
+func (s *Server) Router() router.Router {
 	return s.router
 }
 
-func (s *ServerHTTP) setupTLS() (*mtls.Config, error) {
+func (s *Server) setupTLS() (*mtls.Config, error) {
 	// TLS already provided or not needed.
-	if s.Config.TLS != nil || s.Config.Insecure {
-		return s.Config.TLS, nil
+	if s.config.TLS != nil || s.config.Insecure {
+		return s.config.TLS, nil
 	}
 
 	var (
@@ -328,8 +369,8 @@ func (s *ServerHTTP) setupTLS() (*mtls.Config, error) {
 	)
 
 	// Generate self signed cert.
-	if s.Config.TLS == nil {
-		config, err = mtls.GenTLSConfig(s.Config.Address)
+	if s.config.TLS == nil {
+		config, err = mtls.GenTLSConfig(s.config.Address)
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate self signed certificate: %w", err)
 		}
@@ -338,7 +379,7 @@ func (s *ServerHTTP) setupTLS() (*mtls.Config, error) {
 	return &mtls.Config{Config: config}, nil
 }
 
-func (s *ServerHTTP) getEndpoints() ([]*registry.Endpoint, error) {
+func (s *Server) getEndpoints() ([]*registry.Endpoint, error) {
 	router, ok := s.router.(router.Routes)
 	if !ok {
 		return nil, errors.New("incompatible router")
@@ -348,7 +389,7 @@ func (s *ServerHTTP) getEndpoints() ([]*registry.Endpoint, error) {
 	result := make([]*registry.Endpoint, len(routes))
 
 	for _, r := range routes {
-		s.Logger.Trace("found endpoint", slog.String("name", r.Pattern[1:]))
+		s.logger.Trace("found endpoint", slog.String("name", r.Pattern[1:]))
 
 		result = append(result, &registry.Endpoint{
 			Name:     r.Pattern[1:],
@@ -357,7 +398,7 @@ func (s *ServerHTTP) getEndpoints() ([]*registry.Endpoint, error) {
 
 		if len(r.SubRoutes) > 0 {
 			for _, sr := range r.SubRoutes {
-				s.Logger.Trace("found sub endpoint", slog.String("name", sr.Pattern[1:]))
+				s.logger.Trace("found sub endpoint", slog.String("name", sr.Pattern[1:]))
 
 				result = append(result, &registry.Endpoint{
 					Name:     sr.Pattern[1:],
@@ -370,7 +411,7 @@ func (s *ServerHTTP) getEndpoints() ([]*registry.Endpoint, error) {
 	return result, nil
 }
 
-func (s *ServerHTTP) registryService() (*registry.Service, error) {
+func (s *Server) registryService() (*registry.Service, error) {
 	node := &registry.Node{
 		ID:        s.EntrypointID(),
 		Address:   s.Address(),
@@ -384,27 +425,27 @@ func (s *ServerHTTP) registryService() (*registry.Service, error) {
 	}
 
 	return &registry.Service{
-		Name:      s.Registry.ServiceName(),
-		Version:   s.Registry.ServiceVersion(),
+		Name:      s.registry.ServiceName(),
+		Version:   s.registry.ServiceVersion(),
 		Nodes:     []*registry.Node{node},
 		Endpoints: eps,
 	}, nil
 }
 
-func (s *ServerHTTP) register() error {
+func (s *Server) register() error {
 	rService, err := s.registryService()
 	if err != nil {
 		return err
 	}
 
-	return s.Registry.Register(rService)
+	return s.registry.Register(rService)
 }
 
-func (s *ServerHTTP) deregister() error {
+func (s *Server) deregister() error {
 	rService, err := s.registryService()
 	if err != nil {
 		return err
 	}
 
-	return s.Registry.Deregister(rService)
+	return s.registry.Deregister(rService)
 }

@@ -9,11 +9,10 @@ import (
 	"github.com/go-orb/plugins/server/http/tests/proto"
 )
 
-var _ proto.StreamsServer = (*EchoHandler)(nil)
+var _ proto.StreamsHandler = (*EchoHandler)(nil)
 
 // EchoHandler is a test handler.
 type EchoHandler struct {
-	proto.UnimplementedStreamsServer
 }
 
 // Call implements the call method.

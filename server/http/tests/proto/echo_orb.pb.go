@@ -2,7 +2,7 @@
 //
 // version:
 // - protoc-gen-go-orb        v0.0.1
-// - protoc                   v5.27.3
+// - protoc                   v5.28.0
 //
 // Proto source: echo.proto
 
@@ -15,10 +15,6 @@ import (
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/server"
 
-	grpc "google.golang.org/grpc"
-
-	mdrpc "github.com/go-orb/plugins/server/drpc"
-	mhertz "github.com/go-orb/plugins/server/hertz"
 	mhttp "github.com/go-orb/plugins/server/http"
 )
 
@@ -40,50 +36,15 @@ func (c *StreamsClient) Call(ctx context.Context, service string, req *CallReque
 	return client.Call[CallResponse](ctx, c.client, service, "echo.Streams/Call", req, opts...)
 }
 
-// AuthorizedCall calls AuthorizedCall.
-func (c *StreamsClient) AuthorizedCall(ctx context.Context, service string, req *CallRequest, opts ...client.CallOption) (*CallResponse, error) {
-	return client.Call[CallResponse](ctx, c.client, service, "echo.Streams/AuthorizedCall", req, opts...)
-}
-
 // StreamsHandler is the Handler for echo.Streams
 type StreamsHandler interface {
 	Call(ctx context.Context, req *CallRequest) (*CallResponse, error)
-
-	AuthorizedCall(ctx context.Context, req *CallRequest) (*CallResponse, error)
-}
-
-// registerStreamsDRPCHandler registers the service to an dRPC server.
-func registerStreamsDRPCHandler(srv *mdrpc.Server, handler StreamsHandler) error {
-	desc := DRPCStreamsDescription{}
-
-	// Register with DRPC.
-	r := srv.Router()
-
-	// Register with the server/drpc(.Mux).
-	err := r.Register(handler, desc)
-	if err != nil {
-		return err
-	}
-
-	// Add each endpoint name of this handler to the orb drpc server.
-	srv.AddEndpoint("/echo.Streams/Call")
-	srv.AddEndpoint("/echo.Streams/AuthorizedCall")
-
-	return nil
 }
 
 // registerStreamsHTTPHandler registers the service to an HTTP server.
 func registerStreamsHTTPHandler(srv *mhttp.Server, handler StreamsHandler) {
 	r := srv.Router()
 	r.Post("/echo.Streams/Call", mhttp.NewGRPCHandler(srv, handler.Call, HandlerStreams, "Call"))
-	r.Post("/echo.Streams/AuthorizedCall", mhttp.NewGRPCHandler(srv, handler.AuthorizedCall, HandlerStreams, "AuthorizedCall"))
-}
-
-// registerStreamsHertzHandler registers the service to an Hertz server.
-func registerStreamsHertzHandler(srv *mhertz.Server, handler StreamsHandler) {
-	r := srv.Router()
-	r.POST("/echo.Streams/Call", mhertz.NewGRPCHandler(srv, handler.Call, HandlerStreams, "Call"))
-	r.POST("/echo.Streams/AuthorizedCall", mhertz.NewGRPCHandler(srv, handler.AuthorizedCall, HandlerStreams, "AuthorizedCall"))
 }
 
 // RegisterStreamsHandler will return a registration function that can be
@@ -92,12 +53,6 @@ func RegisterStreamsHandler(handler StreamsHandler) server.RegistrationFunc {
 	return func(s any) {
 		switch srv := s.(type) {
 
-		case grpc.ServiceRegistrar:
-			registerStreamsGRPCHandler(srv, handler)
-		case *mdrpc.Server:
-			registerStreamsDRPCHandler(srv, handler)
-		case *mhertz.Server:
-			registerStreamsHertzHandler(srv, handler)
 		case *mhttp.Server:
 			registerStreamsHTTPHandler(srv, handler)
 		default:
