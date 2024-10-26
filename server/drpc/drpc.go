@@ -17,8 +17,6 @@ import (
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/addr"
 	"github.com/google/uuid"
-
-	"github.com/gammazero/workerpool"
 )
 
 var _ orbserver.Entrypoint = (*Server)(nil)
@@ -49,7 +47,6 @@ type Server struct {
 	entrypointID string
 
 	started bool
-	wp      *workerpool.WorkerPool
 }
 
 // Start will create the listeners and start the server on the entrypoint.
@@ -86,34 +83,18 @@ func (s *Server) Start() error {
 
 	s.ctx, s.cancelFunc = context.WithCancel(context.Background())
 
-	s.wp = workerpool.New(s.config.MaxConcurrentStreams)
-	go s.run(s.ctx, listener)
+	go func() {
+		if err := s.server.Serve(s.ctx, listener); err != nil {
+			s.logger.Error("while starting the dRPC Server", "error", err)
+		}
+	}()
 
 	s.started = true
 
 	return s.registryRegister()
 }
 
-func (s *Server) run(ctx context.Context, lis net.Listener) {
-	for {
-		conn, err := lis.Accept()
-		if err != nil {
-			if ctx.Err() != nil {
-				return
-			}
-
-			continue
-		}
-
-		s.wp.Submit(func() {
-			if err = s.server.ServeOne(ctx, conn); err != nil {
-				s.logger.Error("while serving", "err", err, "addr", conn.RemoteAddr())
-			}
-		})
-	}
-}
-
-// Stop will stop the Hertz server(s).
+// Stop will stop the dRPC server.
 func (s *Server) Stop(_ context.Context) error {
 	if !s.started {
 		return nil
@@ -121,7 +102,6 @@ func (s *Server) Stop(_ context.Context) error {
 
 	// Stops the dRPC Server.
 	s.cancelFunc()
-	s.wp.Stop()
 
 	return s.registryDeregister()
 }
