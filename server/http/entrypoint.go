@@ -20,7 +20,6 @@ import (
 
 	"log/slog"
 
-	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
@@ -58,7 +57,6 @@ type Server struct {
 	// or mount other routers.
 	router  router.Router
 	handler http.Handler
-	codecs  map[string]codecs.Marshaler
 
 	httpServer  *httpServer
 	http3Server *http3server
@@ -139,18 +137,12 @@ func New(acfg any, logger log.Logger, reg registry.Type) (server.Entrypoint, err
 		return nil, fmt.Errorf("create router (%s): %w", cfg.Router, err)
 	}
 
-	codecs, err := cfg.NewCodecMap()
-	if err != nil {
-		return nil, fmt.Errorf("create codec map: %w", err)
-	}
-
 	logger = logger.With(slog.String("entrypoint", cfg.Name))
 
 	entrypoint := Server{
 		config:   cfg,
 		logger:   logger,
 		registry: reg,
-		codecs:   codecs,
 		router:   router,
 	}
 

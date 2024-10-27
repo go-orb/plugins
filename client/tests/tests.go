@@ -22,7 +22,6 @@ import (
 	// Blank imports here are fine.
 	_ "github.com/go-orb/plugins-experimental/registry/mdns"
 	_ "github.com/go-orb/plugins/codecs/json"
-	_ "github.com/go-orb/plugins/codecs/jsonpb"
 	_ "github.com/go-orb/plugins/codecs/proto"
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	_ "github.com/go-orb/plugins/config/source/file"
@@ -78,7 +77,7 @@ var (
 		{
 			Name:        "proto",
 			Endpoint:    "echo.Streams/Call",
-			ContentType: "application/protobuf",
+			ContentType: "application/x-protobuf",
 			Request: &proto.CallRequest{
 				Name: "Alex",
 			},
@@ -89,7 +88,7 @@ var (
 		{
 			Name:        "json",
 			Endpoint:    "echo.Streams/Call",
-			ContentType: "application/protobuf+json",
+			ContentType: "application/json",
 			Request: &proto.CallRequest{
 				Name: "Alex",
 			},

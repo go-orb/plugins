@@ -15,12 +15,10 @@ require (
 	github.com/go-orb/plugins/client/orb/transport/http v0.0.0-20241027005319-1bca6b63ac9e
 	github.com/go-orb/plugins/client/orb/transport/https v0.0.0-20241027005319-1bca6b63ac9e
 	github.com/go-orb/plugins/codecs/json v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/codecs/jsonpb v0.0.0-20241027005319-1bca6b63ac9e
 	github.com/go-orb/plugins/codecs/proto v0.0.0-20241027005319-1bca6b63ac9e
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20241027005319-1bca6b63ac9e
 	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20241027005319-1bca6b63ac9e
 	github.com/go-orb/plugins/config/source/file v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/log/lumberjack v0.0.0-20241027005319-1bca6b63ac9e
 	github.com/go-orb/plugins/log/slog v0.0.0-20241027005319-1bca6b63ac9e
 	github.com/go-orb/plugins/server/drpc v0.0.0-20241027005319-1bca6b63ac9e
 	github.com/go-orb/plugins/server/grpc v0.0.0-20241027005319-1bca6b63ac9e
@@ -85,6 +83,5 @@ require (
 	golang.org/x/text v0.19.0 // indirect
 	golang.org/x/tools v0.26.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241021214115-324edc3d5d38 // indirect
-	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

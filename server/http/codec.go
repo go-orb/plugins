@@ -10,6 +10,7 @@ import (
 
 	"log/slog"
 
+	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/plugins/server/http/headers"
 	"github.com/go-orb/plugins/server/http/utils/header"
 )
@@ -54,12 +55,12 @@ func (s *Server) decodeBody(resp http.ResponseWriter, request *http.Request, msg
 
 	// Set response content type
 	aHeader := request.Header.Get(headers.Accept)
-	accept := header.GetAcceptType(s.codecs, aHeader, contentType)
+	accept := header.GetAcceptType(aHeader, contentType)
 	resp.Header().Set(headers.ContentType, accept)
 
-	codec, ok := s.codecs[contentType]
-	if !ok {
-		s.logger.Debug("Request failed, codec not found for content type: " + contentType)
+	codec, err := codecs.GetMime(contentType)
+	if err != nil {
+		s.logger.Debug("Request failed, codec not found for content type", "Content-Type", contentType)
 		return "", ErrContentTypeNotSupported
 	}
 
@@ -78,8 +79,8 @@ func (s *Server) encodeBody(w http.ResponseWriter, r *http.Request, v any) error
 		contentType = headers.JSONContentType
 	}
 
-	codec, ok := s.codecs[contentType]
-	if !ok {
+	codec, err := codecs.GetMime(contentType)
+	if err != nil {
 		s.logger.Debug("Request failed, codec for content type not available", slog.String("Content-Type", contentType))
 		return ErrContentTypeNotSupported
 	}

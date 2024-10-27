@@ -4,6 +4,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73 h1:JFKKzHUP4o/3c5R0TKK/to/ggVl5B61AtDsILIaiHTs=
 github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73/go.mod h1:IqEV2MC/Xasp/x0cHO+RcQUHjOdP5ObL5vht+KD0l6A=
+github.com/go-orb/plugins/codecs/json v0.0.0-20241027010804-96f32fd57e48 h1:NlNIeqROZXtGpD3wrnOUG8aRC6vSSSundomBUxp5FRE=
+github.com/go-orb/plugins/codecs/json v0.0.0-20241027010804-96f32fd57e48/go.mod h1:DDFlIl6iVJQQ2S245abYR14wLBiNW3FBjz0rxIOk2fk=
 github.com/go-orb/plugins/codecs/proto v0.0.0-20241027005319-1bca6b63ac9e h1:WRmyCOd5nM1IiG2SmiUH3sVxcP+KjVjJ5GsVjItfwIU=
 github.com/go-orb/plugins/codecs/proto v0.0.0-20241027005319-1bca6b63ac9e/go.mod h1:tXrcBj3h8B8SiMOa+3UrGTWXe4t1RqckuLFILwiinCw=
 github.com/go-orb/plugins/event/natsjs v0.0.0-20241027005319-1bca6b63ac9e h1:bqDxnLDTNLC8Phj1LnCL+KbVxAo480p0k27bya0HyYE=

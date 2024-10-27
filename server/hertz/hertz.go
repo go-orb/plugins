@@ -15,7 +15,6 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/google/uuid"
 
-	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
@@ -40,8 +39,6 @@ type Server struct {
 
 	// entrypointID is the entrypointID (uuid) of this entrypoint in the registry.
 	entrypointID string
-
-	codecs map[string]codecs.Marshaler
 
 	started bool
 }
@@ -288,18 +285,12 @@ func New(acfg any, logger log.Logger, reg registry.Type) (orbserver.Entrypoint, 
 		return nil, err
 	}
 
-	codecs, err := cfg.NewCodecMap()
-	if err != nil {
-		return nil, fmt.Errorf("create codec map: %w", err)
-	}
-
 	logger = logger.With(slog.String("component", orbserver.ComponentType), slog.String("plugin", Plugin), slog.String("entrypoint", cfg.Name))
 
 	entrypoint := Server{
 		config:   cfg,
 		logger:   logger,
 		registry: reg,
-		codecs:   codecs,
 	}
 
 	return &entrypoint, nil

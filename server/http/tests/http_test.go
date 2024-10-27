@@ -30,7 +30,7 @@ import (
 	thttp "github.com/go-orb/plugins/server/http/tests/util/http"
 
 	_ "github.com/go-orb/plugins/codecs/form"
-	_ "github.com/go-orb/plugins/codecs/jsonpb"
+	_ "github.com/go-orb/plugins/codecs/json"
 	_ "github.com/go-orb/plugins/codecs/proto"
 
 	_ "github.com/go-orb/plugins-experimental/registry/mdns"
@@ -202,16 +202,6 @@ func TestServerNoRouter(t *testing.T) {
 	require.ErrorIs(t, err, mhttp.ErrRouterNotFound, "setting an invalid router should return an error")
 }
 
-func TestServerNoCodecs(t *testing.T) {
-	_, cleanup, err := setupServer(t, false, mhttp.WithCodecWhitelist([]string{}))
-	defer cleanup()
-	require.ErrorIs(t, err, mhttp.ErrEmptyCodecWhitelist, "setting an empty codec whitelist should return an error")
-
-	_, cleanup, err = setupServer(t, false, mhttp.WithCodecWhitelist([]string{"abc", "def"}))
-	defer cleanup()
-	require.ErrorIs(t, err, mhttp.ErrNoMatchingCodecs, "setting an empty codec whitelist should return an error")
-}
-
 func TestServerNoTLS(t *testing.T) {
 	_, cleanup, err := setupServer(t, false, mhttp.WithTLS(&tls.Config{}))
 	defer cleanup()
@@ -333,7 +323,7 @@ func TestServerRequestSpecificContentType(t *testing.T) {
 	}
 
 	testCt("application/proto")
-	testCt("application/protobuf")
+	testCt("application/x-protobuf")
 	testCt("application/x-proto")
 	testCt("application/x-protobuf")
 	testCt("application/json")
@@ -705,7 +695,7 @@ func makeRequests(t *testing.T, addr string, reqType thttp.ReqType) {
 	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/octet-stream", reqType), addr+": POST Proto")
 	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/proto", reqType), addr+": POST Proto")
 	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/x-proto", reqType), addr+": POST Proto")
-	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/protobuf", reqType), addr+": POST Proto")
+	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/x-protobuf", reqType), addr+": POST Proto")
 	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/x-protobuf", reqType), addr+": POST Proto")
 	require.NoError(t, thttp.TestPostRequestProto(t, addr, "application/x-protobuf", reqType), addr+": POST Proto")
 }

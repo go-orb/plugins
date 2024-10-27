@@ -24,7 +24,7 @@ func (p *Proto) ContentTypes() []string {
 	return []string{
 		"application/octet-stream", // TODO(jochumdev): Remove me?
 		"application/proto",
-		"application/protobuf",
+		"application/x-protobuf",
 		"application/x-proto",
 		"application/x-protobuf",
 	}

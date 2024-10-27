@@ -21,6 +21,7 @@ import (
 	tgrpc "github.com/go-orb/plugins/server/grpc/tests/util/grpc"
 
 	_ "github.com/go-orb/plugins-experimental/registry/mdns"
+	_ "github.com/go-orb/plugins/codecs/json"
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	_ "github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/slog"

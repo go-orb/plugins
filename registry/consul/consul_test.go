@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
+	_ "github.com/go-orb/plugins/codecs/json"
 	_ "github.com/go-orb/plugins/log/slog"
 	"github.com/go-orb/plugins/registry/tests"
 )

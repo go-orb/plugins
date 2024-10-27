@@ -50,7 +50,7 @@ func GetAcceptType(ctx codecs.Map, acceptHeader string, contentType string) stri
 	return accept
 }
 
-// Decode body takes the request body and decodes it into the proto type.
+// decodeBody takes the request body and decodes it into the proto type.
 func (s *Server) decodeBody(ctx *app.RequestContext, msg any) (string, error) {
 	if ctx.Request.Header.IsGet() {
 		return consts.MIMEApplicationJSON, ctx.BindQuery(msg)

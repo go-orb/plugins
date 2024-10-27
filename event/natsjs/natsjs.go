@@ -67,7 +67,7 @@ func setAddrs(addrs []string) []string {
 func New(serviceName string, cfg Config, log log.Logger) *NatsJS {
 	cfg.Addresses = setAddrs(cfg.Addresses)
 
-	codec, err := codecs.GetMime("application/protobuf")
+	codec, err := codecs.GetMime("application/x-protobuf")
 	if err != nil {
 		panic(err)
 	}

@@ -33,6 +33,8 @@ github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9
 github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V4qmtdjCk=
 github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73 h1:JFKKzHUP4o/3c5R0TKK/to/ggVl5B61AtDsILIaiHTs=
 github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73/go.mod h1:IqEV2MC/Xasp/x0cHO+RcQUHjOdP5ObL5vht+KD0l6A=
+github.com/go-orb/plugins/codecs/json v0.0.0-20241027005319-1bca6b63ac9e h1:mTor1A/yyreG+LfMNjR1SM8fgWM2qxjVUZHJDNEtNwQ=
+github.com/go-orb/plugins/codecs/json v0.0.0-20241027005319-1bca6b63ac9e/go.mod h1:Cr1kdhidXdYspikoiTLGAAtM9lbXHemz2r5mqZQDoMA=
 github.com/go-orb/plugins/log/slog v0.0.0-20241027005319-1bca6b63ac9e h1:JUNNvMYw/7LCzJAIhtX6EEro7CyaHwsBTK6mW22GsFA=
 github.com/go-orb/plugins/log/slog v0.0.0-20241027005319-1bca6b63ac9e/go.mod h1:vm8CyS/agvNX5Wf85haVPpRE7HyysIqeHLZKSCoUv08=
 github.com/go-orb/plugins/registry/regutil v0.0.0-20241027005319-1bca6b63ac9e h1:dmZDqz/t+GyoRBedak91dzHuz5ffnD7ZyHpmhz0d23U=

@@ -7,6 +7,7 @@ toolchain go1.23.0
 require (
 	github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73
 	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20241027000905-359dfc52c961
+	github.com/go-orb/plugins/codecs/json v0.0.0-20241027010804-96f32fd57e48
 	github.com/go-orb/plugins/codecs/yaml v0.0.0-20241027005319-1bca6b63ac9e
 	github.com/go-orb/plugins/config/source/file v0.0.0-20241027005319-1bca6b63ac9e
 	github.com/go-orb/plugins/log/slog v0.0.0-20241027005319-1bca6b63ac9e

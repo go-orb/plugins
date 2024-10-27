@@ -22,9 +22,6 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/go-orb/plugins/event/natsjs"
-
-	_ "github.com/go-orb/plugins/codecs/proto"
-	_ "github.com/go-orb/plugins/log/slog"
 )
 
 func createServer() (event.Handler, context.CancelFunc, error) {

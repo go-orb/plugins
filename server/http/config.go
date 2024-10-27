@@ -5,10 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/server"
-	"github.com/go-orb/go-orb/util/slicemap"
 	mtls "github.com/go-orb/go-orb/util/tls"
 	"github.com/google/uuid"
 
@@ -71,20 +69,11 @@ const (
 	DefaultMaxHeaderBytes = 1024 * 64
 )
 
-// DefaultCodecWhitelist is the default allowed list of codecs to be used for
-// HTTP request encoding/decoding. This means that if any of these plugins are
-// registered, they will be included in the server's available codecs.
-// If they are not registered, the server will not be able to handle these formats.
-func DefaultCodecWhitelist() []string {
-	return []string{"proto", "jsonpb", "form", "xml"}
-}
-
 // Errors.
 var (
-	ErrNoRouter            = errors.New("no router plugin name set in config")
-	ErrRouterNotFound      = errors.New("router plugin not found, did you register it?")
-	ErrEmptyCodecWhitelist = errors.New("codec whitelist is empty")
-	ErrNoMatchingCodecs    = errors.New("no matching codecs found, did you register the codec plugins?")
+	ErrNoRouter         = errors.New("no router plugin name set in config")
+	ErrRouterNotFound   = errors.New("router plugin not found, did you register it?")
+	ErrNoMatchingCodecs = errors.New("no matching codecs found, did you register the codec plugins?")
 )
 
 // Config provides options to the entrypoint.
@@ -149,16 +138,6 @@ type Config struct {
 	// HTTP request headers.
 	MaxHeaderBytes int `json:"maxHeaderBytes" yaml:"maxHeaderBytes"`
 
-	// CodecWhitelist is the list of codec names that are allowed to be used
-	// with the HTTP server. This means that if registered, codecs in this list
-	// will be added to the server, allowing you to make RPC requests in that format.
-	// If any of the codecs in this list are not registred nothing will happen.
-	//
-	// We explicitly whitelist codecs, as we don't
-	// want to add every codec plugin that has been registered to be automaically
-	// added to the server.
-	CodecWhitelist []string `json:"codecWhitelist" yaml:"codecWhitelist"`
-
 	// Router is the router plugin to use. Default is chi.
 	Router string `json:"router" yaml:"router"`
 
@@ -207,7 +186,6 @@ func NewConfig(options ...server.Option) *Config {
 		HTTP2:                DefaultHTTP2,
 		HTTP3:                DefaultHTTP3,
 		Gzip:                 DefaultEnableGzip,
-		CodecWhitelist:       DefaultCodecWhitelist(),
 		Router:               DefaultRouter,
 		ReadTimeout:          DefaultReadTimeout,
 		WriteTimeout:         DefaultWriteTimeout,
@@ -219,33 +197,6 @@ func NewConfig(options ...server.Option) *Config {
 	}
 
 	return cfg
-}
-
-// NewCodecMap fetches the whitelisted codec plugins from the registered codecs
-// if present.
-func (c *Config) NewCodecMap() (codecs.Map, error) {
-	if len(c.CodecWhitelist) == 0 {
-		return nil, ErrEmptyCodecWhitelist
-	}
-
-	cm := make(codecs.Map, len(c.CodecWhitelist))
-
-	codecs.Plugins.Range(func(name string, codec codecs.Marshaler) bool {
-		if slicemap.In(c.CodecWhitelist, name) {
-			// One codec can support multiple mime types, we add all of them to the map.
-			for _, mime := range codec.ContentTypes() {
-				cm[mime] = codec
-			}
-		}
-
-		return true
-	})
-
-	if len(cm) == 0 {
-		return nil, ErrNoMatchingCodecs
-	}
-
-	return cm, nil
 }
 
 // NewRouter uses the config.Router to craete a new router.
@@ -377,18 +328,6 @@ func WithRouter(router string) server.Option {
 		cfg, ok := c.(*Config)
 		if ok {
 			cfg.Router = router
-		}
-	}
-}
-
-// WithCodecWhitelist sets the list of codecs allowed in the HTTP entrypoint.
-// If registered, any codecs set here will be imported into the server.
-// You still need to register the codec plugins by importing them.
-func WithCodecWhitelist(list []string) server.Option {
-	return func(c server.EntrypointConfigType) {
-		cfg, ok := c.(*Config)
-		if ok {
-			cfg.CodecWhitelist = list
 		}
 	}
 }

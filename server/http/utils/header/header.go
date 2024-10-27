@@ -22,7 +22,7 @@ func GetContentType(header string) (string, error) {
 
 // GetAcceptType parses the Accept header and checks against the available codecs
 // to find a matching content type.
-func GetAcceptType(c codecs.Map, acceptHeader string, contentType string) string {
+func GetAcceptType(acceptHeader string, contentType string) string {
 	accept := contentType
 
 	// If request used Form content type, return JSON instead of form.
@@ -39,8 +39,9 @@ func GetAcceptType(c codecs.Map, acceptHeader string, contentType string) string
 		}
 
 		// Check if we have a codec for the content type
-		if _, ok := c[ct]; ok {
+		if _, err := codecs.GetMime(ct); err == nil {
 			accept = ct
+			break
 		}
 	}
 

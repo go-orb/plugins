@@ -14,17 +14,5 @@ require (
 
 require (
 	github.com/cornelk/hashmap v1.0.8 // indirect
-	github.com/gammazero/deque v0.2.1 // indirect
-	github.com/gammazero/workerpool v1.1.3 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/subcommands v1.2.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
-	github.com/google/wire v0.6.0 // indirect
-	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/zeebo/errs v1.3.0 // indirect
-	golang.org/x/mod v0.21.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/tools v0.26.0 // indirect
 )

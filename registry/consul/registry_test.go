@@ -12,8 +12,6 @@ import (
 	"github.com/go-orb/go-orb/types"
 	consul "github.com/hashicorp/consul/api"
 	"github.com/stretchr/testify/require"
-
-	_ "github.com/go-orb/plugins/log/slog"
 )
 
 type mockRegistry struct {

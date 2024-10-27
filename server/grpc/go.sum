@@ -6,6 +6,8 @@ github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73 h1:JFKKzHUP4o/3c5R0T
 github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73/go.mod h1:IqEV2MC/Xasp/x0cHO+RcQUHjOdP5ObL5vht+KD0l6A=
 github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20241027000905-359dfc52c961 h1:PNjbpWzp1BNs+bD6eemTAYHjpNgJrpUNiVmsYZpdrHU=
 github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20241027000905-359dfc52c961/go.mod h1:Zz5h/yMxxvX8z+4JBGMbxepryOrMjwdAlOKoQdnu/Kw=
+github.com/go-orb/plugins/codecs/json v0.0.0-20241027010804-96f32fd57e48 h1:NlNIeqROZXtGpD3wrnOUG8aRC6vSSSundomBUxp5FRE=
+github.com/go-orb/plugins/codecs/json v0.0.0-20241027010804-96f32fd57e48/go.mod h1:DDFlIl6iVJQQ2S245abYR14wLBiNW3FBjz0rxIOk2fk=
 github.com/go-orb/plugins/codecs/yaml v0.0.0-20241027005319-1bca6b63ac9e h1:3N+o3M3R0T581CsHYRNXFhcHzM3A1b/uMULi1ty2wvY=
 github.com/go-orb/plugins/codecs/yaml v0.0.0-20241027005319-1bca6b63ac9e/go.mod h1:iA9pLcYpp98bTEUCPOwHASMoo1gSs1tgsbluwq3i+0w=
 github.com/go-orb/plugins/config/source/file v0.0.0-20241027005319-1bca6b63ac9e h1:L7EaeL6decsSycP4w9klV7PkSRYzsnvk6iLH8ApUpWQ=

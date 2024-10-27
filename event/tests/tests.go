@@ -10,6 +10,11 @@ import (
 	"github.com/go-orb/go-orb/event"
 	echopb "github.com/go-orb/plugins/event/tests/pb/echo"
 	"github.com/stretchr/testify/suite"
+
+	// Blank imports are fine.
+	_ "github.com/go-orb/plugins/codecs/json"
+	_ "github.com/go-orb/plugins/codecs/proto"
+	_ "github.com/go-orb/plugins/log/slog"
 )
 
 // Suite is our testsuite.
