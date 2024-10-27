@@ -5,12 +5,12 @@ go 1.23
 toolchain go1.23.0
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20241009125109-7ec5aad2d35c
-	github.com/go-orb/plugins/log/slog v0.0.0-20241009130715-06bd8407d801
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20241009130715-06bd8407d801
-	github.com/go-orb/plugins/registry/tests v0.0.0-20241009130715-06bd8407d801
+	github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73
+	github.com/go-orb/plugins/log/slog v0.0.0-20241027005319-1bca6b63ac9e
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20241027005319-1bca6b63ac9e
+	github.com/go-orb/plugins/registry/tests v0.0.0-20241027005319-1bca6b63ac9e
 	github.com/google/uuid v1.6.0
-	github.com/hashicorp/consul/api v1.29.4
+	github.com/hashicorp/consul/api v1.30.0
 	github.com/hashicorp/consul/sdk v0.16.1
 	github.com/mitchellh/hashstructure v1.1.0
 	github.com/stretchr/testify v1.9.0
@@ -20,7 +20,7 @@ require (
 	github.com/armon/go-metrics v0.4.1 // indirect
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/fatih/color v1.17.0 // indirect
+	github.com/fatih/color v1.18.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v1.6.3 // indirect
@@ -38,11 +38,8 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	golang.org/x/exp v0.0.0-20241004190924-225e2abe05e6 // indirect
+	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c // indirect
 	golang.org/x/net v0.30.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240827150818-7e3bb234dfed // indirect
-	google.golang.org/grpc v1.66.0 // indirect
-	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -5,9 +5,9 @@ go 1.23
 toolchain go1.23.0
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20241009125109-7ec5aad2d35c
+	github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73
 	github.com/google/uuid v1.6.0
-	github.com/zeebo/errs v1.3.0
+	github.com/zeebo/errs v1.4.0
 	google.golang.org/protobuf v1.35.1
 	storj.io/drpc v0.0.34
 )

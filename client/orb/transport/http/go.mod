@@ -5,9 +5,9 @@ go 1.23
 toolchain go1.23.0
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20241009125109-7ec5aad2d35c
-	github.com/go-orb/plugins/client/orb v0.0.0-20241009130715-06bd8407d801
-	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20241009130715-06bd8407d801
+	github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73
+	github.com/go-orb/plugins/client/orb v0.0.0-20241027005319-1bca6b63ac9e
+	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20241027005319-1bca6b63ac9e
 )
 
 require (

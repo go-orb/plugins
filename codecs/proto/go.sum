@@ -1,7 +1,7 @@
 github.com/cornelk/hashmap v1.0.8 h1:nv0AWgw02n+iDcawr5It4CjQIAcdMMKRrs10HOJYlrc=
 github.com/cornelk/hashmap v1.0.8/go.mod h1:RfZb7JO3RviW/rT6emczVuC/oxpdz4UsSB2LJSclR1k=
-github.com/go-orb/go-orb v0.0.0-20241009125109-7ec5aad2d35c h1:W2PzOE+9UOKw1dbfFdKsuZMth29sPwM+Z9y1X1pItv4=
-github.com/go-orb/go-orb v0.0.0-20241009125109-7ec5aad2d35c/go.mod h1:59wJps2KJS+ggIwA9Y9NIcI+X83BkEyHSnuoXrEb3v8=
+github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73 h1:JFKKzHUP4o/3c5R0TKK/to/ggVl5B61AtDsILIaiHTs=
+github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73/go.mod h1:IqEV2MC/Xasp/x0cHO+RcQUHjOdP5ObL5vht+KD0l6A=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 google.golang.org/protobuf v1.35.1 h1:m3LfL6/Ca+fqnjnlqQXNpFPABW1UD7mjh8KO2mKFytA=

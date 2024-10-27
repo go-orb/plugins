@@ -6,7 +6,7 @@ toolchain go1.23.0
 
 require (
 	github.com/cloudwego/hertz v0.9.3
-	github.com/go-orb/go-orb v0.0.0-20241009125109-7ec5aad2d35c
+	github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73
 	github.com/google/uuid v1.6.0
 	github.com/hertz-contrib/http2 v0.1.8
 )
@@ -17,22 +17,22 @@ require (
 	github.com/bytedance/go-tagexpr/v2 v2.9.11 // indirect
 	github.com/bytedance/gopkg v0.1.1 // indirect
 	github.com/bytedance/sonic v1.12.3 // indirect
-	github.com/bytedance/sonic/loader v0.2.0 // indirect
+	github.com/bytedance/sonic/loader v0.2.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/cloudwego/netpoll v0.6.4 // indirect
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.8 // indirect
-	github.com/nyaruka/phonenumbers v1.4.0 // indirect
+	github.com/nyaruka/phonenumbers v1.4.1 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	golang.org/x/arch v0.11.0 // indirect
-	golang.org/x/exp v0.0.0-20241004190924-225e2abe05e6 // indirect
 	golang.org/x/net v0.30.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
 	golang.org/x/text v0.19.0 // indirect
