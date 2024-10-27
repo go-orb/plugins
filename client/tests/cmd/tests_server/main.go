@@ -11,6 +11,7 @@ import (
 	"github.com/go-orb/go-orb/types"
 
 	_ "github.com/go-orb/plugins-experimental/registry/mdns"
+	_ "github.com/go-orb/plugins/codecs/json"
 	_ "github.com/go-orb/plugins/codecs/jsonpb"
 	_ "github.com/go-orb/plugins/codecs/proto"
 	_ "github.com/go-orb/plugins/codecs/yaml"

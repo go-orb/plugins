@@ -18,6 +18,15 @@ import (
 	"github.com/go-orb/plugins/client/tests/proto"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/exp/slices"
+
+	_ "github.com/go-orb/plugins-experimental/registry/mdns"
+	_ "github.com/go-orb/plugins/codecs/json"
+	_ "github.com/go-orb/plugins/codecs/jsonpb"
+	_ "github.com/go-orb/plugins/codecs/proto"
+	_ "github.com/go-orb/plugins/codecs/yaml"
+	_ "github.com/go-orb/plugins/config/source/file"
+	_ "github.com/go-orb/plugins/log/slog"
+	_ "github.com/go-orb/plugins/server/http/router/chi"
 )
 
 //nolint:gochecknoglobals
@@ -68,7 +77,7 @@ var (
 		{
 			Name:        "proto",
 			Endpoint:    "echo.Streams/Call",
-			ContentType: "application/x-protobuf",
+			ContentType: "application/protobuf",
 			Request: &proto.CallRequest{
 				Name: "Alex",
 			},
@@ -79,7 +88,7 @@ var (
 		{
 			Name:        "json",
 			Endpoint:    "echo.Streams/Call",
-			ContentType: "application/json",
+			ContentType: "application/protobuf+json",
 			Request: &proto.CallRequest{
 				Name: "Alex",
 			},

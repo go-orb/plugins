@@ -10,13 +10,6 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	o "github.com/go-orb/plugins/client/orb/transport/drpc"
-
-	_ "github.com/go-orb/plugins-experimental/registry/mdns"
-	_ "github.com/go-orb/plugins/codecs/jsonpb"
-	_ "github.com/go-orb/plugins/codecs/proto"
-	_ "github.com/go-orb/plugins/codecs/yaml"
-	_ "github.com/go-orb/plugins/config/source/file"
-	_ "github.com/go-orb/plugins/log/slog"
 )
 
 func newSuite() *tests.TestSuite {

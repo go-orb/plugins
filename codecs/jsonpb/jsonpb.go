@@ -88,7 +88,7 @@ func (j *JSONPb) Decodes(v any) bool {
 // ContentTypes returns the content types the marshaller can handle.
 func (j *JSONPb) ContentTypes() []string {
 	return []string{
-		"application/json",
+		"application/protobuf+json",
 	}
 }
 
