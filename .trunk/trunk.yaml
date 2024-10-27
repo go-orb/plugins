@@ -16,14 +16,14 @@ runtimes:
 lint:
   enabled:
     - osv-scanner@1.9.0
-    - checkov@3.2.257
-    - trivy@0.56.1
-    - trufflehog@3.82.7
+    - checkov@3.2.269
+    - trivy@0.56.2
+    - trufflehog@3.82.13
     - yamllint@1.35.1
     - actionlint@1.7.3
     - markdownlint@0.42.0
     - git-diff-check
-    - gitleaks@8.20.1
+    - gitleaks@8.21.1
     - gofmt@1.20.5
     - golangci-lint@1.61.0
     - prettier@3.3.3
@@ -32,9 +32,9 @@ lint:
     - shellcheck
     - shfmt
 cli:
-  version: 1.22.6
+  version: 1.22.7
 plugins:
   sources:
     - id: trunk
-      ref: v1.6.3
+      ref: v1.6.4
       uri: https://github.com/trunk-io/plugins
