@@ -1,4 +1,4 @@
-package natjs
+package natsjs
 
 import (
 	"crypto/tls"

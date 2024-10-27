@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package echo;
+
+option go_package = "./echo;echo";
+
+message Req { 
+  bytes payload = 1; 
+  bool error = 2;
+}
+
+message Resp {
+  bytes payload = 1;
+}

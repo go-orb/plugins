@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./;pb";
+
+message Request {
+    bytes data = 1;
+    string content_type = 2;
+    map<string, string> metadata = 3;
+}
+
+message Reply {
+    bytes data = 1;
+    string content_type = 2;
+    map<string, string> metadata = 3;
+    string error = 4;
+}
+

@@ -1,8 +1,9 @@
-// Package natjs provides the nats jetstream event client for go-orb.
-package natjs
+// Package natsjs provides the nats jetstream event client for go-orb.
+package natsjs
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -12,19 +13,14 @@ import (
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/container"
 	"github.com/go-orb/go-orb/util/metadata"
-	"github.com/go-orb/go-orb/util/orberrors"
+	"github.com/go-orb/go-orb/util/ultrapool"
+	"github.com/go-orb/plugins/event/natsjs/pb"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
 // This is here to make sure it implements event.Events.
-var _ event.Events = (*NatsJS)(nil)
-
-type replyMessage struct {
-	Metadata map[string]string `json:"metadata"`
-	Data     []byte            `json:"data"`
-	Err      error             `json:"err"`
-}
+var _ event.Handler = (*NatsJS)(nil)
 
 // NatsJS is the nats jetstream event client for go-orb.
 type NatsJS struct {
@@ -36,6 +32,10 @@ type NatsJS struct {
 	nc    *nats.Conn
 	js    jetstream.JetStream
 	codec codecs.Marshaler
+
+	evReqPool container.Pool[*event.Req[[]byte, []byte]]
+	reqPool   container.Pool[*pb.Request]
+	replyPool container.Pool[*pb.Reply]
 
 	consumers *container.SafeMap[string, jetstream.ConsumeContext]
 }
@@ -67,7 +67,7 @@ func setAddrs(addrs []string) []string {
 func New(serviceName string, cfg Config, log log.Logger) *NatsJS {
 	cfg.Addresses = setAddrs(cfg.Addresses)
 
-	codec, err := codecs.GetMime("application/json")
+	codec, err := codecs.GetMime("application/protobuf")
 	if err != nil {
 		panic(err)
 	}
@@ -77,14 +77,23 @@ func New(serviceName string, cfg Config, log log.Logger) *NatsJS {
 		config:      cfg,
 		logger:      log,
 		codec:       codec,
-		consumers:   container.NewSafeMap[string, jetstream.ConsumeContext](),
+
+		evReqPool: container.NewPool(func() *event.Req[[]byte, []byte] { return &event.Req[[]byte, []byte]{} }),
+		reqPool:   container.NewPool(func() *pb.Request { return &pb.Request{} }),
+		replyPool: container.NewPool(func() *pb.Reply { return &pb.Reply{} }),
+
+		consumers: container.NewSafeMap[string, jetstream.ConsumeContext](),
 	}
 }
 
 // Request runs a REST like call on the given topic.
-func (n *NatsJS) Request(_ context.Context, topic string, req *event.Call[[]byte, any], opts ...event.RequestOption) ([]byte, error) {
+func (n *NatsJS) Request(
+	_ context.Context,
+	req *event.Req[[]byte, any],
+	opts ...event.RequestOption,
+) ([]byte, error) {
 	// validate the topic
-	if len(topic) == 0 {
+	if len(req.Topic) == 0 {
 		return nil, event.ErrMissingTopic
 	}
 
@@ -94,61 +103,77 @@ func (n *NatsJS) Request(_ context.Context, topic string, req *event.Call[[]byte
 
 	options := event.NewCallOptions(opts...)
 
-	data, err := n.codec.Encode(req)
+	pbReq := &pb.Request{}
+	defer n.reqPool.Put(pbReq)
+	pbReq.Reset()
+
+	pbReq.Data = req.Data
+	pbReq.ContentType = req.ContentType
+	pbReq.Metadata = req.Metadata
+
+	data, err := n.codec.Encode(pbReq)
 	if err != nil {
-		return nil, err
+		n.logger.Error("while encoding the message", "topic", req.Topic, "err", err, "data", data)
+		return nil, fmt.Errorf("while encoding the message: %w", err)
 	}
 
 	// Send the request and wait for a reply.
-	msg, err := n.nc.Request(topic, data, options.RequestTimeout)
+	msg, err := n.nc.Request(req.Topic, data, options.RequestTimeout)
 	if err != nil {
-		n.logger.Error("while publishing a call", "topic", topic, "err", err)
+		n.logger.Error("while publishing a request", "topic", req.Topic, "err", err)
 		return nil, err
 	}
 
-	reply := &replyMessage{}
+	reply := n.replyPool.Get()
+	defer n.replyPool.Put(reply)
+	reply.Reset()
 
 	err = n.codec.Decode(msg.Data, reply)
 	if err != nil {
-		n.logger.Error("while decoding the reply", "topic", topic, "err", err)
+		n.logger.Error("while decoding the reply", "topic", req.Topic, "err", err, "data", msg.Data)
 		return nil, err
 	}
 
-	return reply.Data, reply.Err
+	if len(reply.Error) != 0 {
+		return nil, errors.New(reply.Error)
+	}
+
+	return reply.GetData(), nil
 }
 
 // HandleRequest subscribes to the given topic and handles the requests.
 func (n *NatsJS) HandleRequest(
-	_ context.Context,
+	ctx context.Context,
 	topic string,
-) (<-chan event.Call[[]byte, []byte], error) {
+	callbackHandler func(context.Context, *event.Req[[]byte, []byte]),
+) {
 	// validate the topic
 	if len(topic) == 0 {
-		return nil, event.ErrMissingTopic
+		n.logger.Error("can't handle", "error", event.ErrMissingTopic)
+		return
 	}
 
-	outChan := make(chan event.Call[[]byte, []byte], 16)
-
-	_, err := n.nc.Subscribe(topic, func(msg *nats.Msg) {
-		req := event.Call[[]byte, []byte]{}
-
-		err := n.codec.Decode(msg.Data, &req)
-		if err != nil {
-			req.Err = orberrors.From(err)
+	wPool := ultrapool.NewWorkerPool(func(task ultrapool.Task) {
+		msg, ok := task.(*nats.Msg)
+		if !ok {
 			return
 		}
 
-		req.SetReplyFunc(func(ctx context.Context, result []byte, inErr error) {
+		replyFunc := func(ctx context.Context, result []byte, inErr error) {
 			md, ok := metadata.Outgoing(ctx)
 			if !ok {
 				md = make(map[string]string)
 			}
 
-			reply := &replyMessage{
-				Metadata: md,
-				Data:     result,
-				Err:      inErr,
+			reply := n.replyPool.Get()
+			defer n.replyPool.Put(reply)
+			reply.Reset()
+
+			reply.Data = result
+			if inErr != nil {
+				reply.Error = inErr.Error()
 			}
+			reply.Metadata = md
 
 			b, err := n.codec.Encode(reply)
 			if err != nil {
@@ -160,16 +185,55 @@ func (n *NatsJS) HandleRequest(
 				n.logger.Error("failed to send reply, error was", "err", err)
 				return
 			}
-		})
+		}
 
-		outChan <- req
+		req := n.reqPool.Get()
+		defer n.reqPool.Put(req)
+
+		err := n.codec.Decode(msg.Data, req)
+		if err != nil {
+			n.logger.Error("while decoding the request", "error", err)
+			replyFunc(ctx, nil, fmt.Errorf("while decoding the request: %w", err))
+			return
+		}
+
+		evReq := n.evReqPool.Get()
+		defer n.evReqPool.Put(evReq)
+		evReq.ContentType = req.ContentType
+		evReq.Data = req.Data
+		evReq.SetReplyFunc(replyFunc)
+
+		callbackHandler(context.Background(), evReq)
 	})
-	if err != nil {
-		return nil, err
-	}
-	// sub.Unsubscribe() //nolint:errcheck
 
-	return outChan, nil
+	sub, err := n.nc.SubscribeSync(topic)
+	if err != nil {
+		n.logger.Error("can't handle", "error", err)
+		return
+	}
+
+	wPool.Start()
+	for {
+		msg, err := sub.NextMsgWithContext(ctx)
+		if err != nil {
+			if errors.Is(err, context.Canceled) {
+				break
+			}
+
+			n.logger.Error("while getting a message", "error", err)
+		}
+
+		if err := wPool.AddTask(msg); err != nil {
+			n.logger.Error("while adding a worker task", "error", err)
+		}
+	}
+
+	// Unsubscribe after the loop has been canceled.
+	if err := sub.Unsubscribe(); err != nil {
+		n.logger.Error("while unsubscribing", "error", err)
+	}
+
+	wPool.Stop()
 }
 
 // Start events.
@@ -236,13 +300,13 @@ func Provide(
 	datas types.ConfigData,
 	logger log.Logger,
 	opts ...event.Option,
-) (event.Type, error) {
+) (event.Handler, error) {
 	cfg, err := NewConfig(name, datas, opts...)
 	if err != nil {
-		return event.Type{}, fmt.Errorf("create nats registry config: %w", err)
+		return nil, fmt.Errorf("create nats registry config: %w", err)
 	}
 
 	me := New(string(name), cfg, logger)
 
-	return event.Type{Events: me}, nil
+	return me, nil
 }
