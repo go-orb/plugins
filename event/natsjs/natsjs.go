@@ -134,14 +134,16 @@ func (n *NatsJS) Request(
 		return nil, err
 	}
 
-	if len(reply.Error) != 0 {
-		return nil, errors.New(reply.Error)
+	if len(reply.GetError()) != 0 {
+		return nil, errors.New(reply.GetError())
 	}
 
 	return reply.GetData(), nil
 }
 
 // HandleRequest subscribes to the given topic and handles the requests.
+//
+//nolint:funlen
 func (n *NatsJS) HandleRequest(
 	ctx context.Context,
 	topic string,
@@ -173,6 +175,7 @@ func (n *NatsJS) HandleRequest(
 			if inErr != nil {
 				reply.Error = inErr.Error()
 			}
+
 			reply.Metadata = md
 
 			b, err := n.codec.Encode(reply)
@@ -194,13 +197,14 @@ func (n *NatsJS) HandleRequest(
 		if err != nil {
 			n.logger.Error("while decoding the request", "error", err)
 			replyFunc(ctx, nil, fmt.Errorf("while decoding the request: %w", err))
+
 			return
 		}
 
 		evReq := n.evReqPool.Get()
 		defer n.evReqPool.Put(evReq)
-		evReq.ContentType = req.ContentType
-		evReq.Data = req.Data
+		evReq.ContentType = req.GetContentType()
+		evReq.Data = req.GetData()
 		evReq.SetReplyFunc(replyFunc)
 
 		callbackHandler(context.Background(), evReq)
@@ -213,6 +217,7 @@ func (n *NatsJS) HandleRequest(
 	}
 
 	wPool.Start()
+
 	for {
 		msg, err := sub.NextMsgWithContext(ctx)
 		if err != nil {

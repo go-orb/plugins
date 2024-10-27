@@ -1,4 +1,5 @@
-package json
+// Package goccyjson contains a fast replacement for encoding/json.
+package goccyjson
 
 import (
 	"io"

@@ -1,6 +1,6 @@
 module github.com/go-orb/plugins/config/source/cli/tests
 
-go 1.23.2
+go 1.23
 
 require (
 	github.com/go-orb/go-orb v0.0.1

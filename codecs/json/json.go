@@ -1,3 +1,4 @@
+// Package json contains the encoding/json en/de-coder.
 package json
 
 import (

@@ -1,6 +1,6 @@
 module github.com/go-orb/plugins/event/tests
 
-go 1.23.1
+go 1.23
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20241009192637-67e6b576f4f3
