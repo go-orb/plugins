@@ -5,9 +5,9 @@ go 1.23
 require (
 	github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73
 	github.com/go-orb/plugins/codecs/json v0.0.0-20241027010804-96f32fd57e48
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/event/natsjs v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/log/slog v0.0.0-20241027005319-1bca6b63ac9e
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/event/natsjs v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/log/slog v0.0.0-20241027010804-96f32fd57e48
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/protobuf v1.35.1
 )

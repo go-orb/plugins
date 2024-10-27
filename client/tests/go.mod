@@ -7,23 +7,23 @@ toolchain go1.23.0
 require (
 	github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73
 	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20241027000905-359dfc52c961
-	github.com/go-orb/plugins/client/orb/transport/drpc v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/client/orb/transport/grpc v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/client/orb/transport/h2c v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/client/orb/transport/hertzh2c v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/client/orb/transport/hertzhttp v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/client/orb/transport/http v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/client/orb/transport/https v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/codecs/json v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/config/source/file v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/log/slog v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/server/drpc v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/server/grpc v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/server/hertz v0.0.0-20241027005319-1bca6b63ac9e
-	github.com/go-orb/plugins/server/http v0.0.0-20241027005319-1bca6b63ac9e
+	github.com/go-orb/plugins/client/orb/transport/drpc v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/client/orb/transport/grpc v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/client/orb/transport/h2c v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/client/orb/transport/hertzh2c v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/client/orb/transport/hertzhttp v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/client/orb/transport/http v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/client/orb/transport/https v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/codecs/json v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/config/source/file v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/log/slog v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/server/drpc v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/server/grpc v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/server/hertz v0.0.0-20241027010804-96f32fd57e48
+	github.com/go-orb/plugins/server/http v0.0.0-20241027010804-96f32fd57e48
 	github.com/google/wire v0.6.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c
@@ -48,9 +48,9 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-chi/chi/v5 v5.1.0 // indirect
-	github.com/go-orb/plugins/client/orb v0.0.0-20241027005319-1bca6b63ac9e // indirect
-	github.com/go-orb/plugins/client/orb/transport/basehertz v0.0.0-20241027005319-1bca6b63ac9e // indirect
-	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20241027005319-1bca6b63ac9e // indirect
+	github.com/go-orb/plugins/client/orb v0.0.0-20241027010804-96f32fd57e48 // indirect
+	github.com/go-orb/plugins/client/orb/transport/basehertz v0.0.0-20241027010804-96f32fd57e48 // indirect
+	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20241027010804-96f32fd57e48 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/pprof v0.0.0-20241023014458-598669927662 // indirect
 	github.com/google/subcommands v1.2.0 // indirect

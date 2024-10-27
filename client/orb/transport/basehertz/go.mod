@@ -6,8 +6,8 @@ toolchain go1.23.0
 
 require (
 	github.com/cloudwego/hertz v0.9.3
-	github.com/go-orb/go-orb v0.0.0-20241009125109-7ec5aad2d35c
-	github.com/go-orb/plugins/client/orb v0.0.0-20241009130715-06bd8407d801
+	github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73
+	github.com/go-orb/plugins/client/orb v0.0.0-20241027010804-96f32fd57e48
 )
 
 require (
@@ -16,7 +16,7 @@ require (
 	github.com/bytedance/go-tagexpr/v2 v2.9.11 // indirect
 	github.com/bytedance/gopkg v0.1.1 // indirect
 	github.com/bytedance/sonic v1.12.3 // indirect
-	github.com/bytedance/sonic/loader v0.2.0 // indirect
+	github.com/bytedance/sonic/loader v0.2.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/cloudwego/netpoll v0.6.4 // indirect
@@ -24,7 +24,7 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.8 // indirect
-	github.com/nyaruka/phonenumbers v1.4.0 // indirect
+	github.com/nyaruka/phonenumbers v1.4.1 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
