@@ -85,7 +85,7 @@ func RefreshClients() {
 	}
 
 	http3Client = &http.Client{
-		Transport: &http3.RoundTripper{
+		Transport: &http3.Transport{
 			TLSClientConfig: &tls.Config{
 				//nolint:gosec
 				InsecureSkipVerify: true,

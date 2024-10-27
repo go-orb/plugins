@@ -27,7 +27,7 @@ func NewTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, error)
 		"https",
 		&http.Client{
 			Timeout: cfg.ConnectionTimeout,
-			Transport: &http3.RoundTripper{
+			Transport: &http3.Transport{
 				QUICConfig: &quic.Config{
 					MaxIncomingStreams:         int64(cfg.PoolSize),
 					MaxIncomingUniStreams:      int64(cfg.PoolSize),
