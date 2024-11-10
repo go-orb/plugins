@@ -7,13 +7,13 @@ toolchain go1.23.0
 require (
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-orb/go-orb v0.0.0-20241110084057-e256fbfa128d
-	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20241110080131-1dc0c40cbe12
-	github.com/go-orb/plugins/codecs/form v0.0.0-20241110080420-c3dff95b18c2
-	github.com/go-orb/plugins/codecs/json v0.0.0-20241110080420-c3dff95b18c2
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20241110080420-c3dff95b18c2
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20241110080420-c3dff95b18c2
-	github.com/go-orb/plugins/config/source/file v0.0.0-20241110080420-c3dff95b18c2
-	github.com/go-orb/plugins/log/slog v0.0.0-20241110080420-c3dff95b18c2
+	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20241110094607-87afee11d096
+	github.com/go-orb/plugins/codecs/form v0.0.0-20241110100006-384967e4b782
+	github.com/go-orb/plugins/codecs/json v0.0.0-20241110100006-384967e4b782
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20241110100006-384967e4b782
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20241110100006-384967e4b782
+	github.com/go-orb/plugins/config/source/file v0.0.0-20241110100006-384967e4b782
+	github.com/go-orb/plugins/log/slog v0.0.0-20241110100006-384967e4b782
 	github.com/google/uuid v1.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/quic-go/quic-go v0.48.1
@@ -29,8 +29,6 @@ require (
 	github.com/go-playground/form/v4 v4.2.1 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/pprof v0.0.0-20241101162523-b92577c0c142 // indirect
-	github.com/google/subcommands v1.2.0 // indirect
-	github.com/google/wire v0.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/miekg/dns v1.1.62 // indirect
