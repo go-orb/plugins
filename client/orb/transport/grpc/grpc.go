@@ -124,7 +124,7 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 
 		_ = conn.Close() //nolint:errcheck
 
-		orbE := orberrors.New(httpStatusCode, "")
+		orbE := orberrors.HTTP(httpStatusCode)
 		return orbE.Wrap(gErr.Err())
 	}
 
@@ -143,7 +143,9 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 
 		httpStatusCode := CodeToHTTPStatus(gErr.Code())
 
-		return orberrors.New(httpStatusCode, gErr.Message())
+		orbE := orberrors.HTTP(httpStatusCode)
+
+		return orbE.Wrap(gErr.Err())
 	}
 
 	return nil

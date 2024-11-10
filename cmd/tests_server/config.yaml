@@ -1,0 +1,54 @@
+client:
+  logger:
+    plugin: slog
+    format: json
+    level: TRACE # DEBUG-1
+service:
+  server:
+    handlers:
+      - echo.Streams
+    entrypoints:
+      - name: hertzhttp
+        plugin: hertz
+        http2: false
+        insecure: true
+
+      - name: hertzh2c
+        plugin: hertz
+        h2c: true
+        insecure: true
+
+      - name: grpc
+        plugin: grpc
+        insecure: true
+        reflection: false
+
+      - name: http
+        plugin: http
+        insecure: true
+
+      - name: https
+        plugin: http
+        insecure: false
+        http2: false
+
+      - name: h2c
+        plugin: http
+        insecure: true
+        h2c: true
+
+      - name: http2
+        plugin: http
+        http2: true
+
+      - name: http3
+        plugin: http
+        http3: true
+
+      - name: drpc
+        plugin: drpc
+
+  logger:
+    plugin: slog
+    format: json
+    level: TRACE # DEBUG-1

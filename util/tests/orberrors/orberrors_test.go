@@ -2,14 +2,26 @@ package orberrors
 
 import (
 	"errors"
+	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/stretchr/testify/require"
 )
 
+func TestErrorIs(t *testing.T) {
+	err := orberrors.HTTP(http.StatusUnauthorized)
+	require.ErrorIs(t, err, orberrors.ErrUnauthorized)
+}
+
+func TestErrorIsWrapped(t *testing.T) {
+	err := orberrors.HTTP(http.StatusUnauthorized).Wrap(errors.New("test"))
+	require.ErrorIs(t, err, orberrors.ErrUnauthorized)
+}
+
 func TestError(t *testing.T) {
-	msg := orberrors.ErrInternalServerError.Error()
+	msg := fmt.Sprintf("%v", orberrors.ErrInternalServerError)
 	expected := "internal server error"
 	require.Equal(t, expected, msg)
 }
@@ -52,10 +64,10 @@ func TestFromAndAs(t *testing.T) {
 }
 
 func TestWrappedAs(t *testing.T) {
-	err := orberrors.ErrRequestTimeout.Wrap(errors.New("Test"))
-	require.Equal(t, "request timeout: Test", err.Error())
+	err := orberrors.ErrRequestTimeout.Wrap(errors.New("test"))
+	require.Equal(t, "request timeout: test", err.Error())
 	orbe, ok := orberrors.As(err)
 	require.True(t, ok)
-	require.Equal(t, "request timeout: Test", orbe.Error())
+	require.Equal(t, "request timeout: test", orbe.Error())
 	require.Equal(t, 408, orbe.Code)
 }

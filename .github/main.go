@@ -257,6 +257,7 @@ func (m *GoOrb) Update(ctx context.Context, root *dagger.Directory) (*AllResult,
 
 			c := m.goContainer(root, dir).
 				WithEnvVariable("GOPROXY", "direct").
+				WithEnvVariable("GOSUMDB", "off").
 				WithExec([]string{"go", "get", "-u", "-t", "./..."}).
 				WithExec([]string{"go", "get", "-u", "github.com/go-orb/go-orb@main"}).
 				WithExec([]string{"bash", "-c", "for m in $(grep github.com/go-orb/plugins go.mod | egrep -v \"^module\" | awk '{ print $1 }'); do go get -u \"${m}@main\"; done"}).

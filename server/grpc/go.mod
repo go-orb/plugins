@@ -5,12 +5,12 @@ go 1.23
 toolchain go1.23.0
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20241110074750-fa58e9b25592
+	github.com/go-orb/go-orb v0.0.0-20241110084057-e256fbfa128d
 	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20241110080131-1dc0c40cbe12
-	github.com/go-orb/plugins/codecs/json v0.0.0-20241027043739-772da474b6a7
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20241027043739-772da474b6a7
-	github.com/go-orb/plugins/config/source/file v0.0.0-20241027043739-772da474b6a7
-	github.com/go-orb/plugins/log/slog v0.0.0-20241027043739-772da474b6a7
+	github.com/go-orb/plugins/codecs/json v0.0.0-20241110080420-c3dff95b18c2
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20241110080420-c3dff95b18c2
+	github.com/go-orb/plugins/config/source/file v0.0.0-20241110080420-c3dff95b18c2
+	github.com/go-orb/plugins/log/slog v0.0.0-20241110080420-c3dff95b18c2
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/grpc v1.68.0
@@ -20,6 +20,8 @@ require (
 require (
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/google/subcommands v1.2.0 // indirect
+	github.com/google/wire v0.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/miekg/dns v1.1.62 // indirect
