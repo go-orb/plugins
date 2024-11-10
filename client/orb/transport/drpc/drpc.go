@@ -113,7 +113,7 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 
 	mdResult := &message.Response{}
 	if err := conn.Invoke(ctx, "/"+req.Endpoint(), &t.encoder, req.Request(), mdResult); err != nil {
-		orbError := orberrors.New(int(drpcerr.Code(err)), "") //nolint:gosec
+		orbError := orberrors.HTTP(int(drpcerr.Code(err))) //nolint:gosec
 		orbError = orbError.Wrap(err)
 		return orbError
 	}
