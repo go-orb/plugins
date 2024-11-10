@@ -1,4 +1,4 @@
-name: PR Tests
+name: Pull Request
 on:
   pull_request: {}
 permissions: read-all
@@ -11,9 +11,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Lint files
-        uses: dagger/dagger-for-github@v7
+        uses: go-orb/dagger-for-github@v6
         with:
-          version: latest
+          version: "v0.14.0"
           verb: call
           args: lint --root=. logs
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
@@ -25,9 +25,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run unit tests
-        uses: dagger/dagger-for-github@v7
+        uses: go-orb/dagger-for-github@v6
         with:
-          version: latest
+          version: "v0.14.0"
           verb: call
           args: test --root=. logs
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
