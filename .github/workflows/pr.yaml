@@ -15,7 +15,7 @@ jobs:
         with:
           version: latest
           verb: call
-          args: lint --root=.
+          args: lint --root=. logs
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
   test:
     name: Unit Tests

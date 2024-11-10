@@ -50,7 +50,7 @@ func (m *GoOrb) runAll(ctx context.Context, root *dagger.Directory, worker func(
 	var wg sync.WaitGroup
 
 	// Start workers
-	for i := 0; i < runtime.NumCPU()/2; i++ {
+	for i := 0; i < runtime.NumCPU(); i++ {
 		wg.Add(1)
 		go worker(ctx, &wg, input, res, root)
 	}
