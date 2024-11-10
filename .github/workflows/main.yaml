@@ -13,7 +13,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Lint files
-        uses: dagger/dagger-for-github@v6
+        uses: dagger/dagger-for-github@v7
         with:
           version: latest
           verb: call
@@ -27,7 +27,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run unit tests
-        uses: dagger/dagger-for-github@v6
+        uses: dagger/dagger-for-github@v7
         with:
           version: latest
           verb: call
