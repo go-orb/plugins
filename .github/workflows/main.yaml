@@ -13,7 +13,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Lint files
-        uses: go-orb/dagger-for-github
+        uses: go-orb/dagger-for-github@main
         with:
           version: "v0.14.0"
           verb: call
@@ -27,7 +27,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run unit tests
-        uses: go-orb/dagger-for-github
+        uses: go-orb/dagger-for-github@main
         with:
           version: "v0.14.0"
           verb: call
