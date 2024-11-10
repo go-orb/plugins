@@ -86,7 +86,7 @@ func New(serviceName string, cfg Config, log log.Logger) *NatsJS {
 	}
 }
 
-// Clone creates a clone of the handler, this is usefull for parallel requests.
+// Clone creates a clone of the handler, this is useful for parallel requests.
 func (n *NatsJS) Clone() event.Handler {
 	return &NatsJS{
 		serviceName: n.serviceName,

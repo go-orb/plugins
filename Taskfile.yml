@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 tasks:
   lint:
@@ -10,7 +10,7 @@ tasks:
     desc: Run "go mod tidy" in all packages
     cmds:
       - cmd: dagger call tidy --root=. source export --path=.
-  
+
   mod-update:
     desc: Run "go get -u -t ./..." in all packages
     cmds:
