@@ -36,7 +36,7 @@ func init() {
 		cli.Usage("Registry addresses."),
 	))
 
-	registry.Plugins.Register(Name, ProvideRegistryConsul)
+	registry.Plugins.Add(Name, ProvideRegistryConsul)
 }
 
 // Config provides configuration for the consul registry.

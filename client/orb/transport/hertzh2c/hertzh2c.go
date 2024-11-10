@@ -16,7 +16,7 @@ import (
 const Name = "hertzh2c"
 
 func init() {
-	orb.Transports.Register(Name, NewTransport)
+	orb.RegisterTransport(Name, NewTransport)
 }
 
 // NewTransport creates a new hertz http transport for the orb client.

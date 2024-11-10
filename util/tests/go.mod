@@ -3,9 +3,9 @@ module github.com/go-orb/plugins/util/tests
 go 1.23
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73
+	github.com/go-orb/go-orb v0.0.0-20241110074750-fa58e9b25592
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c
+	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f
 )
 
 require (

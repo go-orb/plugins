@@ -17,8 +17,9 @@ const Name = "natsjs"
 //
 //nolint:gochecknoglobals
 var (
-	DefaultAddresses = []string{"nats://localhost:4222"}
-	DefaultCodec     = "application/json"
+	DefaultAddresses     = []string{"nats://localhost:4222"}
+	DefaultCodec         = "application/x-protobuf"
+	DefaultMaxConcurrent = 256
 )
 
 func init() {
@@ -30,6 +31,13 @@ func init() {
 		cli.Usage("Events addresses."),
 	))
 
+	_ = cli.Flags.Add(cli.NewFlag(
+		event.ComponentType+"_codec",
+		DefaultCodec,
+		cli.ConfigPathSlice([]string{event.ComponentType, "codec"}),
+		cli.Usage("Events internal codec."),
+	))
+
 	event.Register(Name, Provide)
 }
 
@@ -37,9 +45,10 @@ func init() {
 type Config struct {
 	event.Config `yaml:",inline"`
 
-	Addresses []string    `json:"addresses,omitempty" yaml:"addresses,omitempty"`
-	TLSConfig *tls.Config `json:"-"                   yaml:"-"`
-	Codec     string      `json:"codec"               yaml:"codec"`
+	Addresses     []string    `json:"addresses,omitempty" yaml:"addresses,omitempty"`
+	TLSConfig     *tls.Config `json:"-"                   yaml:"-"`
+	Codec         string      `json:"codec"               yaml:"codec"`
+	MaxConcurrent int         `json:"maxConcurrent"       yaml:"maxConcurrent"`
 }
 
 // ApplyOptions applies a set of options to the config.
@@ -69,6 +78,26 @@ func WithTLSConfig(n *tls.Config) event.Option {
 	}
 }
 
+// WithCodec sets the internal codec.
+func WithCodec(n string) event.Option {
+	return func(c event.ConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.Codec = n
+		}
+	}
+}
+
+// WithMaxConcurrent sets the number of concurrent workers.
+func WithMaxConcurrent(n int) event.Option {
+	return func(c event.ConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.MaxConcurrent = n
+		}
+	}
+}
+
 // NewConfig creates a new config object.
 func NewConfig(
 	serviceName types.ServiceName,
@@ -76,9 +105,10 @@ func NewConfig(
 	opts ...event.Option,
 ) (Config, error) {
 	cfg := Config{
-		Config:    event.NewConfig(),
-		Addresses: DefaultAddresses,
-		Codec:     DefaultCodec,
+		Config:        event.NewConfig(),
+		Addresses:     DefaultAddresses,
+		Codec:         DefaultCodec,
+		MaxConcurrent: DefaultMaxConcurrent,
 	}
 
 	cfg.ApplyOptions(opts...)

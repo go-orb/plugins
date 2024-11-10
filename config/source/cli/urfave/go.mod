@@ -5,11 +5,11 @@ go 1.23
 toolchain go1.23.0
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73
+	github.com/go-orb/go-orb v0.0.0-20241110074750-fa58e9b25592
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.5
-	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c
+	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f
 )
 
 require (

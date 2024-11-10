@@ -63,11 +63,11 @@ func setAddrs(addrs []string) []string {
 }
 
 // New creates a new NATS registry. This functions should rarely be called manually.
-// To create a new registry use ProvideRegistryNATS.
+// To create a new registry use Provide.
 func New(serviceName string, cfg Config, log log.Logger) *NatsJS {
 	cfg.Addresses = setAddrs(cfg.Addresses)
 
-	codec, err := codecs.GetMime("application/x-protobuf")
+	codec, err := codecs.GetMime(cfg.Codec)
 	if err != nil {
 		panic(err)
 	}
@@ -77,6 +77,22 @@ func New(serviceName string, cfg Config, log log.Logger) *NatsJS {
 		config:      cfg,
 		logger:      log,
 		codec:       codec,
+
+		evReqPool: container.NewPool(func() *event.Req[[]byte, []byte] { return &event.Req[[]byte, []byte]{} }),
+		reqPool:   container.NewPool(func() *pb.Request { return &pb.Request{} }),
+		replyPool: container.NewPool(func() *pb.Reply { return &pb.Reply{} }),
+
+		consumers: container.NewSafeMap[string, jetstream.ConsumeContext](),
+	}
+}
+
+// Clone creates a clone of the handler, this is usefull for parallel requests.
+func (n *NatsJS) Clone() event.Handler {
+	return &NatsJS{
+		serviceName: n.serviceName,
+		config:      n.config,
+		logger:      n.logger,
+		codec:       n.codec,
 
 		evReqPool: container.NewPool(func() *event.Req[[]byte, []byte] { return &event.Req[[]byte, []byte]{} }),
 		reqPool:   container.NewPool(func() *pb.Request { return &pb.Request{} }),
@@ -209,6 +225,7 @@ func (n *NatsJS) HandleRequest(
 
 		callbackHandler(context.Background(), evReq)
 	})
+	wPool.SetNumShards(n.config.MaxConcurrent)
 
 	sub, err := n.nc.SubscribeSync(topic)
 	if err != nil {

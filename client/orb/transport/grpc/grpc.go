@@ -23,7 +23,7 @@ import (
 const Name = "grpc"
 
 func init() {
-	orb.Transports.Register(Name, NewTransport)
+	orb.RegisterTransport(Name, NewTransport)
 }
 
 // Transport is a go-orb/plugins/client/orb compatible transport.
@@ -124,7 +124,8 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 
 		_ = conn.Close() //nolint:errcheck
 
-		return orberrors.New(httpStatusCode, gErr.Message())
+		orbE := orberrors.New(httpStatusCode, "")
+		return orbE.Wrap(gErr.Err())
 	}
 
 	if opts.ResponseMetadata != nil {

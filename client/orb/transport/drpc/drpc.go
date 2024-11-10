@@ -49,7 +49,7 @@ func (e *encoder) Unmarshal(data []byte, msg drpc.Message) error {
 const Name = "drpc"
 
 func init() {
-	orb.Transports.Register(Name, NewTransport)
+	orb.RegisterTransport(Name, NewTransport)
 }
 
 // Transport is a go-orb/plugins/client/orb compatible transport.
@@ -113,7 +113,9 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 
 	mdResult := &message.Response{}
 	if err := conn.Invoke(ctx, "/"+req.Endpoint(), &t.encoder, req.Request(), mdResult); err != nil {
-		return orberrors.New(int(drpcerr.Code(err)), err.Error()) //nolint:gosec
+		orbError := orberrors.New(int(drpcerr.Code(err)), "") //nolint:gosec
+		orbError = orbError.Wrap(err)
+		return orbError
 	}
 
 	// Unmarshal the result.

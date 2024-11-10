@@ -11,7 +11,7 @@ import (
 
 // Middleware contains a map of middlewares, by name. These can by
 // referenced dynamically from your config files.
-var Middleware = container.NewPlugins[func(http.Handler) http.Handler]() //nolint:gochecknoglobals
+var Middleware = container.NewMap[string, func(http.Handler) http.Handler]() //nolint:gochecknoglobals
 
 // Middleware is a wrapper around the func(http.Handler) http.Handler convention
 // used for middleware. We use this alias to implement custom marshal/unmarshal

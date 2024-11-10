@@ -31,16 +31,21 @@ const (
 func init() {
 	log.Register(Name, Factory)
 
-	err := cli.Flags.Add(cli.NewFlag(
+	_ = cli.Flags.Add(cli.NewFlag(
 		"log_level",
 		log.DefaultLevel,
 		cli.ConfigPathSlice([]string{log.DefaultConfigSection, "level"}),
 		cli.Usage("Log level (FATAL, ERROR, NOTICE, WARN, INFO, DEBUG, TRACE)"),
 		cli.EnvVars("LOG_LEVEL"),
 	))
-	if err != nil && !errors.Is(err, cli.ErrFlagExists) {
-		panic(err)
-	}
+
+	_ = cli.Flags.Add(cli.NewFlag(
+		"log_format",
+		DefaultFormat,
+		cli.ConfigPathSlice([]string{log.DefaultConfigSection, "format"}),
+		cli.Usage("Log format (json, text)"),
+		cli.EnvVars("LOG_FORMAT"),
+	))
 }
 
 // Config is the config struct for slog.

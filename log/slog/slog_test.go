@@ -10,6 +10,8 @@ import (
 	"github.com/go-orb/go-orb/config/source"
 	"github.com/go-orb/go-orb/log"
 	"github.com/stretchr/testify/require"
+
+	_ "github.com/go-orb/plugins/codecs/json"
 )
 
 func TestChangeLevel(t *testing.T) {

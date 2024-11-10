@@ -10,31 +10,31 @@ import (
 
 func TestError(t *testing.T) {
 	msg := orberrors.ErrInternalServerError.Error()
-	expected := "500 Internal Server Error"
+	expected := "internal server error"
 	require.Equal(t, expected, msg)
 }
 
 func TestWrappedError(t *testing.T) {
 	err := orberrors.ErrInternalServerError.Wrap(errors.New("testing"))
-	expected := "500 Internal Server Error: testing"
+	expected := "internal server error: testing"
 	require.Equal(t, expected, err.Error())
 }
 
 func TestNew(t *testing.T) {
 	msg := orberrors.New(500, "testing").Error()
-	expected := "500 testing"
+	expected := "testing"
 	require.Equal(t, expected, msg)
 }
 
 func TestNewHTTP(t *testing.T) {
 	msg := orberrors.NewHTTP(500).Error()
-	expected := "500 Internal Server Error"
+	expected := "internal server error"
 	require.Equal(t, expected, msg)
 }
 
 func TestFrom(t *testing.T) {
 	msg := orberrors.From(errors.New("testing")).Error()
-	expected := "500 testing"
+	expected := "internal server error: testing"
 	require.Equal(t, expected, msg)
 }
 
@@ -53,9 +53,9 @@ func TestFromAndAs(t *testing.T) {
 
 func TestWrappedAs(t *testing.T) {
 	err := orberrors.ErrRequestTimeout.Wrap(errors.New("Test"))
-	require.Equal(t, "408 Request Timeout: Test", err.Error())
+	require.Equal(t, "request timeout: Test", err.Error())
 	orbe, ok := orberrors.As(err)
 	require.True(t, ok)
-	require.Equal(t, "408 Request Timeout: Test", orbe.Error())
+	require.Equal(t, "request timeout: Test", orbe.Error())
 	require.Equal(t, 408, orbe.Code)
 }

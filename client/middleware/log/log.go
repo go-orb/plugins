@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	client.Middlewares.Register(Name, Provide)
+	client.Middlewares.Add(Name, Provide)
 }
 
 // Name is the middlewares name.

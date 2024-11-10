@@ -15,7 +15,7 @@ import (
 const Name = "h2c"
 
 func init() {
-	orb.Transports.Register(Name, NewTransport)
+	orb.RegisterTransport(Name, NewTransport)
 }
 
 // NewTransport creates a new https transport for the orb client.

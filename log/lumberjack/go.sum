@@ -1,6 +1,6 @@
 github.com/cornelk/hashmap v1.0.8 h1:nv0AWgw02n+iDcawr5It4CjQIAcdMMKRrs10HOJYlrc=
 github.com/cornelk/hashmap v1.0.8/go.mod h1:RfZb7JO3RviW/rT6emczVuC/oxpdz4UsSB2LJSclR1k=
-github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73 h1:JFKKzHUP4o/3c5R0TKK/to/ggVl5B61AtDsILIaiHTs=
-github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73/go.mod h1:IqEV2MC/Xasp/x0cHO+RcQUHjOdP5ObL5vht+KD0l6A=
+github.com/go-orb/go-orb v0.0.0-20241110074750-fa58e9b25592 h1:bytwjCRMe1GijAKAjXXK7i42AlLF+JkMc+x3RPnSpM0=
+github.com/go-orb/go-orb v0.0.0-20241110074750-fa58e9b25592/go.mod h1:IqEV2MC/Xasp/x0cHO+RcQUHjOdP5ObL5vht+KD0l6A=
 gopkg.in/natefinch/lumberjack.v2 v2.2.1 h1:bBRl1b0OH9s/DuPhuXpNl+VtCaJXFZ5/uEFST95x9zc=
 gopkg.in/natefinch/lumberjack.v2 v2.2.1/go.mod h1:YD8tP3GAjkrDg1eZH7EGmyESg/lsYskCTPBJVb9jqSc=

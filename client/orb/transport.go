@@ -34,5 +34,10 @@ type TransportFactory = func(log.Logger, *Config) (TransportType, error)
 
 //nolint:gochecknoglobals
 var (
-	Transports = container.NewPlugins[TransportFactory]()
+	Transports = container.NewMap[string, TransportFactory]()
 )
+
+// RegisterTransport registers a transport with the orb client.
+func RegisterTransport(name string, transport TransportFactory) {
+	Transports.Add(name, transport)
+}

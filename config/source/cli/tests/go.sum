@@ -2,8 +2,8 @@ github.com/cornelk/hashmap v1.0.8 h1:nv0AWgw02n+iDcawr5It4CjQIAcdMMKRrs10HOJYlrc
 github.com/cornelk/hashmap v1.0.8/go.mod h1:RfZb7JO3RviW/rT6emczVuC/oxpdz4UsSB2LJSclR1k=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73 h1:JFKKzHUP4o/3c5R0TKK/to/ggVl5B61AtDsILIaiHTs=
-github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73/go.mod h1:IqEV2MC/Xasp/x0cHO+RcQUHjOdP5ObL5vht+KD0l6A=
+github.com/go-orb/go-orb v0.0.0-20241110074750-fa58e9b25592 h1:bytwjCRMe1GijAKAjXXK7i42AlLF+JkMc+x3RPnSpM0=
+github.com/go-orb/go-orb v0.0.0-20241110074750-fa58e9b25592/go.mod h1:IqEV2MC/Xasp/x0cHO+RcQUHjOdP5ObL5vht+KD0l6A=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=

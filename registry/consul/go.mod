@@ -5,11 +5,11 @@ go 1.23
 toolchain go1.23.0
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20241027004147-7e65db198d73
-	github.com/go-orb/plugins/codecs/json v0.0.0-20241027010804-96f32fd57e48
-	github.com/go-orb/plugins/log/slog v0.0.0-20241027010804-96f32fd57e48
-	github.com/go-orb/plugins/registry/regutil v0.0.0-20241027010804-96f32fd57e48
-	github.com/go-orb/plugins/registry/tests v0.0.0-20241027043445-541f709e177b
+	github.com/go-orb/go-orb v0.0.0-20241110074750-fa58e9b25592
+	github.com/go-orb/plugins/codecs/json v0.0.0-20241027043739-772da474b6a7
+	github.com/go-orb/plugins/log/slog v0.0.0-20241027043739-772da474b6a7
+	github.com/go-orb/plugins/registry/regutil v0.0.0-20241027043739-772da474b6a7
+	github.com/go-orb/plugins/registry/tests v0.0.0-20241027043739-772da474b6a7
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/consul/api v1.30.0
 	github.com/hashicorp/consul/sdk v0.16.1
@@ -39,8 +39,8 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c // indirect
-	golang.org/x/net v0.30.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
+	golang.org/x/net v0.31.0 // indirect
+	golang.org/x/sys v0.27.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
