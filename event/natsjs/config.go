@@ -23,19 +23,21 @@ var (
 )
 
 func init() {
+	//nolint:errcheck
 	_ = cli.Flags.Add(cli.NewFlag(
 		event.ComponentType+"_addresses",
 		DefaultAddresses,
 		cli.ConfigPathSlice([]string{event.ComponentType, "addresses"}),
 		cli.Usage("Events addresses."),
-	)) //nolint:errcheck
+	))
 
+	//nolint:errcheck
 	_ = cli.Flags.Add(cli.NewFlag(
 		event.ComponentType+"_codec",
 		DefaultCodec,
 		cli.ConfigPathSlice([]string{event.ComponentType, "codec"}),
 		cli.Usage("Events internal codec."),
-	)) //nolint:errcheck
+	))
 
 	event.Register(Name, Provide)
 }
