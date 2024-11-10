@@ -31,5 +31,5 @@ jobs:
         with:
           version: latest
           verb: call
-          args: test --root=.
+          args: test --root=. logs
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
