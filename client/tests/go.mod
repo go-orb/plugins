@@ -39,7 +39,6 @@ require (
 	github.com/bytedance/gopkg v0.1.1 // indirect
 	github.com/bytedance/sonic v1.12.4 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
-	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/hertz v0.9.3 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
@@ -49,7 +48,6 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/go-chi/chi/v5 v5.1.0 // indirect
-	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-orb/plugins/client/orb v0.0.0-20241110092208-bd726ef6240d // indirect
 	github.com/go-orb/plugins/client/orb/transport/basehertz v0.0.0-20241110092208-bd726ef6240d // indirect
 	github.com/go-orb/plugins/client/orb/transport/basehttp v0.0.0-20241110100006-384967e4b782 // indirect
@@ -60,9 +58,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hertz-contrib/http2 v0.1.8 // indirect
-	github.com/ianlancetaylor/demangle v0.0.0-20240912202439-0a2b6291aafd // indirect
 	github.com/klauspost/cpuid/v2 v2.2.9 // indirect
-	github.com/knz/go-libedit v1.10.1 // indirect
 	github.com/miekg/dns v1.1.62 // indirect
 	github.com/nyaruka/phonenumbers v1.4.1 // indirect
 	github.com/onsi/ginkgo/v2 v2.21.0 // indirect
