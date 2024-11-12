@@ -97,7 +97,7 @@ func (m *Mux) HandleRPC(stream drpc.Stream, rpc string) (err error) {
 
 		return drpcerr.WithCode(errors.New(oErr.Message), uint64(oErr.Code)) //nolint:gosec
 	case out != nil && !reflect.ValueOf(out).IsNil():
-		outData, err := anypb.New(out.(proto.Message))
+		outData, err := anypb.New(out.(proto.Message)) //nolint:errcheck
 		if err != nil {
 			return errs.Wrap(err)
 		}

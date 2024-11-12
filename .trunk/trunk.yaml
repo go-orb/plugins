@@ -15,24 +15,24 @@ runtimes:
     - node@18.12.1
 lint:
   enabled:
-    - osv-scanner@1.9.0
-    - checkov@3.2.269
+    - osv-scanner@1.9.1
+    - checkov@3.2.286
     - trivy@0.56.2
-    - trufflehog@3.82.13
+    - trufflehog@3.83.6
     - yamllint@1.35.1
-    - actionlint@1.7.3
+    - actionlint@1.7.4
     - markdownlint@0.42.0
     - git-diff-check
     - gitleaks@8.21.1
     - gofmt@1.20.5
-    - golangci-lint@1.61.0
+    - golangci-lint@1.62.0
     - prettier@3.3.3
   disabled:
     - gokart
     - shellcheck
     - shfmt
 cli:
-  version: 1.22.7
+  version: 1.22.8
 plugins:
   sources:
     - id: trunk

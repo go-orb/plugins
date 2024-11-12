@@ -369,7 +369,7 @@ func TestServerIntegration(t *testing.T) {
 
 	e, err := srv.GetEntrypoint("test-ep-1")
 	require.NoError(t, err, "failed to fetch entrypoint 1")
-	require.Len(t, e.(*mhttp.Server).Router().Routes(), 1, "number of routes not equal to 1")
+	require.Len(t, e.(*mhttp.Server).Router().Routes(), 1, "number of routes not equal to 1") //nolint:errcheck
 	makeRequests(t, "https://"+e.Address(), thttp.TypeHTTP3)
 
 	e, err = srv.GetEntrypoint("test-ep-2")
@@ -685,7 +685,7 @@ func setupServer(tb testing.TB, nolog bool, opts ...server.Option) (*mhttp.Serve
 		return nil, cancel, err
 	}
 
-	return server.(*mhttp.Server), cleanup, nil
+	return server.(*mhttp.Server), cleanup, nil //nolint:errcheck
 }
 
 func makeRequests(t *testing.T, addr string, reqType thttp.ReqType) {

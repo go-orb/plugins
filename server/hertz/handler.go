@@ -53,7 +53,7 @@ func NewGRPCHandler[Tin any, Tout any](
 
 		// Apply middleware.
 		h := func(ctx context.Context, req any) (any, error) {
-			return fHandler(ctx, req.(*Tin))
+			return fHandler(ctx, req.(*Tin)) //nolint:errcheck
 		}
 		for _, m := range srv.config.OptMiddlewares {
 			h = m.Call(h)

@@ -284,7 +284,7 @@ func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest, c client.Ty
 		s.Require().Error(err)
 	} else {
 		s.Require().NoError(err)
-		s.Equal(req.Response.(*proto.CallResponse).GetMsg(), rsp.GetMsg(), "unexpected response")
+		s.Equal(req.Response.(*proto.CallResponse).GetMsg(), rsp.GetMsg(), "unexpected response") //nolint:errcheck
 	}
 }
 

@@ -221,7 +221,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	// Copy comments from proto file.
 	genServiceComments(g, service)
 
-	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() {
+	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() { //nolint:errcheck
 		g.P("//")
 		g.P(deprecationComment)
 	}
@@ -240,7 +240,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	// Copy comments from proto file.
 	genServiceComments(g, service)
 
-	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() {
+	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() { //nolint:errcheck
 		g.P("//")
 		g.P(deprecationComment)
 	}
@@ -248,7 +248,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	g.P("type ", serverType, " interface {")
 	for _, method := range service.Methods {
 		g.AnnotateSymbol(serverType+"."+method.GoName, protogen.Annotation{Location: method.Location})
-		if method.Desc.Options().(*descriptorpb.MethodOptions).GetDeprecated() {
+		if method.Desc.Options().(*descriptorpb.MethodOptions).GetDeprecated() { //nolint:errcheck
 			g.P(deprecationComment)
 		}
 		g.P(method.Comments.Leading,
@@ -272,7 +272,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	g.P("}")
 
 	// Server registration.
-	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() {
+	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() { //nolint:errcheck
 		g.P(deprecationComment)
 	}
 	serviceDescVar := service.GoName + "_ServiceDesc"

@@ -120,7 +120,7 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 	}
 
 	// Unmarshal the result.
-	if err := mdResult.GetData().UnmarshalTo(result.(proto.Message)); err != nil {
+	if err := mdResult.GetData().UnmarshalTo(result.(proto.Message)); err != nil { //nolint:errcheck
 		return orberrors.From(err)
 	}
 

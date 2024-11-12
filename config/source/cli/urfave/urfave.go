@@ -142,7 +142,7 @@ func (c *flagCLI) parse(args []string) error {
 	}
 
 	for n, tf := range c.stringSliceFlags {
-		if !slices.Equal(c.flags[n].Default.([]string), tf.Get(ctx)) {
+		if !slices.Equal(c.flags[n].Default.([]string), tf.Get(ctx)) { //nolint:errcheck
 			c.flags[n].Value = tf.Get(ctx)
 		}
 	}

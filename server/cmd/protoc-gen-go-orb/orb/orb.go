@@ -82,7 +82,7 @@ func genServices(file *protogen.File, generated *protogen.GeneratedFile) []servi
 
 // genService will generate a single service description.
 func genService(file *protogen.File, generated *protogen.GeneratedFile, service *protogen.Service) serviceDesc {
-	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() {
+	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() { //nolint:errcheck
 		generated.P("//")
 		generated.P(deprecationComment)
 	}

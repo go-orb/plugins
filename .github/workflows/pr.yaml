@@ -13,7 +13,7 @@ jobs:
       - name: Lint files
         uses: dagger/dagger-for-github@v7
         with:
-          version: "v0.14.0"
+          version: v0.14.0
           verb: call
           args: lint --root=. logs
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
@@ -27,7 +27,7 @@ jobs:
       - name: Run unit tests
         uses: dagger/dagger-for-github@v7
         with:
-          version: "v0.14.0"
+          version: v0.14.0
           verb: call
           args: test --root=. logs
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}

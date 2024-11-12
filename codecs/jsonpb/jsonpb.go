@@ -22,7 +22,7 @@ type mEncoder struct {
 }
 
 func (m *mEncoder) Encode(v any) error {
-	b, err := protojson.Marshal(v.(protoreflect.ProtoMessage))
+	b, err := protojson.Marshal(v.(protoreflect.ProtoMessage)) //nolint:errcheck
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func (m *mDecoder) Decode(v any) error {
 		return err
 	}
 
-	return protojson.Unmarshal(b, v.(protoreflect.ProtoMessage))
+	return protojson.Unmarshal(b, v.(protoreflect.ProtoMessage)) //nolint:errcheck
 }
 
 // JSONPb wraps Google's implementation of a JSON <> Protocol buffer marshaller
@@ -54,13 +54,13 @@ type JSONPb struct{}
 
 // Encode encodes "v" into byte sequence.
 func (j *JSONPb) Encode(v any) ([]byte, error) {
-	return protojson.Marshal(v.(protoreflect.ProtoMessage))
+	return protojson.Marshal(v.(protoreflect.ProtoMessage)) //nolint:errcheck
 }
 
 // Decode decodes "data" into "v".
 // "v" must be a pointer value.
 func (j *JSONPb) Decode(b []byte, v any) error {
-	return protojson.Unmarshal(b, v.(protoreflect.ProtoMessage))
+	return protojson.Unmarshal(b, v.(protoreflect.ProtoMessage)) //nolint:errcheck
 }
 
 // NewEncoder returns a new JSON/ProtocolBuffer encoder.
