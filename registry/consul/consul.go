@@ -124,7 +124,7 @@ func (c *RegistryConsul) Deregister(s *registry.Service, _ ...registry.Deregiste
 // Register registers a service within the registry.
 // TODO(jochumdev): work on the nolints.
 //
-//nolint:gocyclo,funlen,cyclop
+//nolint:gocognit,gocyclo,cyclop,funlen
 func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.RegisterOption) error {
 	if len(service.Nodes) == 0 {
 		return errors.New("require at least one node")
@@ -270,8 +270,6 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 }
 
 // GetService returns a service from the registry.
-//
-//nolint:funlen
 func (c *RegistryConsul) GetService(name string, _ ...registry.GetOption) ([]*registry.Service, error) {
 	var (
 		rsp []*consul.ServiceEntry

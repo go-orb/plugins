@@ -34,6 +34,7 @@ type TransportFactory = func(log.Logger, *Config) (TransportType, error)
 
 //nolint:gochecknoglobals
 var (
+	// Transports is a map of registered transports.
 	Transports = container.NewMap[string, TransportFactory]()
 )
 

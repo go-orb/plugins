@@ -1,16 +1,16 @@
 package slicemap
 
 import (
+	"cmp"
 	"strconv"
 	"testing"
 
 	"github.com/go-orb/go-orb/util/slicemap"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/exp/constraints"
 )
 
-type sliceTest[T constraints.Ordered] struct {
+type sliceTest[T cmp.Ordered] struct {
 	Array    []T
 	Query    []T
 	Expected []bool

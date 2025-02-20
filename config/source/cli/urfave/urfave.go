@@ -4,11 +4,11 @@ package urfave
 import (
 	"fmt"
 	"os"
+	"slices"
 
 	oCli "github.com/go-orb/go-orb/config/source/cli"
 	"github.com/hashicorp/go-multierror"
 	"github.com/urfave/cli/v2"
-	"golang.org/x/exp/slices"
 )
 
 func init() {

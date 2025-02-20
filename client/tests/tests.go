@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"slices"
 	"time"
 
 	"github.com/go-orb/go-orb/client"
@@ -17,7 +18,6 @@ import (
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/client/tests/proto"
 	"github.com/stretchr/testify/suite"
-	"golang.org/x/exp/slices"
 
 	// Blank imports here are fine.
 	_ "github.com/go-orb/plugins-experimental/registry/mdns"
@@ -31,7 +31,10 @@ import (
 
 //nolint:gochecknoglobals
 var (
-	ServiceName     = types.ServiceName("service")
+	// ServiceName is the name of the testing service.
+	ServiceName = types.ServiceName("service")
+
+	// DefaultRequests is the list of default requests.
 	DefaultRequests = []TestRequest{
 		{
 			Name:     "32byte",
