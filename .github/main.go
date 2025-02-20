@@ -145,7 +145,7 @@ func (m *GoOrb) Lint(
 				WithDirectory("/work/src", root.Directory(dir)).
 				WithWorkdir("/work/src").
 				WithMountedFile("/work/config", golangciConfig).
-				WithExec([]string{"golangci-lint", "run", "--config", "/work/config"}).
+				WithExec([]string{"golangci-lint", "run", "--config", "/work/config", "--timeout=10m"}).
 				Stdout(ctx)
 
 			res <- &WorkerResult{Module: dir, Logs: out, Err: err}
