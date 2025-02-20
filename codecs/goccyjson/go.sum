@@ -1,6 +1,6 @@
 github.com/cornelk/hashmap v1.0.8 h1:nv0AWgw02n+iDcawr5It4CjQIAcdMMKRrs10HOJYlrc=
 github.com/cornelk/hashmap v1.0.8/go.mod h1:RfZb7JO3RviW/rT6emczVuC/oxpdz4UsSB2LJSclR1k=
-github.com/go-orb/go-orb v0.0.0-20241110084057-e256fbfa128d h1:z6KbQerINwOTr2Wki1Me0B5jZ7IwLizdjL7Klzn+g0M=
-github.com/go-orb/go-orb v0.0.0-20241110084057-e256fbfa128d/go.mod h1:IqEV2MC/Xasp/x0cHO+RcQUHjOdP5ObL5vht+KD0l6A=
-github.com/goccy/go-json v0.10.3 h1:KZ5WoDbxAIgm2HNbYckL0se1fHD6rz5j4ywS6ebzDqA=
-github.com/goccy/go-json v0.10.3/go.mod h1:oq7eo15ShAhp70Anwd5lgX2pLfOS3QCiwU/PULtXL6M=
+github.com/go-orb/go-orb v0.0.0-20250220181250-2526983d68a1 h1:Zw5hpsIlimXuBy593tAg7MZTYcK2k7iSBseWOWBlRQk=
+github.com/go-orb/go-orb v0.0.0-20250220181250-2526983d68a1/go.mod h1:Z64Q1rFtN8XHhnito1vWzJrxfxJs+f9F+J5TzAKGvJ0=
+github.com/goccy/go-json v0.10.5 h1:Fq85nIqj+gXn/S5ahsiTlK3TmC85qgirsdTP/+DeaC4=
+github.com/goccy/go-json v0.10.5/go.mod h1:oq7eo15ShAhp70Anwd5lgX2pLfOS3QCiwU/PULtXL6M=

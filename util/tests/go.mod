@@ -1,11 +1,13 @@
 module github.com/go-orb/plugins/util/tests
 
-go 1.23
+go 1.23.0
+
+toolchain go1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20241110084057-e256fbfa128d
-	github.com/stretchr/testify v1.9.0
-	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f
+	github.com/go-orb/go-orb v0.0.0-20250220181250-2526983d68a1
+	github.com/stretchr/testify v1.10.0
+	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa
 )
 
 require (

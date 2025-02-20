@@ -1,13 +1,13 @@
 module github.com/go-orb/plugins/log/slog
 
-go 1.23
+go 1.23.0
 
-toolchain go1.23.0
+toolchain go1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20241110084057-e256fbfa128d
-	github.com/go-orb/plugins/codecs/json v0.0.0-20241110092208-bd726ef6240d
-	github.com/stretchr/testify v1.9.0
+	github.com/go-orb/go-orb v0.0.0-20250220181250-2526983d68a1
+	github.com/go-orb/plugins/codecs/json v0.0.0-20241112091851-191046fb96f7
+	github.com/stretchr/testify v1.10.0
 )
 
 require (

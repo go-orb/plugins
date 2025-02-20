@@ -1,20 +1,20 @@
 module github.com/go-orb/plugins/server/grpc
 
-go 1.23
+go 1.23.0
 
-toolchain go1.23.0
+toolchain go1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20241110084057-e256fbfa128d
-	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20241110094607-87afee11d096
-	github.com/go-orb/plugins/codecs/json v0.0.0-20241110100006-384967e4b782
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20241110100006-384967e4b782
-	github.com/go-orb/plugins/config/source/file v0.0.0-20241110100006-384967e4b782
-	github.com/go-orb/plugins/log/slog v0.0.0-20241110100006-384967e4b782
+	github.com/go-orb/go-orb v0.0.0-20250220181250-2526983d68a1
+	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20241112090132-578292d58b28
+	github.com/go-orb/plugins/codecs/json v0.0.0-20241112091851-191046fb96f7
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20241112091851-191046fb96f7
+	github.com/go-orb/plugins/config/source/file v0.0.0-20241112091851-191046fb96f7
+	github.com/go-orb/plugins/log/slog v0.0.0-20241112091851-191046fb96f7
 	github.com/google/uuid v1.6.0
-	github.com/stretchr/testify v1.9.0
-	google.golang.org/grpc v1.68.0
-	google.golang.org/protobuf v1.35.1
+	github.com/stretchr/testify v1.10.0
+	google.golang.org/grpc v1.70.0
+	google.golang.org/protobuf v1.36.5
 )
 
 require (
@@ -22,14 +22,14 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/miekg/dns v1.1.62 // indirect
+	github.com/miekg/dns v1.1.63 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/net v0.31.0 // indirect
-	golang.org/x/sync v0.9.0 // indirect
-	golang.org/x/sys v0.27.0 // indirect
-	golang.org/x/text v0.20.0 // indirect
-	golang.org/x/tools v0.27.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20241104194629-dd2ea8efbc28 // indirect
+	golang.org/x/mod v0.23.0 // indirect
+	golang.org/x/net v0.35.0 // indirect
+	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/tools v0.30.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250219182151-9fdb1cabc7b2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
