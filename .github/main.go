@@ -126,7 +126,7 @@ func (m *GoOrb) Lint(
 			default:
 			}
 
-			out, err := dag.Container().From("golangci/golangci-lint").
+			out, err := dag.Container().From("golangci/golangci-lint:v1.64.5").
 				WithMountedCache("/go/pkg/mod",
 					dag.CacheVolume("go-mod"),
 					dagger.ContainerWithMountedCacheOpts{
