@@ -1,6 +1,8 @@
 {
   "name": "go-orb",
-  "sdk": "go",
-  "source": ".github",
-  "engineVersion": "v0.16.1"
+  "engineVersion": "v0.16.1",
+  "sdk": {
+    "source": "go"
+  },
+  "source": ".github"
 }

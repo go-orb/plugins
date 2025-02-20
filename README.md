@@ -28,6 +28,20 @@ dagger call test --root=.
 dagger call lint --root=.
 ```
 
+#### Run the tests for a single plugin
+
+```sh
+cd server/http
+go test ./... -v -race -cover
+cd ...
+```
+
+or with dagger
+
+```sh
+dagger call test --root=./server/http
+```
+
 ### Quirks
 
 #### It's not allowed to import plugins in github.com/go-orb/go-orb
