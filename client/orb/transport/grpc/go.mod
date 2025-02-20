@@ -1,8 +1,8 @@
 module github.com/go-orb/plugins/client/orb/transport/grpc
 
-go 1.23
+go 1.23.0
 
-toolchain go1.23.0
+toolchain go1.23.6
 
 require (
 	github.com/go-orb/go-orb v0.0.0-20241110084057-e256fbfa128d

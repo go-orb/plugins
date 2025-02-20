@@ -51,7 +51,7 @@ func main() {
 		true,
 		"set to true to use generic types for streaming client and server objects; this flag is EXPERIMENTAL and may be changed or removed in a future release (gRPC)",
 	)
-	servers = flags.String("supported_servers", "drpc;grpc;hertz;http", "semicolon separated list of servers to generate for")
+	servers = flags.String("supported_servers", "drpc;grpc;http", "semicolon separated list of servers to generate for")
 
 	flags.StringVar(&drpcConf.Protolib, "protolib", "google.golang.org/protobuf", "which protobuf library to use for encoding")
 	flags.BoolVar(&drpcConf.JSON, "json", true, "generate encoders with json support")

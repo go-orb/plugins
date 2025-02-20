@@ -27,7 +27,6 @@ import (
 	_ "github.com/go-orb/plugins/log/slog"
 	_ "github.com/go-orb/plugins/server/drpc"
 	_ "github.com/go-orb/plugins/server/grpc"
-	_ "github.com/go-orb/plugins/server/hertz"
 	_ "github.com/go-orb/plugins/server/http"
 	_ "github.com/go-orb/plugins/server/http/router/chi"
 )

@@ -72,14 +72,14 @@ func (m *GoOrb) runAll(ctx context.Context, root *dagger.Directory, worker func(
 	for r := range res {
 		if r.Err != nil {
 			err = multierror.Append(err, r.Err)
+
+			if len(r.Logs) > 0 {
+				result.Logs = append(result.Logs, "## "+r.Module+"\n"+r.Logs+"\n\n")
+			}
 		}
 
 		if r.Source != nil {
 			result.Source = result.Source.WithDirectory(r.Module, r.Source)
-		}
-
-		if len(r.Logs) > 0 {
-			result.Logs = append(result.Logs, "## "+r.Module+"\n"+r.Logs+"\n\n")
 		}
 	}
 

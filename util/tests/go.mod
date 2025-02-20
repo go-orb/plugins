@@ -7,7 +7,6 @@ toolchain go1.23.6
 require (
 	github.com/go-orb/go-orb v0.0.0-20250220181250-2526983d68a1
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa
 )
 
 require (

@@ -44,18 +44,6 @@ func provideServerOpts() ([]server.ConfigOption, error) {
 	server.Handlers.Add(proto.HandlerStreams, hRegister)
 
 	opts := []server.ConfigOption{}
-	// opts = append(opts, server.WithEntrypointConfig(mhertz.NewConfig(
-	// 	mhertz.WithName("hertzhttp"),
-	// 	mhertz.WithDisableHTTP2(),
-	// 	mhertz.WithInsecure(),
-	// 	mhertz.WithHandlers(hRegister),
-	// )))
-	// opts = append(opts, server.WithEntrypointConfig(mhertz.NewConfig(
-	// 	mhertz.WithName("hertzh2c"),
-	// 	mhertz.WithInsecure(),
-	// 	mhertz.WithAllowH2C(),
-	// 	mhertz.WithHandlers(hRegister),
-	// )))
 	// opts = append(opts, server.WithEntrypointConfig(mgrpc.NewConfig(
 	// 	mgrpc.WithName("grpc"),
 	// 	mgrpc.WithInsecure(),

@@ -9,7 +9,6 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.5
-	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa
 )
 
 require (
