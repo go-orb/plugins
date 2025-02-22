@@ -1,19 +1,17 @@
 module github.com/go-orb/plugins/server/http
 
-go 1.23.0
-
-toolchain go1.23.6
+go 1.23.6
 
 require (
 	github.com/go-chi/chi/v5 v5.2.1
-	github.com/go-orb/go-orb v0.0.0-20250220181250-2526983d68a1
-	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20241112090132-578292d58b28
-	github.com/go-orb/plugins/codecs/form v0.0.0-20241112091851-191046fb96f7
-	github.com/go-orb/plugins/codecs/json v0.0.0-20241112091851-191046fb96f7
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20241112091851-191046fb96f7
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20241112091851-191046fb96f7
-	github.com/go-orb/plugins/config/source/file v0.0.0-20241112091851-191046fb96f7
-	github.com/go-orb/plugins/log/slog v0.0.0-20241112091851-191046fb96f7
+	github.com/go-orb/go-orb v0.0.0-20250220192804-1f05260015f2
+	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20250220203922-41462c628e64
+	github.com/go-orb/plugins/codecs/form v0.0.0-20250220201609-166b27343f72
+	github.com/go-orb/plugins/codecs/json v0.0.0-20250220201609-166b27343f72
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20250220201609-166b27343f72
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20250220201609-166b27343f72
+	github.com/go-orb/plugins/config/source/file v0.0.0-20250220201609-166b27343f72
+	github.com/go-orb/plugins/log/slog v0.0.0-20250220201609-166b27343f72
 	github.com/google/uuid v1.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/quic-go/quic-go v0.50.0
@@ -36,7 +34,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/quic-go/qpack v0.5.1 // indirect
 	go.uber.org/mock v0.5.0 // indirect
-	golang.org/x/crypto v0.33.0 // indirect
+	golang.org/x/crypto v0.34.0 // indirect
 	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa // indirect
 	golang.org/x/mod v0.23.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect

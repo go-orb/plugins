@@ -212,7 +212,7 @@ func (m *GoOrb) Test(ctx context.Context, root *dagger.Directory) (*AllResult, e
 	return m.runAll(ctx, root, testWorker)
 }
 
-// Runs `go mod tidy -go=1.23.0` in all modules starting with `root`
+// Runs `go mod tidy -go=1.23.6` in all modules starting with `root`
 func (m *GoOrb) Tidy(ctx context.Context, root *dagger.Directory) (*AllResult, error) {
 	tidyWorker := func(ctx context.Context, wg *sync.WaitGroup, input <-chan string, res chan<- *WorkerResult, root *dagger.Directory) {
 		defer wg.Done()
@@ -224,7 +224,7 @@ func (m *GoOrb) Tidy(ctx context.Context, root *dagger.Directory) (*AllResult, e
 			}
 
 			c := m.goContainer(root, dir).
-				WithExec([]string{"go", "mod", "tidy", "-go=1.23.0"})
+				WithExec([]string{"go", "mod", "tidy", "-go=1.23.6"})
 			stdout, err := c.Stdout(ctx)
 			if err != nil {
 				res <- &WorkerResult{Module: dir, Source: c.Directory("/work/src"), Err: err}
@@ -261,7 +261,7 @@ func (m *GoOrb) Update(ctx context.Context, root *dagger.Directory) (*AllResult,
 				WithExec([]string{"go", "get", "-u", "-t", "./..."}).
 				WithExec([]string{"go", "get", "-u", "github.com/go-orb/go-orb@main"}).
 				WithExec([]string{"bash", "-c", "for m in $(grep github.com/go-orb/plugins go.mod | grep -E -v \"^module\" | awk '{ print $1 }'); do go get -u \"${m}@main\"; done"}).
-				WithExec([]string{"go", "mod", "tidy", "-go=1.23.0"})
+				WithExec([]string{"go", "mod", "tidy", "-go=1.23.6"})
 
 			stdout, err := c.Stdout(ctx)
 			if err != nil {

@@ -1,16 +1,14 @@
 module github.com/go-orb/plugins/config/tests
 
-go 1.23.0
-
-toolchain go1.23.6
+go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20250220181250-2526983d68a1
-	github.com/go-orb/plugins/codecs/json v0.0.0-20241112091851-191046fb96f7
-	github.com/go-orb/plugins/codecs/yaml v0.0.0-20241112091851-191046fb96f7
-	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20241112091851-191046fb96f7
-	github.com/go-orb/plugins/config/source/file v0.0.0-20241112091851-191046fb96f7
-	github.com/go-orb/plugins/config/source/http v0.0.0-20241112091851-191046fb96f7
+	github.com/go-orb/go-orb v0.0.0-20250220192804-1f05260015f2
+	github.com/go-orb/plugins/codecs/json v0.0.0-20250220201609-166b27343f72
+	github.com/go-orb/plugins/codecs/yaml v0.0.0-20250220201609-166b27343f72
+	github.com/go-orb/plugins/config/source/cli/urfave v0.0.0-20250220201609-166b27343f72
+	github.com/go-orb/plugins/config/source/file v0.0.0-20250220201609-166b27343f72
+	github.com/go-orb/plugins/config/source/http v0.0.0-20250220201609-166b27343f72
 	github.com/stretchr/testify v1.10.0
 )
 
@@ -25,6 +23,5 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/urfave/cli/v2 v2.27.5 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
-	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
