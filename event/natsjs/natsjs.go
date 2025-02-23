@@ -172,7 +172,7 @@ func (n *NatsJS) Request(
 
 // HandleRequest subscribes to the given topic and handles the requests.
 //
-//nolint:funlen
+//nolint:funlen,gocognit
 func (n *NatsJS) HandleRequest(
 	ctx context.Context,
 	topic string,
