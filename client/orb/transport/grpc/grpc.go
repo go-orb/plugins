@@ -60,9 +60,24 @@ func (t *Transport) Call(_ context.Context, _ *client.Request[any, any], _ *clie
 	return nil, orberrors.ErrInternalServerError
 }
 
+// toOrbError converts a grpc error to an orb error.
+func toOrbError(err error) error {
+	gErr, ok := status.FromError(err)
+	if !ok {
+		return orberrors.From(err)
+	}
+
+	httpStatusCode := CodeToHTTPStatus(gErr.Code())
+
+	orbE := orberrors.HTTP(httpStatusCode)
+	if httpStatusCode == 499 {
+		return orbE.Wrap(context.Canceled)
+	}
+
+	return orbE.Wrap(gErr.Err())
+}
+
 // CallNoCodec does the actual rpc call to the server.
-//
-//nolint:funlen
 func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) error {
 	node, err := req.Node(ctx, opts)
 	if err != nil {
@@ -113,20 +128,8 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 
 	err = conn.Invoke(ctx, "/"+req.Endpoint(), req.Request(), result, grpc.Header(&resMeta))
 	if err != nil {
-		gErr, ok := status.FromError(err)
-		if !ok {
-			_ = conn.Close() //nolint:errcheck
-
-			return orberrors.From(err)
-		}
-
-		httpStatusCode := CodeToHTTPStatus(gErr.Code())
-
 		_ = conn.Close() //nolint:errcheck
-
-		orbE := orberrors.HTTP(httpStatusCode)
-
-		return orbE.Wrap(gErr.Err())
+		return toOrbError(err)
 	}
 
 	if opts.ResponseMetadata != nil {
@@ -137,16 +140,7 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 
 	err = conn.Close()
 	if err != nil {
-		gErr, ok := status.FromError(err)
-		if !ok {
-			return orberrors.From(err)
-		}
-
-		httpStatusCode := CodeToHTTPStatus(gErr.Code())
-
-		orbE := orberrors.HTTP(httpStatusCode)
-
-		return orbE.Wrap(gErr.Err())
+		return toOrbError(err)
 	}
 
 	return nil
