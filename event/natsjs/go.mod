@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/event/natsjs
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20250223090627-cd243523667d
+	github.com/go-orb/go-orb v0.0.0-20250223091611-43c7a94101e6
 	github.com/nats-io/nats.go v1.39.1
 	google.golang.org/protobuf v1.36.5
 )

@@ -3,11 +3,11 @@ module github.com/go-orb/plugins/event/tests
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20250223090627-cd243523667d
-	github.com/go-orb/plugins/codecs/json v0.0.0-20250223062945-a58c305007af
-	github.com/go-orb/plugins/codecs/proto v0.0.0-20250223062945-a58c305007af
-	github.com/go-orb/plugins/event/natsjs v0.0.0-20250223062945-a58c305007af
-	github.com/go-orb/plugins/log/slog v0.0.0-20250223062945-a58c305007af
+	github.com/go-orb/go-orb v0.0.0-20250223091611-43c7a94101e6
+	github.com/go-orb/plugins/codecs/json v0.0.0-20250223092049-e3ef730082f2
+	github.com/go-orb/plugins/codecs/proto v0.0.0-20250223092049-e3ef730082f2
+	github.com/go-orb/plugins/event/natsjs v0.0.0-20250223092049-e3ef730082f2
+	github.com/go-orb/plugins/log/slog v0.0.0-20250223092049-e3ef730082f2
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/protobuf v1.36.5
 )
