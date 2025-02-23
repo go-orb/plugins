@@ -290,6 +290,8 @@ func New(cfg Config, log log.Logger, registry registry.Type) *Client {
 }
 
 // Provide is the wire provider for client.
+//
+//nolint:gocognit,gocyclo
 func Provide(
 	name types.ServiceName,
 	data types.ConfigData,
@@ -312,7 +314,7 @@ func Provide(
 	newClient := New(cfg, logger, registry)
 
 	//nolint:nestif
-	if config.HasKey[[]any](sections, "middlewares", data) {
+	if config.HasKey[[]any](sections, "middlewares", data) || len(cfg.Middleware) > 0 {
 		// Get and factory them all.
 		middlewares := []client.Middleware{}
 
@@ -332,6 +334,25 @@ func Provide(
 			}
 
 			m, err := fac(append(sections, "middlewares", strconv.Itoa(i)), data, client.Type{Client: newClient}, logger)
+			if err != nil {
+				return client.Type{}, err
+			}
+
+			middlewares = append(middlewares, m)
+		}
+
+		for _, m := range cfg.Middleware {
+			fac, ok := client.Middlewares.Get(m.Name)
+			if !ok {
+				return client.Type{}, fmt.Errorf("Client middleware '%s' not found, did you import it?", m.Name)
+			}
+
+			myData, err := config.ParseStruct([]string{}, m)
+			if err != nil {
+				return client.Type{}, err
+			}
+
+			m, err := fac([]string{}, types.ConfigData{myData}, client.Type{Client: newClient}, logger)
 			if err != nil {
 				return client.Type{}, err
 			}
