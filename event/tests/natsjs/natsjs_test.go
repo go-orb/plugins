@@ -24,11 +24,11 @@ import (
 	"github.com/go-orb/plugins/event/natsjs"
 )
 
-func createServer() (event.Handler, context.CancelFunc, error) {
+func createServer() (log.Logger, event.Handler, context.CancelFunc, error) {
 	logger, err := log.New(log.WithLevel("DEBUG"))
 	if err != nil {
 		log.Error("while creating a logger", err)
-		return nil, func() {}, errors.New("while creating a logger")
+		return log.Logger{}, nil, func() {}, errors.New("while creating a logger")
 	}
 
 	var (
@@ -65,10 +65,10 @@ func createServer() (event.Handler, context.CancelFunc, error) {
 
 	if !started {
 		log.Error("failed to start NATS server", err)
-		return nil, func() {}, errors.New("failed to start nats server")
+		return log.Logger{}, nil, func() {}, errors.New("failed to start nats server")
 	}
 
-	return handler, cleanup, nil
+	return logger, handler, cleanup, nil
 }
 
 func getFreeLocalhostAddress() (string, error) {
@@ -119,10 +119,10 @@ func natsServer() (string, context.CancelFunc, error) {
 }
 
 func TestSuite(t *testing.T) {
-	h, cleanup, err := createServer()
+	logger, handler, cleanup, err := createServer()
 	require.NoError(t, err)
 
-	suite.Run(t, tests.New(h))
+	suite.Run(t, tests.New(logger, handler))
 
 	cleanup()
 }
@@ -130,10 +130,10 @@ func TestSuite(t *testing.T) {
 func BenchmarkRequest(b *testing.B) {
 	b.StopTimer()
 
-	h, cleanup, err := createServer()
+	logger, handler, cleanup, err := createServer()
 	require.NoError(b, err, "while creating a server")
 
-	s := tests.New(h)
+	s := tests.New(logger, handler)
 	s.BenchmarkRequest(b)
 
 	cleanup()

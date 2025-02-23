@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/go-orb/go-orb/codecs"
@@ -13,6 +14,7 @@ import (
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/container"
 	"github.com/go-orb/go-orb/util/metadata"
+	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/go-orb/util/ultrapool"
 	"github.com/go-orb/plugins/event/natsjs/pb"
 	"github.com/nats-io/nats.go"
@@ -104,7 +106,7 @@ func (n *NatsJS) Clone() event.Handler {
 
 // Request runs a REST like call on the given topic.
 func (n *NatsJS) Request(
-	_ context.Context,
+	ctx context.Context,
 	req *event.Req[[]byte, any],
 	opts ...event.RequestOption,
 ) ([]byte, error) {
@@ -117,7 +119,7 @@ func (n *NatsJS) Request(
 		return nil, req.Err
 	}
 
-	options := event.NewCallOptions(opts...)
+	options := event.NewRequestOptions(opts...)
 
 	pbReq := &pb.Request{}
 	defer n.reqPool.Put(pbReq)
@@ -125,7 +127,13 @@ func (n *NatsJS) Request(
 
 	pbReq.Data = req.Data
 	pbReq.ContentType = req.ContentType
-	pbReq.Metadata = req.Metadata
+
+	// Handle metadata from the client to the server/handler.
+	if md, ok := metadata.Outgoing(ctx); ok {
+		pbReq.Metadata = md
+	} else {
+		pbReq.Metadata = make(map[string]string)
+	}
 
 	data, err := n.codec.Encode(pbReq)
 	if err != nil {
@@ -150,8 +158,13 @@ func (n *NatsJS) Request(
 		return nil, err
 	}
 
-	if len(reply.GetError()) != 0 {
-		return nil, errors.New(reply.GetError())
+	// Handle metadata from the server to the client.
+	for k, v := range reply.GetMetadata() {
+		options.Metadata[k] = v
+	}
+
+	if reply.GetCode() != http.StatusOK {
+		return nil, orberrors.New(int(reply.GetCode()), reply.GetMessage())
 	}
 
 	return reply.GetData(), nil
@@ -178,21 +191,26 @@ func (n *NatsJS) HandleRequest(
 		}
 
 		replyFunc := func(ctx context.Context, result []byte, inErr error) {
-			md, ok := metadata.Outgoing(ctx)
-			if !ok {
-				md = make(map[string]string)
-			}
-
 			reply := n.replyPool.Get()
 			defer n.replyPool.Put(reply)
 			reply.Reset()
 
-			reply.Data = result
-			if inErr != nil {
-				reply.Error = inErr.Error()
+			// Handle metadata coming from the handler/server to the client.
+			if md, ok := metadata.Outgoing(ctx); ok {
+				reply.Metadata = md
+			} else {
+				reply.Metadata = make(map[string]string)
 			}
 
-			reply.Metadata = md
+			reply.Data = result
+
+			if inErr != nil {
+				orbE := orberrors.From(inErr)
+				reply.Code = int32(orbE.Code) //nolint:gosec
+				reply.Message = orbE.Error()
+			} else {
+				reply.Code = http.StatusOK
+			}
 
 			b, err := n.codec.Encode(reply)
 			if err != nil {
@@ -217,13 +235,22 @@ func (n *NatsJS) HandleRequest(
 			return
 		}
 
+		// Handle metadata coming from the client to the server/handler.
+		ctx, md := metadata.WithIncoming(ctx)
+		for k, v := range req.GetMetadata() {
+			md[k] = v
+		}
+
+		// Prepare the context for outgoing (to the client) metadata.
+		ctx, _ = metadata.WithOutgoing(ctx)
+
 		evReq := n.evReqPool.Get()
 		defer n.evReqPool.Put(evReq)
 		evReq.ContentType = req.GetContentType()
 		evReq.Data = req.GetData()
 		evReq.SetReplyFunc(replyFunc)
 
-		callbackHandler(context.Background(), evReq)
+		callbackHandler(ctx, evReq)
 	})
 	wPool.SetNumShards(n.config.MaxConcurrent)
 
