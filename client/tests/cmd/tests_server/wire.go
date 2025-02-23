@@ -15,7 +15,7 @@ import (
 	"github.com/go-orb/plugins/client/tests/handler"
 	"github.com/go-orb/plugins/client/tests/proto"
 
-	"github.com/google/wire"
+	"github.com/go-orb/wire"
 )
 
 // provideConfigData reads the config from cli and returns it.
