@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/log/lumberjack
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.0.0-20250223062516-2e68b601dde6
+	github.com/go-orb/go-orb v0.1.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
