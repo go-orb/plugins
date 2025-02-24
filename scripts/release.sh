@@ -55,9 +55,8 @@ function check_if_changed() {
 		return 1
 	fi
 
-	local changes="$(git --no-pager log "${last_tag}..HEAD" --format="%s" "${pkg}")"
-	if [[ ${#changes} == "0" ]]; then
-		# echo "# No changes detected in package '${pkg}'"
+	if ! git diff --name-only "${last_tag}" HEAD | grep "${pkg}" > /dev/null; then
+		echo "# No changes detected in package '${pkg}'"
 		return 1
 	fi
 	return 0
@@ -124,7 +123,6 @@ function release() {
 	fi
 
 	if ! check_if_changed "${pkg}"; then
-        echo "#No changes detected in package '${pkg}'"
 		return 1
 	fi
 
