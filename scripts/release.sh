@@ -105,7 +105,7 @@ function update_deps() {
 }
 
 function ask_for_confirmation() {
-	local -r message="Do you want to release $1/$2?"
+	local -r message="Do you want to release $1?"
 
 	read -p "${message} [y/N]: " -n 1 -r
 	echo
@@ -130,7 +130,7 @@ function release() {
 			return 0
 		fi
 
-        if ! ask_for_confirmation "${pkg}" "v0.1.0"; then
+        if ! ask_for_confirmation "${pkg}/v0.1.0"; then
             return 1
         fi
 
@@ -175,7 +175,7 @@ function release() {
 		return 0
 	fi
 
-	if ! ask_for_confirmation "${pkg}" "${new_tag}"; then
+	if ! ask_for_confirmation "${new_tag}"; then
 		return 1
 	fi	
 
