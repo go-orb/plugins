@@ -366,5 +366,13 @@ func Provide(
 		}
 	}
 
-	return client.Type{Client: newClient}, nil
+	instance := client.Type{Client: newClient}
+
+	// Register the client as a component.
+	err = types.RegisterComponent(&instance, types.PriorityClient)
+	if err != nil {
+		logger.Warn("while registering client/orb as a component", "error", err)
+	}
+
+	return instance, nil
 }
