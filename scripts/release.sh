@@ -51,12 +51,10 @@ function check_if_changed() {
 	local pkg="$1"
 	local last_tag=$(get_last_tag "${pkg}")
 	if [[ ${last_tag} == "" ]]; then
-		echo -e "# No previous tag\n# Run:\ngh release create ""${pkg}/v1.0.0"" -n 'Initial release'"
 		return 1
 	fi
 
-	if ! git diff --name-only "${last_tag}" HEAD | grep "${pkg}" > /dev/null; then
-		echo "# No changes detected in package '${pkg}'"
+	if ! git diff --name-only "${last_tag}" HEAD | grep -E "${pkg}/[0-9\.a-zA-Z\-_]+$" > /dev/null; then
 		return 1
 	fi
 	return 0
@@ -106,16 +104,36 @@ function update_deps() {
     return 0
 }
 
-function release() {
-    echo "Releasing ${1}"
+function ask_for_confirmation() {
+	local -r message="Do you want to release $1/$2?"
 
+	read -p "${message} [y/N]: " -n 1 -r
+	echo
+	if [[ $REPLY =~ ^[Yy]$ ]]; then
+		return 0
+	fi
+	return 1
+}
+
+function release() {
 	if [[ ! -f "${1}/go.mod" ]]; then
 		echo "Unknown package '${1}' given."
 		return 1
 	fi
 
 	local pkg="${1}"
+	local drymode="$2"
+
     if ! get_last_tag "${pkg}" 1>/dev/null; then
+		if [[ "${drymode}" == "1" ]]; then
+			echo "Would release ${pkg}/v0.1.0"
+			return 0
+		fi
+
+        if ! ask_for_confirmation "${pkg}" "v0.1.0"; then
+            return 1
+        fi
+
         update_deps "${pkg}" "v0.1.0"
         gh release create "${pkg}/v0.1.0" -n 'Initial release'
         git fetch 1>/dev/null 2>&1
@@ -151,7 +169,15 @@ function release() {
 		local new_tag=${tmp_new_tag:1}
 	fi
 
-	echo "# Upgrading ${pkg}: ${last_tag} >> ${new_tag}"
+	if [[ "${drymode}" == "1" ]]; then
+		echo "Would release ${new_tag}"
+		git diff --name-only "${last_tag}" HEAD | grep "${pkg}"
+		return 0
+	fi
+
+	if ! ask_for_confirmation "${pkg}" "${new_tag}"; then
+		return 1
+	fi	
 
     update_deps "${pkg}" "${new_tag}"
 	gh release create "${new_tag}" --notes-file "${CHANGELOG_FILE}"
@@ -160,7 +186,7 @@ function release() {
 
 function release_all() {
     for pkg in $(python3 ${SCRIPT_DIR}/release_order.py); do
-	    release "${pkg}"
+	    release "${pkg}" "0"
 	done
 }
 
@@ -170,10 +196,10 @@ function release_specific() {
 		# If path contains a star find all relevant packages
 		if echo "${pkg}" | grep -q "\*"; then
 			while read -r p; do
-				release "$(remove_prefix "${p}")"
+				release "$(remove_prefix "${p}")" "0"
 			done < <(find "${pkg}" -name 'go.mod' -printf "%h\n")
 		else
-			release "${pkg}"
+			release "${pkg}" "0"
 		fi
 	done < <(echo "${1}" | tr "," "\n")
 	# set -o noglob
