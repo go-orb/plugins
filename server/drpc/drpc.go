@@ -106,6 +106,11 @@ func (s *Server) Stop(_ context.Context) error {
 	return s.registryDeregister()
 }
 
+// AddHandler adds a handler for later registration.
+func (s *Server) AddHandler(handler orbserver.RegistrationFunc) {
+	s.handlers = append(s.handlers, handler)
+}
+
 // Register executes a registration function on the entrypoint.
 func (s *Server) Register(register orbserver.RegistrationFunc) {
 	if !s.started {

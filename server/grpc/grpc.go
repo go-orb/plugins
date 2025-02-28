@@ -246,6 +246,11 @@ func (s *Server) EntrypointID() string {
 	return s.entrypointID
 }
 
+// AddHandler adds a handler for later registration.
+func (s *Server) AddHandler(handler server.RegistrationFunc) {
+	s.config.OptHandlers = append(s.config.OptHandlers, handler)
+}
+
 // Register executes a registration function on the entrypoint.
 func (s *Server) Register(register server.RegistrationFunc) {
 	register(s.server)

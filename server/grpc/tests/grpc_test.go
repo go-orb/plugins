@@ -88,14 +88,16 @@ func TestGrpcIntegration(t *testing.T) {
 	name := types.ServiceName("com.example.test")
 	version := types.ServiceVersion("v1.0.0")
 
-	logger, err := log.Provide(name, nil)
+	components := types.NewComponents()
+
+	logger, err := log.Provide(name, nil, components)
 	require.NoError(t, err, "failed to setup logger")
 
-	reg, err := registry.Provide(name, version, nil, logger)
+	reg, err := registry.Provide(name, version, nil, components, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
 	h, _ := server.Handlers.Get("Streams")
-	srv, err := server.Provide(name, nil, logger, reg,
+	srv, err := server.Provide(name, nil, components, logger, reg,
 		server.WithEntrypointConfig(mgrpc.NewConfig(
 			mgrpc.WithName("test-ep-1"),
 			mgrpc.WithReflection(true),
@@ -150,14 +152,16 @@ func TestServerFileConfig(t *testing.T) {
 	config, err := config.Read([]*url.URL{fURL}, nil)
 	require.NoError(t, err, "failed to read file config")
 
-	logger, err := log.Provide(name, nil)
+	components := types.NewComponents()
+
+	logger, err := log.Provide(name, nil, components)
 	require.NoError(t, err, "failed to setup logger")
 
-	reg, err := registry.Provide(name, version, nil, logger)
+	reg, err := registry.Provide(name, version, nil, components, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
 	h, _ := server.Handlers.Get("Streams")
-	srv, err := server.Provide(name, config, logger, reg,
+	srv, err := server.Provide(name, config, components, logger, reg,
 		server.WithEntrypointConfig(mgrpc.NewConfig(
 			mgrpc.WithName("static-ep-1"),
 			mgrpc.WithAddress(":48081"),

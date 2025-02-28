@@ -17,6 +17,7 @@ import (
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
+	"github.com/go-orb/go-orb/types"
 
 	mgrpc "github.com/go-orb/plugins/server/grpc"
 	"github.com/go-orb/plugins/server/grpc/tests/proto"
@@ -29,7 +30,8 @@ func SetupServer(opts ...server.Option) (server.Entrypoint, func(t *testing.T), 
 		return nil, nil, fmt.Errorf("setup logger: %w", err)
 	}
 
-	reg, err := registry.Provide("app", "v1.0.0", nil, logger)
+	components := types.NewComponents()
+	reg, err := registry.Provide("app", "v1.0.0", nil, components, logger)
 	if err != nil {
 		return nil, nil, fmt.Errorf("setup registry: %w", err)
 	}

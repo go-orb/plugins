@@ -334,15 +334,17 @@ func TestServerIntegration(t *testing.T) {
 	name := types.ServiceName("com.example.test")
 	version := types.ServiceVersion("v1.0.0")
 
-	logger, err := log.Provide(name, nil)
+	components := types.NewComponents()
+
+	logger, err := log.Provide(name, nil, components)
 	require.NoError(t, err, "failed to setup the logger")
 
-	reg, err := registry.Provide(name, version, nil, logger)
+	reg, err := registry.Provide(name, version, nil, components, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
 	h := new(handler.EchoHandler)
 
-	srv, err := server.Provide(name, nil, logger, reg,
+	srv, err := server.Provide(name, nil, components, logger, reg,
 		server.WithEntrypointConfig(mhttp.NewConfig(
 			mhttp.WithName("test-ep-1"),
 			mhttp.WithAddress(":48081"),
@@ -403,17 +405,19 @@ func TestServerFileConfig(t *testing.T) {
 	t.Logf("%+v", fURL.RawPath)
 	require.NoError(t, err, "failed to parse file config url")
 
+	components := types.NewComponents()
+
 	config, err := config.Read([]*url.URL{fURL}, nil)
 	require.NoError(t, err, "failed to read file config")
 
-	logger, err := log.Provide(name, nil)
+	logger, err := log.Provide(name, nil, components)
 	require.NoError(t, err, "failed to setup the logger")
 
-	reg, err := registry.Provide(name, version, nil, logger)
+	reg, err := registry.Provide(name, version, nil, components, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
 	h := new(handler.EchoHandler)
-	srv, err := server.Provide(name, config, logger, reg,
+	srv, err := server.Provide(name, config, components, logger, reg,
 		server.WithEntrypointConfig(mhttp.NewConfig(
 			mhttp.WithName("static-ep-1"),
 			mhttp.WithAddress(":48081"),
@@ -650,12 +654,14 @@ func setupServer(tb testing.TB, nolog bool, opts ...server.Option) (*mhttp.Serve
 
 	cancel := func() {}
 
-	logger, err := log.Provide(name, nil, lopts...)
+	components := types.NewComponents()
+
+	logger, err := log.Provide(name, nil, components, lopts...)
 	if err != nil {
 		return nil, cancel, fmt.Errorf("failed to setup logger: %w", err)
 	}
 
-	reg, err := registry.Provide("app", "v1.0.0", nil, logger)
+	reg, err := registry.Provide("app", "v1.0.0", nil, components, logger)
 	if err != nil {
 		return nil, nil, fmt.Errorf("setup registry: %w", err)
 	}
