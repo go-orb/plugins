@@ -6,6 +6,20 @@ tasks:
     cmds:
       - cmd: dagger call lint --root=.
 
+  local-lint:
+    desc: Run "golangci-lint" in all packages with the go.work
+    cmds:
+      - |
+        for i in $(find . -name 'go.mod'); do
+          if [[ "$i" == "./.github/go.mod" ]]; then
+            continue
+          fi
+          pushd ${i:0:-6} 1>/dev/null
+          echo $i
+          golangci-lint run || true
+          popd 1>/dev/null
+        done
+
   mod-tidy:
     desc: Run "go mod tidy" in all packages
     cmds:
