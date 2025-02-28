@@ -86,6 +86,7 @@ func newComponents(
 	serviceVersion types.ServiceVersion,
 ) ([]types.Component, error) {
 	panic(wire.Build(
+		types.ProvideComponents,
 		urfave.ProvideConfigData,
 		wire.Value([]log.Option{}),
 		log.Provide,

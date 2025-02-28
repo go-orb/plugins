@@ -37,29 +37,33 @@ func newComponents(serviceName types.ServiceName, serviceVersion types.ServiceVe
 	if err != nil {
 		return nil, err
 	}
-	v := _wireValue
-	logger, err := log.Provide(serviceName, configData, v...)
+	v, err := types.ProvideComponents()
 	if err != nil {
 		return nil, err
 	}
-	v2 := _wireValue2
-	registryType, err := registry.Provide(serviceName, serviceVersion, configData, logger, v2...)
+	v2 := _wireValue
+	logger, err := log.Provide(serviceName, configData, v, v2...)
 	if err != nil {
 		return nil, err
 	}
-	v3, err := provideServerOpts()
+	v3 := _wireValue2
+	registryType, err := registry.Provide(serviceName, serviceVersion, configData, v, logger, v3...)
 	if err != nil {
 		return nil, err
 	}
-	serverServer, err := server.Provide(serviceName, configData, logger, registryType, v3...)
+	v4, err := provideServerOpts()
 	if err != nil {
 		return nil, err
 	}
-	v4, err := provideComponents(serviceName, serviceVersion, configData, logger, registryType, serverServer)
+	serverServer, err := server.Provide(serviceName, configData, v, logger, registryType, v4...)
 	if err != nil {
 		return nil, err
 	}
-	return v4, nil
+	v5, err := provideComponents(serviceName, serviceVersion, configData, logger, registryType, serverServer)
+	if err != nil {
+		return nil, err
+	}
+	return v5, nil
 }
 
 var (

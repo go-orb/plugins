@@ -295,6 +295,7 @@ func New(cfg Config, log log.Logger, registry registry.Type) *Client {
 func Provide(
 	name types.ServiceName,
 	data types.ConfigData,
+	components *types.Components,
 	logger log.Logger,
 	registry registry.Type,
 	opts ...client.Option,
@@ -369,7 +370,7 @@ func Provide(
 	instance := client.Type{Client: newClient}
 
 	// Register the client as a component.
-	err = types.RegisterComponent(&instance, types.PriorityClient)
+	err = components.Add(&instance, types.PriorityClient)
 	if err != nil {
 		logger.Warn("while registering client/orb as a component", "error", err)
 	}

@@ -2,7 +2,7 @@
 //
 // version:
 // - protoc-gen-go-orb        v0.0.1
-// - protoc                   v5.27.3
+// - protoc                   v5.29.2
 //
 // Proto source: echo.proto
 
@@ -18,6 +18,7 @@ import (
 	grpc "google.golang.org/grpc"
 
 	mdrpc "github.com/go-orb/plugins/server/drpc"
+
 	mhttp "github.com/go-orb/plugins/server/http"
 )
 
