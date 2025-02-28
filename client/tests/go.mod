@@ -8,12 +8,12 @@ require (
 	github.com/go-orb/plugins/client/orb/transport/drpc v0.1.0
 	github.com/go-orb/plugins/client/orb/transport/grpc v0.1.0
 	github.com/go-orb/plugins/client/orb/transport/h2c v0.1.0
-	github.com/go-orb/plugins/client/orb/transport/http v0.1.0
+	github.com/go-orb/plugins/client/orb/transport/http v0.1.1
 	github.com/go-orb/plugins/client/orb/transport/https v0.1.0
 	github.com/go-orb/plugins/codecs/json v0.1.0
 	github.com/go-orb/plugins/codecs/proto v0.1.0
 	github.com/go-orb/plugins/codecs/yaml v0.1.0
-	github.com/go-orb/plugins/config/source/cli/urfave v0.2.0
+	github.com/go-orb/plugins/config/source/cli/urfave v0.2.1
 	github.com/go-orb/plugins/config/source/file v0.1.0
 	github.com/go-orb/plugins/log/slog v0.1.0
 	github.com/go-orb/plugins/server/drpc v0.1.0
@@ -31,7 +31,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/go-chi/chi/v5 v5.2.1 // indirect
-	github.com/go-orb/plugins/client/orb v0.1.1 // indirect
+	github.com/go-orb/plugins/client/orb v0.1.3 // indirect
 	github.com/go-orb/plugins/client/orb/transport/basehttp v0.1.1 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/pprof v0.0.0-20250208200701-d0013a598941 // indirect
