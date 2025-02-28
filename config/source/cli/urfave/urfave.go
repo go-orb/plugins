@@ -52,7 +52,10 @@ func Parse(app *cli.App, flags []*oCli.Flag, args []string) source.Data {
 		return result
 	}
 
-	flagParser.parse(args)
+	if err := flagParser.parse(args); err != nil {
+		result.Error = err
+		return result
+	}
 
 	oCli.ParseFlags(&result, flags)
 

@@ -160,7 +160,7 @@ function release() {
 	unset last_tag_split[-1]
 
 	# Increment minor version if "feat:" commit found, otherwise patch version
-	git --no-pager log "${last_tag}..HEAD" --format="%s" "${pkg}/*" | grep -q -E "^feat:"
+	git --no-pager log "${last_tag}..HEAD" --format="%s" "${pkg}/*" | grep -q -E "^(feat|chore)"
 	if [[ $? == "0" ]]; then
 		local tmp_new_tag="$(printf "/%s" "${last_tag_split[@]}")/v$(increment_minor_version "${version}")"
 		local new_tag=${tmp_new_tag:1}

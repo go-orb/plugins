@@ -55,7 +55,6 @@ func TestCliConfig(t *testing.T) {
 }
 
 func TestCliConfigWithFlags(t *testing.T) {
-
 	flags := cli.Flags.Clone()
 
 	// Test with some common flags.

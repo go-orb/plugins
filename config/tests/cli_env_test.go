@@ -14,7 +14,6 @@ import (
 )
 
 func TestCLIEnv(t *testing.T) {
-
 	flags := cli.Flags.Clone()
 
 	err := flags.Add(cli.NewFlag(
