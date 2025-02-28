@@ -9,19 +9,19 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/go-orb/go-orb/config"
+	"github.com/go-orb/go-orb/config/source"
 	"github.com/go-orb/go-orb/config/source/cli"
 
 	_ "github.com/go-orb/plugins/codecs/yaml"
-	_ "github.com/go-orb/plugins/config/source/cli/urfave"
+	"github.com/go-orb/plugins/config/source/cli/urfave"
 )
 
 func testSections(t *testing.T, sections []string) {
 	t.Helper()
 
-	// Clear flags from other tests
-	cli.Flags.Clear()
+	flags := cli.Flags.Clone()
 
-	err := cli.Flags.Add(cli.NewFlag(
+	err := flags.Add(cli.NewFlag(
 		"registry",
 		"mdns",
 		cli.ConfigPath("registry.plugin"),
@@ -29,15 +29,15 @@ func testSections(t *testing.T, sections []string) {
 	))
 	require.NoError(t, err)
 
-	err = cli.Flags.Add(cli.NewFlag(
-		"registry_ttl",
+	err = flags.Add(cli.NewFlag(
+		"registry_timeout",
 		300,
-		cli.ConfigPathSlice([]string{"registry", "ttl"}),
+		cli.ConfigPathSlice([]string{"registry", "timeout"}),
 		cli.Usage("int flag usage"),
 	))
 	require.NoError(t, err)
 
-	err = cli.Flags.Add(cli.NewFlag(
+	err = flags.Add(cli.NewFlag(
 		"nats-address",
 		[]string{},
 		cli.ConfigPathSlice([]string{"registry", "addresses"}),
@@ -49,17 +49,26 @@ func testSections(t *testing.T, sections []string) {
 		"testapp",
 		"--registry",
 		"nats",
-		"--registry_ttl",
+		"--registry_timeout",
 		"600",
 		"--nats-address",
 		"nats://localhost:4222",
 	}
 
-	u1, err := url.Parse("cli://urfave")
+	// Setup the CLI parser.
+	app, err := urfave.ProvideApp("app", "v1.0.0")
+	require.NoError(t, err)
+	parser, err := urfave.ProvideParserFunc(app, flags.List())
+	require.NoError(t, err)
+	source.Plugins.Set(cli.New(parser))
+
+	u1, err := url.Parse("cli:///?add_section=true")
 	require.NoError(t, err)
 
 	datas, err := config.Read([]*url.URL{u1}, sections)
 	require.NoError(t, err)
+
+	require.NoError(t, config.Dump(datas))
 
 	// Merge all data from the URL's.
 	cfg := newRegistryNatsConfig()

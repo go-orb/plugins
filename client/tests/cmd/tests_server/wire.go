@@ -5,35 +5,16 @@
 package main
 
 import (
-	"net/url"
-
-	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/plugins/client/tests/handler"
 	"github.com/go-orb/plugins/client/tests/proto"
+	"github.com/go-orb/plugins/config/source/cli/urfave"
 
 	"github.com/go-orb/wire"
 )
-
-// provideConfigData reads the config from cli and returns it.
-func provideConfigData(
-	serviceName types.ServiceName,
-	serviceVersion types.ServiceVersion,
-) (types.ConfigData, error) {
-	u, err := url.Parse("cli://urfave")
-	if err != nil {
-		return nil, err
-	}
-
-	cfgSections := types.SplitServiceName(serviceName)
-
-	data, err := config.Read([]*url.URL{u}, cfgSections)
-
-	return data, err
-}
 
 // provideServerOpts provides options for the go-orb server.
 func provideServerOpts() ([]server.ConfigOption, error) {
@@ -105,7 +86,7 @@ func newComponents(
 	serviceVersion types.ServiceVersion,
 ) ([]types.Component, error) {
 	panic(wire.Build(
-		provideConfigData,
+		urfave.ProvideConfigData,
 		wire.Value([]log.Option{}),
 		log.Provide,
 		wire.Value([]registry.Option{}),

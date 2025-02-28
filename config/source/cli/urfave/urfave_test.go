@@ -3,9 +3,11 @@ package urfave
 import (
 	"testing"
 
-	"github.com/go-orb/go-orb/config/source/cli"
+	oCli "github.com/go-orb/go-orb/config/source/cli"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -14,27 +16,23 @@ const (
 )
 
 func TestParse(t *testing.T) {
-	myConfig := cli.NewConfig()
-	myConfig.Name = "test"
-	myConfig.Version = "v0.0.1"
-
-	flagString := cli.NewFlag(
+	flagString := oCli.NewFlag(
 		FlagString,
 		"orb!1!1",
-		cli.ConfigPathSlice([]string{"orb", "registry", FlagString}),
-		cli.Usage("string flag usage"),
+		oCli.ConfigPathSlice([]string{"orb", "registry", FlagString}),
+		oCli.Usage("string flag usage"),
 	)
 
-	flagInt := cli.NewFlag(
+	flagInt := oCli.NewFlag(
 		FlagInt,
 		0,
-		cli.ConfigPathSlice([]string{"orb", "registry", FlagInt}),
-		cli.Usage("int flag usage"),
+		oCli.ConfigPathSlice([]string{"orb", "registry", FlagInt}),
+		oCli.Usage("int flag usage"),
 	)
 
-	err := Parse(
-		&myConfig,
-		[]*cli.Flag{flagString, flagInt},
+	result := Parse(
+		cli.NewApp(),
+		[]*oCli.Flag{flagString, flagInt},
 		[]string{
 			"testapp",
 			"--string",
@@ -43,13 +41,13 @@ func TestParse(t *testing.T) {
 			"42",
 		},
 	)
-	require.NoError(t, err)
+	require.NoError(t, result.Error)
 
-	vString, err := cli.FlagValue[string](flagString)
+	vString, err := oCli.FlagValue[string](flagString)
 	require.NoError(t, err)
 	assert.Equal(t, "demo", vString)
 
-	vInt, err := cli.FlagValue[int](flagInt)
+	vInt, err := oCli.FlagValue[int](flagInt)
 	require.NoError(t, err)
 	assert.Equal(t, 42, vInt)
 }

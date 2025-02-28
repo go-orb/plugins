@@ -6,27 +6,33 @@ import (
 	"os"
 	"slices"
 
+	"github.com/go-orb/go-orb/codecs"
+	"github.com/go-orb/go-orb/config/source"
 	oCli "github.com/go-orb/go-orb/config/source/cli"
 	"github.com/hashicorp/go-multierror"
 	"github.com/urfave/cli/v2"
 )
 
 func init() {
-	oCli.Plugins.Add("urfave", Parse)
+
 }
 
 type flagCLI struct {
+	app              *cli.App
 	flags            map[string]*oCli.Flag
 	stringFlags      map[string]*cli.StringFlag
 	intFlags         map[string]*cli.IntFlag
 	stringSliceFlags map[string]*cli.StringSliceFlag
-	config           *oCli.Config
 }
 
 // Parse parses all the CLI flags.
-func Parse(config *oCli.Config, flags []*oCli.Flag, args []string) error {
-	parser := &flagCLI{
-		config:           config,
+func Parse(app *cli.App, flags []*oCli.Flag, args []string) source.Data {
+	result := source.Data{
+		Data: make(map[string]any),
+	}
+
+	flagParser := &flagCLI{
+		app:              app,
 		flags:            make(map[string]*oCli.Flag),
 		stringFlags:      make(map[string]*cli.StringFlag),
 		intFlags:         make(map[string]*cli.IntFlag),
@@ -36,16 +42,33 @@ func Parse(config *oCli.Config, flags []*oCli.Flag, args []string) error {
 	var mErr *multierror.Error
 
 	for _, f := range flags {
-		if err := parser.add(f); err != nil {
+		if err := flagParser.add(f); err != nil {
 			mErr = multierror.Append(mErr, err)
 		}
 	}
 
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		result.Error = mErr
+		return result
 	}
 
-	return parser.parse(args)
+	flagParser.parse(args)
+
+	oCli.ParseFlags(&result, flags)
+
+	mJSON, err := codecs.GetMime("application/json")
+	if err != nil {
+		result.Error = err
+	} else {
+		result.Marshaler = mJSON
+	}
+
+	// Clear all flags for future runs.
+	for _, f := range flags {
+		f.Clear()
+	}
+
+	return result
 }
 
 func (c *flagCLI) add(flag *oCli.Flag) error {
@@ -104,19 +127,22 @@ func (c *flagCLI) parse(args []string) error {
 
 	var ctx *cli.Context
 
-	app := &cli.App{
-		Name:    c.config.Name,
-		Version: c.config.Version,
-		Flags:   flags,
-		Action: func(fCtx *cli.Context) error {
-			// Extract the ctx from the urfave app
-			ctx = fCtx
+	app := c.app
+	app.Flags = append(app.Flags, flags...)
+	action := app.Action
 
-			return nil
-		},
+	app.Action = func(fCtx *cli.Context) error {
+		// Extract the ctx from the urfave app
+		ctx = fCtx
+
+		if action != nil {
+			return action(ctx)
+		}
+
+		return nil
 	}
 
-	if len(c.config.Version) < 1 {
+	if len(app.Version) < 1 {
 		app.HideVersion = true
 	}
 

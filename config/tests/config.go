@@ -30,7 +30,7 @@ func newRegistryConfig() *registryConfig {
 	return &registryConfig{
 		Plugin:  "mdns",
 		Enabled: true,
-		Timeout: 600,
+		Timeout: 929,
 		Log:     newLogConfig(),
 	}
 }

@@ -7,15 +7,15 @@ import (
 	"testing"
 
 	"github.com/go-orb/go-orb/config"
+	"github.com/go-orb/go-orb/config/source"
 	"github.com/go-orb/go-orb/config/source/cli"
-	_ "github.com/go-orb/plugins/config/source/cli/urfave"
+	"github.com/go-orb/plugins/config/source/cli/urfave"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCliConfig(t *testing.T) {
-	// Clear flags from previous tests.
-	cli.Flags.Clear()
+	flags := cli.Flags.Clone()
 
 	// Setup os.Args
 	os.Args = []string{
@@ -28,7 +28,14 @@ func TestCliConfig(t *testing.T) {
 	u1, err := url.Parse("./data/set2/registry1.yaml")
 	require.NoError(t, err)
 
-	u2, err := url.Parse("cli://urfave")
+	// Setup the CLI parser.
+	app, err := urfave.ProvideApp("app", "v1.0.0")
+	require.NoError(t, err)
+	parser, err := urfave.ProvideParserFunc(app, flags.List())
+	require.NoError(t, err)
+	source.Plugins.Set(cli.New(parser))
+
+	u2, err := url.Parse("cli://")
 	require.NoError(t, err)
 
 	// Read the urls.
@@ -48,11 +55,11 @@ func TestCliConfig(t *testing.T) {
 }
 
 func TestCliConfigWithFlags(t *testing.T) {
-	// Clear flags from previous tests.
-	cli.Flags.Clear()
+
+	flags := cli.Flags.Clone()
 
 	// Test with some common flags.
-	err := cli.Flags.Add(cli.NewFlag(
+	err := flags.Add(cli.NewFlag(
 		"registry",
 		"mdns",
 		cli.ConfigPathSlice([]string{"registry", "plugin"}),
@@ -63,7 +70,7 @@ func TestCliConfigWithFlags(t *testing.T) {
 		panic(err)
 	}
 
-	err = cli.Flags.Add(cli.NewFlag(
+	err = flags.Add(cli.NewFlag(
 		"registry_timeout",
 		100,
 		cli.ConfigPathSlice([]string{"registry", "timeout"}),
@@ -81,7 +88,14 @@ func TestCliConfigWithFlags(t *testing.T) {
 		"./data/set2/registry2.yaml",
 	}
 
-	u1, err := url.Parse("cli://urfave")
+	// Setup the CLI parser.
+	app, err := urfave.ProvideApp("app", "v1.0.0")
+	require.NoError(t, err)
+	parser, err := urfave.ProvideParserFunc(app, flags.List())
+	require.NoError(t, err)
+	source.Plugins.Set(cli.New(parser))
+
+	u1, err := url.Parse("cli://")
 	require.NoError(t, err)
 
 	// Read the urls.
