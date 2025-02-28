@@ -109,6 +109,7 @@ func (c *flagCLI) add(flag *oCli.Flag) error {
 	return nil
 }
 
+//nolint:gocyclo
 func (c *flagCLI) parse(args []string) error {
 	i := 0
 	flags := make([]cli.Flag, len(c.stringFlags)+len(c.intFlags)+len(c.stringSliceFlags))
@@ -130,23 +131,33 @@ func (c *flagCLI) parse(args []string) error {
 
 	var ctx *cli.Context
 
-	app := c.app
-	app.Flags = append(app.Flags, flags...)
-	action := app.Action
-
-	app.Action = func(fCtx *cli.Context) error {
-		// Extract the ctx from the urfave app
-		ctx = fCtx
-
-		if action != nil {
-			return action(ctx)
+	runAction := func(oldAction func(*cli.Context) error) func(*cli.Context) error {
+		if oldAction == nil {
+			return nil
 		}
 
-		return nil
+		return func(fCtx *cli.Context) error {
+			// Extract the ctx from the urfave app
+			ctx = fCtx
+
+			if oldAction != nil {
+				return oldAction(fCtx)
+			}
+
+			return nil
+		}
 	}
 
-	if len(app.Version) < 1 {
-		app.HideVersion = true
+	app := c.app
+	app.Flags = append(app.Flags, flags...)
+
+	app.Action = runAction(app.Action)
+	for _, sub := range app.Commands {
+		sub.Action = runAction(sub.Action)
+
+		for _, susub := range sub.Subcommands {
+			susub.Action = runAction(susub.Action)
+		}
 	}
 
 	if err := app.Run(args); err != nil {
