@@ -19,7 +19,7 @@ func ProvideApp(
 	app.Name = string(serviceName)
 	app.Version = string(serviceVersion)
 	app.Usage = "A go-orb app"
-	app.Action = func(c *cli.Context) error {
+	app.Action = func(_ *cli.Context) error {
 		return nil
 	}
 
