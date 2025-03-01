@@ -34,3 +34,8 @@ tasks:
     desc: Run "go test ./..." in all packages
     cmds:
       - cmd: dagger call test --root=.
+
+  deps:
+    desc: Update dependencies on all changed packages to the latest git commit
+    cmds:
+      - cmd: ./scripts/deps.sh all
