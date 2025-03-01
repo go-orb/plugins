@@ -43,7 +43,7 @@ func TestParse(t *testing.T) {
 		&cli.App{
 			Name:   "testapp",
 			Usage:  "A testapp",
-			Action: func(ctx *cli.Context) error { return nil },
+			Action: func(_ *cli.Context) error { return nil },
 		},
 		[]*oCli.Flag{flagString, flagInt},
 		[]string{
