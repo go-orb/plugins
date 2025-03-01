@@ -6,6 +6,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-orb/go-orb v0.2.2-0.20250228150029-7678bb66edad h1:wUUTk2wMHK6jW0SOdNwNWoyd3Efp3WGUrICo6zSQkAU=
 github.com/go-orb/go-orb v0.2.2-0.20250228150029-7678bb66edad/go.mod h1:5LP/2OY9b3N5eOsiVVdU3R78B7kIfNXYNjJi9o0Vbdg=
+github.com/go-orb/plugins/codecs/json v0.1.0 h1:AVegWk0XiEOLXowZcZUbZl4hEcNFkb9v/6hXqHZsIr4=
+github.com/go-orb/plugins/codecs/json v0.1.0/go.mod h1:h5hlVUks15dxY3O45gsEBtDclrOFZlixF4UHk4uKbMA=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/errwrap v1.1.0 h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY2I=
 github.com/hashicorp/errwrap v1.1.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=

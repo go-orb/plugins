@@ -4,6 +4,7 @@ go 1.23.6
 
 require (
 	github.com/go-orb/go-orb v0.2.2-0.20250228150029-7678bb66edad
+	github.com/go-orb/plugins/codecs/json v0.1.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.5
