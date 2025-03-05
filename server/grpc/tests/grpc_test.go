@@ -103,6 +103,8 @@ func TestGrpcIntegration(t *testing.T) {
 			mgrpc.WithReflection(true),
 			mgrpc.WithHandlers(h),
 			mgrpc.WithInsecure(),
+			mgrpc.WithReflection(true),
+			mgrpc.WithHealthService(true),
 		)),
 		server.WithEntrypointConfig(mgrpc.NewConfig(
 			mgrpc.WithName("test-ep-2"),
