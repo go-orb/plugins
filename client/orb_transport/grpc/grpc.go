@@ -8,16 +8,39 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/encoding"
 	gmetadata "google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"github.com/go-orb/go-orb/client"
+	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/client/orb"
 	"github.com/go-orb/plugins/client/orb_transport/grpc/pool"
 )
+
+type codecProxy struct {
+	codec codecs.Marshaler
+}
+
+// Marshal returns the wire format of v.
+func (c *codecProxy) Marshal(v any) ([]byte, error) {
+	return c.codec.Encode(v)
+}
+
+// Unmarshal parses the wire format into v.
+func (c *codecProxy) Unmarshal(data []byte, v any) error {
+	return c.codec.Decode(data, v)
+}
+
+// Name returns the name of the Codec implementation. The returned string
+// will be used as part of content type in transmission.  The result must be
+// static; the result cannot change between calls.
+func (c *codecProxy) Name() string {
+	return c.codec.String()
+}
 
 // Name is the transports name.
 const Name = "grpc"
@@ -34,6 +57,14 @@ type Transport struct {
 
 // Start starts the transport.
 func (t *Transport) Start() error {
+
+	codec, err := codecs.GetMime("application/json")
+	if err != nil {
+		return err
+	}
+
+	encoding.RegisterCodec(&codecProxy{codec: codec})
+
 	return nil
 }
 
@@ -125,8 +156,13 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 	defer cancel()
 
 	resMeta := gmetadata.MD{}
+	callOpts := []grpc.CallOption{grpc.Header(&resMeta)}
 
-	err = conn.Invoke(ctx, "/"+req.Endpoint(), req.Request(), result, grpc.Header(&resMeta))
+	if opts.ContentType == "application/json" {
+		callOpts = append(callOpts, grpc.CallContentSubtype("json"))
+	}
+
+	err = conn.Invoke(ctx, "/"+req.Endpoint(), req.Request(), result, callOpts...)
 	if err != nil {
 		_ = conn.Close() //nolint:errcheck
 		return toOrbError(err)
