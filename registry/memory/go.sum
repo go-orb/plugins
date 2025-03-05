@@ -10,6 +10,8 @@ github.com/go-orb/plugins/log/slog v0.1.0 h1:zL6pvF+O8QcPV+HlchBSah3Oq/D9te4Ef0d
 github.com/go-orb/plugins/log/slog v0.1.0/go.mod h1:ukTlNvAHvsssx7+xV9g92D2qpsALvnNw0FSfRpLA47o=
 github.com/go-orb/plugins/registry/tests v0.1.0 h1:VvSqKloVKMsIIU6tAcI1JlRh+GsfmPhaeVFYCcHiL80=
 github.com/go-orb/plugins/registry/tests v0.1.0/go.mod h1:3hsUqaMEVhVaWAVjDDQkhh4B/4n6SAlsSn29FJ+khBY=
+github.com/go-orb/plugins/registry/tests v0.1.1-0.20250305195510-f8ae278ebbbd h1:wMoQ3ilIzbqwwOmBh+AC0NYirIVdcxC762dIXjaiElQ=
+github.com/go-orb/plugins/registry/tests v0.1.1-0.20250305195510-f8ae278ebbbd/go.mod h1:s1Q10n4DLplfP/woI1hmWDPQkCmO+WUiuClpAQsaGqM=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=

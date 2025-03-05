@@ -20,6 +20,7 @@ func (m *watcher) Next() (*registry.Result, error) {
 			if len(m.wo.Service) > 0 && m.wo.Service != r.Service.Name {
 				continue
 			}
+
 			return r, nil
 		case <-m.exit:
 			return nil, errors.New("watcher stopped")

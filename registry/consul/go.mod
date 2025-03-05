@@ -7,7 +7,7 @@ require (
 	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250305150401-ab2fd6755a1b
 	github.com/go-orb/plugins/log/slog v0.1.1-0.20250305150401-ab2fd6755a1b
 	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250305150401-ab2fd6755a1b
-	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250305150401-ab2fd6755a1b
+	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250305195510-f8ae278ebbbd
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/consul/api v1.31.2
 	github.com/hashicorp/consul/sdk v0.16.2

@@ -38,6 +38,8 @@ github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250305150401-ab2fd6755a1b 
 github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250305150401-ab2fd6755a1b/go.mod h1:rdVHb8X8pk/KetqDzAv0LP+WugrtF5Nygk2XQNjOj+Q=
 github.com/go-orb/plugins/registry/tests v0.1.1-0.20250305150401-ab2fd6755a1b h1:GNSwejSQL7hKjucYxkSOPm+t2Stv+sFiConQNKMBsM0=
 github.com/go-orb/plugins/registry/tests v0.1.1-0.20250305150401-ab2fd6755a1b/go.mod h1:mp1bT0T1iP9KNoSADInKjBbPvtGUdao9EbUJfJCvRzg=
+github.com/go-orb/plugins/registry/tests v0.1.1-0.20250305195510-f8ae278ebbbd h1:wMoQ3ilIzbqwwOmBh+AC0NYirIVdcxC762dIXjaiElQ=
+github.com/go-orb/plugins/registry/tests v0.1.1-0.20250305195510-f8ae278ebbbd/go.mod h1:s1Q10n4DLplfP/woI1hmWDPQkCmO+WUiuClpAQsaGqM=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=

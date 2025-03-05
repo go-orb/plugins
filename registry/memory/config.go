@@ -20,8 +20,10 @@ var (
 	DefaultTTLPruneTime = 10 * time.Millisecond
 )
 
+// Name provides the name of this registry.
 const Name = "memory"
 
+// Config provides configuration for the memory registry.
 type Config struct {
 	registry.Config `yaml:",inline"`
 

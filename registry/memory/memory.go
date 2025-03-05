@@ -150,6 +150,7 @@ func (c *Registry) Deregister(s *registry.Service, _ ...registry.DeregisterOptio
 	c.Lock()
 	defer c.Unlock()
 
+	//nolint:nestif
 	if _, ok := c.records[s.Name]; ok {
 		if _, ok := c.records[s.Name][s.Version]; ok {
 			for _, n := range s.Nodes {
