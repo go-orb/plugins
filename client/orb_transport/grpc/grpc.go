@@ -57,7 +57,6 @@ type Transport struct {
 
 // Start starts the transport.
 func (t *Transport) Start() error {
-
 	codec, err := codecs.GetMime("application/json")
 	if err != nil {
 		return err
