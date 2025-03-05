@@ -287,6 +287,10 @@ func (c *RegistryConsul) GetService(name string, _ ...registry.GetOption) ([]*re
 		return nil, err
 	}
 
+	if len(rsp) == 0 {
+		return []*registry.Service{}, registry.ErrNotFound
+	}
+
 	serviceMap := map[string]*registry.Service{}
 
 	for _, service := range rsp {

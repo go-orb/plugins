@@ -131,7 +131,7 @@ func (r *TestSuite) TestDeregister() {
 	time.Sleep(r.updateTime)
 
 	services, err = r.registries[0].GetService(service1.Name)
-	r.Require().NoError(err)
+	r.Require().ErrorIs(registry.ErrNotFound, err)
 	r.Require().Empty(services)
 }
 
@@ -151,7 +151,7 @@ func (r *TestSuite) TestGetServiceAllRegistries() {
 // TestGetServiceWithNoNodes tests a non existent service.
 func (r *TestSuite) TestGetServiceWithNoNodes() {
 	services, err := r.registries[0].GetService("missing")
-	r.Require().NoError(err)
+	r.Require().ErrorIs(registry.ErrNotFound, err)
 	r.Require().Empty(services)
 }
 
@@ -187,8 +187,8 @@ func (r *TestSuite) BenchmarkGetServiceWithNoNodes(b *testing.B) {
 
 	for n := 0; n < b.N; n++ {
 		services, err := r.registries[0].GetService("missing")
-		require.NoError(b, err)
-		require.Empty(b, services)
+		r.Require().ErrorIs(registry.ErrNotFound, err)
+		r.Require().Empty(services)
 	}
 
 	b.StopTimer()
