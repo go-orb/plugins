@@ -35,18 +35,19 @@ func main() {
 	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer cancel()
 
 	for _, c := range components {
 		err := c.Start(ctx)
 		if err != nil {
 			log.Error("Failed to start", err, "component", c.Type())
+			cancel()
 			os.Exit(1)
 		}
 	}
 
 	// Blocks until we get a sigint/sigterm
 	<-ctx.Done()
+	cancel()
 
 	// Shutdown.
 	ctx = context.Background()
