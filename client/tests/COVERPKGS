@@ -1,9 +1,9 @@
 github.com/go-orb/go-orb/client
 github.com/go-orb/plugins/client/orb
-github.com/go-orb/plugins/client/orb/transport/basehttp
-github.com/go-orb/plugins/client/orb/transport/drpc
-github.com/go-orb/plugins/client/orb/transport/grpc
-github.com/go-orb/plugins/client/orb/transport/h2c
-github.com/go-orb/plugins/client/orb/transport/http
-github.com/go-orb/plugins/client/orb/transport/http3
-github.com/go-orb/plugins/client/orb/transport/https
+github.com/go-orb/plugins/client/orb_transport/basehttp
+github.com/go-orb/plugins/client/orb_transport/drpc
+github.com/go-orb/plugins/client/orb_transport/grpc
+github.com/go-orb/plugins/client/orb_transport/h2c
+github.com/go-orb/plugins/client/orb_transport/http
+github.com/go-orb/plugins/client/orb_transport/http3
+github.com/go-orb/plugins/client/orb_transport/https

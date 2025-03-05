@@ -39,12 +39,12 @@ function check_if_changed() {
 	fi
 
 	# Check if the package has been changed on git.
-	if ! git diff --name-only "${last_tag}" HEAD | grep -E "${pkg}/[0-9\.a-zA-Z\-_]+$" > /dev/null; then
+	if git diff --name-only "${last_tag}" HEAD | grep -E "${pkg}/[0-9\.a-zA-Z\-_]+$" > /dev/null; then
 		return 1
 	fi
 
 	# Check if the package has been changed on filesystem.
-	if ! git status --porcelain -s | grep -E "${pkg}/[0-9\.a-zA-Z\-_]+$" > /dev/null; then
+	if git status --porcelain -s | grep -E "${pkg}/[0-9\.a-zA-Z\-_]+$" > /dev/null; then
 		return 1
 	fi
 	
@@ -114,10 +114,10 @@ function upgrade_specific() {
 		# If path contains a star find all relevant packages
 		if echo "${pkg}" | grep -q "\*"; then
 			while read -r p; do
-				upgrade "$(remove_prefix "${p}")" "0"
+				update_deps "$(remove_prefix "${p}")" "0"
 			done < <(find "${pkg}" -name 'go.mod' -printf "%h\n")
 		else
-			upgrade "${pkg}" "0"
+			update_deps "${pkg}" "0"
 		fi
 	done < <(echo "${1}" | tr "," "\n")
 	# set -o noglob
