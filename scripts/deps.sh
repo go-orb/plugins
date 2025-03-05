@@ -40,11 +40,13 @@ function check_if_changed() {
 
 	# Check if the package has been changed on git.
 	if git diff --name-only "${last_tag}" HEAD | grep -E "${pkg}/[0-9\.a-zA-Z\-_]+$" > /dev/null; then
+		echo "# Changed on git diff" 
 		return 1
 	fi
 
 	# Check if the package has been changed on filesystem.
 	if git status --porcelain -s | grep -E "${pkg}/[0-9\.a-zA-Z\-_]+$" > /dev/null; then
+		echo "# Changed on filesystem"
 		return 1
 	fi
 	
@@ -60,7 +62,7 @@ function update_deps() {
         if ! go get -u "${m}@main"; then
 			# try another time
 			sleep 5
-			go get "${m}@main"
+			go get -u "${m}@main"
 			if ! go get -u "${m}@main"; then
 				echo "updated_deps: Failed to update dependency ${m}"
 				exit 1
@@ -94,7 +96,8 @@ function upgrade() {
 
 	local pkg="${1}"
 
-	if ! check_if_changed "${pkg}"; then
+	echo "Checking ${pkg}"
+	if check_if_changed "${pkg}"; then
 		return 0
 	fi
 

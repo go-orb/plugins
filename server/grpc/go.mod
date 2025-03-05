@@ -3,12 +3,12 @@ module github.com/go-orb/plugins/server/grpc
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250305123333-8e8b471e4858
+	github.com/go-orb/go-orb v0.2.2-0.20250305134442-f3b67dfc55fe
 	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20250305135311-ad2ba0bb8d1c
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250301080642-9d51bb50e0e3
-	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250301080642-9d51bb50e0e3
-	github.com/go-orb/plugins/config/source/file v0.1.1-0.20250301080642-9d51bb50e0e3
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250301080642-9d51bb50e0e3
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250305150401-ab2fd6755a1b
+	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250305150401-ab2fd6755a1b
+	github.com/go-orb/plugins/config/source/file v0.1.1-0.20250305150401-ab2fd6755a1b
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250305150401-ab2fd6755a1b
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/grpc v1.70.0
