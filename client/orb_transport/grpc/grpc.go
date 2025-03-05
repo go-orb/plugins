@@ -16,7 +16,7 @@ import (
 	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/client/orb"
-	"github.com/go-orb/plugins/client/orb/transport/grpc/pool"
+	"github.com/go-orb/plugins/client/orb_transport/grpc/pool"
 )
 
 // Name is the transports name.

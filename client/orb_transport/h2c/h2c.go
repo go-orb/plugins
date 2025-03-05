@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/plugins/client/orb"
-	"github.com/go-orb/plugins/client/orb/transport/basehttp"
+	"github.com/go-orb/plugins/client/orb_transport/basehttp"
 )
 
 // Name is the transports name.

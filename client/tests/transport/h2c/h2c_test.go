@@ -9,7 +9,7 @@ import (
 	"github.com/go-orb/plugins/client/tests"
 	"github.com/stretchr/testify/suite"
 
-	o "github.com/go-orb/plugins/client/orb/transport/h2c"
+	o "github.com/go-orb/plugins/client/orb_transport/h2c"
 )
 
 func newSuite() *tests.TestSuite {
