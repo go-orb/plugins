@@ -148,9 +148,9 @@ func TestServerEntrypointsStarts(t *testing.T) {
 	}
 	defer cleanup()
 
-	require.NoError(t, server.Start(), "start server 1")
-	require.NoError(t, server.Start(), "start server 2")
-	require.NoError(t, server.Start(), "start server 3")
+	require.NoError(t, server.Start(context.Background()), "start server 1")
+	require.NoError(t, server.Start(context.Background()), "start server 2")
+	require.NoError(t, server.Start(context.Background()), "start server 3")
 
 	addr = "https://" + addr
 
@@ -367,7 +367,7 @@ func TestServerIntegration(t *testing.T) {
 		)),
 	)
 	require.NoError(t, err, "failed to setup server")
-	require.NoError(t, srv.Start(), "failed to start the server")
+	require.NoError(t, srv.Start(context.Background()), "failed to start the server")
 
 	e, err := srv.GetEntrypoint("test-ep-1")
 	require.NoError(t, err, "failed to fetch entrypoint 1")
@@ -430,7 +430,7 @@ func TestServerFileConfig(t *testing.T) {
 		)),
 	)
 	require.NoError(t, err, "failed to setup server")
-	require.NoError(t, srv.Start(), "failed to start server")
+	require.NoError(t, srv.Start(context.Background()), "failed to start server")
 
 	e, err := srv.GetEntrypoint("static-ep-1")
 	require.NoError(t, err, "failed to fetch entrypoint 1")
@@ -687,7 +687,7 @@ func setupServer(tb testing.TB, nolog bool, opts ...server.Option) (*mhttp.Serve
 		}
 	}
 
-	if err := server.Start(); err != nil {
+	if err := server.Start(context.Background()); err != nil {
 		return nil, cancel, err
 	}
 

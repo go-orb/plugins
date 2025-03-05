@@ -1,6 +1,7 @@
 package consul
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -19,6 +20,8 @@ import (
 )
 
 func createServer() (*tests.TestSuite, func() error, error) {
+	ctx := context.Background()
+
 	logger, err := log.New()
 	if err != nil {
 		log.Error("failed to create logger", "err", err)
@@ -39,7 +42,7 @@ func createServer() (*tests.TestSuite, func() error, error) {
 	}
 
 	reg1 := New("", "", cfg1, logger)
-	if err := reg1.Start(); err != nil {
+	if err := reg1.Start(ctx); err != nil {
 		log.Error("failed to connect registry one to Consul server", "err", err)
 		server.Stop() //nolint:errcheck
 		return nil, func() error { return nil }, err
@@ -53,7 +56,7 @@ func createServer() (*tests.TestSuite, func() error, error) {
 	}
 
 	reg2 := New("", "", cfg2, logger)
-	if err := reg2.Start(); err != nil {
+	if err := reg2.Start(ctx); err != nil {
 		log.Error("failed to connect registry two to Consul server", "err", err)
 		server.Stop() //nolint:errcheck
 		return nil, func() error { return nil }, err
@@ -67,7 +70,7 @@ func createServer() (*tests.TestSuite, func() error, error) {
 	}
 
 	reg3 := New("", "", cfg3, logger)
-	if err := reg3.Start(); err != nil {
+	if err := reg3.Start(ctx); err != nil {
 		log.Error("failed to connect registry three to Consul server", "err", err)
 		server.Stop() //nolint:errcheck
 		return nil, func() error { return nil }, err

@@ -34,22 +34,22 @@ func main() {
 		os.Exit(1)
 	}
 
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer cancel()
+
 	for _, c := range components {
-		err := c.Start()
+		err := c.Start(ctx)
 		if err != nil {
 			log.Error("Failed to start", err, "component", c.Type())
 			os.Exit(1)
 		}
 	}
 
-	done := make(chan os.Signal, 1)
-	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
-
 	// Blocks until we get a sigint/sigterm
-	<-done
+	<-ctx.Done()
 
 	// Shutdown.
-	ctx := context.Background()
+	ctx = context.Background()
 
 	for k := range components {
 		c := components[len(components)-1-k]

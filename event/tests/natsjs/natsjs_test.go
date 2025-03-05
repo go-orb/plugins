@@ -54,7 +54,7 @@ func createServer() (log.Logger, event.Handler, context.CancelFunc, error) {
 		}
 
 		handler = natsjs.New("org.orb.testservice", cfg, logger)
-		err = handler.Start()
+		err = handler.Start(context.Background())
 		if err != nil {
 			time.Sleep(time.Second)
 			continue

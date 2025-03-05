@@ -286,7 +286,7 @@ func (n *NatsJS) HandleRequest(
 }
 
 // Start events.
-func (n *NatsJS) Start() error {
+func (n *NatsJS) Start(_ context.Context) error {
 	nopts := nats.GetDefaultOptions()
 
 	if n.config.TLSConfig != nil {

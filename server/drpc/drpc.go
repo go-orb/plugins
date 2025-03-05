@@ -50,7 +50,7 @@ type Server struct {
 }
 
 // Start will create the listeners and start the server on the entrypoint.
-func (s *Server) Start() error {
+func (s *Server) Start(_ context.Context) error {
 	if s.started {
 		return nil
 	}

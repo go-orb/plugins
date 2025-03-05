@@ -79,16 +79,6 @@ func Provide(
 		cfg.OptMiddlewares = append(cfg.OptMiddlewares, mw)
 	}
 
-	// Get handlers.
-	for _, k := range cfg.Handlers {
-		h, ok := server.Handlers.Get(k)
-		if !ok {
-			return nil, fmt.Errorf("%w: '%s', did you register it?", server.ErrUnknownHandler, k)
-		}
-
-		cfg.OptHandlers = append(cfg.OptHandlers, h)
-	}
-
 	return New(cfg, logger, reg)
 }
 
@@ -107,6 +97,16 @@ func New(acfg any, logger log.Logger, reg registry.Type) (server.Entrypoint, err
 	}
 
 	logger = logger.With(slog.String("component", server.ComponentType), slog.String("plugin", Plugin), slog.String("entrypoint", cfg.Name))
+
+	// Get handlers.
+	for _, k := range cfg.Handlers {
+		h, ok := server.Handlers.Get(k)
+		if !ok {
+			return nil, fmt.Errorf("%w: '%s', did you register it?", server.ErrUnknownHandler, k)
+		}
+
+		cfg.OptHandlers = append(cfg.OptHandlers, h)
+	}
 
 	srv := Server{
 		config:   cfg,
@@ -142,7 +142,7 @@ func (s *Server) setupgRPCServer() {
 }
 
 // Start start the gRPC server.
-func (s *Server) Start() error {
+func (s *Server) Start(_ context.Context) error {
 	if s.started {
 		return nil
 	}
@@ -158,7 +158,7 @@ func (s *Server) Start() error {
 		}
 	}
 
-	s.logger.Info("gRPC server listening on: " + s.lis.Addr().String())
+	s.logger.Info("gRPC server listening", "address", s.lis.Addr().String())
 
 	go func() {
 		if err := s.server.Serve(s.lis); err != nil {
@@ -171,6 +171,7 @@ func (s *Server) Start() error {
 		s.health.Resume()
 	}
 
+	// Register with registry.
 	if err := s.register(); err != nil {
 		return err
 	}
@@ -186,7 +187,7 @@ func (s *Server) Stop(ctx context.Context) error {
 		return nil
 	}
 
-	s.logger.Info("gRPC server shutting down: " + s.lis.Addr().String())
+	s.logger.Info("gRPC server shutting down", "address", s.lis.Addr().String())
 
 	if err := s.deregister(); err != nil {
 		return err

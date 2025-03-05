@@ -42,7 +42,7 @@ func SetupServer(opts ...server.Option) (server.Entrypoint, func(t *testing.T), 
 		return nil, nil, fmt.Errorf("setup gRPC server: %w", err)
 	}
 
-	if err := srv.Start(); err != nil {
+	if err := srv.Start(context.Background()); err != nil {
 		return nil, nil, fmt.Errorf("start: %w", err)
 	}
 

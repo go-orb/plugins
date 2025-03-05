@@ -26,7 +26,7 @@ type Middleware struct {
 }
 
 // Start the component. E.g. connect to the broker.
-func (m *Middleware) Start() error { return nil }
+func (m *Middleware) Start(_ context.Context) error { return nil }
 
 // Stop the component. E.g. disconnect from the broker.
 // The context will contain a timeout, and cancelation should be respected.
@@ -62,12 +62,22 @@ func (m *Middleware) Call(
 		// The actual call.
 		rsp, err := next(ctx, req, opts)
 
-		m.logger.TraceContext(
-			ctx,
-			"Got a result",
-			"url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()),
-			"content-type", opts.ContentType,
-		)
+		if err != nil {
+			m.logger.ErrorContext(
+				ctx,
+				"Got an error",
+				"error", err,
+				"url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()),
+				"content-type", opts.ContentType,
+			)
+		} else {
+			m.logger.TraceContext(
+				ctx,
+				"Got a result",
+				"url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()),
+				"content-type", opts.ContentType,
+			)
+		}
 
 		return rsp, err
 	}
@@ -92,12 +102,22 @@ func (m *Middleware) CallNoCodec(
 
 		err = next(ctx, req, result, opts)
 
-		m.logger.TraceContext(
-			ctx,
-			"Got a result",
-			"url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()),
-			"content-type", opts.ContentType,
-		)
+		if err != nil {
+			m.logger.ErrorContext(
+				ctx,
+				"Got an error",
+				"error", err,
+				"url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()),
+				"content-type", opts.ContentType,
+			)
+		} else {
+			m.logger.TraceContext(
+				ctx,
+				"Got a result",
+				"url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()),
+				"content-type", opts.ContentType,
+			)
+		}
 
 		return err
 	}

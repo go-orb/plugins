@@ -179,12 +179,13 @@ func (s *TestSuite) SetupSuite() {
 	s.configData = cfgData
 	s.clientName = types.ServiceName("client")
 
+	ctx := context.Background()
 	components := types.NewComponents()
 
 	// Logger
 	logger, err := log.New()
 	s.Require().NoError(err, "while setting up logger")
-	s.Require().NoError(logger.Start())
+	s.Require().NoError(logger.Start(ctx))
 	s.logger = logger
 
 	// Registry
@@ -193,7 +194,7 @@ func (s *TestSuite) SetupSuite() {
 		s.Require().NoError(err, "while creating a registry")
 	}
 
-	s.Require().NoError(reg.Start())
+	s.Require().NoError(reg.Start(ctx))
 	s.registry = reg
 
 	// Client
@@ -202,7 +203,7 @@ func (s *TestSuite) SetupSuite() {
 		s.Require().NoError(err, "while creating a client")
 	}
 
-	s.Require().NoError(c.Start())
+	s.Require().NoError(c.Start(ctx))
 	s.client = c
 
 	if len(s.Transports) == 0 {

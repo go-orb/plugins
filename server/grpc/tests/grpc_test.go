@@ -73,9 +73,9 @@ func TestGrpcStartStop(t *testing.T) {
 	)
 	require.NoError(t, err, "setup server")
 
-	require.NoError(t, srv.Start(), "start server 1")
-	require.NoError(t, srv.Start(), "start server 2")
-	require.NoError(t, srv.Start(), "start server 3")
+	require.NoError(t, srv.Start(context.Background()), "start server 1")
+	require.NoError(t, srv.Start(context.Background()), "start server 2")
+	require.NoError(t, srv.Start(context.Background()), "start server 3")
 
 	require.NoError(t, tgrpc.MakeRequest(srv.Address(), "Alex", nil), "make request")
 
@@ -113,7 +113,7 @@ func TestGrpcIntegration(t *testing.T) {
 		)),
 	)
 	require.NoError(t, err, "failed to setup server")
-	require.NoError(t, srv.Start(), "failed to start server")
+	require.NoError(t, srv.Start(context.Background()), "failed to start server")
 
 	e, err := srv.GetEntrypoint("test-ep-1")
 	require.NoError(t, err, "failed to fetch entrypoint 1")
@@ -175,7 +175,7 @@ func TestServerFileConfig(t *testing.T) {
 	)
 
 	require.NoError(t, err, "failed to setup server")
-	require.NoError(t, srv.Start(), "failed to start server")
+	require.NoError(t, srv.Start(context.Background()), "failed to start server")
 
 	e, err := srv.GetEntrypoint("static-ep-1")
 	require.NoError(t, err, "failed to fetch static ep 1")

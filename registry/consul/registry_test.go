@@ -2,6 +2,7 @@ package consul
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net"
@@ -66,7 +67,7 @@ func newConsulTestRegistry(t *testing.T, r *mockRegistry) (*RegistryConsul, func
 	require.NoError(t, err)
 
 	cr := New("", "", config, logger)
-	err = cr.Start()
+	err = cr.Start(context.Background())
 	require.NoError(t, err)
 
 	return cr, func() {

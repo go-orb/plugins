@@ -34,7 +34,7 @@ type Client struct {
 }
 
 // Start starts the client.
-func (c *Client) Start() error {
+func (c *Client) Start(_ context.Context) error {
 	return nil
 }
 
@@ -209,25 +209,43 @@ func (c *Client) Call(
 	_ any,
 	opts ...client.CallOption,
 ) (resp *client.RawResponse, err error) {
-	co := c.makeOptions(opts...)
+	callOptions := c.makeOptions(opts...)
 
 	// Add metadata to the context.
 	ctx, _ = metadata.WithOutgoing(ctx)
 
-	transport, err := c.transportForReq(ctx, req, co)
+	transport, err := c.transportForReq(ctx, req, callOptions)
 	if err != nil {
 		return nil, err
 	}
 
 	// Wrap middlewares
 	call := func(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (*client.RawResponse, error) {
-		return transport.Call(ctx, req, opts)
+		result, err := transport.Call(ctx, req, opts)
+
+		// Retry logic.
+		if err != nil && callOptions.Retry != nil && callOptions.Retries > 0 {
+			var retryCount int
+			for retryCount < callOptions.Retries {
+				retryCount++
+
+				shouldRetry, rErr := callOptions.Retry(ctx, err, callOptions)
+				if !shouldRetry || rErr != nil {
+					break
+				}
+
+				result, err = transport.Call(ctx, req, callOptions)
+			}
+		}
+
+		return result, err
 	}
 	for _, m := range c.middlewares {
 		call = m.Call(call)
 	}
 
-	return call(ctx, req, co)
+	// The actual call.
+	return call(ctx, req, callOptions)
 }
 
 // CallNoCodec does the actual call without codecs.
@@ -237,25 +255,43 @@ func (c *Client) CallNoCodec(
 	result any,
 	opts ...client.CallOption,
 ) error {
-	co := c.makeOptions(opts...)
+	callOptions := c.makeOptions(opts...)
 
 	// Add metadata to the context.
 	ctx, _ = metadata.WithOutgoing(ctx)
 
-	transport, err := c.transportForReq(ctx, req, co)
+	transport, err := c.transportForReq(ctx, req, callOptions)
 	if err != nil {
 		return err
 	}
 
 	// Wrap middlewares
 	call := func(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) error {
-		return transport.CallNoCodec(ctx, req, result, opts)
+		err := transport.CallNoCodec(ctx, req, result, opts)
+
+		// Retry logic.
+		if err != nil && callOptions.Retry != nil && callOptions.Retries > 0 {
+			var retryCount int
+			for retryCount < callOptions.Retries {
+				retryCount++
+
+				shouldRetry, rErr := callOptions.Retry(ctx, err, callOptions)
+				if !shouldRetry || rErr != nil {
+					break
+				}
+
+				err = transport.CallNoCodec(ctx, req, result, opts)
+			}
+		}
+
+		return err
 	}
 	for _, m := range c.middlewares {
 		call = m.CallNoCodec(call)
 	}
 
-	return call(ctx, req, result, co)
+	// The actual call.
+	return call(ctx, req, result, callOptions)
 }
 
 // New creates a new orb client. This functions should rarely be called manually.

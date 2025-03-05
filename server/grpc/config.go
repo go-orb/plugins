@@ -5,7 +5,6 @@ import (
 	"net"
 	"time"
 
-	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
 	"github.com/go-orb/go-orb/log"
@@ -21,10 +20,10 @@ const (
 	DefaultInsecure = false
 
 	// DefaultgRPCReflection enables reflection by default.
-	DefaultgRPCReflection = true
+	DefaultgRPCReflection = false
 
 	// DefaultHealthService enables the health service by default.
-	DefaultHealthService = true
+	DefaultHealthService = false
 
 	// DefaultTimeout is set to 5s.
 	DefaultTimeout = time.Second * 5
@@ -108,7 +107,7 @@ type Config struct {
 func NewConfig(options ...server.Option) *Config {
 	cfg := &Config{
 		EntrypointConfig: server.EntrypointConfig{
-			Name:    Plugin + "-" + uuid.NewString(),
+			Name:    Plugin,
 			Plugin:  Plugin,
 			Enabled: true,
 		},
@@ -215,7 +214,7 @@ func WithGRPCOptions(opts ...grpc.ServerOption) server.Option {
 
 // WithHealthService dictates whether the gRPC health check protocol should be
 // implemented. This is an implementation provided by the grpc package.
-// Defaults to true.
+// Defaults to false.
 //
 // This is useful for healthprobes, such as in Kubernetes (>=1.24).
 func WithHealthService(health bool) server.Option {
@@ -228,7 +227,7 @@ func WithHealthService(health bool) server.Option {
 }
 
 // WithReflection dictates whether the server should implementent gRPC
-// reflection. This is used by e.g. the gRPC proxy. Defaults to true.
+// reflection. This is used by e.g. the gRPC proxy. Defaults to false.
 func WithReflection(reflection bool) server.Option {
 	return func(c server.EntrypointConfigType) {
 		cfg, ok := c.(*Config)

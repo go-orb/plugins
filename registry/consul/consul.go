@@ -510,7 +510,7 @@ func New(serviceName string, _ string, cfg Config, logger log.Logger) *RegistryC
 }
 
 // Start the registry.
-func (c *RegistryConsul) Start() error {
+func (c *RegistryConsul) Start(_ context.Context) error {
 	// setup the client
 	c.Client()
 

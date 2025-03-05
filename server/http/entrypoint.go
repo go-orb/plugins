@@ -164,7 +164,7 @@ func New(acfg any, logger log.Logger, reg registry.Type) (server.Entrypoint, err
 }
 
 // Start will create the listeners and start the server on the entrypoint.
-func (s *Server) Start() error {
+func (s *Server) Start(_ context.Context) error {
 	if s.started {
 		return nil
 	}
