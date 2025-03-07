@@ -264,7 +264,7 @@ func (s *TestSuite) TearDownSuite() {
 	}
 }
 
-func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest, c client.Type) {
+func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest, clientWire client.Type) {
 	opts := []client.CallOption{}
 	if req.ContentType != "" {
 		opts = append(opts, client.WithContentType(req.ContentType))
@@ -281,7 +281,7 @@ func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest, c client.Ty
 	if req.ContentType == "" || req.ContentType == "application/x-protobuf" {
 		rsp, err := client.Call[proto.CallResponse](
 			ctx,
-			c,
+			clientWire,
 			req.Service,
 			req.Endpoint,
 			req.Request,
@@ -294,22 +294,24 @@ func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest, c client.Ty
 			s.Require().NoError(err)
 			s.Equal(req.Response.(*proto.CallResponse).GetMsg(), rsp.GetMsg(), "unexpected response") //nolint:errcheck
 		}
-	} else {
-		rsp, err := client.Call[map[string]any](
-			ctx,
-			c,
-			req.Service,
-			req.Endpoint,
-			req.Request,
-			opts...,
-		)
 
-		if req.Error {
-			s.Require().Error(err)
-		} else {
-			s.Require().NoError(err)
-			s.Equal(req.Response.(map[string]any)["msg"], (*rsp)["msg"], "unexpected response") //nolint:errcheck
-		}
+		return
+	}
+
+	rsp, err := client.Call[map[string]any](
+		ctx,
+		clientWire,
+		req.Service,
+		req.Endpoint,
+		req.Request,
+		opts...,
+	)
+
+	if req.Error {
+		s.Require().Error(err)
+	} else {
+		s.Require().NoError(err)
+		s.Equal(req.Response.(map[string]any)["msg"], (*rsp)["msg"], "unexpected response") //nolint:errcheck
 	}
 }
 

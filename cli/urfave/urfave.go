@@ -43,7 +43,7 @@ type parserCommand struct {
 	subCommands []*parserCommand
 }
 
-func (c *parserCommand) add(flag *oCli.Flag) error {
+func (pc *parserCommand) add(flag *oCli.Flag) error {
 	switch d := flag.Default.(type) {
 	case int:
 		f := &uCli.IntFlag{
@@ -52,7 +52,7 @@ func (c *parserCommand) add(flag *oCli.Flag) error {
 			Value:   d,
 			EnvVars: flag.EnvVars,
 		}
-		c.intFlags[flag.Name] = f
+		pc.intFlags[flag.Name] = f
 	case string:
 		f := &uCli.StringFlag{
 			Name:    flag.Name,
@@ -60,7 +60,7 @@ func (c *parserCommand) add(flag *oCli.Flag) error {
 			Value:   d,
 			EnvVars: flag.EnvVars,
 		}
-		c.stringFlags[flag.Name] = f
+		pc.stringFlags[flag.Name] = f
 	case []string:
 		f := &uCli.StringSliceFlag{
 			Name:    flag.Name,
@@ -68,12 +68,12 @@ func (c *parserCommand) add(flag *oCli.Flag) error {
 			Value:   uCli.NewStringSlice(d...),
 			EnvVars: flag.EnvVars,
 		}
-		c.stringSliceFlags[flag.Name] = f
+		pc.stringSliceFlags[flag.Name] = f
 	default:
 		return fmt.Errorf("found a unknown flag: %s", flag.Name)
 	}
 
-	c.flags[flag.Name] = flag
+	pc.flags[flag.Name] = flag
 
 	return nil
 }
@@ -146,7 +146,7 @@ func newParserCommandFromOcli(oCommand *oCli.Command, previousCommands []string)
 		Subcommands: make([]*uCli.Command, 0),
 	}
 	if !oCommand.NoAction {
-		uCmd.Action = func(ctx *uCli.Context) error {
+		uCmd.Action = func(_ *uCli.Context) error {
 			return oCommand.InternalAction()
 		}
 	}
@@ -155,6 +155,7 @@ func newParserCommandFromOcli(oCommand *oCli.Command, previousCommands []string)
 	pCmd.uCommand = uCmd
 
 	var mErr *multierror.Error
+
 	for _, f := range oCommand.Flags {
 		if err := pCmd.add(f); err != nil {
 			mErr = multierror.Append(mErr, err)
@@ -193,6 +194,7 @@ type parser struct {
 	commands []*parserCommand
 }
 
+//nolint:gocognit,gocyclo,cyclop
 func (p *parser) run(args []string) ([]*oCli.Flag, error) {
 	var ctx *uCli.Context
 
@@ -290,7 +292,7 @@ func newParser(appContext *oCli.AppContext) (*parser, error) {
 	}
 
 	if !oApp.NoAction {
-		uApp.Action = func(ctx *uCli.Context) error {
+		uApp.Action = func(_ *uCli.Context) error {
 			return oApp.InternalAction()
 		}
 	}

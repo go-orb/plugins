@@ -70,7 +70,6 @@ func TestGlobalFlags(t *testing.T) {
 
 // TestCommands tests parsing with commands.
 func TestCommands(t *testing.T) {
-
 	// Create command with flags
 	cmdFlag1 := cli.NewFlag("cmd-flag1", "cmd-default", cli.FlagUsage("A command flag"))
 	cmdFlag2 := cli.NewFlag("cmd-flag2", 123, cli.FlagUsage("Another command flag"))
@@ -118,7 +117,6 @@ func TestCommands(t *testing.T) {
 
 // TestNestedCommands tests parsing with nested commands.
 func TestNestedCommands(t *testing.T) {
-
 	// Create nested subcommands
 	subSubCmdFlag := cli.NewFlag("subsub-flag", "subsub-default", cli.FlagUsage("A sub-sub command flag"))
 	subSubCmd := &cli.Command{
@@ -172,7 +170,6 @@ func TestNestedCommands(t *testing.T) {
 
 // TestMixedFlagsAndCommands tests parsing with both global and command flags.
 func TestMixedFlagsAndCommands(t *testing.T) {
-
 	// Create global flags
 	globalFlag1 := cli.NewFlag("global-flag1", "global-default", cli.FlagUsage("A global flag"))
 	globalFlag2 := cli.NewFlag("global-flag2", 789, cli.FlagUsage("Another global flag"))
@@ -235,7 +232,6 @@ func TestMixedFlagsAndCommands(t *testing.T) {
 
 // TestMultipleCommands tests parsing with multiple commands at the same level.
 func TestMultipleCommands(t *testing.T) {
-
 	// Create multiple commands
 	cmd1Flag := cli.NewFlag("cmd1-flag", "cmd1-default", cli.FlagUsage("Command 1 flag"))
 	cmd1 := &cli.Command{
