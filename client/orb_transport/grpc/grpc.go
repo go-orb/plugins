@@ -121,6 +121,7 @@ func (t *Transport) RequestNoCodec(ctx context.Context, req *client.Req[any, any
 		factory := func(_ context.Context, addr string, tlsConfig *tls.Config) (*grpc.ClientConn, error) {
 			gopts := []grpc.DialOption{}
 
+			//nolint:gocritic
 			if tlsConfig != nil {
 				gopts = append(gopts, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)))
 			} else if node.Transport == "grpcs" {
