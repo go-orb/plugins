@@ -8,13 +8,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestEmptyParse tests parsing with an empty command list
+// TestEmptyParse tests parsing with an empty command list.
 func TestEmptyParse(t *testing.T) {
 	appContext := cli.NewAppContext(&cli.App{
-		Name:     "testapp",
-		Usage:    "A testapp",
-		Commands: []*cli.Command{},
-		Flags:    []*cli.Flag{},
+		Name:           "testapp",
+		Usage:          "A testapp",
+		Commands:       []*cli.Command{},
+		Flags:          []*cli.Flag{},
+		NoGlobalConfig: true,
 	})
 
 	flags, err := Parse(appContext, []string{})
@@ -22,16 +23,17 @@ func TestEmptyParse(t *testing.T) {
 	require.Empty(t, flags, "expected 0 flags")
 }
 
-// TestGlobalFlags tests parsing with global flags
+// TestGlobalFlags tests parsing with global flags.
 func TestGlobalFlags(t *testing.T) {
 	strFlag := cli.NewFlag("str-flag", "default-value", cli.FlagUsage("A string flag"))
 	intFlag := cli.NewFlag("int-flag", 42, cli.FlagUsage("An integer flag"))
 	sliceFlag := cli.NewFlag("slice-flag", []string{"val1", "val2"}, cli.FlagUsage("A string slice flag"))
 
 	appContext := cli.NewAppContext(&cli.App{
-		Name:  "testapp",
-		Usage: "A testapp with global flags",
-		Flags: []*cli.Flag{strFlag, intFlag, sliceFlag},
+		Name:           "testapp",
+		Usage:          "A testapp with global flags",
+		Flags:          []*cli.Flag{strFlag, intFlag, sliceFlag},
+		NoGlobalConfig: true,
 	})
 
 	// Test with no flags set (using defaults)
@@ -66,7 +68,7 @@ func TestGlobalFlags(t *testing.T) {
 	}
 }
 
-// TestCommands tests parsing with commands
+// TestCommands tests parsing with commands.
 func TestCommands(t *testing.T) {
 
 	// Create command with flags
@@ -81,9 +83,10 @@ func TestCommands(t *testing.T) {
 	}
 
 	appContext := cli.NewAppContext(&cli.App{
-		Name:     "testapp",
-		Usage:    "A testapp with commands",
-		Commands: []*cli.Command{cmd},
+		Name:           "testapp",
+		Usage:          "A testapp with commands",
+		Commands:       []*cli.Command{cmd},
+		NoGlobalConfig: true,
 	})
 
 	// Test with command and flags
@@ -113,7 +116,7 @@ func TestCommands(t *testing.T) {
 	}
 }
 
-// TestNestedCommands tests parsing with nested commands
+// TestNestedCommands tests parsing with nested commands.
 func TestNestedCommands(t *testing.T) {
 
 	// Create nested subcommands
@@ -144,9 +147,10 @@ func TestNestedCommands(t *testing.T) {
 	}
 
 	appContext := cli.NewAppContext(&cli.App{
-		Name:     "testapp",
-		Usage:    "A testapp with nested commands",
-		Commands: []*cli.Command{cmd},
+		Name:           "testapp",
+		Usage:          "A testapp with nested commands",
+		Commands:       []*cli.Command{cmd},
+		NoGlobalConfig: true,
 	})
 
 	// Test with deeply nested command
@@ -166,7 +170,7 @@ func TestNestedCommands(t *testing.T) {
 	require.Equal(t, "custom-subsub-value", flags[0].Value)
 }
 
-// TestMixedFlagsAndCommands tests parsing with both global and command flags
+// TestMixedFlagsAndCommands tests parsing with both global and command flags.
 func TestMixedFlagsAndCommands(t *testing.T) {
 
 	// Create global flags
@@ -183,10 +187,11 @@ func TestMixedFlagsAndCommands(t *testing.T) {
 	}
 
 	appContext := cli.NewAppContext(&cli.App{
-		Name:     "testapp",
-		Usage:    "A testapp with global flags and commands",
-		Commands: []*cli.Command{cmd},
-		Flags:    []*cli.Flag{globalFlag1, globalFlag2},
+		Name:           "testapp",
+		Usage:          "A testapp with global flags and commands",
+		Commands:       []*cli.Command{cmd},
+		Flags:          []*cli.Flag{globalFlag1, globalFlag2},
+		NoGlobalConfig: true,
 	})
 
 	// Test with global flags and command flags
@@ -228,7 +233,7 @@ func TestMixedFlagsAndCommands(t *testing.T) {
 	require.True(t, cmdFlagFound, "cmd-flag not found in results")
 }
 
-// TestMultipleCommands tests parsing with multiple commands at the same level
+// TestMultipleCommands tests parsing with multiple commands at the same level.
 func TestMultipleCommands(t *testing.T) {
 
 	// Create multiple commands
@@ -249,9 +254,10 @@ func TestMultipleCommands(t *testing.T) {
 	}
 
 	appContext := cli.NewAppContext(&cli.App{
-		Name:     "testapp",
-		Usage:    "A testapp with multiple commands",
-		Commands: []*cli.Command{cmd1, cmd2},
+		Name:           "testapp",
+		Usage:          "A testapp with multiple commands",
+		Commands:       []*cli.Command{cmd1, cmd2},
+		NoGlobalConfig: true,
 	})
 
 	// Test with second command
