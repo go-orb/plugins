@@ -81,7 +81,7 @@ func TestNilError(t *testing.T) {
 	var err *orberrors.Error
 	require.Equal(t, "", err.Error())
 	require.NoError(t, err.Toerror())
-	require.NoError(t, err.Wrap(errors.New("test")))
+	require.Error(t, err.Wrap(errors.New("test")))
 	require.NoError(t, err.Unwrap())
 }
 
@@ -89,7 +89,7 @@ func TestToerror(t *testing.T) {
 	// Test non-nil case
 	orbErr := orberrors.New(400, "bad request")
 	err := orbErr.Toerror()
-	require.NoError(t, err)
+	require.Error(t, err)
 	require.Equal(t, "bad request", err.Error())
 
 	// Test nil case
@@ -157,15 +157,15 @@ func TestErrorIsComparison(t *testing.T) {
 
 	// Different code
 	err3 := orberrors.New(400, "not found")
-	require.ErrorIs(t, err1, err3)
+	require.NotErrorIs(t, err1, err3)
 
 	// Different message
 	err4 := orberrors.New(404, "page not found")
-	require.ErrorIs(t, err1, err4)
+	require.NotErrorIs(t, err1, err4)
 
 	// Not an orberrors.Error
 	err5 := errors.New("regular error")
-	require.ErrorIs(t, err1, err5)
+	require.NotErrorIs(t, err1, err5)
 }
 
 func TestMultiLevelWrapping(t *testing.T) {
