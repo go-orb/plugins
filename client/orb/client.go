@@ -34,6 +34,11 @@ type Client struct {
 	transports *container.SafeMap[string, Transport]
 }
 
+// Logger returns the logger.
+func (c *Client) Logger() log.Logger {
+	return c.logger
+}
+
 // Start starts the client.
 func (c *Client) Start(_ context.Context) error {
 	return nil

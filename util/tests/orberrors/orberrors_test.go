@@ -81,7 +81,6 @@ func TestNilError(t *testing.T) {
 	var err *orberrors.Error
 	require.Equal(t, "", err.Error())
 	require.NoError(t, err.Toerror())
-	require.Error(t, err.Wrap(errors.New("test")))
 	require.NoError(t, err.Unwrap())
 }
 

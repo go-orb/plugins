@@ -79,7 +79,9 @@ func (s *Server) Start(_ context.Context) error {
 
 	s.address = listener.Addr().String()
 
-	s.logger.Info("Got address", "address", s.address)
+	s.logger = s.logger.With(slog.String("transport", s.Transport()), slog.String("address", s.Address()))
+
+	s.logger.Info("dRPC server listening")
 
 	s.ctx, s.cancelFunc = context.WithCancel(context.Background())
 

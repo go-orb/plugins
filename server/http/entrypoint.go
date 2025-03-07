@@ -189,7 +189,9 @@ func (s *Server) Start(_ context.Context) error {
 		return err
 	}
 
-	s.logger.Info("Got address", "address", s.Address())
+	s.logger = s.logger.With(slog.String("transport", s.Transport()), slog.String("address", s.Address()))
+
+	s.logger.Info("HTTP server listening")
 
 	go func() {
 		if err = s.httpServer.Start(s.listenerTCP); err != nil {

@@ -188,7 +188,9 @@ func (s *Server) Start(_ context.Context) error {
 		}
 	}
 
-	s.logger.Info("gRPC server listening", "address", s.lis.Addr().String())
+	s.logger = s.logger.With(slog.String("transport", s.Transport()), slog.String("address", s.Address()))
+
+	s.logger.Info("gRPC server listening")
 
 	go func() {
 		if err := s.server.Serve(s.lis); err != nil {
