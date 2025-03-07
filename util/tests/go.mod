@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/util/tests
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250307104133-5994b6de19a3
+	github.com/go-orb/go-orb v0.2.2-0.20250307141103-038ba03c3f37
 	github.com/stretchr/testify v1.10.0
 )
 
