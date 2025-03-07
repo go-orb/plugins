@@ -90,7 +90,8 @@ func (m *Middleware) CallNoCodec(
 	return func(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) error {
 		node, err := req.Node(ctx, opts)
 		if err != nil {
-			return orberrors.From(err)
+			// Call the client/next middleware on resolve errors, this might trigger the retry logic.
+			return next(ctx, req, result, opts)
 		}
 
 		m.logger.TraceContext(

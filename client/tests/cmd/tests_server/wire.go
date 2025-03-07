@@ -5,13 +5,17 @@
 package main
 
 import (
+	"context"
+	"fmt"
+
+	"github.com/go-orb/go-orb/cli"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/types"
+	"github.com/go-orb/plugins/cli/urfave"
 	"github.com/go-orb/plugins/client/tests/handler"
 	"github.com/go-orb/plugins/client/tests/proto"
-	"github.com/go-orb/plugins/config/source/cli/urfave"
 
 	"github.com/go-orb/wire"
 )
@@ -25,75 +29,66 @@ func provideServerOpts() ([]server.ConfigOption, error) {
 	server.Handlers.Add(proto.HandlerStreams, hRegister)
 
 	opts := []server.ConfigOption{}
-	// opts = append(opts, server.WithEntrypointConfig(mgrpc.NewConfig(
-	// 	mgrpc.WithName("grpc"),
-	// 	mgrpc.WithInsecure(),
-	// 	mgrpc.WithHandlers(hRegister),
-	// )))
-	// opts = append(opts, server.WithEntrypointConfig(mhttp.NewConfig(
-	// 	mhttp.WithName("http"),
-	// 	mhttp.WithInsecure(),
-	// 	mhttp.WithHandlers(hRegister),
-	// )))
-	// opts = append(opts, server.WithEntrypointConfig(mhttp.NewConfig(
-	// 	mhttp.WithName("https"),
-	// 	mhttp.WithDisableHTTP2(),
-	// 	mhttp.WithHandlers(hRegister),
-	// )))
-	// opts = append(opts, server.WithEntrypointConfig(mhttp.NewConfig(
-	// 	mhttp.WithName("h2c"),
-	// 	mhttp.WithInsecure(),
-	// 	mhttp.WithAllowH2C(),
-	// 	mhttp.WithHandlers(hRegister),
-	// )))
-	// opts = append(opts, server.WithEntrypointConfig(mhttp.NewConfig(
-	// 	mhttp.WithName("http2"),
-	// 	mhttp.WithHandlers(hRegister),
-	// )))
-	// opts = append(opts, server.WithEntrypointConfig(mhttp.NewConfig(
-	// 	mhttp.WithName("http3"),
-	// 	mhttp.WithHTTP3(),
-	// 	mhttp.WithHandlers(hRegister),
-	// )))
-	// opts = append(opts, server.WithEntrypointConfig(drpc.NewConfig(
-	// 	drpc.WithName("drpc"),
-	// 	drpc.WithHandlers(hRegister),
-	// )))
-
 	return opts, nil
 }
 
-// provideComponents creates a slice of components out of the arguments.
-func provideComponents(
-	serviceName types.ServiceName,
-	serviceVersion types.ServiceVersion,
-	cfgData types.ConfigData,
-	logger log.Logger,
-	reg registry.Type,
-	srv server.Server,
-) ([]types.Component, error) {
-	components := []types.Component{}
-	components = append(components, logger)
-	components = append(components, reg)
-	components = append(components, &srv)
+type wireRunResult struct{}
 
-	return components, nil
+func wireRun(
+	serviceContext *cli.ServiceContext,
+	components *types.Components,
+	logger log.Logger,
+	_ server.Server,
+) (wireRunResult, error) {
+	// Orb start
+	for _, c := range components.Iterate(false) {
+		logger.Debug("Starting", "component", fmt.Sprintf("%s/%s", c.Type(), c.String()))
+
+		err := c.Start(serviceContext.Context())
+		if err != nil {
+			logger.Error("Failed to start", "error", err, "component", fmt.Sprintf("%s/%s", c.Type(), c.String()))
+			return wireRunResult{}, fmt.Errorf("failed to start component %s/%s: %w", c.Type(), c.String(), err)
+		}
+	}
+
+	// Let the service work.
+	<-serviceContext.Context().Done()
+
+	// Orb shutdown.
+	ctx := context.Background()
+
+	for _, c := range components.Iterate(true) {
+		logger.Debug("Stopping", "component", fmt.Sprintf("%s/%s", c.Type(), c.String()))
+
+		err := c.Stop(ctx)
+		if err != nil {
+			logger.Error("Failed to stop", "error", err, "component", fmt.Sprintf("%s/%s", c.Type(), c.String()))
+		}
+	}
+
+	return wireRunResult{}, nil
 }
 
-// newComponents combines everything above and returns a slice of components.
-func newComponents(
-	serviceName types.ServiceName,
-	serviceVersion types.ServiceVersion,
-) ([]types.Component, error) {
+func run(
+	appContext *cli.AppContext,
+	args []string,
+) (wireRunResult, error) {
 	panic(wire.Build(
+		urfave.ProvideParser,
+		cli.ProvideParsedFlagsFromArgs,
+
+		cli.ProvideSingleServiceContext,
 		types.ProvideComponents,
-		urfave.ProvideConfigData,
-		wire.Value([]log.Option{}),
-		log.Provide,
-		wire.Value([]registry.Option{}),
-		registry.Provide,
+
+		cli.ProvideConfigData,
+		cli.ProvideServiceName,
+		cli.ProvideServiceVersion,
+
+		log.ProvideNoOpts,
+		registry.ProvideNoOpts,
 		provideServerOpts,
 		server.Provide,
-		provideComponents,
+
+		wireRun,
 	))
 }

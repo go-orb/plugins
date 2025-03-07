@@ -171,7 +171,7 @@ func (s *TestSuite) SetupSuite() {
 
 	cURLs := []*url.URL{}
 
-	cfgData, err := config.Read(cURLs, nil)
+	cfgData, err := config.Read(cURLs)
 	if err != nil {
 		s.Require().NoError(err, "while parsing a config")
 	}

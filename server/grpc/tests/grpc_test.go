@@ -151,7 +151,7 @@ func TestServerFileConfig(t *testing.T) {
 	// litter.Dump(fURL)
 	// t.Logf("%+v", fURL.Host)
 
-	config, err := config.Read([]*url.URL{fURL}, nil)
+	config, err := config.Read([]*url.URL{fURL})
 	require.NoError(t, err, "failed to read file config")
 
 	components := types.NewComponents()

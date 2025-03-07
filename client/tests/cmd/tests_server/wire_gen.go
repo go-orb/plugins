@@ -7,13 +7,16 @@
 package main
 
 import (
+	"context"
+	"fmt"
+	"github.com/go-orb/go-orb/cli"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/types"
+	"github.com/go-orb/plugins/cli/urfave"
 	"github.com/go-orb/plugins/client/tests/handler"
 	"github.com/go-orb/plugins/client/tests/proto"
-	"github.com/go-orb/plugins/config/source/cli/urfave"
 )
 
 import (
@@ -31,45 +34,57 @@ import (
 
 // Injectors from wire.go:
 
-// newComponents combines everything above and returns a slice of components.
-func newComponents(serviceName types.ServiceName, serviceVersion types.ServiceVersion) ([]types.Component, error) {
-	configData, err := urfave.ProvideConfigData(serviceName, serviceVersion)
+func run(appContext *cli.AppContext, args []string) (wireRunResult, error) {
+	serviceContext, err := cli.ProvideSingleServiceContext(appContext)
 	if err != nil {
-		return nil, err
+		return wireRunResult{}, err
 	}
 	v, err := types.ProvideComponents()
 	if err != nil {
-		return nil, err
+		return wireRunResult{}, err
 	}
-	v2 := _wireValue
-	logger, err := log.Provide(serviceName, configData, v, v2...)
+	serviceName, err := cli.ProvideServiceName(serviceContext)
 	if err != nil {
-		return nil, err
+		return wireRunResult{}, err
 	}
-	v3 := _wireValue2
-	registryType, err := registry.Provide(serviceName, serviceVersion, configData, v, logger, v3...)
+	parserFunc, err := urfave.ProvideParser()
 	if err != nil {
-		return nil, err
+		return wireRunResult{}, err
 	}
-	v4, err := provideServerOpts()
+	v2, err := cli.ProvideParsedFlagsFromArgs(appContext, parserFunc, args)
 	if err != nil {
-		return nil, err
+		return wireRunResult{}, err
 	}
-	serverServer, err := server.Provide(serviceName, configData, v, logger, registryType, v4...)
+	configData, err := cli.ProvideConfigData(serviceContext, v2)
 	if err != nil {
-		return nil, err
+		return wireRunResult{}, err
 	}
-	v5, err := provideComponents(serviceName, serviceVersion, configData, logger, registryType, serverServer)
+	logger, err := log.ProvideNoOpts(serviceName, configData, v)
 	if err != nil {
-		return nil, err
+		return wireRunResult{}, err
 	}
-	return v5, nil
+	serviceVersion, err := cli.ProvideServiceVersion(serviceContext)
+	if err != nil {
+		return wireRunResult{}, err
+	}
+	registryType, err := registry.ProvideNoOpts(serviceName, serviceVersion, configData, v, logger)
+	if err != nil {
+		return wireRunResult{}, err
+	}
+	v3, err := provideServerOpts()
+	if err != nil {
+		return wireRunResult{}, err
+	}
+	serverServer, err := server.Provide(serviceName, configData, v, logger, registryType, v3...)
+	if err != nil {
+		return wireRunResult{}, err
+	}
+	mainWireRunResult, err := wireRun(serviceContext, v, logger, serverServer)
+	if err != nil {
+		return wireRunResult{}, err
+	}
+	return mainWireRunResult, nil
 }
-
-var (
-	_wireValue  = []log.Option{}
-	_wireValue2 = []registry.Option{}
-)
 
 // wire.go:
 
@@ -82,23 +97,40 @@ func provideServerOpts() ([]server.ConfigOption, error) {
 		Add(proto.HandlerStreams, hRegister)
 
 	opts := []server.ConfigOption{}
-
 	return opts, nil
 }
 
-// provideComponents creates a slice of components out of the arguments.
-func provideComponents(
-	serviceName types.ServiceName,
-	serviceVersion types.ServiceVersion,
-	cfgData types.ConfigData,
-	logger log.Logger,
-	reg registry.Type,
-	srv server.Server,
-) ([]types.Component, error) {
-	components := []types.Component{}
-	components = append(components, logger)
-	components = append(components, reg)
-	components = append(components, &srv)
+type wireRunResult struct{}
 
-	return components, nil
+func wireRun(
+	serviceContext *cli.ServiceContext,
+	components *types.Components,
+	logger log.Logger,
+	_ server.Server,
+) (wireRunResult, error) {
+
+	for _, c := range components.Iterate(false) {
+		logger.Debug("Starting", "component", fmt.Sprintf("%s/%s", c.Type(), c.String()))
+
+		err := c.Start(serviceContext.Context())
+		if err != nil {
+			logger.Error("Failed to start", "error", err, "component", fmt.Sprintf("%s/%s", c.Type(), c.String()))
+			return wireRunResult{}, fmt.Errorf("failed to start component %s/%s: %w", c.Type(), c.String(), err)
+		}
+	}
+
+	<-serviceContext.Context().Done()
+
+	ctx := context.Background()
+
+	for _, c := range components.Iterate(true) {
+		logger.Debug("Stopping", "component", fmt.Sprintf("%s/%s", c.Type(), c.String()))
+
+		err := c.Stop(ctx)
+		if err != nil {
+			logger.Error("Failed to stop", "error", err, "component", fmt.Sprintf("%s/%s", c.Type(), c.String()))
+		}
+	}
+
+	return wireRunResult{}, nil
 }

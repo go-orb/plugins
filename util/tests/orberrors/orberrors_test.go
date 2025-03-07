@@ -39,7 +39,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestNewHTTP(t *testing.T) {
-	msg := orberrors.NewHTTP(500).Error()
+	msg := orberrors.HTTP(500).Error()
 	expected := "internal server error"
 	require.Equal(t, expected, msg)
 }

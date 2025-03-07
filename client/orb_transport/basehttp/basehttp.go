@@ -154,7 +154,7 @@ func (t *Transport) call2(hReq *http.Request, opts *client.CallOptions) (*client
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return res, orberrors.NewHTTP(resp.StatusCode)
+		return res, orberrors.HTTP(resp.StatusCode)
 	}
 
 	return res, nil

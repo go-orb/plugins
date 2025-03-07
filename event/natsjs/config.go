@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/go-orb/go-orb/config"
-	"github.com/go-orb/go-orb/config/source/cli"
 	"github.com/go-orb/go-orb/event"
 	"github.com/go-orb/go-orb/types"
 )
@@ -23,22 +22,6 @@ var (
 )
 
 func init() {
-	//nolint:errcheck
-	_ = cli.Flags.Add(cli.NewFlag(
-		event.ComponentType+"_addresses",
-		DefaultAddresses,
-		cli.ConfigPathSlice([]string{event.ComponentType, "addresses"}),
-		cli.Usage("Events addresses."),
-	))
-
-	//nolint:errcheck
-	_ = cli.Flags.Add(cli.NewFlag(
-		event.ComponentType+"_codec",
-		DefaultCodec,
-		cli.ConfigPathSlice([]string{event.ComponentType, "codec"}),
-		cli.Usage("Events internal codec."),
-	))
-
 	event.Register(Name, Provide)
 }
 

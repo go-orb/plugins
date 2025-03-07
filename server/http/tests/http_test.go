@@ -407,7 +407,7 @@ func TestServerFileConfig(t *testing.T) {
 
 	components := types.NewComponents()
 
-	config, err := config.Read([]*url.URL{fURL}, nil)
+	config, err := config.Read([]*url.URL{fURL})
 	require.NoError(t, err, "failed to read file config")
 
 	logger, err := log.Provide(name, nil, components)

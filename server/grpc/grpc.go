@@ -310,7 +310,7 @@ func (s *Server) listen() error {
 func (s *Server) getEndpoints() []*registry.Endpoint {
 	sInfo := s.server.GetServiceInfo()
 
-	result := make([]*registry.Endpoint, len(sInfo))
+	result := make([]*registry.Endpoint, 0, len(sInfo))
 
 	for k := range sInfo {
 		s.logger.Trace("found endpoint", slog.String("name", k))

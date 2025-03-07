@@ -177,7 +177,7 @@ func (s *Server) Router() *Mux {
 }
 
 func (s *Server) getEndpoints() []*registry.Endpoint {
-	result := make([]*registry.Endpoint, len(s.endpoints))
+	result := make([]*registry.Endpoint, 0, len(s.endpoints))
 
 	for _, r := range s.endpoints {
 		s.logger.Trace("found endpoint", "name", r[1:])

@@ -2,14 +2,10 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	"os"
-	"os/signal"
-	"syscall"
 
-	"github.com/go-orb/go-orb/log"
-	"github.com/go-orb/go-orb/types"
-
+	"github.com/go-orb/go-orb/cli"
 	_ "github.com/go-orb/plugins-experimental/registry/mdns"
 	_ "github.com/go-orb/plugins/codecs/json"
 	_ "github.com/go-orb/plugins/codecs/proto"
@@ -23,41 +19,28 @@ import (
 )
 
 func main() {
-	var (
-		serviceName    = types.ServiceName("service")
-		serviceVersion = types.ServiceVersion("v0.0.1")
-	)
+	app := cli.App{
+		Name:     "service",
+		Version:  "unset",
+		Usage:    "A foobar example app",
+		NoAction: false,
+		Flags: []*cli.Flag{
+			{
+				Name:        "log_level",
+				Default:     "INFO",
+				EnvVars:     []string{"LOG_LEVEL"},
+				ConfigPaths: []cli.FlagConfigPath{{Path: []string{"logger", "level"}}},
+				Usage:       "Set the log level, one of TRACE, DEBUG, INFO, WARN, ERROR",
+			},
+		},
+		Commands: []*cli.Command{},
+	}
 
-	components, err := newComponents(serviceName, serviceVersion)
+	appContext := cli.NewAppContext(&app)
+
+	_, err := run(appContext, os.Args)
 	if err != nil {
-		log.Error("while creating components", "err", err)
+		fmt.Printf("run error: %s\n", err)
 		os.Exit(1)
-	}
-
-	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-
-	for _, c := range components {
-		err := c.Start(ctx)
-		if err != nil {
-			log.Error("Failed to start", err, "component", c.Type())
-			cancel()
-			os.Exit(1)
-		}
-	}
-
-	// Blocks until we get a sigint/sigterm
-	<-ctx.Done()
-	cancel()
-
-	// Shutdown.
-	ctx = context.Background()
-
-	for k := range components {
-		c := components[len(components)-1-k]
-
-		err := c.Stop(ctx)
-		if err != nil {
-			log.Error("Failed to stop", err, "component", c.Type())
-		}
 	}
 }

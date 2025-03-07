@@ -16,7 +16,7 @@ import (
 func testSet2URLs(t *testing.T, urls []*url.URL) {
 	t.Helper()
 
-	datas, err := config.Read(urls, []string{"app"})
+	datas, err := config.Read(urls)
 	require.NoError(t, err)
 
 	// Merge all data from the URL's.

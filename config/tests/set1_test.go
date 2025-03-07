@@ -18,7 +18,7 @@ const urlRepo = "https://raw.githubusercontent.com/go-orb/plugins/main/config/te
 func testSet1URLs(t *testing.T, urls []*url.URL) {
 	t.Helper()
 
-	datas, err := config.Read(urls, []string{"app"})
+	datas, err := config.Read(urls)
 	require.NoError(t, err)
 
 	// Merge all data from the URL's.
@@ -112,6 +112,6 @@ func TestSet1FailUnknown(t *testing.T) {
 	u3, err := url.Parse("./data/set1/unknown.yaml")
 	require.NoError(t, err)
 
-	_, err = config.Read([]*url.URL{u1, u2, u3}, []string{"app"})
+	_, err = config.Read([]*url.URL{u1, u2, u3})
 	require.ErrorIs(t, err, config.ErrFileNotFound)
 }

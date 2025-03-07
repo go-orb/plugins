@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 
 	"log/slog"
@@ -165,6 +166,10 @@ func (c *Client) makeOptions(opts ...client.CallOption) *client.CallOptions {
 func (c *Client) transportForReq(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (Transport, error) {
 	node, err := req.Node(ctx, opts)
 	if err != nil {
+		if errors.Is(err, registry.ErrNotFound) {
+			return nil, orberrors.HTTP(http.StatusServiceUnavailable)
+		}
+
 		return nil, orberrors.ErrInternalServerError.Wrap(err)
 	}
 
@@ -208,20 +213,20 @@ func (c *Client) Call(
 	req *client.Request[any, any],
 	_ any,
 	opts ...client.CallOption,
-) (resp *client.RawResponse, err error) {
+) (*client.RawResponse, error) {
 	callOptions := c.makeOptions(opts...)
 
 	// Add metadata to the context.
 	ctx, _ = metadata.WithOutgoing(ctx)
 
-	transport, err := c.transportForReq(ctx, req, callOptions)
-	if err != nil {
-		return nil, err
-	}
-
 	// Wrap middlewares
 	call := func(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (*client.RawResponse, error) {
-		result, err := transport.Call(ctx, req, opts)
+		var resp *client.RawResponse
+
+		transport, err := c.transportForReq(ctx, req, callOptions)
+		if err == nil {
+			resp, err = transport.Call(ctx, req, opts)
+		}
 
 		// Retry logic.
 		if err != nil && callOptions.Retry != nil && callOptions.Retries > 0 {
@@ -234,11 +239,11 @@ func (c *Client) Call(
 					break
 				}
 
-				result, err = transport.Call(ctx, req, callOptions)
+				resp, err = transport.Call(ctx, req, callOptions)
 			}
 		}
 
-		return result, err
+		return resp, err
 	}
 	for _, m := range c.middlewares {
 		call = m.Call(call)
@@ -260,14 +265,12 @@ func (c *Client) CallNoCodec(
 	// Add metadata to the context.
 	ctx, _ = metadata.WithOutgoing(ctx)
 
-	transport, err := c.transportForReq(ctx, req, callOptions)
-	if err != nil {
-		return err
-	}
-
 	// Wrap middlewares
 	call := func(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) error {
-		err := transport.CallNoCodec(ctx, req, result, opts)
+		transport, err := c.transportForReq(ctx, req, callOptions)
+		if err == nil {
+			err = transport.CallNoCodec(ctx, req, result, opts)
+		}
 
 		// Retry logic.
 		if err != nil && callOptions.Retry != nil && callOptions.Retries > 0 {
@@ -280,7 +283,10 @@ func (c *Client) CallNoCodec(
 					break
 				}
 
-				err = transport.CallNoCodec(ctx, req, result, opts)
+				transport, err = c.transportForReq(ctx, req, callOptions)
+				if err == nil {
+					err = transport.CallNoCodec(ctx, req, result, opts)
+				}
 			}
 		}
 

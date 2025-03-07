@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/go-orb/go-orb/config/source/cli"
+	"github.com/go-orb/go-orb/cli"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -12,8 +12,8 @@ func TestStringFlag(t *testing.T) {
 	flag := cli.NewFlag(
 		"string",
 		"",
-		cli.ConfigPathSlice([]string{"registry", "string"}),
-		cli.Usage("demo String flag"),
+		cli.FlagConfigPaths(cli.FlagConfigPath{Path: []string{"registry", "string"}}),
+		cli.FlagUsage("demo String flag"),
 	)
 
 	// Initial value of flag must be nil
@@ -33,8 +33,8 @@ func TestIntFlag(t *testing.T) {
 	flag := cli.NewFlag(
 		"int",
 		300,
-		cli.ConfigPathSlice([]string{"registry", "int"}),
-		cli.Usage("demo Int flag"),
+		cli.FlagConfigPaths(cli.FlagConfigPath{Path: []string{"registry", "int"}}),
+		cli.FlagUsage("demo Int flag"),
 	)
 
 	// Initial value of flag must be nil
@@ -54,8 +54,8 @@ func TestStringSliceFlag(t *testing.T) {
 	flag := cli.NewFlag(
 		"stringslice",
 		[]string{"1", "2"},
-		cli.ConfigPathSlice([]string{"registry", "stringslice"}),
-		cli.Usage("demo StringSlice flag"),
+		cli.FlagConfigPaths(cli.FlagConfigPath{Path: []string{"registry", "stringslice"}}),
+		cli.FlagUsage("demo StringSlice flag"),
 	)
 
 	// Initial value of flag must be nil
