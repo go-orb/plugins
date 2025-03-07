@@ -263,6 +263,10 @@ func (s *Server) Address() string {
 
 // Transport returns the client transport to use.
 func (s *Server) Transport() string {
+	if !s.config.Insecure {
+		return "grpcs"
+	}
+
 	return "grpc"
 }
 
@@ -323,8 +327,11 @@ func (s *Server) listen() error {
 	}
 
 	var tlsConfig *tls.Config
+
 	if s.config.TLS != nil && s.config.TLS.Config != nil {
+		s.logger.Debug("TLS config found", "config", s.config.TLS)
 		tlsConfig = s.config.TLS.Config
+		tlsConfig.NextProtos = []string{"h2"}
 	}
 
 	lis, err := mnet.Listen("tcp", s.config.Address, tlsConfig)

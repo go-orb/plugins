@@ -21,6 +21,15 @@ func init() {
 
 // NewTransport creates a new https transport for the orb client.
 func NewTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, error) {
+	tlsConfig := &tls.Config{
+		//nolint:gosec
+		InsecureSkipVerify: true,
+	}
+
+	if cfg.TLSConfig != nil {
+		tlsConfig = cfg.TLSConfig
+	}
+
 	return basehttp.NewTransport(
 		Name,
 		logger,
@@ -34,10 +43,7 @@ func NewTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, error)
 					MaxStreamReceiveWindow:     3 * (1 << 20),   // 3 MB
 					MaxConnectionReceiveWindow: 4.5 * (1 << 20), // 4.5 MB
 				},
-				TLSClientConfig: &tls.Config{
-					//nolint:gosec
-					InsecureSkipVerify: true,
-				},
+				TLSClientConfig: tlsConfig,
 			},
 		},
 	)

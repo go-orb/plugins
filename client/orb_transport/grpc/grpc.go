@@ -47,6 +47,7 @@ const Name = "grpc"
 
 func init() {
 	orb.RegisterTransport(Name, NewTransport)
+	orb.RegisterTransport("grpcs", NewTransport)
 }
 
 // Transport is a go-orb/plugins/client/orb compatible transport.
@@ -57,12 +58,14 @@ type Transport struct {
 
 // Start starts the transport.
 func (t *Transport) Start() error {
-	codec, err := codecs.GetMime("application/json")
-	if err != nil {
-		return err
-	}
+	if encoding.GetCodec("json") == nil {
+		codec, err := codecs.GetMime("application/json")
+		if err != nil {
+			return err
+		}
 
-	encoding.RegisterCodec(&codecProxy{codec: codec})
+		encoding.RegisterCodec(&codecProxy{codec: codec})
+	}
 
 	return nil
 }
@@ -120,6 +123,9 @@ func (t *Transport) RequestNoCodec(ctx context.Context, req *client.Req[any, any
 
 			if tlsConfig != nil {
 				gopts = append(gopts, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)))
+			} else if node.Transport == "grpcs" {
+				creds := credentials.NewTLS(&tls.Config{InsecureSkipVerify: true, NextProtos: []string{"h2"}}) //nolint:gosec
+				gopts = append(gopts, grpc.WithTransportCredentials(creds))
 			} else {
 				gopts = append(gopts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 			}

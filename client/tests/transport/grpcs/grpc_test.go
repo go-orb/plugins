@@ -9,14 +9,14 @@ import (
 	"github.com/go-orb/plugins/client/tests"
 	"github.com/stretchr/testify/suite"
 
-	_ "github.com/go-orb/plugins/client/orb_transport/grpc"
+	o "github.com/go-orb/plugins/client/orb_transport/grpc"
 )
 
 func newSuite() *tests.TestSuite {
 	_, filename, _, _ := runtime.Caller(0)
 	pluginsRoot := filepath.Join(filepath.Dir(filename), "../../../../")
 
-	s := tests.NewSuite(pluginsRoot, []string{"grpcs"})
+	s := tests.NewSuite(pluginsRoot, []string{o.Name})
 	// s.Debug = true
 	return s
 }

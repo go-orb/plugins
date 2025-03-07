@@ -13,6 +13,11 @@ service:
         insecure: true
         reflection: false
 
+      - name: grpcs
+        plugin: grpc
+        insecure: false
+        reflection: false
+
       - name: http
         plugin: http
         insecure: true
