@@ -124,7 +124,7 @@ func (c *Client) ResolveService(
 }
 
 // NeedsCodec returns whetever the underlying transport requires a codec to translate the communication with the server.
-func (c *Client) NeedsCodec(ctx context.Context, req *client.Request[any, any], opts ...client.CallOption) bool {
+func (c *Client) NeedsCodec(ctx context.Context, req *client.Req[any, any], opts ...client.CallOption) bool {
 	co := c.makeOptions(opts...)
 
 	transport, err := c.transportForReq(ctx, req, co)
@@ -163,7 +163,7 @@ func (c *Client) makeOptions(opts ...client.CallOption) *client.CallOptions {
 	return co
 }
 
-func (c *Client) transportForReq(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (Transport, error) {
+func (c *Client) transportForReq(ctx context.Context, req *client.Req[any, any], opts *client.CallOptions) (Transport, error) {
 	node, err := req.Node(ctx, opts)
 	if err != nil {
 		if errors.Is(err, registry.ErrNotFound) {
@@ -207,10 +207,10 @@ func (c *Client) transportForReq(ctx context.Context, req *client.Request[any, a
 	return transport, err
 }
 
-// Call does the actual call.
-func (c *Client) Call(
+// Request does the actual request.
+func (c *Client) Request(
 	ctx context.Context,
-	req *client.Request[any, any],
+	req *client.Req[any, any],
 	_ any,
 	opts ...client.CallOption,
 ) (*client.RawResponse, error) {
@@ -220,12 +220,12 @@ func (c *Client) Call(
 	ctx, _ = metadata.WithOutgoing(ctx)
 
 	// Wrap middlewares
-	call := func(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (*client.RawResponse, error) {
+	call := func(ctx context.Context, req *client.Req[any, any], opts *client.CallOptions) (*client.RawResponse, error) {
 		var resp *client.RawResponse
 
 		transport, err := c.transportForReq(ctx, req, callOptions)
 		if err == nil {
-			resp, err = transport.Call(ctx, req, opts)
+			resp, err = transport.Request(ctx, req, opts)
 		}
 
 		// Retry logic.
@@ -239,24 +239,24 @@ func (c *Client) Call(
 					break
 				}
 
-				resp, err = transport.Call(ctx, req, callOptions)
+				resp, err = transport.Request(ctx, req, callOptions)
 			}
 		}
 
 		return resp, err
 	}
 	for _, m := range c.middlewares {
-		call = m.Call(call)
+		call = m.Request(call)
 	}
 
 	// The actual call.
 	return call(ctx, req, callOptions)
 }
 
-// CallNoCodec does the actual call without codecs.
-func (c *Client) CallNoCodec(
+// RequestNoCodec does the actual call without codecs.
+func (c *Client) RequestNoCodec(
 	ctx context.Context,
-	req *client.Request[any, any],
+	req *client.Req[any, any],
 	result any,
 	opts ...client.CallOption,
 ) error {
@@ -266,10 +266,10 @@ func (c *Client) CallNoCodec(
 	ctx, _ = metadata.WithOutgoing(ctx)
 
 	// Wrap middlewares
-	call := func(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) error {
+	call := func(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
 		transport, err := c.transportForReq(ctx, req, callOptions)
 		if err == nil {
-			err = transport.CallNoCodec(ctx, req, result, opts)
+			err = transport.RequestNoCodec(ctx, req, result, opts)
 		}
 
 		// Retry logic.
@@ -285,7 +285,7 @@ func (c *Client) CallNoCodec(
 
 				transport, err = c.transportForReq(ctx, req, callOptions)
 				if err == nil {
-					err = transport.CallNoCodec(ctx, req, result, opts)
+					err = transport.RequestNoCodec(ctx, req, result, opts)
 				}
 			}
 		}
@@ -293,7 +293,7 @@ func (c *Client) CallNoCodec(
 		return err
 	}
 	for _, m := range c.middlewares {
-		call = m.CallNoCodec(call)
+		call = m.RequestNoCodec(call)
 	}
 
 	// The actual call.

@@ -42,11 +42,11 @@ func (m *Middleware) String() string {
 	return Name
 }
 
-// Call wraps the original Call method or other middlewares.
-func (m *Middleware) Call(
-	next client.MiddlewareCallHandler,
-) client.MiddlewareCallHandler {
-	return func(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions) (*client.RawResponse, error) {
+// Request wraps the original Request method or other middlewares.
+func (m *Middleware) Request(
+	next client.MiddlewareRequestHandler,
+) client.MiddlewareRequestHandler {
+	return func(ctx context.Context, req *client.Req[any, any], opts *client.CallOptions) (*client.RawResponse, error) {
 		node, err := req.Node(ctx, opts)
 		if err != nil {
 			return nil, orberrors.From(err)
@@ -83,11 +83,11 @@ func (m *Middleware) Call(
 	}
 }
 
-// CallNoCodec wraps the original CallNoCodec method or other middlewares.
-func (m *Middleware) CallNoCodec(
-	next client.MiddlewareCallNoCodecHandler,
-) client.MiddlewareCallNoCodecHandler {
-	return func(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) error {
+// RequestNoCodec wraps the original RequestNoCodec method or other middlewares.
+func (m *Middleware) RequestNoCodec(
+	next client.MiddlewareRequestNoCodecHandler,
+) client.MiddlewareRequestNoCodecHandler {
+	return func(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
 		node, err := req.Node(ctx, opts)
 		if err != nil {
 			// Call the client/next middleware on resolve errors, this might trigger the retry logic.

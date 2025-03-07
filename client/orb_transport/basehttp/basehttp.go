@@ -57,17 +57,17 @@ func (t *Transport) NeedsCodec() bool {
 	return true
 }
 
-// Call does the actual rpc call to the server.
-func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opts *client.CallOptions,
+// Request does the actual rpc call to the server.
+func (t *Transport) Request(ctx context.Context, req *client.Req[any, any], opts *client.CallOptions,
 ) (*client.RawResponse, error) {
-	codec, err := codecs.GetEncoder(opts.ContentType, req.Request())
+	codec, err := codecs.GetEncoder(opts.ContentType, req.Req())
 	if err != nil {
 		return nil, orberrors.ErrBadRequest.Wrap(err)
 	}
 
 	// Encode the request into a *bytes.Buffer{}.
 	buff := bytes.NewBuffer(nil)
-	if err := codec.NewEncoder(buff).Encode(req.Request()); err != nil {
+	if err := codec.NewEncoder(buff).Encode(req.Req()); err != nil {
 		return nil, orberrors.ErrBadRequest.Wrap(err)
 	}
 
@@ -84,7 +84,7 @@ func (t *Transport) Call(ctx context.Context, req *client.Request[any, any], opt
 	hReq, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
-		fmt.Sprintf("%s://%s/%s", t.scheme, node.Address, req.Endpoint()),
+		fmt.Sprintf("%s://%s%s", t.scheme, node.Address, req.Endpoint()),
 		buff,
 	)
 	if err != nil {
@@ -160,8 +160,8 @@ func (t *Transport) call2(hReq *http.Request, opts *client.CallOptions) (*client
 	return res, nil
 }
 
-// CallNoCodec is a noop for http based transports.
-func (t *Transport) CallNoCodec(_ context.Context, _ *client.Request[any, any], _ any, _ *client.CallOptions) error {
+// RequestNoCodec is a noop for http based transports.
+func (t *Transport) RequestNoCodec(_ context.Context, _ *client.Req[any, any], _ any, _ *client.CallOptions) error {
 	return orberrors.ErrInternalServerError
 }
 

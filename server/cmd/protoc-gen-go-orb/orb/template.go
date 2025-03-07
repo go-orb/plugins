@@ -25,6 +25,9 @@ import (
 {{- range .Services }}
 // Handler{{.Type}} is the name of a service, it's here to static type/reference.
 const Handler{{.Type}} = "{{.Name}}"
+{{- $service := .}}{{ range .Methods }}
+const Endpoint{{$service.Type}}{{.Name}} = "/{{$service.Name}}/{{.Name}}"
+{{- end }}
 {{- end }}
 
 {{- range .Services }}
@@ -39,9 +42,9 @@ func New{{.Type}}Client(client client.Client) *{{.Type}}Client {
 }
 
 {{- $service := .}}{{ range .Methods }}
-// {{.Name}} calls {{.Name}}.
+// {{.Name}} requests {{.Name}}.
 func (c *{{$service.Type}}Client) {{.Name}}(ctx context.Context, service string, req *{{.Request}}, opts ...client.CallOption) (*{{.Reply}}, error) {
-	return client.Call[{{.Reply}}](ctx, c.client, service, "{{$service.Name}}/{{.Name}}", req, opts...)
+	return client.Request[{{.Reply}}](ctx, c.client, service, Endpoint{{$service.Type}}{{.Name}}, req, opts...)
 }
 {{- end }}
 

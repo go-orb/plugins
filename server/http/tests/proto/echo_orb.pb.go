@@ -2,7 +2,7 @@
 //
 // version:
 // - protoc-gen-go-orb        v0.0.1
-// - protoc                   v5.28.0
+// - protoc                   v5.29.2
 //
 // Proto source: echo.proto
 
@@ -20,6 +20,7 @@ import (
 
 // HandlerStreams is the name of a service, it's here to static type/reference.
 const HandlerStreams = "echo.Streams"
+const EndpointStreamsCall = "/echo.Streams/Call"
 
 // StreamsClient is the client for echo.Streams
 type StreamsClient struct {
@@ -31,9 +32,9 @@ func NewStreamsClient(client client.Client) *StreamsClient {
 	return &StreamsClient{client: client}
 }
 
-// Call calls Call.
+// Call requests Call.
 func (c *StreamsClient) Call(ctx context.Context, service string, req *CallRequest, opts ...client.CallOption) (*CallResponse, error) {
-	return client.Call[CallResponse](ctx, c.client, service, "echo.Streams/Call", req, opts...)
+	return client.Request[CallResponse](ctx, c.client, service, EndpointStreamsCall, req, opts...)
 }
 
 // StreamsHandler is the Handler for echo.Streams

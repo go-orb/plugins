@@ -24,6 +24,8 @@ import (
 
 // HandlerStreams is the name of a service, it's here to static type/reference.
 const HandlerStreams = "echo.Streams"
+const EndpointStreamsCall = "/echo.Streams/Call"
+const EndpointStreamsAuthorizedCall = "/echo.Streams/AuthorizedCall"
 
 // StreamsClient is the client for echo.Streams
 type StreamsClient struct {
@@ -35,14 +37,14 @@ func NewStreamsClient(client client.Client) *StreamsClient {
 	return &StreamsClient{client: client}
 }
 
-// Call calls Call.
+// Call requests Call.
 func (c *StreamsClient) Call(ctx context.Context, service string, req *CallRequest, opts ...client.CallOption) (*CallResponse, error) {
-	return client.Call[CallResponse](ctx, c.client, service, "echo.Streams/Call", req, opts...)
+	return client.Request[CallResponse](ctx, c.client, service, EndpointStreamsCall, req, opts...)
 }
 
-// AuthorizedCall calls AuthorizedCall.
+// AuthorizedCall requests AuthorizedCall.
 func (c *StreamsClient) AuthorizedCall(ctx context.Context, service string, req *CallRequest, opts ...client.CallOption) (*CallResponse, error) {
-	return client.Call[CallResponse](ctx, c.client, service, "echo.Streams/AuthorizedCall", req, opts...)
+	return client.Request[CallResponse](ctx, c.client, service, EndpointStreamsAuthorizedCall, req, opts...)
 }
 
 // StreamsHandler is the Handler for echo.Streams

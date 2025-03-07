@@ -78,13 +78,13 @@ func (t *Transport) NeedsCodec() bool {
 	return false
 }
 
-// Call is a noop for grpc.
-func (t *Transport) Call(_ context.Context, _ *client.Request[any, any], _ *client.CallOptions) (*client.RawResponse, error) {
+// Request is a noop for grpc.
+func (t *Transport) Request(_ context.Context, _ *client.Req[any, any], _ *client.CallOptions) (*client.RawResponse, error) {
 	return nil, orberrors.ErrInternalServerError
 }
 
-// CallNoCodec does the actual rpc call to the server.
-func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) error {
+// RequestNoCodec does the actual rpc request to the server.
+func (t *Transport) RequestNoCodec(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
 	node, err := req.Node(ctx, opts)
 	if err != nil {
 		return orberrors.From(err)
@@ -112,7 +112,7 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 	defer cancel()
 
 	mdResult := &message.Response{}
-	if err := conn.Invoke(ctx, "/"+req.Endpoint(), &t.encoder, req.Request(), mdResult); err != nil {
+	if err := conn.Invoke(ctx, req.Endpoint(), &t.encoder, req.Req(), mdResult); err != nil {
 		orbError := orberrors.HTTP(int(drpcerr.Code(err))) //nolint:gosec
 		orbError = orbError.Wrap(err)
 

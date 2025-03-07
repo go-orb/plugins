@@ -85,8 +85,8 @@ func (t *Transport) NeedsCodec() bool {
 	return false
 }
 
-// Call is a noop for grpc.
-func (t *Transport) Call(_ context.Context, _ *client.Request[any, any], _ *client.CallOptions) (*client.RawResponse, error) {
+// Request is a noop for grpc.
+func (t *Transport) Request(_ context.Context, _ *client.Req[any, any], _ *client.CallOptions) (*client.RawResponse, error) {
 	return nil, orberrors.ErrInternalServerError
 }
 
@@ -107,8 +107,8 @@ func toOrbError(err error) error {
 	return orbE.Wrap(gErr.Err())
 }
 
-// CallNoCodec does the actual rpc call to the server.
-func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, any], result any, opts *client.CallOptions) error {
+// RequestNoCodec does the actual rpc request to the server.
+func (t *Transport) RequestNoCodec(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
 	node, err := req.Node(ctx, opts)
 	if err != nil {
 		return orberrors.From(err)
@@ -161,7 +161,7 @@ func (t *Transport) CallNoCodec(ctx context.Context, req *client.Request[any, an
 		callOpts = append(callOpts, grpc.CallContentSubtype("json"))
 	}
 
-	err = conn.Invoke(ctx, "/"+req.Endpoint(), req.Request(), result, callOpts...)
+	err = conn.Invoke(ctx, req.Endpoint(), req.Req(), result, callOpts...)
 	if err != nil {
 		_ = conn.Close() //nolint:errcheck
 		return toOrbError(err)

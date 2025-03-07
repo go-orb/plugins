@@ -38,7 +38,7 @@ var (
 	DefaultRequests = []TestRequest{
 		{
 			Name:     "32byte",
-			Endpoint: "echo.Streams/Call",
+			Endpoint: proto.EndpointStreamsCall,
 			Request: &proto.CallRequest{
 				Name: "32byte",
 			},
@@ -49,7 +49,7 @@ var (
 		},
 		// {
 		// 	Name:        "raw-json",
-		// 	Endpoint:    "echo.Streams/Call",
+		// 	Endpoint:    proto.EndpointStreamsCall,
 		// 	ContentType: "application/json",
 		// 	Request:     `{"name": "Alex"}`,
 		// 	Response: map[string]any{
@@ -58,7 +58,7 @@ var (
 		// },
 		{
 			Name:     "default codec with URL",
-			Endpoint: "echo.Streams/Call",
+			Endpoint: proto.EndpointStreamsCall,
 			Request: &proto.CallRequest{
 				Name: "Alex",
 			},
@@ -69,7 +69,7 @@ var (
 		},
 		{
 			Name:     "default codec",
-			Endpoint: "echo.Streams/Call",
+			Endpoint: proto.EndpointStreamsCall,
 			Request: &proto.CallRequest{
 				Name: "Alex",
 			},
@@ -79,7 +79,7 @@ var (
 		},
 		{
 			Name:        "proto",
-			Endpoint:    "echo.Streams/Call",
+			Endpoint:    proto.EndpointStreamsCall,
 			ContentType: "application/x-protobuf",
 			Request: &proto.CallRequest{
 				Name: "Alex",
@@ -91,7 +91,7 @@ var (
 		// Not supported in dRPC, have to fix it.
 		// {
 		// 	Name:        "json",
-		// 	Endpoint:    "echo.Streams/Call",
+		// 	Endpoint:    proto.EndpointStreamsCall,
 		// 	ContentType: "application/json",
 		// 	Request: map[string]any{
 		// 		"name": "Alex",
@@ -102,7 +102,7 @@ var (
 		// },
 		{
 			Name:     "error request",
-			Endpoint: "echo.Streams/Call",
+			Endpoint: proto.EndpointStreamsCall,
 			Error:    true,
 			Request: &proto.CallRequest{
 				Name: "error",
@@ -279,7 +279,7 @@ func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest, clientWire 
 	}
 
 	if req.ContentType == "" || req.ContentType == "application/x-protobuf" {
-		rsp, err := client.Call[proto.CallResponse](
+		rsp, err := client.Request[proto.CallResponse](
 			ctx,
 			clientWire,
 			req.Service,
@@ -298,7 +298,7 @@ func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest, clientWire 
 		return
 	}
 
-	rsp, err := client.Call[map[string]any](
+	rsp, err := client.Request[map[string]any](
 		ctx,
 		clientWire,
 		req.Service,
