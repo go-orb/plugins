@@ -11,10 +11,12 @@ import (
 	"log/slog"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/encoding"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
+	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
@@ -25,6 +27,27 @@ import (
 	mtls "github.com/go-orb/go-orb/util/tls"
 	"github.com/google/uuid"
 )
+
+type codecProxy struct {
+	codec codecs.Marshaler
+}
+
+// Marshal returns the wire format of v.
+func (c *codecProxy) Marshal(v any) ([]byte, error) {
+	return c.codec.Encode(v)
+}
+
+// Unmarshal parses the wire format into v.
+func (c *codecProxy) Unmarshal(data []byte, v any) error {
+	return c.codec.Decode(data, v)
+}
+
+// Name returns the name of the Codec implementation. The returned string
+// will be used as part of content type in transmission.  The result must be
+// static; the result cannot change between calls.
+func (c *codecProxy) Name() string {
+	return c.codec.String()
+}
 
 // Interface guard.
 var _ server.Entrypoint = (*Server)(nil)
@@ -146,6 +169,13 @@ func (s *Server) Start(_ context.Context) error {
 	if s.started {
 		return nil
 	}
+
+	codec, err := codecs.GetMime("application/json")
+	if err != nil {
+		return err
+	}
+
+	encoding.RegisterCodec(&codecProxy{codec: codec})
 
 	// Register handlers.
 	for _, f := range s.config.OptHandlers {
