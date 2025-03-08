@@ -32,6 +32,74 @@ type record struct {
 	Endpoints []*registry.Endpoint
 }
 
+type dataStore struct {
+	config Config
+
+	logger log.Logger
+
+	Records  map[string]map[string]*record
+	Watchers map[string]*watcher
+
+	startOnce sync.Once
+	sync.RWMutex
+}
+
+func (d *dataStore) Start(ctx context.Context) {
+	d.startOnce.Do(func() {
+		go d.ttlPrune(ctx)
+	})
+}
+
+func (d *dataStore) ttlPrune(ctx context.Context) {
+	prune := time.NewTicker(d.config.TTLPruneTime)
+	defer prune.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-prune.C:
+			d.Lock()
+			for name, records := range d.Records {
+				for version, record := range records {
+					for id, n := range record.Nodes {
+						if n.TTL != 0 && time.Since(n.LastSeen) > n.TTL {
+							d.logger.Debug("Registry TTL expired for node of service", "node", n.ID, "service", name)
+							delete(d.Records[name][version].Nodes, id)
+						}
+					}
+				}
+			}
+			d.Unlock()
+		}
+	}
+}
+
+func (d *dataStore) SendEvent(r *registry.Result) {
+	d.RLock()
+	watchers := make([]*watcher, 0, len(d.Watchers))
+
+	for _, w := range d.Watchers {
+		watchers = append(watchers, w)
+	}
+	d.RUnlock()
+
+	for _, w := range watchers {
+		select {
+		case <-w.exit:
+			d.Lock()
+			delete(d.Watchers, w.id)
+			d.Unlock()
+		default:
+			timeout := time.After(d.config.WatcherSendTimeout)
+			select {
+			case w.res <- r:
+			case <-timeout:
+			}
+		}
+	}
+}
+
 // Registry is the memory registry for go-orb.
 type Registry struct {
 	serviceName    string
@@ -43,11 +111,7 @@ type Registry struct {
 
 	logger log.Logger
 
-	records  map[string]map[string]*record
-	watchers map[string]*watcher
-
-	startOnce sync.Once
-	sync.RWMutex
+	dataStore *dataStore
 }
 
 // ServiceName returns the configured name of this service.
@@ -73,9 +137,7 @@ func (c *Registry) NodeID() string {
 
 // Start starts the registry.
 func (c *Registry) Start(ctx context.Context) error {
-	c.startOnce.Do(func() {
-		go c.ttlPrune(ctx)
-	})
+	c.dataStore.Start(ctx)
 
 	return nil
 }
@@ -95,83 +157,33 @@ func (c *Registry) Type() string {
 	return registry.ComponentType
 }
 
-func (c *Registry) sendEvent(r *registry.Result) {
-	c.RLock()
-	watchers := make([]*watcher, 0, len(c.watchers))
-
-	for _, w := range c.watchers {
-		watchers = append(watchers, w)
-	}
-	c.RUnlock()
-
-	for _, w := range watchers {
-		select {
-		case <-w.exit:
-			c.Lock()
-			delete(c.watchers, w.id)
-			c.Unlock()
-		default:
-			timeout := time.After(c.config.WatcherSendTimeout)
-			select {
-			case w.res <- r:
-			case <-timeout:
-			}
-		}
-	}
-}
-
-func (c *Registry) ttlPrune(ctx context.Context) {
-	prune := time.NewTicker(c.config.TTLPruneTime)
-	defer prune.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-prune.C:
-			c.Lock()
-			for name, records := range c.records {
-				for version, record := range records {
-					for id, n := range record.Nodes {
-						if n.TTL != 0 && time.Since(n.LastSeen) > n.TTL {
-							c.logger.Debug("Registry TTL expired for node of service", "node", n.ID, "service", name)
-							delete(c.records[name][version].Nodes, id)
-						}
-					}
-				}
-			}
-			c.Unlock()
-		}
-	}
-}
-
 // Deregister deregisters a service within the registry.
 func (c *Registry) Deregister(s *registry.Service, _ ...registry.DeregisterOption) error {
-	c.Lock()
-	defer c.Unlock()
+	c.dataStore.Lock()
+	defer c.dataStore.Unlock()
 
 	//nolint:nestif
-	if _, ok := c.records[s.Name]; ok {
-		if _, ok := c.records[s.Name][s.Version]; ok {
+	if _, ok := c.dataStore.Records[s.Name]; ok {
+		if _, ok := c.dataStore.Records[s.Name][s.Version]; ok {
 			for _, n := range s.Nodes {
-				if _, ok := c.records[s.Name][s.Version].Nodes[n.ID]; ok {
+				if _, ok := c.dataStore.Records[s.Name][s.Version].Nodes[n.ID]; ok {
 					c.logger.Debug("Registry removed node from service", "name", s.Name, "version", s.Version)
-					delete(c.records[s.Name][s.Version].Nodes, n.ID)
+					delete(c.dataStore.Records[s.Name][s.Version].Nodes, n.ID)
 				}
 			}
 
-			if len(c.records[s.Name][s.Version].Nodes) == 0 {
-				delete(c.records[s.Name], s.Version)
+			if len(c.dataStore.Records[s.Name][s.Version].Nodes) == 0 {
+				delete(c.dataStore.Records[s.Name], s.Version)
 				c.logger.Debug("Registry removed service", "name", s.Name, "version", s.Version)
 			}
 		}
 
-		if len(c.records[s.Name]) == 0 {
-			delete(c.records, s.Name)
+		if len(c.dataStore.Records[s.Name]) == 0 {
+			delete(c.dataStore.Records, s.Name)
 			c.logger.Debug("Registry removed service", "name", s.Name)
 		}
 
-		go c.sendEvent(&registry.Result{Action: "delete", Service: s})
+		go c.dataStore.SendEvent(&registry.Result{Action: "delete", Service: s})
 	}
 
 	return nil
@@ -179,8 +191,8 @@ func (c *Registry) Deregister(s *registry.Service, _ ...registry.DeregisterOptio
 
 // Register registers a service within the registry.
 func (c *Registry) Register(service *registry.Service, opts ...registry.RegisterOption) error {
-	c.Lock()
-	defer c.Unlock()
+	c.dataStore.Lock()
+	defer c.dataStore.Unlock()
 
 	var options registry.RegisterOptions
 	for _, o := range opts {
@@ -189,15 +201,15 @@ func (c *Registry) Register(service *registry.Service, opts ...registry.Register
 
 	r := serviceToRecord(service, options.TTL)
 
-	if _, ok := c.records[service.Name]; !ok {
-		c.records[service.Name] = make(map[string]*record)
+	if _, ok := c.dataStore.Records[service.Name]; !ok {
+		c.dataStore.Records[service.Name] = make(map[string]*record)
 	}
 
-	if _, ok := c.records[service.Name][service.Version]; !ok {
-		c.records[service.Name][service.Version] = r
+	if _, ok := c.dataStore.Records[service.Name][service.Version]; !ok {
+		c.dataStore.Records[service.Name][service.Version] = r
 		c.logger.Debug("Registry added new service", "name", service.Name, "version", service.Version)
 
-		go c.sendEvent(&registry.Result{Action: "update", Service: service})
+		go c.dataStore.SendEvent(&registry.Result{Action: "update", Service: service})
 
 		return nil
 	}
@@ -205,7 +217,7 @@ func (c *Registry) Register(service *registry.Service, opts ...registry.Register
 	addedNodes := false
 
 	for _, n := range service.Nodes {
-		if _, ok := c.records[service.Name][service.Version].Nodes[n.ID]; !ok {
+		if _, ok := c.dataStore.Records[service.Name][service.Version].Nodes[n.ID]; !ok {
 			addedNodes = true
 			metadata := make(map[string]string)
 
@@ -213,7 +225,7 @@ func (c *Registry) Register(service *registry.Service, opts ...registry.Register
 				metadata[k] = v
 			}
 
-			c.records[service.Name][service.Version].Nodes[n.ID] = &node{
+			c.dataStore.Records[service.Name][service.Version].Nodes[n.ID] = &node{
 				Node: &registry.Node{
 					ID:       n.ID,
 					Address:  n.Address,
@@ -227,7 +239,7 @@ func (c *Registry) Register(service *registry.Service, opts ...registry.Register
 
 	if addedNodes {
 		c.logger.Debug("Registry added new node to service", "name", service.Name, "version", service.Version)
-		go c.sendEvent(&registry.Result{Action: "update", Service: service})
+		go c.dataStore.SendEvent(&registry.Result{Action: "update", Service: service})
 
 		return nil
 	}
@@ -235,8 +247,8 @@ func (c *Registry) Register(service *registry.Service, opts ...registry.Register
 	// refresh TTL and timestamp
 	for _, n := range service.Nodes {
 		c.logger.Debug("Updated registration for service", "name", service.Name, "version", service.Version)
-		c.records[service.Name][service.Version].Nodes[n.ID].TTL = options.TTL
-		c.records[service.Name][service.Version].Nodes[n.ID].LastSeen = time.Now()
+		c.dataStore.Records[service.Name][service.Version].Nodes[n.ID].TTL = options.TTL
+		c.dataStore.Records[service.Name][service.Version].Nodes[n.ID].LastSeen = time.Now()
 	}
 
 	return nil
@@ -244,15 +256,15 @@ func (c *Registry) Register(service *registry.Service, opts ...registry.Register
 
 // GetService returns a service from the registry.
 func (c *Registry) GetService(name string, _ ...registry.GetOption) ([]*registry.Service, error) {
-	c.RLock()
-	defer c.RUnlock()
+	c.dataStore.RLock()
+	defer c.dataStore.RUnlock()
 
-	records, ok := c.records[name]
+	records, ok := c.dataStore.Records[name]
 	if !ok {
 		return nil, registry.ErrNotFound
 	}
 
-	services := make([]*registry.Service, len(c.records[name]))
+	services := make([]*registry.Service, len(c.dataStore.Records[name]))
 	i := 0
 
 	for _, record := range records {
@@ -265,12 +277,12 @@ func (c *Registry) GetService(name string, _ ...registry.GetOption) ([]*registry
 
 // ListServices lists services within the registry.
 func (c *Registry) ListServices(_ ...registry.ListOption) ([]*registry.Service, error) {
-	c.RLock()
-	defer c.RUnlock()
+	c.dataStore.RLock()
+	defer c.dataStore.RUnlock()
 
 	var services []*registry.Service
 
-	for _, records := range c.records {
+	for _, records := range c.dataStore.Records {
 		for _, record := range records {
 			services = append(services, recordToService(record))
 		}
@@ -293,9 +305,9 @@ func (c *Registry) Watch(opts ...registry.WatchOption) (registry.Watcher, error)
 		wo:   wo,
 	}
 
-	c.Lock()
-	c.watchers[w.id] = w
-	c.Unlock()
+	c.dataStore.Lock()
+	c.dataStore.Watchers[w.id] = w
+	c.dataStore.Unlock()
 
 	return w, nil
 }
@@ -317,27 +329,32 @@ func Provide(
 		return registry.Type{}, err
 	}
 
-	reg := Instance(string(name), string(version), cfg, logger)
+	reg := New(string(name), string(version), cfg, logger)
 
 	return registry.Type{Registry: reg}, nil
 }
 
 //nolint:gochecknoglobals
-var instance *Registry
+var store *dataStore
 
-// Instance creates a new memory registry or returns the existing one.
-func Instance(serviceName string, serviceVersion string, cfg Config, logger log.Logger) *Registry {
-	if instance != nil {
-		return instance
+// New creates a new memory registry.
+func New(serviceName string, serviceVersion string, cfg Config, logger log.Logger) *Registry {
+	if store == nil {
+		store = &dataStore{
+			config:   cfg,
+			logger:   logger,
+			Records:  make(map[string]map[string]*record),
+			Watchers: make(map[string]*watcher),
+		}
 	}
 
-	instance = &Registry{
+	instance := &Registry{
 		serviceName:    serviceName,
 		serviceVersion: serviceVersion,
 		config:         cfg,
 		logger:         logger,
-		records:        make(map[string]map[string]*record),
-		watchers:       make(map[string]*watcher),
+
+		dataStore: store,
 	}
 
 	return instance
