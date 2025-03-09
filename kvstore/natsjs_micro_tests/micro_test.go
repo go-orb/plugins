@@ -3,6 +3,7 @@ package natsjsmicrotests
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"testing"
 
 	"github.com/nats-io/nats-server/v2/server"
@@ -410,17 +411,19 @@ func BenchmarkOrbList(b *testing.B) {
 	defer bm.natsServer.Shutdown()
 
 	// Pre-populate data
-	for i := 0; i < 1000; i++ {
-		key := fmt.Sprintf("key-%d", i)
-		value := fmt.Sprintf("value-%d", i)
-		if err := bm.orbStore.Set(key, "", "", []byte(value)); err != nil {
-			b.Fatal(err)
+	for t := 0; t < 100; t++ {
+		for i := 0; i < 1000; i++ {
+			key := fmt.Sprintf("key-%d", i)
+			value := fmt.Sprintf("value-%d", i)
+			if err := bm.orbStore.Set(key, "", fmt.Sprintf("table-%d", t), []byte(value)); err != nil {
+				b.Fatal(err)
+			}
 		}
 	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := bm.orbStore.Keys("", "")
+		_, err := bm.orbStore.Keys("", fmt.Sprintf("table-%d", rand.Intn(100)))
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -433,14 +436,16 @@ func BenchmarkMicroList(b *testing.B) {
 	defer bm.natsServer.Shutdown()
 
 	// Pre-populate data
-	for i := 0; i < 1000; i++ {
-		key := fmt.Sprintf("key-%d", i)
-		value := fmt.Sprintf("value-%d", i)
-		if err := bm.microStore.Write(&store.Record{
-			Key:   key,
-			Value: []byte(value),
-		}); err != nil {
-			b.Fatal(err)
+	for t := 0; t < 100; t++ {
+		for i := 0; i < 1000; i++ {
+			key := fmt.Sprintf("key-%d", i)
+			value := fmt.Sprintf("value-%d", i)
+			if err := bm.microStore.Write(&store.Record{
+				Key:   key,
+				Value: []byte(value),
+			}, store.WriteTo("default", fmt.Sprintf("table-%d", t))); err != nil {
+				b.Fatal(err)
+			}
 		}
 	}
 
@@ -459,17 +464,19 @@ func BenchmarkOrbListPagination(b *testing.B) {
 	defer bm.natsServer.Shutdown()
 
 	// Pre-populate data
-	for i := 0; i < 1000; i++ {
-		key := fmt.Sprintf("key-%d", i)
-		value := fmt.Sprintf("value-%d", i)
-		if err := bm.orbStore.Set(key, "", "", []byte(value)); err != nil {
-			b.Fatal(err)
+	for t := 0; t < 100; t++ {
+		for i := 0; i < 1000; i++ {
+			key := fmt.Sprintf("key-%d", i)
+			value := fmt.Sprintf("value-%d", i)
+			if err := bm.orbStore.Set(key, "", fmt.Sprintf("table-%d", t), []byte(value)); err != nil {
+				b.Fatal(err)
+			}
 		}
 	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := bm.orbStore.Keys("", "", kvstore.KeysLimit(100), kvstore.KeysOffset(100))
+		_, err := bm.orbStore.Keys("", fmt.Sprintf("table-%d", rand.Intn(100)), kvstore.KeysLimit(100), kvstore.KeysOffset(100))
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -482,14 +489,16 @@ func BenchmarkMicroListPagination(b *testing.B) {
 	defer bm.natsServer.Shutdown()
 
 	// Pre-populate data
-	for i := 0; i < 1000; i++ {
-		key := fmt.Sprintf("key-%d", i)
-		value := fmt.Sprintf("value-%d", i)
-		if err := bm.microStore.Write(&store.Record{
-			Key:   key,
-			Value: []byte(value),
-		}); err != nil {
-			b.Fatal(err)
+	for t := 0; t < 100; t++ {
+		for i := 0; i < 1000; i++ {
+			key := fmt.Sprintf("key-%d", i)
+			value := fmt.Sprintf("value-%d", i)
+			if err := bm.microStore.Write(&store.Record{
+				Key:   key,
+				Value: []byte(value),
+			}, store.WriteTo("default", fmt.Sprintf("table-%d", i))); err != nil {
+				b.Fatal(err)
+			}
 		}
 	}
 
