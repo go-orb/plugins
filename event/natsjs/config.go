@@ -14,8 +14,13 @@ const Name = "natsjs"
 //
 //nolint:gochecknoglobals
 var (
-	DefaultCodec         = "application/x-protobuf"
 	DefaultMaxConcurrent = 256
+
+	// DefaultSyncPublish allows using a synchronous publishing instead of the default asynchronous.
+	DefaultSyncPublish = false
+
+	// DefaultDisableDurableStreams configures whether to disable durable streams.
+	DefaultDisableDurableStreams = false
 )
 
 func init() {
@@ -263,13 +268,25 @@ type Config struct {
 
 	NatsOptions `yaml:",inline"`
 
-	// Codec configures the codec to use for encoding and decoding.
-	// Default: json
-	Codec string `json:"codec"               yaml:"codec"`
+	// RequestCodec configures the codec to use for encoding and decoding.
+	// Default: application/x-protobuf
+	RequestCodec string `json:"requestCodec,omitempty"       yaml:"requestCodec,omitempty"`
+
+	// PublishCodec configures the codec to use for publishing.
+	// Default: application/json
+	PublishCodec string `json:"publishCodec,omitempty"       yaml:"publishCodec,omitempty"`
 
 	// MaxConcurrent configures the maximum number of concurrent workers.
 	// Default: 10
-	MaxConcurrent int `json:"maxConcurrent"       yaml:"maxConcurrent"`
+	MaxConcurrent int `json:"maxConcurrent,omitempty"       yaml:"maxConcurrent,omitempty"`
+
+	// SyncPublish configures whether to publish synchronously.
+	// Default: false
+	SyncPublish bool `json:"syncPublish,omitempty"       yaml:"syncPublish,omitempty"`
+
+	// DisableDurableStreams configures whether to disable durable streams.
+	// Default: false
+	DisableDurableStreams bool `json:"disableDurableStreams,omitempty"       yaml:"disableDurableStreams,omitempty"`
 }
 
 // ApplyOptions applies a set of options to the config.
@@ -549,12 +566,22 @@ func WithSkipHostLookup(skipHostLookup bool) event.Option {
 	}
 }
 
-// WithCodec sets the internal codec.
-func WithCodec(n string) event.Option {
+// WithRequestCodec sets the internal codec.
+func WithRequestCodec(n string) event.Option {
 	return func(c event.ConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.Codec = n
+			cfg.RequestCodec = n
+		}
+	}
+}
+
+// WithPublishCodec sets the internal codec.
+func WithPublishCodec(n string) event.Option {
+	return func(c event.ConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.PublishCodec = n
 		}
 	}
 }
@@ -565,6 +592,26 @@ func WithMaxConcurrent(n int) event.Option {
 		cfg, ok := c.(*Config)
 		if ok {
 			cfg.MaxConcurrent = n
+		}
+	}
+}
+
+// WithSyncPublish configures whether to publish synchronously.
+func WithSyncPublish(syncPublish bool) event.Option {
+	return func(c event.ConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.SyncPublish = syncPublish
+		}
+	}
+}
+
+// WithDisableDurableStreams configures whether to disable durable streams.
+func WithDisableDurableStreams(disableDurableStreams bool) event.Option {
+	return func(c event.ConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.DisableDurableStreams = disableDurableStreams
 		}
 	}
 }
@@ -589,8 +636,10 @@ func NewConfig(opts ...event.Option) (Config, error) {
 			FlusherTimeout:     nats.DefaultFlusherTimeout,
 		},
 
-		Codec:         DefaultCodec,
+		RequestCodec:  event.DefaultRequestContentType,
+		PublishCodec:  event.DefaultPublishContentType,
 		MaxConcurrent: DefaultMaxConcurrent,
+		SyncPublish:   DefaultSyncPublish,
 	}
 
 	cfg.ApplyOptions(opts...)

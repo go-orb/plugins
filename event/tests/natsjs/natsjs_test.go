@@ -23,7 +23,7 @@ import (
 	"github.com/go-orb/plugins/event/natsjs"
 )
 
-func createServer() (log.Logger, event.Handler, context.CancelFunc, error) {
+func createServer() (log.Logger, event.Client, context.CancelFunc, error) {
 	logger, err := log.New(log.WithLevel("DEBUG"))
 	if err != nil {
 		log.Error("while creating a logger", err)
@@ -33,7 +33,7 @@ func createServer() (log.Logger, event.Handler, context.CancelFunc, error) {
 	var (
 		started bool
 
-		handler event.Handler
+		handler event.Client
 	)
 
 	// start the NATS with JetStream server
@@ -50,7 +50,11 @@ func createServer() (log.Logger, event.Handler, context.CancelFunc, error) {
 			log.Error("failed to create config", err)
 		}
 
-		handler = natsjs.New("org.orb.testservice", cfg, logger)
+		handler, err = natsjs.New("org.orb.testservice", cfg, logger)
+		if err != nil {
+			return log.Logger{}, nil, func() {}, err
+		}
+
 		err = handler.Start(context.Background())
 		if err != nil {
 			time.Sleep(time.Second)
@@ -168,6 +172,54 @@ func BenchmarkRequestAuth(b *testing.B) {
 
 	s := tests.New(logger, handler)
 	s.BenchmarkRequestAuth(b)
+
+	cleanup()
+}
+
+func BenchmarkPublish(b *testing.B) {
+	b.StopTimer()
+
+	logger, handler, cleanup, err := createServer()
+	require.NoError(b, err, "while creating a server")
+
+	s := tests.New(logger, handler)
+	s.BenchmarkPublish(b)
+
+	cleanup()
+}
+
+func BenchmarkPublishLarge(b *testing.B) {
+	b.StopTimer()
+
+	logger, handler, cleanup, err := createServer()
+	require.NoError(b, err, "while creating a server")
+
+	s := tests.New(logger, handler)
+	s.BenchmarkPublishLarge(b)
+
+	cleanup()
+}
+
+func BenchmarkPublishMetadata(b *testing.B) {
+	b.StopTimer()
+
+	logger, handler, cleanup, err := createServer()
+	require.NoError(b, err, "while creating a server")
+
+	s := tests.New(logger, handler)
+	s.BenchmarkPublishMetadata(b)
+
+	cleanup()
+}
+
+func BenchmarkConsume(b *testing.B) {
+	b.StopTimer()
+
+	logger, handler, cleanup, err := createServer()
+	require.NoError(b, err, "while creating a server")
+
+	s := tests.New(logger, handler)
+	s.BenchmarkConsume(b)
 
 	cleanup()
 }
