@@ -50,7 +50,7 @@ type Server struct {
 }
 
 // Start will create the listeners and start the server on the entrypoint.
-func (s *Server) Start(_ context.Context) error {
+func (s *Server) Start(ctx context.Context) error {
 	if s.started {
 		return nil
 	}
@@ -83,7 +83,7 @@ func (s *Server) Start(_ context.Context) error {
 
 	s.logger.Info("dRPC server listening")
 
-	s.ctx, s.cancelFunc = context.WithCancel(context.Background())
+	s.ctx, s.cancelFunc = context.WithCancel(ctx)
 
 	go func() {
 		if err := s.server.Serve(s.ctx, listener); err != nil {

@@ -18,6 +18,7 @@ import (
 	grpc "google.golang.org/grpc"
 
 	mdrpc "github.com/go-orb/plugins/server/drpc"
+	memory "github.com/go-orb/plugins/server/memory"
 
 	mhttp "github.com/go-orb/plugins/server/http"
 )
@@ -58,11 +59,25 @@ type StreamsHandler interface {
 func registerStreamsDRPCHandler(srv *mdrpc.Server, handler StreamsHandler) error {
 	desc := DRPCStreamsDescription{}
 
-	// Register with DRPC.
-	r := srv.Router()
+	// Register with the server/drpc(.Mux).
+	err := srv.Router().Register(handler, desc)
+	if err != nil {
+		return err
+	}
+
+	// Add each endpoint name of this handler to the orb drpc server.
+	srv.AddEndpoint("/echo.Streams/Call")
+	srv.AddEndpoint("/echo.Streams/AuthorizedCall")
+
+	return nil
+}
+
+// registerStreamsMemoryHandler registers the service to an dRPC server.
+func registerStreamsMemoryHandler(srv *memory.Server, handler StreamsHandler) error {
+	desc := DRPCStreamsDescription{}
 
 	// Register with the server/drpc(.Mux).
-	err := r.Register(handler, desc)
+	err := srv.Router().Register(handler, desc)
 	if err != nil {
 		return err
 	}
@@ -91,6 +106,8 @@ func RegisterStreamsHandler(handler StreamsHandler) server.RegistrationFunc {
 			registerStreamsGRPCHandler(srv, handler)
 		case *mdrpc.Server:
 			registerStreamsDRPCHandler(srv, handler)
+		case *memory.Server:
+			registerStreamsMemoryHandler(srv, handler)
 		case *mhttp.Server:
 			registerStreamsHTTPHandler(srv, handler)
 		default:

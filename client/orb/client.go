@@ -5,8 +5,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
+	"time"
 
 	"log/slog"
 
@@ -100,15 +102,48 @@ func (c *Client) ResolveService(
 		return nil, client.ErrServiceArgumentEmpty
 	}
 
-	svc, err := c.registry.GetService(service)
+	// Try to resolve the service with retries
+	var services []*registry.Service
+	var err error
+
+	// Retry up to 3 times with a small delay between attempts
+	for retries := 0; retries < 1000; retries++ {
+		if _, err := client.ResolveMemoryServer(service); err == nil {
+			rNodes := make(client.NodeMap)
+			rNodes["memory"] = []*registry.Node{
+				{
+					ID:        "memory",
+					Address:   "",
+					Transport: "memory",
+				},
+			}
+
+			return rNodes, nil
+		}
+
+		services, err = c.registry.GetService(service)
+		if err == nil && len(services) > 0 {
+			c.logger.Debug("service resolution successful", "service", service)
+			break // Service found, exit retry loop
+		}
+
+		c.logger.Debug("service resolution failed, retrying", "service", service, "attempt", retries+1, "error", err)
+		time.Sleep(time.Duration(math.Pow(float64(retries+1), math.E)) * time.Millisecond * 100) // Increasing backoff
+	}
+
 	if err != nil {
+		c.logger.Debug("service resolution failed after retries", "service", service, "error", err)
 		return nil, err
+	}
+
+	if len(services) == 0 {
+		return nil, fmt.Errorf("no instances found for service: %s", service)
 	}
 
 	rNodes := make(client.NodeMap)
 
 	// Find nodes to query
-	for _, service := range svc {
+	for _, service := range services {
 		for _, node := range service.Nodes {
 			tNodes, ok := rNodes[node.Transport]
 			if !ok {

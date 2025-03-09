@@ -18,6 +18,7 @@ import (
 	{{ if .ServerGRPC }}grpc "google.golang.org/grpc"{{ end }}
 
 	{{ if .ServerDRPC }}mdrpc "github.com/go-orb/plugins/server/drpc"{{ end }}
+	{{ if .ServerDRPC }}memory "github.com/go-orb/plugins/server/memory"{{ end }}
 	{{ if .ServerHertz }}mhertz "github.com/go-orb/plugins/server/hertz"{{ end }}
 	{{ if .ServerHTTP }}mhttp "github.com/go-orb/plugins/server/http"{{ end }}
 )
@@ -61,11 +62,26 @@ type {{.Type}}Handler interface {
 func register{{.Type}}DRPCHandler(srv *mdrpc.Server, handler {{.Type}}Handler) error {
 	desc := DRPC{{.Type}}Description{}
 
-	// Register with DRPC.
-	r := srv.Router()
+	// Register with the server/drpc(.Mux).
+	err := srv.Router().Register(handler, desc)
+	if err != nil {
+		return err
+	}
+
+	// Add each endpoint name of this handler to the orb drpc server.
+	{{- $service := .}}{{ range .Methods}}
+	srv.AddEndpoint("{{.Path}}")
+	{{- end }}
+
+	return nil
+}
+
+// register{{.Type}}MemoryHandler registers the service to an dRPC server.
+func register{{.Type}}MemoryHandler(srv *memory.Server, handler {{.Type}}Handler) error {
+	desc := DRPC{{.Type}}Description{}
 
 	// Register with the server/drpc(.Mux).
-	err := r.Register(handler, desc)
+	err := srv.Router().Register(handler, desc)
 	if err != nil {
 		return err
 	}
@@ -115,6 +131,8 @@ func Register{{.Type}}Handler(handler {{.Type}}Handler) server.RegistrationFunc 
 		{{ if $.ServerDRPC }}
 		case *mdrpc.Server:
 			register{{.Type}}DRPCHandler(srv, handler)
+		case *memory.Server:
+			register{{.Type}}MemoryHandler(srv, handler)
 		{{- end -}}
 		{{ if $.ServerHertz }}
 		case *mhertz.Server:
