@@ -59,7 +59,7 @@ type Transport struct {
 // Start starts the transport.
 func (t *Transport) Start() error {
 	if encoding.GetCodec("json") == nil {
-		codec, err := codecs.GetMime("application/json")
+		codec, err := codecs.GetMime(codecs.MimeJSON)
 		if err != nil {
 			return err
 		}
@@ -164,7 +164,7 @@ func (t *Transport) RequestNoCodec(ctx context.Context, req *client.Req[any, any
 	resMeta := gmetadata.MD{}
 	callOpts := []grpc.CallOption{grpc.Header(&resMeta)}
 
-	if opts.ContentType == "application/json" {
+	if opts.ContentType == codecs.MimeJSON {
 		callOpts = append(callOpts, grpc.CallContentSubtype("json"))
 	}
 

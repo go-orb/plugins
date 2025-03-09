@@ -40,7 +40,7 @@ var testJSON = `{
 func testData(t *testing.T) map[string]any {
 	t.Helper()
 
-	codec, err := codecs.GetMime("application/json")
+	codec, err := codecs.GetMime(codecs.MimeJSON)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}

@@ -81,7 +81,7 @@ func (j *CodecJSON) Decodes(_ any) bool {
 // ContentTypes returns the content types the marshaler can handle.
 func (j *CodecJSON) ContentTypes() []string {
 	return []string{
-		"application/json",
+		codecs.MimeJSON,
 	}
 }
 

@@ -170,7 +170,7 @@ func (s *Server) Start(_ context.Context) error {
 		return nil
 	}
 
-	codec, err := codecs.GetMime("application/json")
+	codec, err := codecs.GetMime(codecs.MimeJSON)
 	if err != nil {
 		return err
 	}

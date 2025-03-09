@@ -25,7 +25,7 @@ func init() {
 	event.Register(Name, Provide)
 }
 
-// Config provides configuration for the NATS registry.
+// Config provides configuration for the NATS event client.
 type Config struct {
 	event.Config `yaml:",inline"`
 
