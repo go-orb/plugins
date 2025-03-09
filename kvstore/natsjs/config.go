@@ -7,6 +7,10 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
+func init() {
+	kvstore.Register(Name, Provide)
+}
+
 // Name provides the name of this kvstore client.
 const Name = "natsjs"
 

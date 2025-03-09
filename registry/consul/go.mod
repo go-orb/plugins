@@ -11,7 +11,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/consul/api v1.31.2
 	github.com/hashicorp/consul/sdk v0.16.2
-	github.com/mitchellh/hashstructure v1.1.0
 	github.com/stretchr/testify v1.10.0
 )
 

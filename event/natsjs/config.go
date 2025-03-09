@@ -270,23 +270,23 @@ type Config struct {
 
 	// RequestCodec configures the codec to use for encoding and decoding.
 	// Default: application/x-protobuf
-	RequestCodec string `json:"requestCodec,omitempty"       yaml:"requestCodec,omitempty"`
+	RequestCodec string `json:"requestCodec,omitempty" yaml:"requestCodec,omitempty"`
 
 	// PublishCodec configures the codec to use for publishing.
 	// Default: application/json
-	PublishCodec string `json:"publishCodec,omitempty"       yaml:"publishCodec,omitempty"`
+	PublishCodec string `json:"publishCodec,omitempty" yaml:"publishCodec,omitempty"`
 
 	// MaxConcurrent configures the maximum number of concurrent workers.
 	// Default: 10
-	MaxConcurrent int `json:"maxConcurrent,omitempty"       yaml:"maxConcurrent,omitempty"`
+	MaxConcurrent int `json:"maxConcurrent,omitempty" yaml:"maxConcurrent,omitempty"`
 
 	// SyncPublish configures whether to publish synchronously.
 	// Default: false
-	SyncPublish bool `json:"syncPublish,omitempty"       yaml:"syncPublish,omitempty"`
+	SyncPublish bool `json:"syncPublish,omitempty" yaml:"syncPublish,omitempty"`
 
 	// DisableDurableStreams configures whether to disable durable streams.
 	// Default: false
-	DisableDurableStreams bool `json:"disableDurableStreams,omitempty"       yaml:"disableDurableStreams,omitempty"`
+	DisableDurableStreams bool `json:"disableDurableStreams,omitempty" yaml:"disableDurableStreams,omitempty"`
 }
 
 // ApplyOptions applies a set of options to the config.

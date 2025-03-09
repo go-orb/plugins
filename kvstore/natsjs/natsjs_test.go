@@ -775,7 +775,6 @@ func (s *NatsJSTestSuite) TestProvide() {
 			}}
 
 			instance, err := Provide(
-				s.ctx,
 				types.ServiceName("test-service-"+cfg.name),
 				configData,
 				log.Logger{Logger: slog.New(slog.NewTextHandler(io.Discard, nil))},
@@ -790,7 +789,6 @@ func (s *NatsJSTestSuite) TestProvide() {
 
 			// Test with invalid config
 			instance, err = Provide(
-				s.ctx,
 				types.ServiceName("test-service-invalid-"+cfg.name),
 				configData,
 				log.Logger{Logger: slog.New(slog.NewTextHandler(io.Discard, nil))},

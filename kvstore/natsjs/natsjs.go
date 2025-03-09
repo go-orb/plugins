@@ -65,7 +65,6 @@ func New(serviceName string, cfg Config, log log.Logger) (*NatsJS, error) {
 
 // Provide creates a new NatsJS KVStore client.
 func Provide(
-	ctx context.Context,
 	name types.ServiceName,
 	data types.ConfigData,
 	logger log.Logger,

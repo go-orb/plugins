@@ -190,6 +190,8 @@ func (c *Registry) Deregister(s *registry.Service, _ ...registry.DeregisterOptio
 }
 
 // Register registers a service within the registry.
+//
+//nolint:funlen
 func (c *Registry) Register(service *registry.Service, opts ...registry.RegisterOption) error {
 	c.dataStore.Lock()
 	defer c.dataStore.Unlock()
@@ -206,50 +208,90 @@ func (c *Registry) Register(service *registry.Service, opts ...registry.Register
 	}
 
 	if _, ok := c.dataStore.Records[service.Name][service.Version]; !ok {
+		// New service - store it and we're done
 		c.dataStore.Records[service.Name][service.Version] = r
 		c.logger.Debug("Registry added new service", "name", service.Name, "version", service.Version)
 
-		go c.dataStore.SendEvent(&registry.Result{Action: "update", Service: service})
+		go c.dataStore.SendEvent(&registry.Result{Action: "create", Service: service})
 
 		return nil
 	}
 
-	addedNodes := false
+	// Existing service - update record
+	existingRecord := c.dataStore.Records[service.Name][service.Version]
 
-	for _, n := range service.Nodes {
-		if _, ok := c.dataStore.Records[service.Name][service.Version].Nodes[n.ID]; !ok {
-			addedNodes = true
+	// Update the service metadata
+	existingRecord.Metadata = make(map[string]string)
+	for k, v := range service.Metadata {
+		existingRecord.Metadata[k] = v
+	}
+
+	// Update the endpoints
+	existingRecord.Endpoints = service.Endpoints
+
+	// Track if we made any changes
+	changes := false
+
+	// Handle nodes
+	for _, newNode := range service.Nodes {
+		if existingNode, ok := existingRecord.Nodes[newNode.ID]; !ok { //nolint:nestif
+			// This is a new node, add it
+			changes = true
 			metadata := make(map[string]string)
 
-			for k, v := range n.Metadata {
+			for k, v := range newNode.Metadata {
 				metadata[k] = v
 			}
 
-			c.dataStore.Records[service.Name][service.Version].Nodes[n.ID] = &node{
+			existingRecord.Nodes[newNode.ID] = &node{
 				Node: &registry.Node{
-					ID:       n.ID,
-					Address:  n.Address,
-					Metadata: metadata,
+					ID:        newNode.ID,
+					Address:   newNode.Address,
+					Transport: newNode.Transport,
+					Metadata:  metadata,
 				},
 				TTL:      options.TTL,
 				LastSeen: time.Now(),
 			}
+		} else {
+			// This is an existing node, update it
+			if existingNode.Address != newNode.Address {
+				existingNode.Address = newNode.Address
+				changes = true
+			}
+
+			if existingNode.Transport != newNode.Transport {
+				existingNode.Transport = newNode.Transport
+				changes = true
+			}
+
+			// Update metadata
+			for k, v := range newNode.Metadata {
+				if existingValue, ok := existingNode.Metadata[k]; !ok || existingValue != v {
+					if existingNode.Metadata == nil {
+						existingNode.Metadata = make(map[string]string)
+					}
+
+					existingNode.Metadata[k] = v
+					changes = true
+				}
+			}
+
+			// Always update TTL and LastSeen
+			existingNode.TTL = options.TTL
+			existingNode.LastSeen = time.Now()
 		}
 	}
 
-	if addedNodes {
-		c.logger.Debug("Registry added new node to service", "name", service.Name, "version", service.Version)
-		go c.dataStore.SendEvent(&registry.Result{Action: "update", Service: service})
-
-		return nil
+	// If we made changes or this is a regular TTL refresh, send an update
+	if changes {
+		c.logger.Debug("Updated service", "name", service.Name, "version", service.Version)
+	} else {
+		c.logger.Debug("Refreshed service TTL", "name", service.Name, "version", service.Version)
 	}
 
-	// refresh TTL and timestamp
-	for _, n := range service.Nodes {
-		c.logger.Debug("Updated registration for service", "name", service.Name, "version", service.Version)
-		c.dataStore.Records[service.Name][service.Version].Nodes[n.ID].TTL = options.TTL
-		c.dataStore.Records[service.Name][service.Version].Nodes[n.ID].LastSeen = time.Now()
-	}
+	// Send an update event regardless of changes to maintain expected behavior
+	go c.dataStore.SendEvent(&registry.Result{Action: "update", Service: service})
 
 	return nil
 }

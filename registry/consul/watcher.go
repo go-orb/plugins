@@ -26,14 +26,14 @@ type consulWatcher struct {
 	services map[string][]*registry.Service
 }
 
-func newConsulWatcher(cr *RegistryConsul, opts ...registry.WatchOption) (*consulWatcher, error) {
+func newConsulWatcher(regConsul *RegistryConsul, opts ...registry.WatchOption) (*consulWatcher, error) {
 	var wo registry.WatchOptions
 	for _, o := range opts {
 		o(&wo)
 	}
 
-	cw := &consulWatcher{
-		r:        cr,
+	watcher := &consulWatcher{
+		r:        regConsul,
 		wo:       wo,
 		exit:     make(chan bool),
 		next:     make(chan *registry.Result, 10),
@@ -41,24 +41,44 @@ func newConsulWatcher(cr *RegistryConsul, opts ...registry.WatchOption) (*consul
 		services: make(map[string][]*registry.Service),
 	}
 
-	wp, err := watch.Parse(map[string]interface{}{
-		"service": wo.Service,
-		"type":    "service",
-	})
-	if err != nil {
-		return nil, err
+	// If a specific service is provided, watch that service
+	if len(wo.Service) > 0 {
+		wp, err := watch.Parse(map[string]interface{}{
+			"service": wo.Service,
+			"type":    "service",
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		wp.Handler = watcher.handle
+
+		tmp := func() {
+			_ = wp.RunWithClientAndHclog(regConsul.Client(), wp.Logger) //nolint:errcheck
+		}
+		go tmp()
+
+		watcher.wp = wp
+	} else {
+		// If no service name is specified, watch all services
+		wp, err := watch.Parse(map[string]interface{}{
+			"type": "services",
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		wp.Handler = watcher.handle
+
+		tmp := func() {
+			_ = wp.RunWithClientAndHclog(regConsul.Client(), wp.Logger) //nolint:errcheck
+		}
+		go tmp()
+
+		watcher.wp = wp
 	}
 
-	wp.Handler = cw.handle
-
-	tmp := func() {
-		_ = wp.RunWithClientAndHclog(cr.Client(), wp.Logger) //nolint:errcheck
-	}
-	go tmp()
-
-	cw.wp = wp
-
-	return cw, nil
+	return watcher, nil
 }
 
 func (cw *consulWatcher) serviceHandler(_ uint64, data interface{}) { //nolint:funlen,gocognit,gocyclo

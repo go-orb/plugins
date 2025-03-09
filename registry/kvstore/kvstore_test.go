@@ -17,12 +17,15 @@ import (
 	"github.com/go-orb/plugins/registry/tests"
 )
 
-func createRegistries(t testing.TB) (*tests.TestSuite, func() error, error) {
+//nolint:unparam
+func createRegistries(tb testing.TB) (*tests.TestSuite, func() error, error) {
+	tb.Helper()
+
 	// Create context
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Start embedded NATS server for testing
-	tmpDir := t.TempDir()
+	tmpDir := tb.TempDir()
 
 	opts := test.DefaultTestOptions
 	opts.Port = -1 // Random port
@@ -33,11 +36,11 @@ func createRegistries(t testing.TB) (*tests.TestSuite, func() error, error) {
 	opts.JetStreamMaxStore = -1  // Unlimited
 
 	server := test.RunServer(&opts)
-	require.True(t, server.JetStreamEnabled())
+	require.True(tb, server.JetStreamEnabled())
 
 	// Create logger
 	logger, err := log.New()
-	require.NoError(t, err)
+	require.NoError(tb, err)
 
 	// Initialize the store
 	storeCfg := natsjs.NewConfig(
@@ -46,28 +49,28 @@ func createRegistries(t testing.TB) (*tests.TestSuite, func() error, error) {
 
 	// Create store
 	store, err := natsjs.New("test-service", storeCfg, logger)
-	require.NoError(t, err)
+	require.NoError(tb, err)
 
 	err = store.Start(ctx)
-	require.NoError(t, err)
+	require.NoError(tb, err)
 
 	// Create first registry
 	cfg1 := NewConfig()
 	reg1, err := New("orb.service.test1", "1.0.0", cfg1, logger, kvstore.Type{KVStore: store})
-	require.NoError(t, err)
-	require.NoError(t, reg1.Start(ctx))
+	require.NoError(tb, err)
+	require.NoError(tb, reg1.Start(ctx))
 
 	// Create second registry
 	cfg2 := NewConfig()
 	reg2, err := New("orb.service.test2", "1.0.0", cfg2, logger, kvstore.Type{KVStore: store})
-	require.NoError(t, err)
-	require.NoError(t, reg2.Start(ctx))
+	require.NoError(tb, err)
+	require.NoError(tb, reg2.Start(ctx))
 
 	// Create third registry
 	cfg3 := NewConfig()
 	reg3, err := New("orb.service.test3", "1.0.0", cfg3, logger, kvstore.Type{KVStore: store})
-	require.NoError(t, err)
-	require.NoError(t, reg3.Start(ctx))
+	require.NoError(tb, err)
+	require.NoError(tb, reg3.Start(ctx))
 
 	cleanup := func() error {
 		cancel()

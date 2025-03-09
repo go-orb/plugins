@@ -116,12 +116,12 @@ func (c *Registry) GetService(name string, _ ...registry.GetOption) ([]*registry
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// If no services found, return ErrNotFound
 	if len(services) == 0 {
 		return nil, registry.ErrNotFound
 	}
-	
+
 	return services, nil
 }
 
@@ -147,10 +147,11 @@ func (c *Registry) listServices(opts ...kvstore.KeysOption) ([]*registry.Service
 	for _, k := range keys {
 		s, err := c.getNode(k)
 		if err != nil {
-			if err == registry.ErrNotFound {
+			if errors.Is(err, registry.ErrNotFound) {
 				// Skip not found errors and continue
 				continue
 			}
+
 			return nil, err
 		}
 

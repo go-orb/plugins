@@ -22,7 +22,7 @@ import (
 func createServer() (*tests.TestSuite, func() error, error) {
 	ctx := context.Background()
 
-	logger, err := log.New()
+	logger, err := log.New(log.WithLevel("TRACE"))
 	if err != nil {
 		log.Error("failed to create logger", "err", err)
 		return nil, func() error { return nil }, err

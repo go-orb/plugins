@@ -14,6 +14,7 @@ import (
 
 // metaTransportKey is the key to use to store the scheme in metadata.
 const metaTransportKey = "__consul__transport"
+const metaNodeIDKey = "__consul__node-id"
 
 // Name provides the name of this registry.
 const Name = "consul"

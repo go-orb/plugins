@@ -155,7 +155,7 @@ func (n *NatsJS) Publish(ctx context.Context, topic string, msg any, opts ...eve
 
 // Consume from a topic.
 //
-//nolint:funlen,gocyclo
+//nolint:funlen,gocyclo,gocognit,cyclop
 func (n *NatsJS) Consume(topic string, opts ...event.ConsumeOption) (<-chan event.Event, error) {
 	// validate the topic
 	if len(topic) == 0 {
@@ -225,6 +225,7 @@ func (n *NatsJS) Consume(topic string, opts ...event.ConsumeOption) (<-chan even
 	consumerID := uuid.New().String()
 
 	// If using a consumer group, create a durable consumer first
+	//nolint:nestif
 	if options.Group != "" {
 		// Create a push-based durable consumer for the group
 		consumerConfig := &nats.ConsumerConfig{
@@ -241,9 +242,11 @@ func (n *NatsJS) Consume(topic string, opts ...event.ConsumeOption) (<-chan even
 		if options.CustomRetries {
 			consumerConfig.MaxDeliver = options.GetRetryLimit()
 		}
+
 		if options.AckWait > 0 {
 			consumerConfig.AckWait = options.AckWait
 		}
+
 		if !options.Offset.IsZero() {
 			consumerConfig.OptStartTime = &options.Offset
 		}
@@ -565,5 +568,6 @@ func Provide(
 	}
 
 	instance, err := New(string(name), cfg, logger)
+
 	return event.Type{Client: instance}, err
 }
