@@ -21,6 +21,7 @@ func natsKey(table, orbkey, keyEncoding string, bucketPerTable bool) string {
 	}
 
 	fullKey := getKey(orbkey, table, bucketPerTable)
+
 	return encode(fullKey, keyEncoding)
 }
 

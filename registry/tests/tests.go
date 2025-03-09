@@ -3,12 +3,12 @@ package tests
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
 	"time"
 
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -150,7 +150,7 @@ func (r *TestSuite) TestGetServiceAllRegistries() {
 
 // TestGetServiceWithNoNodes tests a non existent service.
 func (r *TestSuite) TestGetServiceWithNoNodes() {
-	services, err := r.registries[0].GetService("missing")
+	services, err := r.registries[rand.Intn(len(r.registries))].GetService("missing") //nolint:gosec
 	r.Require().ErrorIs(registry.ErrNotFound, err)
 	r.Require().Empty(services)
 }
@@ -165,11 +165,13 @@ func (r *TestSuite) BenchmarkGetService(b *testing.B) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		services, err := r.registries[0].GetService(r.services[0].Name)
-		require.NoError(b, err)
-		require.Len(b, services, 1)
-		require.Equal(b, r.services[0].Name, services[0].Name)
-		require.Equal(b, len(r.services[0].Nodes), len(services[0].Nodes))
+		id := rand.Intn(len(r.services)) //nolint:gosec
+
+		services, err := r.registries[rand.Intn(len(r.registries))].GetService(r.services[id].Name) //nolint:gosec
+		r.Require().NoError(err)
+		r.Require().Len(services, 1)
+		r.Require().Equal(r.services[id].Name, services[0].Name)
+		r.Require().Equal(len(r.services[id].Nodes), len(services[0].Nodes))
 	}
 
 	b.StopTimer()
@@ -193,4 +195,30 @@ func (r *TestSuite) BenchmarkGetServiceWithNoNodes(b *testing.B) {
 
 	b.StopTimer()
 	r.TearDownSuite()
+}
+
+// BenchmarkParallelGetService benchmarks.
+func (r *TestSuite) BenchmarkParallelGetService(b *testing.B) {
+	b.Helper()
+
+	r.SetT(&testing.T{})
+	r.SetupSuite()
+
+	b.ResetTimer()
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			id := rand.Intn(len(r.services)) //nolint:gosec
+
+			services, err := r.registries[rand.Intn(len(r.registries))].GetService(r.services[id].Name) //nolint:gosec
+			r.Require().NoError(err)
+			r.Require().Len(services, 1)
+			r.Require().Equal(r.services[id].Name, services[0].Name)
+			r.Require().Equal(len(r.services[id].Nodes), len(services[0].Nodes))
+		}
+	})
+
+	b.StopTimer()
+	r.TearDownSuite()
+
 }

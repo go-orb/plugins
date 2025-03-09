@@ -15,9 +15,9 @@ var (
 	//nolint:gochecknoglobals
 	DefaultWatcherSendTimeout = 10 * time.Millisecond
 
-	// DefaultTTLPruneTime is the default time after which a node is considered stale.
+	// DefaultTTL is the default time after which a node is considered stale.
 	//nolint:gochecknoglobals
-	DefaultTTLPruneTime = 10 * time.Millisecond
+	DefaultTTL = 10 * time.Millisecond
 )
 
 // Name provides the name of this registry.
@@ -27,8 +27,10 @@ const Name = "memory"
 type Config struct {
 	registry.Config `yaml:",inline"`
 
+	// WatcherSendTimeout is the timeout for sending events to watchers.
 	WatcherSendTimeout time.Duration `json:"watcherSendTimeout" yaml:"watcherSendTimeout"`
-	TTLPruneTime       time.Duration `json:"ttlPruneTime"       yaml:"ttlPruneTime"`
+	// TTL is the time after which a node is considered stale.
+	TTL time.Duration `json:"ttl" yaml:"ttl"`
 }
 
 // ApplyOptions applies a set of options to the config.
@@ -44,7 +46,7 @@ func NewConfig(opts ...registry.Option) Config {
 		Config: registry.NewConfig(),
 	}
 	cfg.WatcherSendTimeout = DefaultWatcherSendTimeout
-	cfg.TTLPruneTime = DefaultTTLPruneTime
+	cfg.TTL = DefaultTTL
 
 	cfg.ApplyOptions(opts...)
 

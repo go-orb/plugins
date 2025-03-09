@@ -51,7 +51,7 @@ func (d *dataStore) Start(ctx context.Context) {
 }
 
 func (d *dataStore) ttlPrune(ctx context.Context) {
-	prune := time.NewTicker(d.config.TTLPruneTime)
+	prune := time.NewTicker(d.config.TTL)
 	defer prune.Stop()
 
 	for {
@@ -130,7 +130,7 @@ func (c *Registry) NodeID() string {
 		return c.id
 	}
 
-	c.id = c.serviceName + "-" + uuid.New().String()
+	c.id = uuid.New().String()
 
 	return c.id
 }
@@ -317,6 +317,7 @@ func Provide(
 	name types.ServiceName,
 	version types.ServiceVersion,
 	datas types.ConfigData,
+	_ *types.Components,
 	logger log.Logger,
 	opts ...registry.Option,
 ) (registry.Type, error) {

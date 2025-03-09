@@ -9,10 +9,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/kvstore"
 	"github.com/go-orb/go-orb/log"
-	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats-server/v2/test"
@@ -109,7 +107,7 @@ func (s *NatsJSTestSuite) SetupSuite() {
 		)
 
 		// Create store
-		store, err := New(s.ctx, "test-service-"+cfg.name, storeCfg, logger)
+		store, err := New("test-service-"+cfg.name, storeCfg, logger)
 		s.Require().NoError(err)
 
 		err = store.Start(s.ctx)
@@ -781,8 +779,6 @@ func (s *NatsJSTestSuite) TestProvide() {
 				types.ServiceName("test-service-"+cfg.name),
 				configData,
 				log.Logger{Logger: slog.New(slog.NewTextHandler(io.Discard, nil))},
-				registry.Type{},
-				client.Type{},
 				WithURL(s.natsServer.ClientURL()),
 			)
 			s.Require().NoError(err)
@@ -798,8 +794,6 @@ func (s *NatsJSTestSuite) TestProvide() {
 				types.ServiceName("test-service-invalid-"+cfg.name),
 				configData,
 				log.Logger{Logger: slog.New(slog.NewTextHandler(io.Discard, nil))},
-				registry.Type{},
-				client.Type{},
 				WithURL("invalid://url"),
 			)
 			s.Require().NoError(err)

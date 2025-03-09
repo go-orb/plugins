@@ -9,12 +9,10 @@ import (
 
 	"github.com/cornelk/hashmap"
 
-	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/kvstore"
 	"github.com/go-orb/go-orb/log"
-	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/nats-io/nats.go"
@@ -30,6 +28,7 @@ type keyValueEnvelope struct {
 
 // This is here to make sure it implements kvstore.KVStore.
 var _ kvstore.KVStore = (*NatsJS)(nil)
+var _ kvstore.Watcher = (*NatsJS)(nil)
 
 // NatsJS implements the kvstore.KVStore interface using NATS JetStream.
 type NatsJS struct {
@@ -49,7 +48,7 @@ type NatsJS struct {
 
 // New creates a new NATS JetStream KVStore. This function should rarely be called manually.
 // To create a new KVStore use Provide.
-func New(ctx context.Context, serviceName string, cfg Config, log log.Logger) (*NatsJS, error) {
+func New(serviceName string, cfg Config, log log.Logger) (*NatsJS, error) {
 	codec, err := codecs.GetMime(codecs.MimeJSON)
 	if err != nil {
 		return nil, err
@@ -59,8 +58,8 @@ func New(ctx context.Context, serviceName string, cfg Config, log log.Logger) (*
 		serviceName: serviceName,
 		config:      cfg,
 		logger:      log,
-		ctx:         ctx,
 		codec:       codec,
+		ctx:         context.Background(), // Initialize with a background context
 	}, nil
 }
 
@@ -70,8 +69,6 @@ func Provide(
 	name types.ServiceName,
 	data types.ConfigData,
 	logger log.Logger,
-	_ registry.Type,
-	_ client.Type,
 	opts ...kvstore.Option,
 ) (kvstore.Type, error) {
 	cfg := NewConfig(opts...)
@@ -83,7 +80,7 @@ func Provide(
 		return kvstore.Type{}, err
 	}
 
-	instance, err := New(ctx, string(name), cfg, logger)
+	instance, err := New(string(name), cfg, logger)
 	if err != nil {
 		return kvstore.Type{}, err
 	}
@@ -92,7 +89,9 @@ func Provide(
 }
 
 // Start initializes the connection to NATS JetStream.
-func (n *NatsJS) Start(_ context.Context) error {
+func (n *NatsJS) Start(ctx context.Context) error {
+	// Save the context for later use
+	n.ctx = ctx
 	nopts := n.config.NatsOptions.ToOptions()
 
 	n.buckets = hashmap.New[string, jetstream.KeyValue]()
@@ -373,6 +372,93 @@ func (n *NatsJS) DropDatabase(database string) error {
 	}
 
 	return nil
+}
+
+// Watch exposes the watcher interface from the underlying JetStreamContext.
+//
+//nolint:funlen
+func (n *NatsJS) Watch(
+	ctx context.Context,
+	database,
+	table string,
+	opts ...kvstore.WatchOption,
+) (<-chan kvstore.WatchEvent, func() error, error) {
+	bucketName := bucketName(database, table, n.config.BucketPerTable)
+
+	if bucketName == "" {
+		return nil, nil, orberrors.ErrBadRequest.Wrap(errors.New("multi bucket watching is not supported"))
+	}
+
+	b, err := n.js.KeyValue(ctx, bucketName)
+	if err != nil {
+		return nil, nil, orberrors.ErrInternalServerError.Wrap(fmt.Errorf("failed to get bucket: %w", err))
+	}
+
+	orbOpts := kvstore.NewWatchOptions(opts...)
+
+	natsOpts := []jetstream.WatchOpt{}
+	if orbOpts.IgnoreDeletes {
+		natsOpts = append(natsOpts, jetstream.IgnoreDeletes())
+	}
+
+	if orbOpts.IncludeHistory {
+		natsOpts = append(natsOpts, jetstream.IncludeHistory())
+	}
+
+	if orbOpts.UpdatesOnly {
+		natsOpts = append(natsOpts, jetstream.UpdatesOnly())
+	}
+
+	if orbOpts.MetaOnly {
+		natsOpts = append(natsOpts, jetstream.MetaOnly())
+	}
+
+	watcher, err := b.WatchAll(ctx, natsOpts...)
+	if err != nil {
+		return nil, nil, orberrors.ErrInternalServerError.Wrap(fmt.Errorf("failed to watch bucket: %w", err))
+	}
+
+	ch := make(chan kvstore.WatchEvent)
+
+	go func() {
+		for u := range watcher.Updates() {
+			if u == nil {
+				continue
+			}
+
+			var (
+				action kvstore.WatchOp
+				key    string
+				data   []byte
+				err    error
+			)
+
+			switch u.Operation() {
+			case jetstream.KeyValuePut:
+				action = kvstore.WatchOpUpdate
+				key, data, err = n.natsDataToOrb(table, u.Key(), u.Value())
+
+				if err != nil {
+					continue
+				}
+			case jetstream.KeyValueDelete:
+				fallthrough
+			case jetstream.KeyValuePurge:
+				action = kvstore.WatchOpDelete
+				key = natsKey(table, u.Key(), n.config.KeyEncoding, n.config.BucketPerTable)
+			}
+
+			ch <- kvstore.WatchEvent{
+				Record: kvstore.Record{
+					Key:   key,
+					Value: data,
+				},
+				Operation: action,
+			}
+		}
+	}()
+
+	return ch, watcher.Stop, nil
 }
 
 // Read takes a single key and optional ReadOptions. It returns matching []*Record or an error.

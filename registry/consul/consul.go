@@ -99,7 +99,7 @@ func (c *RegistryConsul) NodeID() string {
 		return c.id
 	}
 
-	c.id = c.serviceName + "-" + uuid.New().String()
+	c.id = uuid.New().String()
 
 	return c.id
 }
@@ -421,6 +421,7 @@ func ProvideRegistryConsul(
 	name types.ServiceName,
 	version types.ServiceVersion,
 	datas types.ConfigData,
+	_ *types.Components,
 	logger log.Logger,
 	opts ...registry.Option,
 ) (registry.Type, error) {

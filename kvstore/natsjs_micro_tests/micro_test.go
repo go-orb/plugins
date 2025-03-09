@@ -69,7 +69,6 @@ func (s *NatsJSMicroTestSuite) SetupSuite() {
 	)
 
 	orbStore, err := natsjs.New(
-		context.Background(),
 		"test",
 		storeCfg,
 		logger,
@@ -260,7 +259,6 @@ func setupBenchmark(b *testing.B) *BenchmarkNatsJSMicro {
 	)
 
 	orbStore, err := natsjs.New(
-		context.Background(),
 		"test",
 		storeCfg,
 		logger,
