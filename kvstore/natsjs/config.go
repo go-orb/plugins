@@ -15,7 +15,7 @@ const (
 	DefaultBucketDescription = "KeyValue storage administered by go-orb"
 	DefaultDatabase          = "default"
 	DefaultTable             = ""
-	DefaultKeyEncoding       = ""
+	DefaultKeyEncoding       = "base32"
 	DefaultBucketPerTable    = true
 	DefaultJSONKeyValues     = false
 )
@@ -265,8 +265,8 @@ type Config struct {
 	// Default: "KeyValue storage administered by go-orb"
 	BucketDescription string `json:"bucketDescription,omitempty" yaml:"bucketDescription,omitempty"`
 
-	// KeyEncoding configures the encoding used for keys, set to base32 for encoding.
-	// Default: no encoding - ""
+	// KeyEncoding configures the encoding used for keys, set it to an empty string for no encoding.
+	// Default: base32
 	KeyEncoding string `json:"keyEncoding,omitempty" yaml:"keyEncoding,omitempty"`
 
 	// BucketPerTable configures whether a separate bucket is created for each table.
