@@ -512,6 +512,8 @@ func BenchmarkMicroListPagination(b *testing.B) {
 }
 
 // generateLargeValue generates a value of the specified size in bytes.
+//
+//nolint:unparam
 func generateLargeValue(size int) []byte {
 	value := make([]byte, size)
 	for i := 0; i < size; i++ {

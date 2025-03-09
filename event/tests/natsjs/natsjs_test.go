@@ -16,7 +16,6 @@ import (
 
 	"github.com/go-orb/go-orb/event"
 	"github.com/go-orb/go-orb/log"
-	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/plugins/event/tests"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -37,8 +36,6 @@ func createServer() (log.Logger, event.Handler, context.CancelFunc, error) {
 		handler event.Handler
 	)
 
-	logger.Info("starting NATS server")
-
 	// start the NATS with JetStream server
 	addr, cleanup, err := natsServer()
 	if err != nil {
@@ -48,7 +45,7 @@ func createServer() (log.Logger, event.Handler, context.CancelFunc, error) {
 	// Sometimes the nats server has isssues with starting, so we attempt 5
 	// times.
 	for i := 0; i < 5; i++ {
-		cfg, err := natsjs.NewConfig(types.ServiceName("org.orb.testservice"), nil, natsjs.WithAddresses(addr))
+		cfg, err := natsjs.NewConfig(natsjs.WithURL(addr))
 		if err != nil {
 			log.Error("failed to create config", err)
 		}
@@ -135,6 +132,42 @@ func BenchmarkRequest(b *testing.B) {
 
 	s := tests.New(logger, handler)
 	s.BenchmarkRequest(b)
+
+	cleanup()
+}
+
+func BenchmarkRequestLarge(b *testing.B) {
+	b.StopTimer()
+
+	logger, handler, cleanup, err := createServer()
+	require.NoError(b, err, "while creating a server")
+
+	s := tests.New(logger, handler)
+	s.BenchmarkRequestLarge(b)
+
+	cleanup()
+}
+
+func BenchmarkRequestParallel(b *testing.B) {
+	b.StopTimer()
+
+	logger, handler, cleanup, err := createServer()
+	require.NoError(b, err, "while creating a server")
+
+	s := tests.New(logger, handler)
+	s.BenchmarkRequestParallel(b)
+
+	cleanup()
+}
+
+func BenchmarkRequestAuth(b *testing.B) {
+	b.StopTimer()
+
+	logger, handler, cleanup, err := createServer()
+	require.NoError(b, err, "while creating a server")
+
+	s := tests.New(logger, handler)
+	s.BenchmarkRequestAuth(b)
 
 	cleanup()
 }

@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/go-orb/go-orb/codecs"
+	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/event"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/types"
@@ -42,33 +42,9 @@ type NatsJS struct {
 	consumers *container.SafeMap[string, jetstream.ConsumeContext]
 }
 
-func setAddrs(addrs []string) []string {
-	var cAddrs []string //nolint:prealloc
-
-	for _, addr := range addrs {
-		if len(addr) == 0 {
-			continue
-		}
-
-		if !strings.HasPrefix(addr, "nats://") {
-			addr = "nats://" + addr
-		}
-
-		cAddrs = append(cAddrs, addr)
-	}
-
-	if len(cAddrs) == 0 {
-		cAddrs = []string{nats.DefaultURL}
-	}
-
-	return cAddrs
-}
-
 // New creates a new NATS registry. This functions should rarely be called manually.
 // To create a new registry use Provide.
 func New(serviceName string, cfg Config, log log.Logger) *NatsJS {
-	cfg.Addresses = setAddrs(cfg.Addresses)
-
 	codec, err := codecs.GetMime(cfg.Codec)
 	if err != nil {
 		panic(err)
@@ -287,20 +263,9 @@ func (n *NatsJS) HandleRequest(
 
 // Start events.
 func (n *NatsJS) Start(_ context.Context) error {
-	nopts := nats.GetDefaultOptions()
-
-	if n.config.TLSConfig != nil {
-		nopts.Secure = true
-		nopts.TLSConfig = n.config.TLSConfig
-	}
-
-	if len(n.config.Addresses) > 0 {
-		nopts.Servers = n.config.Addresses
-	}
-
 	var err error
 
-	n.nc, err = nopts.Connect()
+	n.nc, err = n.config.ToOptions().Connect()
 	if err != nil {
 		return err
 	}
@@ -350,9 +315,14 @@ func Provide(
 	logger log.Logger,
 	opts ...event.Option,
 ) (event.Handler, error) {
-	cfg, err := NewConfig(name, datas, opts...)
+	cfg, err := NewConfig(opts...)
 	if err != nil {
 		return nil, fmt.Errorf("create nats registry config: %w", err)
+	}
+
+	sections := types.SplitServiceName(name)
+	if err := config.Parse(append(sections, event.ComponentType), datas, &cfg); err != nil {
+		return nil, fmt.Errorf("parse config: %w", err)
 	}
 
 	me := New(string(name), cfg, logger)

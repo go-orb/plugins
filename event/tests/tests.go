@@ -160,3 +160,83 @@ func (s *Suite) BenchmarkRequest(b *testing.B) {
 	b.StopTimer()
 	s.TearDownSuite()
 }
+
+// BenchmarkRequestLarge runs a benchmark on requests with large payloads.
+func (s *Suite) BenchmarkRequestLarge(b *testing.B) {
+	b.Helper()
+
+	s.SetT(&testing.T{})
+	s.SetupSuite()
+
+	// Create a 64KB payload - staying under NATS default message size limits
+	payload := make([]byte, 64*1024)
+	for i := range payload {
+		payload[i] = byte(i % 256)
+	}
+	
+	req := &echopb.Req{Payload: payload}
+
+	b.ResetTimer()
+	b.StartTimer()
+
+	for n := 0; n < b.N; n++ {
+		resp, err := event.Request[echopb.Resp](context.Background(), s.handler, "echo", req)
+		s.Require().NoError(err)
+		s.Require().Equal(payload, resp.GetPayload())
+	}
+
+	b.StopTimer()
+	s.TearDownSuite()
+}
+
+// BenchmarkRequestParallel runs a benchmark on requests with parallelism.
+func (s *Suite) BenchmarkRequestParallel(b *testing.B) {
+	b.Helper()
+
+	s.SetT(&testing.T{})
+	s.SetupSuite()
+
+	payload := []byte("asdf1234")
+	req := &echopb.Req{Payload: payload}
+
+	b.ResetTimer()
+	b.StartTimer()
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			resp, err := event.Request[echopb.Resp](context.Background(), s.handler, "echo", req)
+			s.Require().NoError(err)
+			s.Require().Equal(payload, resp.GetPayload())
+		}
+	})
+
+	b.StopTimer()
+	s.TearDownSuite()
+}
+
+// BenchmarkRequestAuth runs a benchmark on auth requests.
+func (s *Suite) BenchmarkRequestAuth(b *testing.B) {
+	b.Helper()
+
+	s.SetT(&testing.T{})
+	s.SetupSuite()
+
+	payload := []byte("asdf1234")
+	req := &echopb.Req{Payload: payload}
+
+	// Create auth context with metadata
+	ctx, md := metadata.WithOutgoing(context.Background())
+	md["authorization"] = "Bearer test"
+
+	b.ResetTimer()
+	b.StartTimer()
+
+	for n := 0; n < b.N; n++ {
+		resp, err := event.Request[echopb.Resp](ctx, s.handler, "auth", req)
+		s.Require().NoError(err)
+		s.Require().Equal(payload, resp.GetPayload())
+	}
+
+	b.StopTimer()
+	s.TearDownSuite()
+}
