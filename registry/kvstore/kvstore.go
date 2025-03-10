@@ -82,7 +82,6 @@ func (c *Registry) Type() string {
 
 // Deregister deregisters a service within the registry.
 func (c *Registry) Deregister(s *registry.Service, _ ...registry.DeregisterOption) error {
-
 	mErr := &multierror.Error{}
 
 	for _, node := range s.Nodes {
