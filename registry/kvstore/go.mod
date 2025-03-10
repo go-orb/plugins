@@ -4,11 +4,12 @@ go 1.23.6
 
 require (
 	github.com/go-orb/go-orb v0.2.2-0.20250310150137-28d27c7c856e
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250310152918-34ff74814ae4
-	github.com/go-orb/plugins/kvstore/natsjs v0.0.0-20250310152918-34ff74814ae4
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250310152918-34ff74814ae4
-	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250310152918-34ff74814ae4
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250310163341-37089bcacc15
+	github.com/go-orb/plugins/kvstore/natsjs v0.0.0-20250310163341-37089bcacc15
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250310163341-37089bcacc15
+	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250310163341-37089bcacc15
 	github.com/google/uuid v1.6.0
+	github.com/hashicorp/go-multierror v1.1.1
 	github.com/nats-io/nats-server/v2 v2.10.26
 	github.com/stretchr/testify v1.10.0
 )
@@ -16,6 +17,7 @@ require (
 require (
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/minio/highwayhash v1.0.3 // indirect

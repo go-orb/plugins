@@ -167,20 +167,20 @@ func (c *Registry) Deregister(s *registry.Service, _ ...registry.DeregisterOptio
 		if _, ok := c.dataStore.Records[s.Name][s.Version]; ok {
 			for _, n := range s.Nodes {
 				if _, ok := c.dataStore.Records[s.Name][s.Version].Nodes[n.ID]; ok {
-					c.logger.Debug("Registry removed node from service", "name", s.Name, "version", s.Version)
+					c.logger.Trace("Registry removed node from service", "name", s.Name, "version", s.Version)
 					delete(c.dataStore.Records[s.Name][s.Version].Nodes, n.ID)
 				}
 			}
 
 			if len(c.dataStore.Records[s.Name][s.Version].Nodes) == 0 {
 				delete(c.dataStore.Records[s.Name], s.Version)
-				c.logger.Debug("Registry removed service", "name", s.Name, "version", s.Version)
+				c.logger.Trace("Registry removed service", "name", s.Name, "version", s.Version)
 			}
 		}
 
 		if len(c.dataStore.Records[s.Name]) == 0 {
 			delete(c.dataStore.Records, s.Name)
-			c.logger.Debug("Registry removed service", "name", s.Name)
+			c.logger.Trace("Registry removed service", "name", s.Name)
 		}
 
 		go c.dataStore.SendEvent(&registry.Result{Action: "delete", Service: s})
@@ -210,7 +210,7 @@ func (c *Registry) Register(service *registry.Service, opts ...registry.Register
 	if _, ok := c.dataStore.Records[service.Name][service.Version]; !ok {
 		// New service - store it and we're done
 		c.dataStore.Records[service.Name][service.Version] = r
-		c.logger.Debug("Registry added new service", "name", service.Name, "version", service.Version)
+		c.logger.Trace("Registry added new service", "name", service.Name, "version", service.Version)
 
 		go c.dataStore.SendEvent(&registry.Result{Action: "create", Service: service})
 

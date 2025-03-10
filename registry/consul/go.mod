@@ -4,13 +4,14 @@ go 1.23.6
 
 require (
 	github.com/go-orb/go-orb v0.2.2-0.20250310150137-28d27c7c856e
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250310152918-34ff74814ae4
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250310152918-34ff74814ae4
-	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250310152918-34ff74814ae4
-	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250310152918-34ff74814ae4
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250310163341-37089bcacc15
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250310163341-37089bcacc15
+	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250310163341-37089bcacc15
+	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250310163341-37089bcacc15
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/consul/api v1.31.2
 	github.com/hashicorp/consul/sdk v0.16.2
+	github.com/hashicorp/go-multierror v1.1.1
 	github.com/stretchr/testify v1.10.0
 )
 
@@ -24,7 +25,6 @@ require (
 	github.com/hashicorp/go-hclog v1.6.3 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-metrics v0.5.4 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-rootcerts v1.0.2 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/hashicorp/go-version v1.7.0 // indirect

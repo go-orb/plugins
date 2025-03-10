@@ -14,6 +14,7 @@ import (
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/google/uuid"
+	"github.com/hashicorp/go-multierror"
 )
 
 // This is here to make sure Registry implements registry.Registry.
@@ -81,10 +82,17 @@ func (c *Registry) Type() string {
 
 // Deregister deregisters a service within the registry.
 func (c *Registry) Deregister(s *registry.Service, _ ...registry.DeregisterOption) error {
-	key := s.Name + c.config.ServiceDelimiter + c.NodeID() + c.config.ServiceDelimiter + s.Version
-	c.logger.Trace("deregistering service", "service", s, "key", key)
 
-	return c.kvstore.Purge(key, c.config.Database, c.config.Table)
+	mErr := &multierror.Error{}
+
+	for _, node := range s.Nodes {
+		key := s.Name + c.config.ServiceDelimiter + node.ID + c.config.ServiceDelimiter + s.Version
+		c.logger.Trace("deregistering service", "service", s, "key", key)
+
+		mErr = multierror.Append(mErr, c.kvstore.Purge(key, c.config.Database, c.config.Table))
+	}
+
+	return mErr.ErrorOrNil()
 }
 
 // Register registers a service within the registry.
@@ -93,21 +101,29 @@ func (c *Registry) Register(service *registry.Service, _ ...registry.RegisterOpt
 		return orberrors.ErrBadRequest.Wrap(errors.New("wont store nil service"))
 	}
 
-	b, err := c.codec.Marshal(service)
-	if err != nil {
-		return orberrors.ErrInternalServerError.Wrap(err)
+	mErr := &multierror.Error{}
+
+	for _, node := range service.Nodes {
+		key := service.Name + c.config.ServiceDelimiter + node.ID + c.config.ServiceDelimiter + service.Version
+		c.logger.Trace("registering service", "service", service, "key", key)
+
+		mService := &registry.Service{
+			Name:      service.Name,
+			Version:   service.Version,
+			Metadata:  service.Metadata,
+			Endpoints: service.Endpoints,
+			Nodes:     []*registry.Node{node},
+		}
+
+		b, err := c.codec.Marshal(mService)
+		if err != nil {
+			return orberrors.ErrInternalServerError.Wrap(err)
+		}
+
+		mErr = multierror.Append(mErr, c.kvstore.Set(key, c.config.Database, c.config.Table, b))
 	}
 
-	key := service.Name + c.config.ServiceDelimiter + c.NodeID() + c.config.ServiceDelimiter + service.Version
-
-	c.logger.Trace("registering service", "service", service, "key", key)
-
-	return c.kvstore.Set(
-		key,
-		c.config.Database,
-		c.config.Table,
-		b,
-	)
+	return mErr.ErrorOrNil()
 }
 
 // GetService returns a service from the registry.
