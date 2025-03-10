@@ -140,7 +140,7 @@ func (n *NatsJS) Type() string {
 // orbDataToNATS converts key and value to nats key value.
 func (n *NatsJS) orbDataToNATS(table, key string, value []byte) (string, []byte, error) {
 	if n.config.JSONKeyValues {
-		b, err := n.codec.Encode(&keyValueEnvelope{
+		b, err := n.codec.Marshal(&keyValueEnvelope{
 			Key:      key,
 			Data:     value,
 			Metadata: map[string]any{},
@@ -159,7 +159,7 @@ func (n *NatsJS) orbDataToNATS(table, key string, value []byte) (string, []byte,
 func (n *NatsJS) natsDataToOrb(table, key string, value []byte) (string, []byte, error) {
 	if n.config.JSONKeyValues {
 		var envelope keyValueEnvelope
-		err := n.codec.Decode(value, &envelope)
+		err := n.codec.Unmarshal(value, &envelope)
 
 		if err != nil {
 			return "", nil, err

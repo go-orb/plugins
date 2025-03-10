@@ -48,8 +48,8 @@ func NewFormCodec() *Form {
 	}
 }
 
-// Encode marshals an object into HTTP form format.
-func (c Form) Encode(v any) ([]byte, error) {
+// Marshal marshals an object into HTTP form format.
+func (c Form) Marshal(v any) ([]byte, error) {
 	var (
 		vs  url.Values
 		err error
@@ -76,8 +76,8 @@ func (c Form) Encode(v any) ([]byte, error) {
 	return []byte(vs.Encode()), nil
 }
 
-// Decode unmarshals a struct from HTTP form format into an object.
-func (c Form) Decode(data []byte, v any) error {
+// Unmarshal unmarshals a struct from HTTP form format into an object.
+func (c Form) Unmarshal(data []byte, v any) error {
 	vs, err := url.ParseQuery(string(data))
 	if err != nil {
 		return err
@@ -98,14 +98,14 @@ func (c Form) NewDecoder(r io.Reader) codecs.Decoder {
 			return err
 		}
 
-		return c.Decode(b, v)
+		return c.Unmarshal(b, v)
 	})
 }
 
 // NewEncoder returns an Encoder which writes bytes sequence into "w".
 func (c Form) NewEncoder(w io.Writer) codecs.Encoder {
 	return codecs.EncoderFunc(func(v any) error {
-		b, err := c.Encode(v)
+		b, err := c.Marshal(v)
 		if err != nil {
 			return err
 		}
@@ -116,19 +116,20 @@ func (c Form) NewEncoder(w io.Writer) codecs.Encoder {
 	})
 }
 
-func (Form) String() string {
+// Name returns the codec name.
+func (c Form) Name() string {
 	return Name
 }
 
-// Encodes returns if this is able to encode the given type.
-func (Form) Encodes(v any) bool {
+// Marshals returns if this is able to encode the given type.
+func (c Form) Marshals(v any) bool {
 	_, ok := v.(proto.Message)
 
 	return ok
 }
 
-// Decodes returns if this is able to decode the given type.
-func (Form) Decodes(v any) bool {
+// Unmarshals returns if this is able to decode the given type.
+func (c Form) Unmarshals(v any) bool {
 	_, ok := v.(proto.Message)
 
 	return ok

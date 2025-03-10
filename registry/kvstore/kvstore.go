@@ -93,7 +93,7 @@ func (c *Registry) Register(service *registry.Service, _ ...registry.RegisterOpt
 		return orberrors.ErrBadRequest.Wrap(errors.New("wont store nil service"))
 	}
 
-	b, err := c.codec.Encode(service)
+	b, err := c.codec.Marshal(service)
 	if err != nil {
 		return orberrors.ErrInternalServerError.Wrap(err)
 	}
@@ -187,7 +187,7 @@ func (c *Registry) getNode(s string) (*registry.Service, error) {
 	}
 
 	var svc registry.Service
-	if err := c.codec.Decode(recs[0].Value, &svc); err != nil {
+	if err := c.codec.Unmarshal(recs[0].Value, &svc); err != nil {
 		return nil, err
 	}
 

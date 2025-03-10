@@ -18,9 +18,9 @@ func init() {
 // CodecJSON config files, and web requests.
 type CodecJSON struct{}
 
-// Encode marshals any object into json bytes.
+// Marshal marshals any object into json bytes.
 // Param v should be a pointer type.
-func (j *CodecJSON) Encode(v any) ([]byte, error) {
+func (j *CodecJSON) Marshal(v any) ([]byte, error) {
 	switch vt := v.(type) {
 	case string:
 		return []byte(vt), nil
@@ -29,9 +29,9 @@ func (j *CodecJSON) Encode(v any) ([]byte, error) {
 	}
 }
 
-// Decode decodes json bytes into object v.
+// Unmarshal decodes json bytes into object v.
 // Param v should be a pointer type.
-func (j *CodecJSON) Decode(data []byte, v any) error {
+func (j *CodecJSON) Unmarshal(data []byte, v any) error {
 	return json.Unmarshal(data, v)
 }
 
@@ -68,13 +68,13 @@ func (j *CodecJSON) NewDecoder(r io.Reader) codecs.Decoder {
 	return &wrapDecoder{impl: json.NewDecoder(r)}
 }
 
-// Encodes returns if this is able to encode the given type.
-func (j *CodecJSON) Encodes(_ any) bool {
+// Marshals returns if this is able to encode the given type.
+func (j *CodecJSON) Marshals(_ any) bool {
 	return true
 }
 
-// Decodes returns if this is able to decode the given type.
-func (j *CodecJSON) Decodes(_ any) bool {
+// Unmarshals returns if this is able to decode the given type.
+func (j *CodecJSON) Unmarshals(_ any) bool {
 	return true
 }
 
@@ -85,8 +85,8 @@ func (j *CodecJSON) ContentTypes() []string {
 	}
 }
 
-// String returns the plugin implementation of the marshaler.
-func (j *CodecJSON) String() string {
+// Name returns the codec name.
+func (j *CodecJSON) Name() string {
 	return "json"
 }
 

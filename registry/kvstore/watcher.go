@@ -65,7 +65,7 @@ func (w *Watcher) Next() (*registry.Result, error) {
 		svc.Nodes = []*registry.Node{{ID: parts[0] + "-" + parts[1]}}
 		svc.Version = parts[2]
 	} else {
-		if err := w.codec.Decode(kve.Value, &svc); err != nil {
+		if err := w.codec.Unmarshal(kve.Value, &svc); err != nil {
 			_ = w.stop() //nolint:errcheck
 			return nil, orberrors.ErrInternalServerError.Wrap(err)
 		}

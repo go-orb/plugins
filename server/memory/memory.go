@@ -240,13 +240,13 @@ func (m *Stream) MsgSend(msg drpc.Message, _ drpc.Encoding) error {
 	}
 
 	// Encode the message to bytes using the codec
-	b, err := codec.Encode(msg)
+	b, err := codec.Marshal(msg)
 	if err != nil {
 		return orberrors.ErrInternalServerError.Wrap(err)
 	}
 
 	// Decode the bytes into the result using the codec
-	if err := codec.Decode(b, m.result); err != nil {
+	if err := codec.Unmarshal(b, m.result); err != nil {
 		return orberrors.ErrInternalServerError.Wrap(err)
 	}
 
@@ -303,13 +303,13 @@ func (m *Stream) MsgRecv(msg drpc.Message, _ drpc.Encoding) error {
 	}
 
 	// Encode the request to bytes using the codec
-	b, err := codec.Encode(m.request)
+	b, err := codec.Marshal(m.request)
 	if err != nil {
 		return orberrors.ErrInternalServerError.Wrap(err)
 	}
 
 	// Decode the bytes into the message using the codec
-	if err := codec.Decode(b, msg); err != nil {
+	if err := codec.Unmarshal(b, msg); err != nil {
 		return orberrors.ErrInternalServerError.Wrap(err)
 	}
 

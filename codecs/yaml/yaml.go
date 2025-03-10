@@ -19,14 +19,14 @@ func init() {
 // yaml files, or web requests.
 type Yaml struct{}
 
-// Encode encodes any pointer into yaml byte.
-func (j *Yaml) Encode(v any) ([]byte, error) {
+// Marshal encodes any pointer into yaml byte.
+func (j *Yaml) Marshal(v any) ([]byte, error) {
 	return yaml.Marshal(v)
 }
 
-// Decode decodes yaml bytes into object v.
+// Unmarshal decodes yaml bytes into object v.
 // Param v should be a pointer type.
-func (j *Yaml) Decode(data []byte, v any) error {
+func (j *Yaml) Unmarshal(data []byte, v any) error {
 	return yaml.Unmarshal(data, v)
 }
 
@@ -40,8 +40,8 @@ func (j *Yaml) NewDecoder(r io.Reader) codecs.Decoder {
 	return yaml.NewDecoder(r)
 }
 
-// Encodes returns if this is able to encode the given type.
-func (j *Yaml) Encodes(v any) bool {
+// Marshals returns if this is able to encode the given type.
+func (j *Yaml) Marshals(v any) bool {
 	switch v.(type) {
 	case []string:
 		return true
@@ -58,9 +58,9 @@ func (j *Yaml) Encodes(v any) bool {
 	}
 }
 
-// Decodes returns if this is able to decode the given type.
-func (j *Yaml) Decodes(v any) bool {
-	return j.Encodes(v)
+// Unmarshals returns if this is able to decode the given type.
+func (j *Yaml) Unmarshals(v any) bool {
+	return j.Marshals(v)
 }
 
 // ContentTypes returns the content types the marshaller can handle.
@@ -70,12 +70,12 @@ func (j *Yaml) ContentTypes() []string {
 	}
 }
 
-// String returns the plugin implementation of the marshaler.
-func (j *Yaml) String() string {
+// Name returns the codec name.
+func (j *Yaml) Name() string {
 	return "yaml"
 }
 
-// Exts is a list of file extensions this encoder supports.
+// Exts is a list of file extensions this marshaler supports.
 func (j *Yaml) Exts() []string {
 	return []string{".yaml", ".yml"}
 }

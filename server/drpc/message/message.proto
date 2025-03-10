@@ -6,7 +6,14 @@ import "google/protobuf/any.proto";
 
 option go_package = ".;message";
 
+message Error {
+    uint64 code = 1;
+    string message = 2;
+    string wrapped = 3;
+}
+
 message Response {
     map<string, string> metadata = 1;
     google.protobuf.Any data = 2;
+    Error error = 3;
 }

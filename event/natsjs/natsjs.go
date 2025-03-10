@@ -175,7 +175,7 @@ func (n *NatsJS) Consume(topic string, opts ...event.ConsumeOption) (<-chan even
 
 		// decode the message
 		var evt event.Event
-		if err := n.publishCodec.Decode(msg.Data, &evt); err != nil {
+		if err := n.publishCodec.Unmarshal(msg.Data, &evt); err != nil {
 			n.logger.Error("decoding message", "error", err)
 			// not acknowledging the message is the way to indicate an error occurred
 			return
@@ -346,7 +346,7 @@ func (n *NatsJS) Request(
 		pbReq.Metadata = make(map[string]string)
 	}
 
-	data, err := n.requestCodec.Encode(pbReq)
+	data, err := n.requestCodec.Marshal(pbReq)
 	if err != nil {
 		n.logger.Error("while encoding the message", "topic", req.Topic, "err", err, "data", data)
 		return nil, fmt.Errorf("while encoding the message: %w", err)
@@ -363,7 +363,7 @@ func (n *NatsJS) Request(
 	defer n.replyPool.Put(reply)
 	reply.Reset()
 
-	err = n.requestCodec.Decode(msg.Data, reply)
+	err = n.requestCodec.Unmarshal(msg.Data, reply)
 	if err != nil {
 		n.logger.Error("while decoding the reply", "topic", req.Topic, "err", err, "data", msg.Data)
 		return nil, err
@@ -423,7 +423,7 @@ func (n *NatsJS) HandleRequest(
 				reply.Code = http.StatusOK
 			}
 
-			b, err := n.requestCodec.Encode(reply)
+			b, err := n.requestCodec.Marshal(reply)
 			if err != nil {
 				n.logger.Error("failed to encode reply, error was", "err", err)
 				return
@@ -438,7 +438,7 @@ func (n *NatsJS) HandleRequest(
 		req := n.reqPool.Get()
 		defer n.reqPool.Put(req)
 
-		err := n.requestCodec.Decode(msg.Data, req)
+		err := n.requestCodec.Unmarshal(msg.Data, req)
 		if err != nil {
 			n.logger.Error("while decoding the request", "error", err)
 			replyFunc(ctx, nil, fmt.Errorf("while decoding the request: %w", err))

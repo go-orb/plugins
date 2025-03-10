@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/go-orb/go-orb/client"
+	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
@@ -47,15 +48,15 @@ var (
 			},
 			URL: "t",
 		},
-		// {
-		// 	Name:        "raw-json",
-		// 	Endpoint:    proto.EndpointStreamsCall,
-		// 	ContentType: "application/json",
-		// 	Request:     `{"name": "Alex"}`,
-		// 	Response: map[string]any{
-		// 		"msg": "Hello Alex",
-		// 	},
-		// },
+		{
+			Name:        "raw-json",
+			Endpoint:    proto.EndpointStreamsCall,
+			ContentType: "application/json",
+			Request:     `{"name": "Alex"}`,
+			Response: map[string]any{
+				"msg": "Hello Alex",
+			},
+		},
 		{
 			Name:     "default codec with URL",
 			Endpoint: proto.EndpointStreamsCall,
@@ -88,18 +89,17 @@ var (
 				Msg: "Hello Alex",
 			},
 		},
-		// Not supported in dRPC, have to fix it.
-		// {
-		// 	Name:        "json",
-		// 	Endpoint:    proto.EndpointStreamsCall,
-		// 	ContentType: "application/json",
-		// 	Request: map[string]any{
-		// 		"name": "Alex",
-		// 	},
-		// 	Response: map[string]any{
-		// 		"msg": "Hello Alex",
-		// 	},
-		// },
+		{
+			Name:        "json",
+			Endpoint:    proto.EndpointStreamsCall,
+			ContentType: "application/json",
+			Request: map[string]any{
+				"name": "Alex",
+			},
+			Response: map[string]any{
+				"msg": "Hello Alex",
+			},
+		},
 		{
 			Name:     "error request",
 			Endpoint: proto.EndpointStreamsCall,
@@ -278,7 +278,7 @@ func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest, clientWire 
 		opts = append(opts, client.WithPreferredTransports(s.Transports...))
 	}
 
-	if req.ContentType == "" || req.ContentType == "application/x-protobuf" {
+	if req.ContentType == "" || req.ContentType == codecs.MimeProto {
 		rsp, err := client.Request[proto.CallResponse](
 			ctx,
 			clientWire,

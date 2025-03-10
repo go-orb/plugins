@@ -8,9 +8,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"reflect"
 	"strings"
 
+	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/server/drpc/message"
@@ -22,6 +24,20 @@ import (
 	"storj.io/drpc/drpcerr"
 	"storj.io/drpc/drpcmetadata"
 )
+
+var _ drpc.Encoding = (*encoder)(nil)
+
+type encoder struct {
+	codec codecs.Marshaler
+}
+
+func (e *encoder) Marshal(msg drpc.Message) ([]byte, error) {
+	return e.codec.Marshal(msg)
+}
+
+func (e *encoder) Unmarshal(data []byte, msg drpc.Message) error {
+	return e.codec.Unmarshal(data, msg)
+}
 
 type streamWrapper struct {
 	drpc.Stream
@@ -40,12 +56,22 @@ func (m *Mux) HandleRPC(stream drpc.Stream, rpc string) (err error) {
 	req := interface{}(stream)
 
 	if data.in1 != streamType {
-		msg, ok := reflect.New(data.in1.Elem()).Interface().(drpc.Message)
-		if !ok {
-			return drpc.InternalError.New("invalid rpc input type")
+		// Check for content type in metadata
+		ctx := stream.Context()
+		dMeta, hasMeta := drpcmetadata.Get(ctx)
+		contentType := codecs.MimeProto
+		if hasMeta {
+			contentType = dMeta["Content-Type"]
 		}
 
-		if err := stream.MsgRecv(msg, data.enc); err != nil {
+		codec, err := codecs.GetMime(contentType)
+		if err != nil {
+			return drpcerr.WithCode(fmt.Errorf("invalid content type: %q", contentType), http.StatusInternalServerError)
+		}
+
+		msg := reflect.New(data.in1.Elem()).Interface()
+
+		if err := stream.MsgRecv(msg, &encoder{codec: codec}); err != nil {
 			return errs.Wrap(err)
 		}
 

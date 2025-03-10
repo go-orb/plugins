@@ -21,27 +21,6 @@ import (
 	"github.com/go-orb/plugins/client/orb_transport/grpc/pool"
 )
 
-type codecProxy struct {
-	codec codecs.Marshaler
-}
-
-// Marshal returns the wire format of v.
-func (c *codecProxy) Marshal(v any) ([]byte, error) {
-	return c.codec.Encode(v)
-}
-
-// Unmarshal parses the wire format into v.
-func (c *codecProxy) Unmarshal(data []byte, v any) error {
-	return c.codec.Decode(data, v)
-}
-
-// Name returns the name of the Codec implementation. The returned string
-// will be used as part of content type in transmission.  The result must be
-// static; the result cannot change between calls.
-func (c *codecProxy) Name() string {
-	return c.codec.String()
-}
-
 // Name is the transports name.
 const Name = "grpc"
 
@@ -64,7 +43,7 @@ func (t *Transport) Start() error {
 			return err
 		}
 
-		encoding.RegisterCodec(&codecProxy{codec: codec})
+		encoding.RegisterCodec(codec)
 	}
 
 	return nil

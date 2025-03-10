@@ -46,7 +46,7 @@ func testData(t *testing.T) map[string]any {
 	}
 
 	data := make(map[string]any)
-	if err := codec.Decode([]byte(testJSON), &data); err != nil {
+	if err := codec.Unmarshal([]byte(testJSON), &data); err != nil {
 		t.Fatalf("error while reading testJSON: %v", err)
 	}
 

@@ -52,14 +52,15 @@ func (m *mDecoder) Decode(v any) error {
 // that has more extented support for protocol buffer fields.
 type JSONPb struct{}
 
-// Encode encodes "v" into byte sequence.
-func (j *JSONPb) Encode(v any) ([]byte, error) {
+// Marshal marshals any object into json bytes.
+// Param v should be a pointer type.
+func (j *JSONPb) Marshal(v any) ([]byte, error) {
 	return protojson.Marshal(v.(protoreflect.ProtoMessage)) //nolint:errcheck
 }
 
-// Decode decodes "data" into "v".
-// "v" must be a pointer value.
-func (j *JSONPb) Decode(b []byte, v any) error {
+// Unmarshal decodes json bytes into object v.
+// Param v should be a pointer type.
+func (j *JSONPb) Unmarshal(b []byte, v any) error {
 	return protojson.Unmarshal(b, v.(protoreflect.ProtoMessage)) //nolint:errcheck
 }
 
@@ -73,16 +74,18 @@ func (j *JSONPb) NewDecoder(r io.Reader) codecs.Decoder {
 	return &mDecoder{r: r}
 }
 
-// Encodes returns if this is able to encode the given type.
-func (j *JSONPb) Encodes(v any) bool {
+// Marshals returns if this is able to encode the given type.
+func (j *JSONPb) Marshals(v any) bool {
 	_, ok := v.(protoreflect.ProtoMessage)
 
 	return ok
 }
 
-// Decodes returns if this is able to decode the given type.
-func (j *JSONPb) Decodes(v any) bool {
-	return j.Encodes(v)
+// Unmarshals returns if this is able to decode the given type.
+func (j *JSONPb) Unmarshals(v any) bool {
+	_, ok := v.(protoreflect.ProtoMessage)
+
+	return ok
 }
 
 // ContentTypes returns the content types the marshaller can handle.
@@ -92,8 +95,8 @@ func (j *JSONPb) ContentTypes() []string {
 	}
 }
 
-// String returns the plugin implementation of the marshaler.
-func (j *JSONPb) String() string {
+// Name returns the codec name.
+func (j *JSONPb) Name() string {
 	return "jsonpb"
 }
 
