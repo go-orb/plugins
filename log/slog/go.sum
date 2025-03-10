@@ -4,8 +4,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-orb/go-orb v0.2.2-0.20250310150137-28d27c7c856e h1:aNZeGsCqC7braUMhRrmBbqVw4QIrY6J2IUyqDZSW8TA=
 github.com/go-orb/go-orb v0.2.2-0.20250310150137-28d27c7c856e/go.mod h1:nnJeJbc7HMursS7XlvoIv7k+IJ3se6Z9lHlnUlMoUJ0=
-github.com/go-orb/plugins/codecs/json v0.1.1-0.20250310144458-ca99e485383c h1:8r+yDzloZQ3foOtkhP/wA2JfL33siEZxVVW+4kTvH9o=
-github.com/go-orb/plugins/codecs/json v0.1.1-0.20250310144458-ca99e485383c/go.mod h1:7jS2B6/GSV9OiuyCz7oe16YYGm/C2U8J7VrzPX0w0FA=
+github.com/go-orb/plugins/codecs/json v0.1.1-0.20250310151028-2bd0334e556f h1:j0gkuxI6wBOfiTmL7ZYRrqBkp91vkRfDI+k32ZViihQ=
+github.com/go-orb/plugins/codecs/json v0.1.1-0.20250310151028-2bd0334e556f/go.mod h1:btXn+jB+M7+pyjnsxgirbHmE8FhQ6ohu2M1pOCi17w4=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.10.0 h1:Xv5erBjTwe/5IxqUQTdXv5kgmIvbHo3QQyRwhJsOfJA=

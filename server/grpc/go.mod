@@ -4,14 +4,14 @@ go 1.23.6
 
 require (
 	github.com/go-orb/go-orb v0.2.2-0.20250310150137-28d27c7c856e
-	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20250309142639-d9510978f311
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250310144458-ca99e485383c
-	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250310144458-ca99e485383c
-	github.com/go-orb/plugins/config/source/file v0.1.1-0.20250310144458-ca99e485383c
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250310144458-ca99e485383c
+	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20250310151257-e3753cc29dd6
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250310151028-2bd0334e556f
+	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250310151028-2bd0334e556f
+	github.com/go-orb/plugins/config/source/file v0.1.1-0.20250310151028-2bd0334e556f
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250310151028-2bd0334e556f
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.10.0
-	google.golang.org/grpc v1.70.0
+	google.golang.org/grpc v1.71.0
 	google.golang.org/protobuf v1.36.5
 )
 
@@ -28,6 +28,6 @@ require (
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/tools v0.31.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250219182151-9fdb1cabc7b2 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250303144028-a0af3efb3deb // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

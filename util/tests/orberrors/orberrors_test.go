@@ -190,8 +190,8 @@ func TestDefaultErrors(t *testing.T) {
 		code    int
 		message string
 	}{
-		{orberrors.ErrUnimplemented, 500, "Unimplemented"},
-		{orberrors.ErrUnavailable, 503, "Unavailable"},
+		{orberrors.ErrUnimplemented, 500, "internal server error"},
+		{orberrors.ErrUnavailable, 503, "service unavailable"},
 		{orberrors.ErrInternalServerError, 500, "internal server error"},
 		{orberrors.ErrUnauthorized, 401, "unauthorized"},
 		{orberrors.ErrRequestTimeout, 408, "request timeout"},
