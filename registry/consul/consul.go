@@ -263,8 +263,8 @@ func (c *RegistryConsul) GetService(name string, _ ...registry.GetOption) ([]*re
 	}
 
 	var (
-		ok  bool
-		svc *registry.Service
+		haveService bool
+		svc         *registry.Service
 	)
 
 	serviceMap := make(map[string]*registry.Service)
@@ -289,8 +289,8 @@ func (c *RegistryConsul) GetService(name string, _ ...registry.GetOption) ([]*re
 			}
 		}
 
-		svc, ok = serviceMap[version]
-		if !ok {
+		svc, haveService = serviceMap[version]
+		if !haveService {
 			svc = &registry.Service{
 				Endpoints: decodeEndpoints(node.Service.Tags),
 				Name:      node.Service.Service,
