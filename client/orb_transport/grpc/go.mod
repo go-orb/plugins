@@ -3,8 +3,8 @@ module github.com/go-orb/plugins/client/orb_transport/grpc
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250307141103-038ba03c3f37
-	github.com/go-orb/plugins/client/orb v0.1.4-0.20250307141712-ef020f968e94
+	github.com/go-orb/go-orb v0.2.2-0.20250310150137-28d27c7c856e
+	github.com/go-orb/plugins/client/orb v0.1.4-0.20250310144458-ca99e485383c
 	google.golang.org/grpc v1.70.0
 )
 

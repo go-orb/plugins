@@ -1,8 +1,8 @@
 github.com/cornelk/hashmap v1.0.8 h1:nv0AWgw02n+iDcawr5It4CjQIAcdMMKRrs10HOJYlrc=
 github.com/cornelk/hashmap v1.0.8/go.mod h1:RfZb7JO3RviW/rT6emczVuC/oxpdz4UsSB2LJSclR1k=
-github.com/go-orb/go-orb v0.2.2-0.20250307141103-038ba03c3f37 h1:yrdb/3pkAWTFednJG2VsocSx5BvN9KHekly2p/kvLI8=
-github.com/go-orb/go-orb v0.2.2-0.20250307141103-038ba03c3f37/go.mod h1:TO/Gnyh+NGy5S5vZj9sYf+U9LSFhwUeAxdlxiPtj6PY=
-github.com/go-orb/plugins/client/orb v0.1.4-0.20250307141712-ef020f968e94 h1:h3yzMkBmSlWAPc85JEH9HIn3I5uQdPa+uhhGGpNQPgI=
-github.com/go-orb/plugins/client/orb v0.1.4-0.20250307141712-ef020f968e94/go.mod h1:xIVMUiqvToRoyDg+ks2+46u+izyvPjP0Cp4su7w22wo=
-github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20250307141712-ef020f968e94 h1:pwyVEE5ksFycP0dWjaPQY8QJVLB5+Etqczz72cJhX20=
-github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20250307141712-ef020f968e94/go.mod h1:Ro95m9L0C3Yv2d8VmRGFHFe4DLHzwydexObRUQBVUPg=
+github.com/go-orb/go-orb v0.2.2-0.20250310150137-28d27c7c856e h1:aNZeGsCqC7braUMhRrmBbqVw4QIrY6J2IUyqDZSW8TA=
+github.com/go-orb/go-orb v0.2.2-0.20250310150137-28d27c7c856e/go.mod h1:nnJeJbc7HMursS7XlvoIv7k+IJ3se6Z9lHlnUlMoUJ0=
+github.com/go-orb/plugins/client/orb v0.1.4-0.20250310144458-ca99e485383c h1:GVmaYHHqn/DfGOsdTqqhuKAwZgtFdcp8Z0BURrcpUt4=
+github.com/go-orb/plugins/client/orb v0.1.4-0.20250310144458-ca99e485383c/go.mod h1:inaWOWY2jt51NS2smmc7ikIWYOQSvx1HG9Gy8mFyREI=
+github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20250310144458-ca99e485383c h1:MQ1RWX2/tfr3BiLh41JJ3AMR8b9PEZg46W4w4J3bamY=
+github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20250310144458-ca99e485383c/go.mod h1:0yDdNi1LBw0HvhhnRdMXdI9T36f1jc+gp8LMy30Bw4w=

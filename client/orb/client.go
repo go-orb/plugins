@@ -103,8 +103,10 @@ func (c *Client) ResolveService(
 	}
 
 	// Try to resolve the service with retries
-	var services []*registry.Service
-	var err error
+	var (
+		services []*registry.Service
+		err      error
+	)
 
 	// Retry up to 3 times with a small delay between attempts
 	for retries := 0; retries < 1000; retries++ {

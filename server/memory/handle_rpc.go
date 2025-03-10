@@ -13,11 +13,6 @@ import (
 	"storj.io/drpc"
 )
 
-type outMessage struct {
-	metadata map[string]string
-	message  drpc.Message
-}
-
 type streamWrapper struct {
 	drpc.Stream
 	ctx context.Context

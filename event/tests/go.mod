@@ -3,11 +3,11 @@ module github.com/go-orb/plugins/event/tests
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250307141103-038ba03c3f37
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250307141712-ef020f968e94
-	github.com/go-orb/plugins/codecs/proto v0.1.1-0.20250307141712-ef020f968e94
-	github.com/go-orb/plugins/event/natsjs v0.1.1-0.20250307141712-ef020f968e94
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250307141712-ef020f968e94
+	github.com/go-orb/go-orb v0.2.2-0.20250310150137-28d27c7c856e
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250310144458-ca99e485383c
+	github.com/go-orb/plugins/codecs/proto v0.1.1-0.20250310144458-ca99e485383c
+	github.com/go-orb/plugins/event/natsjs v0.1.1-0.20250310144458-ca99e485383c
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250310144458-ca99e485383c
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/protobuf v1.36.5
 )
@@ -15,6 +15,7 @@ require (
 require (
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/nats-io/nats.go v1.39.1 // indirect
 	github.com/nats-io/nkeys v0.4.10 // indirect

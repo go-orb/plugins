@@ -96,5 +96,3 @@ func (m *Mux) registerOne(srv interface{}, rpc string, enc drpc.Encoding, receiv
 
 	return nil
 }
-
-

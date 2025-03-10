@@ -6,8 +6,8 @@ toolchain go1.24.0
 
 require (
 	github.com/go-micro/plugins/v4/store/nats-js-kv v0.0.0-20240726082623-6831adfdcdc4
-	github.com/go-orb/go-orb v0.2.2-0.20250307215142-2a4889953172
-	github.com/go-orb/plugins/kvstore/natsjs v0.1.0
+	github.com/go-orb/go-orb v0.2.2-0.20250310150137-28d27c7c856e
+	github.com/go-orb/plugins/kvstore/natsjs v0.0.0-20250310144458-ca99e485383c
 	github.com/nats-io/nats.go v1.39.1
 	github.com/stretchr/testify v1.8.4
 	go-micro.dev/v4 v4.11.0
@@ -28,8 +28,10 @@ require (
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect
 	github.com/go-git/go-git/v5 v5.4.2 // indirect
+	github.com/go-orb/wire v0.7.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/google/uuid v1.3.0 // indirect
+	github.com/google/subcommands v1.2.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
@@ -65,7 +67,3 @@ require (
 replace github.com/go-micro/plugins/v4/store/nats-js-kv => github.com/kobergj/plugins/v4/store/nats-js-kv v0.0.0-20240807130109-f62bb67e8c90
 
 replace go-micro.dev/v4 => github.com/butonic/go-micro/v4 v4.11.1-0.20241115112658-b5d4de5ed9b3
-
-replace github.com/go-orb/plugins/kvstore/natsjs => ../natsjs
-
-replace github.com/go-orb/go-orb => ../../../go-orb

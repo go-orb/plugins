@@ -46,9 +46,11 @@ type streamWrapper struct {
 func (s *streamWrapper) Context() context.Context { return s.ctx }
 
 // HandleRPC handles the rpc that has been requested by the stream.
+//
+//nolint:funlen
 func (m *Mux) HandleRPC(stream drpc.Stream, rpc string) (err error) {
-	data, ok := m.rpcs[rpc]
-	if !ok {
+	data, rpcOk := m.rpcs[rpc]
+	if !rpcOk {
 		return drpc.ProtocolError.New("unknown rpc: %q", rpc)
 	}
 
@@ -59,6 +61,7 @@ func (m *Mux) HandleRPC(stream drpc.Stream, rpc string) (err error) {
 		ctx := stream.Context()
 		dMeta, hasMeta := drpcmetadata.Get(ctx)
 		contentType := codecs.MimeProto
+
 		if hasMeta {
 			contentType = dMeta["Content-Type"]
 		}
@@ -82,8 +85,8 @@ func (m *Mux) HandleRPC(stream drpc.Stream, rpc string) (err error) {
 	ctx, reqMd := metadata.WithIncoming(ctx)
 	ctx, outMd := metadata.WithOutgoing(ctx)
 
-	dMeta, ok := drpcmetadata.Get(ctx)
-	if !ok {
+	dMeta, rpcOk := drpcmetadata.Get(ctx)
+	if !rpcOk {
 		dMeta = make(map[string]string)
 	}
 

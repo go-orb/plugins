@@ -78,6 +78,8 @@ func (t *Transport) Request(_ context.Context, _ *client.Req[any, any], _ *clien
 }
 
 // RequestNoCodec does the actual rpc request to the server.
+//
+//nolint:gocyclo,funlen
 func (t *Transport) RequestNoCodec(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
 	node, err := req.Node(ctx, opts)
 	if err != nil {

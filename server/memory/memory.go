@@ -69,7 +69,7 @@ func (s *Server) Start(ctx context.Context) error {
 	s.ctx, s.cancelFunc = context.WithCancel(ctx)
 
 	// Register the memory server with the client package
-	client.RegisterMemoryServer(string(s.registry.ServiceName()), s)
+	client.RegisterMemoryServer(s.registry.ServiceName(), s)
 
 	s.started = true
 
@@ -289,7 +289,7 @@ func (m *Stream) MsgRecv(msg drpc.Message, _ drpc.Encoding) error {
 		}
 
 		// Try to convert between pointer and value
-		if origReqValue.Type().AssignableTo(reflect.PtrTo(msgValue.Type())) {
+		if origReqValue.Type().AssignableTo(reflect.PointerTo(msgValue.Type())) {
 			// Handle pointer compatibility
 			msgValue.Set(origReqValue.Elem())
 			return nil
@@ -318,9 +318,6 @@ func (m *Stream) MsgRecv(msg drpc.Message, _ drpc.Encoding) error {
 
 // Request implements the client.MemoryServer interface.
 func (s *Server) Request(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
-	// For memory server, we directly handle the request without serialization
-	// Since we're in the same process, we can just call the appropriate handler
-
 	// Extract the service and method from the request
 	service := req.Service()
 	endpoint := req.Endpoint()

@@ -30,8 +30,8 @@ func (p *Proto) ContentTypes() []string {
 	}
 }
 
-// Encode encodes "value" into Proto.
-func (*Proto) Marshal(value interface{}) ([]byte, error) {
+// Marshal encodes "value" into Proto.
+func (p *Proto) Marshal(value interface{}) ([]byte, error) {
 	message, ok := value.(proto.Message)
 	if !ok {
 		return nil, errors.New("unable to marshal non proto field")
@@ -41,7 +41,7 @@ func (*Proto) Marshal(value interface{}) ([]byte, error) {
 }
 
 // Unmarshal decodes proto "data" into "value".
-func (*Proto) Unmarshal(data []byte, value interface{}) error {
+func (p *Proto) Unmarshal(data []byte, value interface{}) error {
 	message, ok := value.(proto.Message)
 	if !ok {
 		return errors.New("unable to unmarshal non proto field")
