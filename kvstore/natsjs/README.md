@@ -8,7 +8,7 @@ This plugins supports the `kvstore.Watcher` interface!
 
 ## Compatibility to "store/nats-js"
 
-The plugin is compatible to the "store/nats-js" plugin for go-micro as long as you don't disable JSONKeyValues or disable BucketPerTable.
+The plugin is compatible to the "store/nats-js" plugin for go-micro as long as you don't disable JSONKeyValues or enable BucketPerTable.
 
 The compatiblity is ensured by tests in the [kvstore/natsjs_micro_tests](https://github.com/go-orb/plugins/tree/main/kvstore/natsjs_micro_tests) directory.
 
