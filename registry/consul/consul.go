@@ -12,6 +12,7 @@ import (
 	"runtime"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-orb/go-orb/log"
@@ -20,6 +21,7 @@ import (
 	maddr "github.com/go-orb/go-orb/util/addr"
 	"github.com/google/uuid"
 	consul "github.com/hashicorp/consul/api"
+	"github.com/hashicorp/go-multierror"
 )
 
 // This is here to make sure RegistryConsul implements registry.Registry.
@@ -105,9 +107,15 @@ func (c *RegistryConsul) Deregister(s *registry.Service, _ ...registry.Deregiste
 		return errors.New("require at least one node")
 	}
 
-	node := s.Nodes[0]
+	var mErr *multierror.Error
+	for _, node := range s.Nodes {
+		mErr = multierror.Append(
+			mErr,
+			c.Client().Agent().ServiceDeregister(s.Name+"-"+node.ID+"-"+node.Transport),
+		)
+	}
 
-	return c.Client().Agent().ServiceDeregister(node.ID + "-" + node.Transport)
+	return mErr.ErrorOrNil()
 }
 
 // Register registers a service within the registry.
@@ -173,30 +181,36 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 			return err
 		}
 
-		metadata := node.Metadata
-		if metadata == nil {
-			metadata = make(map[string]string)
+		metadata := map[string]string{}
+		// Add service metadata to the service
+		for k, v := range service.Metadata {
+			metadata["orb_service_"+k] = v
+		}
+
+		// Add node metadata to the service
+		for k, v := range node.Metadata {
+			metadata["orb_node_"+k] = v
+		}
+
+		// Add the transport scheme to metadata if required
+		if _, ok := metadata[metaTransportKey]; !ok {
+			metadata[metaTransportKey] = node.Transport
+		}
+
+		// Add the node ID to metadata if required
+		if _, ok := metadata[metaNodeIDKey]; !ok {
+			metadata[metaNodeIDKey] = node.ID
 		}
 
 		// register the service
 		asr := &consul.AgentServiceRegistration{
-			ID:      node.ID + "-" + node.Transport,
+			ID:      service.Name + "-" + node.ID + "-" + node.Transport,
 			Name:    service.Name,
 			Tags:    tags,
 			Port:    port,
 			Address: host,
 			Meta:    metadata,
 			Check:   check,
-		}
-
-		// Add the transport scheme to metadata if required
-		if _, ok := asr.Meta[metaTransportKey]; !ok {
-			asr.Meta[metaTransportKey] = node.Transport
-		}
-
-		// Add the node ID to metadata if required
-		if _, ok := asr.Meta[metaNodeIDKey]; !ok {
-			asr.Meta[metaNodeIDKey] = node.ID
 		}
 
 		// Specify consul connect
@@ -225,6 +239,8 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 }
 
 // GetService returns a service from the registry.
+//
+//nolint:funlen
 func (c *RegistryConsul) GetService(name string, _ ...registry.GetOption) ([]*registry.Service, error) {
 	var (
 		rsp []*consul.ServiceEntry
@@ -262,14 +278,25 @@ func (c *RegistryConsul) GetService(name string, _ ...registry.GetOption) ([]*re
 		// version is now a tag
 		version, _ := decodeVersion(node.Service.Tags)
 
+		nodeMeta := map[string]string{}
+		svcMeta := map[string]string{}
+
+		for k, v := range node.Service.Meta {
+			if strings.HasPrefix(k, "orb_service_") {
+				svcMeta[strings.TrimPrefix(k, "orb_service_")] = v
+			} else if strings.HasPrefix(k, "orb_node_") {
+				nodeMeta[strings.TrimPrefix(k, "orb_node_")] = v
+			}
+		}
+
 		svc, ok = serviceMap[version]
 		if !ok {
 			svc = &registry.Service{
 				Endpoints: decodeEndpoints(node.Service.Tags),
 				Name:      node.Service.Service,
 				Version:   version,
+				Metadata:  svcMeta,
 			}
-			serviceMap[version] = svc
 		}
 
 		var del bool
@@ -288,21 +315,28 @@ func (c *RegistryConsul) GetService(name string, _ ...registry.GetOption) ([]*re
 		}
 
 		rNode := &registry.Node{
-			ID:       node.Service.ID,
+			ID:       node.Node.ID,
 			Address:  maddr.HostPort(node.Node.Address, node.Service.Port),
-			Metadata: node.Service.Meta,
+			Metadata: nodeMeta,
 		}
 
 		// Extract the transport from Metadata
-		if transport, ok := rNode.Metadata[metaTransportKey]; ok {
+		if transport, ok := node.Service.Meta[metaTransportKey]; ok {
 			rNode.Transport = transport
+			delete(rNode.Metadata, metaTransportKey)
+		} else {
+			continue
 		}
 
 		// Extract the node ID from Metadata
-		if nodeID, ok := rNode.Metadata[metaNodeIDKey]; ok {
+		if nodeID, ok := node.Service.Meta[metaNodeIDKey]; ok {
 			rNode.ID = nodeID
+			delete(rNode.Metadata, metaNodeIDKey)
+		} else {
+			continue
 		}
 
+		serviceMap[version] = svc
 		svc.Nodes = append(svc.Nodes, rNode)
 	}
 

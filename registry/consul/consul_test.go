@@ -81,7 +81,7 @@ func createServer() (*tests.TestSuite, func() error, error) {
 		return nil
 	}
 
-	return tests.CreateSuite(logger, []registry.Registry{reg1, reg2, reg3}, 0, 1), cleanup, nil
+	return tests.CreateSuite(logger, []registry.Registry{reg1, reg2, reg3}, 0, 0), cleanup, nil
 }
 
 func createServer1(tb testing.TB) (*testutil.TestServer, error) {

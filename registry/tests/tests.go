@@ -96,7 +96,7 @@ func (r *TestSuite) TestRegister() {
 
 			services, err = reg.GetService(service.Name)
 			r.Require().NoError(err)
-			r.Len(services, 1)
+			r.Require().Len(services, 1)
 			r.Equal(service.Version, services[0].Version)
 			r.Equal(service.Nodes[0].Transport, services[0].Nodes[0].Transport)
 		})
@@ -185,8 +185,6 @@ func (r *TestSuite) TestGetAllNodesAndVersions() {
 				for _, svc := range services {
 					r.Require().NoError(registry.Deregister(svc))
 				}
-
-				time.Sleep(r.updateTime)
 			}()
 
 			// Test 1: GetService should return all versions of service 1
@@ -675,8 +673,6 @@ func (r *TestSuite) TestServiceWithEndpoints() {
 
 // TestConcurrentRegistrations tests concurrent registration and deregistration operations.
 func (r *TestSuite) TestConcurrentRegistrations() {
-	r.T().Skip("flaky on CI")
-
 	const numServices = 10
 
 	const numWorkers = 3
@@ -849,13 +845,13 @@ func (r *TestSuite) TestServiceNodesHealth() {
 	r.Require().Len(services[0].Nodes, 2)
 
 	// Simulate a node becoming unhealthy by updating its metadata
-	services[0].Nodes[0].Metadata["status"] = "unhealthy"
+	nodes[0].Metadata["status"] = "unhealthy"
 
 	// Update the service with the modified node
 	updatedService := registry.Service{
 		Name:    service.Name,
 		Version: service.Version,
-		Nodes:   services[0].Nodes,
+		Nodes:   []*registry.Node{nodes[0]},
 	}
 	r.Require().NoError(r.registries[0].Register(&updatedService))
 	time.Sleep(r.updateTime)
