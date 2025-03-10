@@ -13,9 +13,11 @@ import (
 	"storj.io/drpc/drpcmetadata"
 	"storj.io/drpc/drpcpool"
 
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/go-orb/go-orb/client"
+	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
@@ -25,24 +27,17 @@ import (
 
 var _ drpc.Encoding = (*encoder)(nil)
 
-type encoder struct{}
+type encoder struct {
+	marshaler   codecs.Marshaler
+	unmarshaler codecs.Marshaler
+}
 
 func (e *encoder) Marshal(msg drpc.Message) ([]byte, error) {
-	message, ok := msg.(proto.Message)
-	if !ok {
-		return nil, errors.New("unable to marshal non proto field")
-	}
-
-	return proto.Marshal(message)
+	return e.marshaler.Marshal(msg)
 }
 
 func (e *encoder) Unmarshal(data []byte, msg drpc.Message) error {
-	message, ok := msg.(proto.Message)
-	if !ok {
-		return errors.New("unable to unmarshal non proto field")
-	}
-
-	return proto.Unmarshal(data, message)
+	return e.unmarshaler.Unmarshal(data, msg)
 }
 
 // Name is the transports name.
@@ -54,9 +49,8 @@ func init() {
 
 // Transport is a go-orb/plugins/client/orb compatible transport.
 type Transport struct {
-	logger  log.Logger
-	pool    *drpcpool.Pool[string, drpcpool.Conn]
-	encoder encoder
+	logger log.Logger
+	pool   *drpcpool.Pool[string, drpcpool.Conn]
 }
 
 // Start starts the transport.
@@ -105,29 +99,71 @@ func (t *Transport) RequestNoCodec(ctx context.Context, req *client.Req[any, any
 	// Add metadata to drpc.
 	md, ok := metadata.Outgoing(ctx)
 	if ok {
+		md["Content-Type"] = opts.ContentType
 		ctx = drpcmetadata.AddPairs(ctx, md)
+	}
+
+	contentTypeCodec, err := codecs.GetMime(opts.ContentType)
+	if err != nil {
+		return orberrors.From(err)
+	}
+
+	protoCodec := contentTypeCodec
+	if opts.ContentType != codecs.MimeProto {
+		protoCodec, err = codecs.GetMime(codecs.MimeProto)
+		if err != nil {
+			return orberrors.From(err)
+		}
 	}
 
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(opts.RequestTimeout))
 	defer cancel()
 
 	mdResult := &message.Response{}
-	if err := conn.Invoke(ctx, req.Endpoint(), &t.encoder, req.Req(), mdResult); err != nil {
+	if err := conn.Invoke(
+		ctx,
+		req.Endpoint(),
+		&encoder{marshaler: contentTypeCodec, unmarshaler: protoCodec},
+		req.Req(),
+		mdResult,
+	); err != nil {
 		orbError := orberrors.HTTP(int(drpcerr.Code(err))) //nolint:gosec
 		orbError = orbError.Wrap(err)
 
 		return orbError
 	}
 
-	// Unmarshal the result.
-	if err := mdResult.GetData().UnmarshalTo(result.(proto.Message)); err != nil { //nolint:errcheck
-		return orberrors.From(err)
-	}
-
 	// Retrieve metadata from drpc.
 	if opts.ResponseMetadata != nil {
 		for k, v := range mdResult.GetMetadata() {
 			opts.ResponseMetadata[k] = v
+		}
+	}
+
+	if mdResult.GetError().GetCode() != 0 {
+		orbE := orberrors.New(int(mdResult.GetError().GetCode()), mdResult.GetError().GetMessage())
+		if mdResult.GetError().GetWrapped() != "" {
+			orbE = orbE.Wrap(errors.New(mdResult.GetError().GetWrapped()))
+		}
+
+		return orbE
+	}
+
+	// Unmarshal the result.
+	if opts.ContentType == codecs.MimeProto {
+		if err := mdResult.GetData().UnmarshalTo(result.(proto.Message)); err != nil { //nolint:errcheck
+			return orberrors.From(err)
+		}
+	} else {
+		// Convert the Any proto message to JSON first
+		jsonBytes, err := protojson.Marshal(mdResult.GetData())
+		if err != nil {
+			return orberrors.From(err)
+		}
+
+		// Use contentTypeCodec to unmarshal the JSON into the result
+		if err := contentTypeCodec.Unmarshal(jsonBytes, result); err != nil {
+			return orberrors.From(err)
 		}
 	}
 

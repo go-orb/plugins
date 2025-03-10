@@ -6,7 +6,6 @@ package drpc
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -113,23 +112,27 @@ func (m *Mux) HandleRPC(stream drpc.Stream, rpc string) (err error) {
 	// Calls all middlewares until the actual call.
 	out, err := h(ctx, req)
 
-	switch {
-	case err != nil:
-		oErr := orberrors.From(err)
-
-		if oErr.Wrapped != nil {
-			return drpcerr.WithCode(fmt.Errorf("%s: %s", oErr.Message, oErr.Wrapped.Error()), uint64(oErr.Code)) //nolint:gosec
-		}
-
-		return drpcerr.WithCode(errors.New(oErr.Message), uint64(oErr.Code)) //nolint:gosec
-	case out != nil && !reflect.ValueOf(out).IsNil():
+	if out != nil && err == nil {
 		outData, err := anypb.New(out.(proto.Message)) //nolint:errcheck
 		if err != nil {
 			return errs.Wrap(err)
 		}
 
-		return stream.MsgSend(&message.Response{Metadata: outMd, Data: outData}, data.enc)
-	default:
-		return stream.CloseSend()
+		return stream.MsgSend(&message.Response{Metadata: outMd, Data: outData, Error: &message.Error{}}, data.enc)
+	} else if err != nil {
+		orbErr := orberrors.From(err)
+
+		wrapped := ""
+		if orbErr.Unwrap() != nil {
+			wrapped = orbErr.Unwrap().Error()
+		}
+
+		return stream.MsgSend(&message.Response{Metadata: outMd, Data: &anypb.Any{}, Error: &message.Error{
+			Code:    int64(orbErr.Code),
+			Message: orbErr.Message,
+			Wrapped: wrapped,
+		}}, data.enc)
 	}
+
+	return stream.CloseSend()
 }
