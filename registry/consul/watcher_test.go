@@ -64,6 +64,7 @@ func newWatcher() *consulWatcher {
 	}
 }
 
+//nolint:unparam
 func newHealthCheck(node, name, status string) *api.HealthCheck {
 	return &api.HealthCheck{
 		Node:        node,
@@ -74,8 +75,6 @@ func newHealthCheck(node, name, status string) *api.HealthCheck {
 }
 
 // newServiceEntry.
-//
-//nolint:unparam
 func newServiceEntry(node, address, name, version, scheme string, checks []*api.HealthCheck) *api.ServiceEntry {
 	md := map[string]string{metaTransportKey: scheme}
 	return &api.ServiceEntry{

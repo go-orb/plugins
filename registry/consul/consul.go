@@ -240,7 +240,7 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 
 // GetService returns a service from the registry.
 //
-//nolint:funlen
+//nolint:funlen,gocyclo
 func (c *RegistryConsul) GetService(name string, _ ...registry.GetOption) ([]*registry.Service, error) {
 	var (
 		rsp []*consul.ServiceEntry
