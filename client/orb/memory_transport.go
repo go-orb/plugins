@@ -27,22 +27,13 @@ func (t *MemoryTransport) Stop(_ context.Context) error {
 	return nil
 }
 
-func (t *MemoryTransport) String() string {
+// Name returns the name of this transport.
+func (t *MemoryTransport) Name() string {
 	return "memory"
 }
 
-// NeedsCodec returns false for grpc the transport.
-func (t *MemoryTransport) NeedsCodec() bool {
-	return false
-}
-
-// Request is a noop for grpc.
-func (t *MemoryTransport) Request(_ context.Context, _ *client.Req[any, any], _ *client.CallOptions) (*client.RawResponse, error) {
-	return nil, orberrors.ErrInternalServerError
-}
-
-// RequestNoCodec does the actual rpc request to the server.
-func (t *MemoryTransport) RequestNoCodec(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
+// Request does the actual rpc request to the server.
+func (t *MemoryTransport) Request(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
 	t.logger.Debug("requesting memory server", "service", req.Service())
 
 	server, err := client.ResolveMemoryServer(req.Service())

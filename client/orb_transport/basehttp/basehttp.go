@@ -48,32 +48,29 @@ func (t *Transport) Stop(_ context.Context) error {
 	return nil
 }
 
-func (t *Transport) String() string {
+// Name returns the name of this transport.
+func (t *Transport) Name() string {
 	return t.name
 }
 
-// NeedsCodec is always true for http based transports.
-func (t *Transport) NeedsCodec() bool {
-	return true
-}
-
 // Request does the actual rpc call to the server.
-func (t *Transport) Request(ctx context.Context, req *client.Req[any, any], opts *client.CallOptions,
-) (*client.RawResponse, error) {
+//
+//nolint:funlen,gocyclo
+func (t *Transport) Request(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
 	codec, err := codecs.GetEncoder(opts.ContentType, req.Req())
 	if err != nil {
-		return nil, orberrors.ErrBadRequest.Wrap(err)
+		return orberrors.ErrBadRequest.Wrap(err)
 	}
 
 	// Encode the request into a *bytes.Buffer{}.
 	buff := bytes.NewBuffer(nil)
 	if err := codec.NewEncoder(buff).Encode(req.Req()); err != nil {
-		return nil, orberrors.ErrBadRequest.Wrap(err)
+		return orberrors.ErrBadRequest.Wrap(err)
 	}
 
 	node, err := req.Node(ctx, opts)
 	if err != nil {
-		return nil, orberrors.From(err)
+		return orberrors.From(err)
 	}
 
 	// Set the connection timeout
@@ -88,7 +85,7 @@ func (t *Transport) Request(ctx context.Context, req *client.Req[any, any], opts
 		buff,
 	)
 	if err != nil {
-		return nil, orberrors.ErrBadRequest.Wrap(err)
+		return orberrors.ErrBadRequest.Wrap(err)
 	}
 
 	// Set headers.
@@ -103,32 +100,22 @@ func (t *Transport) Request(ctx context.Context, req *client.Req[any, any], opts
 		}
 	}
 
-	return t.call2(hReq, opts)
-}
-
-func (t *Transport) call2(hReq *http.Request, opts *client.CallOptions) (*client.RawResponse, error) {
 	// Run the request.
 	resp, err := t.hclient.Do(hReq)
 	if err != nil {
-		return nil, orberrors.From(err)
+		return orberrors.From(err)
 	}
 
-	buff := bytes.NewBuffer(nil)
+	buff = bytes.NewBuffer(nil)
 
 	_, err = buff.ReadFrom(resp.Body)
 	if err != nil && !errors.Is(err, io.EOF) {
-		return nil, orberrors.From(err)
+		return orberrors.From(err)
 	}
 
 	// Close the request body.
 	if err := resp.Body.Close(); err != nil {
-		return nil, orberrors.From(err)
-	}
-
-	// Create a Response{} and fill it.
-	res := &client.RawResponse{
-		ContentType: resp.Header.Get("Content-Type"),
-		Body:        buff,
+		return orberrors.From(err)
 	}
 
 	if opts.ResponseMetadata != nil {
@@ -154,15 +141,16 @@ func (t *Transport) call2(hReq *http.Request, opts *client.CallOptions) (*client
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return res, orberrors.HTTP(resp.StatusCode)
+		return orberrors.HTTP(resp.StatusCode)
 	}
 
-	return res, nil
-}
+	// Decode the response into `result`.
+	err = codec.NewDecoder(buff).Decode(result)
+	if err != nil {
+		return orberrors.ErrBadRequest.Wrap(err)
+	}
 
-// RequestNoCodec is a noop for http based transports.
-func (t *Transport) RequestNoCodec(_ context.Context, _ *client.Req[any, any], _ any, _ *client.CallOptions) error {
-	return orberrors.ErrInternalServerError
+	return nil
 }
 
 // NewTransport creates a Transport with a custom http.Client.

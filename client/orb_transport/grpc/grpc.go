@@ -98,18 +98,9 @@ func (t *Transport) Stop(_ context.Context) error {
 	return nil
 }
 
-func (t *Transport) String() string {
+// Name returns the name of this transport.
+func (t *Transport) Name() string {
 	return t.name
-}
-
-// NeedsCodec returns false for grpc the transport.
-func (t *Transport) NeedsCodec() bool {
-	return false
-}
-
-// Request is a noop for grpc.
-func (t *Transport) Request(_ context.Context, _ *client.Req[any, any], _ *client.CallOptions) (*client.RawResponse, error) {
-	return nil, orberrors.ErrInternalServerError
 }
 
 // toOrbError converts a grpc error to an orb error.
@@ -137,8 +128,8 @@ func toOrbError(err error) error {
 	return orbE.Wrap(gErr.Err())
 }
 
-// RequestNoCodec does the actual rpc request to the server.
-func (t *Transport) RequestNoCodec(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
+// Request does the actual rpc request to the server.
+func (t *Transport) Request(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
 	node, err := req.Node(ctx, opts)
 	if err != nil {
 		return orberrors.From(err)

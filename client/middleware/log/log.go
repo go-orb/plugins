@@ -8,7 +8,6 @@ import (
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/types"
-	"github.com/go-orb/go-orb/util/orberrors"
 )
 
 func init() {
@@ -42,51 +41,10 @@ func (m *Middleware) String() string {
 	return Name
 }
 
-// Request wraps the original Request method or other middlewares.
+// Request wraps the original RequestNoCodec method or other middlewares.
 func (m *Middleware) Request(
 	next client.MiddlewareRequestHandler,
 ) client.MiddlewareRequestHandler {
-	return func(ctx context.Context, req *client.Req[any, any], opts *client.CallOptions) (*client.RawResponse, error) {
-		node, err := req.Node(ctx, opts)
-		if err != nil {
-			return nil, orberrors.From(err)
-		}
-
-		m.logger.TraceContext(
-			ctx,
-			"Making a request",
-			"url", fmt.Sprintf("%s://%s%s", node.Transport, node.Address, req.Endpoint()),
-			"content-type", opts.ContentType,
-		)
-
-		// The actual call.
-		rsp, err := next(ctx, req, opts)
-
-		if err != nil {
-			m.logger.ErrorContext(
-				ctx,
-				"Got an error",
-				"error", err,
-				"url", fmt.Sprintf("%s://%s%s", node.Transport, node.Address, req.Endpoint()),
-				"content-type", opts.ContentType,
-			)
-		} else {
-			m.logger.TraceContext(
-				ctx,
-				"Got a result",
-				"url", fmt.Sprintf("%s://%s%s", node.Transport, node.Address, req.Endpoint()),
-				"content-type", opts.ContentType,
-			)
-		}
-
-		return rsp, err
-	}
-}
-
-// RequestNoCodec wraps the original RequestNoCodec method or other middlewares.
-func (m *Middleware) RequestNoCodec(
-	next client.MiddlewareRequestNoCodecHandler,
-) client.MiddlewareRequestNoCodecHandler {
 	return func(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
 		node, err := req.Node(ctx, opts)
 		if err != nil {

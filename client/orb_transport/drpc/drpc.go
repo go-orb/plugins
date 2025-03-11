@@ -96,24 +96,15 @@ func (t *Transport) Stop(_ context.Context) error {
 	return nil
 }
 
-func (t *Transport) String() string {
+// Name returns the name of this transport.
+func (t *Transport) Name() string {
 	return Name
 }
 
-// NeedsCodec returns false for grpc the transport.
-func (t *Transport) NeedsCodec() bool {
-	return false
-}
-
-// Request is a noop for grpc.
-func (t *Transport) Request(_ context.Context, _ *client.Req[any, any], _ *client.CallOptions) (*client.RawResponse, error) {
-	return nil, orberrors.ErrInternalServerError
-}
-
-// RequestNoCodec does the actual rpc request to the server.
+// Request does the actual rpc request to the server.
 //
 //nolint:gocyclo
-func (t *Transport) RequestNoCodec(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
+func (t *Transport) Request(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
 	node, err := req.Node(ctx, opts)
 	if err != nil {
 		return orberrors.From(err)
