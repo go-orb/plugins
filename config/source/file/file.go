@@ -2,17 +2,16 @@
 package file
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/config/source"
 	"github.com/go-orb/go-orb/log"
-	"github.com/google/uuid"
 )
 
 func init() {
@@ -45,41 +44,68 @@ func (s *Source) String() string {
 }
 
 func (s *Source) Read(u *url.URL) source.Data {
+	// Handle base64-encoded content from URL parameter.
+	if b64Param := u.Query().Get("base64"); b64Param != "" {
+		return s.readFromBase64(u.Path, b64Param)
+	}
+
+	// Handle regular file path.
+	return s.readFromFile(u.Host + u.Path)
+}
+
+// readFromBase64 reads config from a base64-encoded string.
+func (s *Source) readFromBase64(path, b64Content string) source.Data {
 	result := source.Data{
 		Data: make(map[string]any),
 	}
 
-	path := u.Host + u.Path
+	// Get marshaler for file extension.
+	marshaler := s.getMarshaler(path)
+	if marshaler == nil {
+		result.Error = config.ErrCodecNotFound
+		return result
+	}
 
+	result.Marshaler = marshaler
+
+	// Decode base64 content.
+	data, err := base64.URLEncoding.DecodeString(b64Content)
+	if err != nil {
+		result.Error = fmt.Errorf("failed to decode base64 config: %w", err)
+		return result
+	}
+
+	// Unmarshal the data.
+	if err := marshaler.Unmarshal(data, &result.Data); err != nil {
+		result.Error = fmt.Errorf("failed to unmarshal base64 config: %w", err)
+		return result
+	}
+
+	return result
+}
+
+// readFromFile reads config from a filesystem path.
+func (s *Source) readFromFile(path string) source.Data {
+	result := source.Data{
+		Data: make(map[string]any),
+	}
+
+	// Check if file exists
 	if _, err := os.Stat(path); err != nil {
 		result.Error = fmt.Errorf("%w: %w", config.ErrFileNotFound, err)
 		return result
 	}
 
-	// Get the marshaler from the extension.
-	var (
-		pathExt = filepath.Ext(path)
-		decoder codecs.Marshaler
-	)
-
-	codecs.Plugins.Range(func(_ string, m codecs.Marshaler) bool {
-		for _, ext := range m.Exts() {
-			if pathExt == ext {
-				decoder = m
-				return false
-			}
-		}
-
-		return true
-	})
-
-	if decoder == nil {
+	// Get marshaler for file extension.
+	marshaler := s.getMarshaler(path)
+	if marshaler == nil {
 		result.Error = config.ErrCodecNotFound
 		return result
 	}
 
-	result.Marshaler = decoder
+	result.Marshaler = marshaler
 
+	// Open and read the file.
 	fh, err := os.Open(filepath.Clean(path))
 	if err != nil {
 		result.Error = err
@@ -92,7 +118,8 @@ func (s *Source) Read(u *url.URL) source.Data {
 		}
 	}()
 
-	if err := decoder.NewDecoder(fh).Decode(&result.Data); err != nil {
+	// Decode the file content.
+	if err := marshaler.NewDecoder(fh).Decode(&result.Data); err != nil {
 		result.Error = err
 		return result
 	}
@@ -100,38 +127,22 @@ func (s *Source) Read(u *url.URL) source.Data {
 	return result
 }
 
-// TempFile will take a byte sequence and write it to a temporary file. This
-// is useful if you want to parse a config from memory.
-//
-// If at any point an erro occurs, it will panic. It does not return the error
-// as the probability of one occurring is small, and now you can use it directly
-// within your config array definition.
-//
-// Example:
-//
-//	configSource := []config.Source{"config.yaml", file.TempFile(myConfig, "yaml")}
-func TempFile(data []byte, filetype string) *url.URL {
-	dir := os.TempDir()
-	filePath := path.Join(dir, "go-micro-config-"+uuid.NewString()+"."+filetype)
+// getMarshaler finds an appropriate marshaler for the given file path based on extension.
+func (s *Source) getMarshaler(path string) codecs.Marshaler {
+	ext := filepath.Ext(path)
 
-	file, err := os.OpenFile(path.Clean(filePath), os.O_CREATE|os.O_RDWR, 0600)
-	if err != nil {
-		panic(fmt.Errorf("failed to create temporary config file '%s': %w", filePath, err))
-	}
+	var result codecs.Marshaler
 
-	_, err = file.Write(data)
-	if err != nil {
-		panic(fmt.Errorf("failed to write temporary config file '%s': %w", filePath, err))
-	}
+	codecs.Plugins.Range(func(_ string, m codecs.Marshaler) bool {
+		for _, supportedExt := range m.Exts() {
+			if ext == supportedExt {
+				result = m
+				return false // Stop iterating
+			}
+		}
 
-	file.Close() //nolint:errcheck,gosec
+		return true // Continue iterating
+	})
 
-	u := "file://" + filePath
-
-	url, err := url.Parse(u)
-	if err != nil {
-		panic(fmt.Errorf("failed to parse temporary config file as url '%s': %w", u, err))
-	}
-
-	return url
+	return result
 }

@@ -334,6 +334,7 @@ func Provide(
 			mCfg := &client.MiddlewareConfig{}
 			if err := config.Parse(append(sections, "middlewares", strconv.Itoa(i)), data, mCfg); err != nil || mCfg.Name == "" {
 				if errors.Is(err, config.ErrNotExistent) || mCfg.Name == "" {
+					logger.Warn("Unable to parse middleware config", "section", append(sections, "middlewares", strconv.Itoa(i)))
 					break
 				}
 
