@@ -4,7 +4,6 @@ package drpc
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"net"
 
 	"storj.io/drpc"
@@ -124,7 +123,6 @@ func (t *Transport) RequestNoCodec(ctx context.Context, req *client.Req[any, any
 	if err != nil {
 		return orberrors.From(err)
 	}
-	defer conn.Close()
 
 	// Add metadata to drpc request
 	md, ok := metadata.Outgoing(ctx)
@@ -174,20 +172,16 @@ func (t *Transport) RequestNoCodec(ctx context.Context, req *client.Req[any, any
 		return orbError
 	}
 
+	err = conn.Close()
+	if err != nil {
+		return orberrors.From(err)
+	}
+
 	// Retrieve metadata from drpc.
 	if opts.ResponseMetadata != nil {
 		for k, v := range mdResult.GetMetadata() {
 			opts.ResponseMetadata[k] = v
 		}
-	}
-
-	if mdResult.GetError().GetCode() != 0 {
-		orbE := orberrors.New(int(mdResult.GetError().GetCode()), mdResult.GetError().GetMessage())
-		if mdResult.GetError().GetWrapped() != "" {
-			orbE = orbE.Wrap(errors.New(mdResult.GetError().GetWrapped()))
-		}
-
-		return orbE
 	}
 
 	// Unmarshal the result.

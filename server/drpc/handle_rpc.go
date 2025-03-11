@@ -13,6 +13,7 @@ import (
 
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/util/metadata"
+	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/server/drpc/message"
 	"github.com/zeebo/errs"
 	proto "google.golang.org/protobuf/proto"
@@ -114,14 +115,17 @@ func (m *Mux) HandleRPC(stream drpc.Stream, rpc string) (err error) {
 
 	switch {
 	case err != nil:
-		return errs.Wrap(err)
+		orbE := orberrors.From(err)
+		drpcE := drpcerr.WithCode(orbE, uint64(orbE.Code)) //nolint:gosec
+
+		return errs.Wrap(drpcE)
 	case out != nil && !reflect.ValueOf(out).IsNil():
 		outData, err := anypb.New(out.(proto.Message)) //nolint:errcheck
 		if err != nil {
 			return errs.Wrap(err)
 		}
 
-		return stream.MsgSend(&message.Response{Metadata: outMd, Data: outData, Error: &message.Error{}}, data.enc)
+		return stream.MsgSend(&message.Response{Metadata: outMd, Data: outData}, data.enc)
 	default:
 		return stream.CloseSend()
 	}
