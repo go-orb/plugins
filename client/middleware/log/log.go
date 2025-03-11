@@ -55,7 +55,7 @@ func (m *Middleware) Request(
 		m.logger.TraceContext(
 			ctx,
 			"Making a request",
-			"url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()),
+			"url", fmt.Sprintf("%s://%s%s", node.Transport, node.Address, req.Endpoint()),
 			"content-type", opts.ContentType,
 		)
 
@@ -67,14 +67,14 @@ func (m *Middleware) Request(
 				ctx,
 				"Got an error",
 				"error", err,
-				"url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()),
+				"url", fmt.Sprintf("%s://%s%s", node.Transport, node.Address, req.Endpoint()),
 				"content-type", opts.ContentType,
 			)
 		} else {
 			m.logger.TraceContext(
 				ctx,
 				"Got a result",
-				"url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()),
+				"url", fmt.Sprintf("%s://%s%s", node.Transport, node.Address, req.Endpoint()),
 				"content-type", opts.ContentType,
 			)
 		}
@@ -97,7 +97,7 @@ func (m *Middleware) RequestNoCodec(
 		m.logger.TraceContext(
 			ctx,
 			"Making a request",
-			"url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()),
+			"url", fmt.Sprintf("%s://%s%s", node.Transport, node.Address, req.Endpoint()),
 			"content-type", opts.ContentType,
 		)
 
@@ -108,14 +108,14 @@ func (m *Middleware) RequestNoCodec(
 				ctx,
 				"Got an error",
 				"error", err,
-				"url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()),
+				"url", fmt.Sprintf("%s://%s%s", node.Transport, node.Address, req.Endpoint()),
 				"content-type", opts.ContentType,
 			)
 		} else {
 			m.logger.TraceContext(
 				ctx,
 				"Got a result",
-				"url", fmt.Sprintf("%s://%s/%s", node.Transport, node.Address, req.Endpoint()),
+				"url", fmt.Sprintf("%s://%s%s", node.Transport, node.Address, req.Endpoint()),
 				"content-type", opts.ContentType,
 			)
 		}
