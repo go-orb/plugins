@@ -4,6 +4,10 @@ This repo contains plugins for [github.com/go-orb/go-orb](https://github.com/go-
 
 With a single `_` import you can import a plugin and it's ready to use with the interfaces of [the core](https://github.com/go-orb/go-orb).
 
+## Examples
+
+Please see our [examples](https://github.com/go-orb/examples) repo for a list of examples.
+
 ## Plugins
 
 ### Server
@@ -14,9 +18,14 @@ All servers implement the `server.Entrypoint` interface and are configureable wi
 
 See [RPC Benchmarks](https://github.com/go-orb/go-orb/wiki/RPC-Benchmarks) for a comparison of the different servers.
 
+#### Memory
+
+- Lightning speed direct function calls, this is usefull if you wanna ship your micro-services as well as Monolith.
+- Location: [`/server/memory`](https://github.com/go-orb/plugins/tree/main/server/memory)
+
 #### HTTP
 
-- **HTTP/HTTPS/HTTP2/HTTP3**: Complete HTTP protocol family with support for REST APIs
+- **HTTP/HTTPS/HTTP2/HTTP3**: Complete HTTP protocol family
 - Features include middleware support, automatic TLS configuration
 - Location: [`/server/http`](https://github.com/go-orb/plugins/tree/main/server/http)
 
@@ -74,7 +83,7 @@ Configuration plugins provide different sources for application configuration:
 
 ### Event
 
-Event plugins provide pub/sub messaging capabilities:
+Event plugins provide pub/sub messaging capabilities as well as REST like operations:
 
 - **NATS**: NATS JetStream implementations
   - Location: [`/event/natsjs`](https://github.com/go-orb/plugins/tree/main/event/natsjs)
