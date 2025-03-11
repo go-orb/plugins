@@ -12,7 +12,6 @@ package http
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -29,7 +28,6 @@ import (
 	mtls "github.com/go-orb/go-orb/util/tls"
 	"github.com/google/uuid"
 
-	"github.com/go-orb/plugins/server/http/router"
 	mtcp "github.com/go-orb/plugins/server/http/utils/tcp"
 	mudp "github.com/go-orb/plugins/server/http/utils/udp"
 )
@@ -55,7 +53,7 @@ type Server struct {
 	// The router here is merely a reference to the router that is used in the servers
 	// themselves. You can fetch the router with the getter, and register handlers,
 	// or mount other routers.
-	router  router.Router
+	router  *Router
 	handler http.Handler
 
 	httpServer  *httpServer
@@ -132,10 +130,7 @@ func New(acfg any, logger log.Logger, reg registry.Type) (server.Entrypoint, err
 		return nil, err
 	}
 
-	router, err := cfg.NewRouter()
-	if err != nil {
-		return nil, fmt.Errorf("create router (%s): %w", cfg.Router, err)
-	}
+	router := NewRouter(logger)
 
 	logger = logger.With(slog.String("entrypoint", cfg.Name))
 
@@ -352,7 +347,7 @@ func (s *Server) Type() string {
 
 // Router returns the router used by the HTTP server.
 // You can use this to register extra handlers, or mount additional routers.
-func (s *Server) Router() router.Router {
+func (s *Server) Router() *Router {
 	return s.router
 }
 
@@ -378,33 +373,18 @@ func (s *Server) setupTLS() (*mtls.Config, error) {
 	return &mtls.Config{Config: config}, nil
 }
 
+//nolint:unparam
 func (s *Server) getEndpoints() ([]*registry.Endpoint, error) {
-	router, ok := s.router.(router.Routes)
-	if !ok {
-		return nil, errors.New("incompatible router")
-	}
-
-	routes := router.Routes()
+	routes := s.router.Routes()
 	result := make([]*registry.Endpoint, len(routes))
 
 	for _, r := range routes {
-		s.logger.Trace("found endpoint", slog.String("name", r.Pattern[1:]))
+		s.logger.Trace("found endpoint", slog.String("name", r))
 
 		result = append(result, &registry.Endpoint{
-			Name:     r.Pattern[1:],
+			Name:     r,
 			Metadata: map[string]string{"stream": "true"},
 		})
-
-		if len(r.SubRoutes) > 0 {
-			for _, sr := range r.SubRoutes {
-				s.logger.Trace("found sub endpoint", slog.String("name", sr.Pattern[1:]))
-
-				result = append(result, &registry.Endpoint{
-					Name:     sr.Pattern[1:],
-					Metadata: map[string]string{"stream": "true"},
-				})
-			}
-		}
 	}
 
 	return result, nil

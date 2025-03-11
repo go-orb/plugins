@@ -8,8 +8,6 @@ import (
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/server"
 	mtls "github.com/go-orb/go-orb/util/tls"
-
-	"github.com/go-orb/plugins/server/http/router"
 )
 
 const (
@@ -37,10 +35,6 @@ const (
 
 	// DefaultHTTP3 dicates whether to also start an HTTP/3.0 server.
 	DefaultHTTP3 = false
-
-	// DefaultRouter to use as serve mux. There's not really a reason to change this
-	// but if you really wanted to, you could.
-	DefaultRouter = "chi"
 
 	// DefaultReadTimeout see net/http pkg for more details.
 	DefaultReadTimeout = 5 * time.Second
@@ -70,8 +64,6 @@ const (
 
 // Errors.
 var (
-	ErrNoRouter         = errors.New("no router plugin name set in config")
-	ErrRouterNotFound   = errors.New("router plugin not found, did you register it?")
 	ErrNoMatchingCodecs = errors.New("no matching codecs found, did you register the codec plugins?")
 )
 
@@ -137,9 +129,6 @@ type Config struct {
 	// HTTP request headers.
 	MaxHeaderBytes int `json:"maxHeaderBytes" yaml:"maxHeaderBytes"`
 
-	// Router is the router plugin to use. Default is chi.
-	Router string `json:"router" yaml:"router"`
-
 	// ReadTimeout is the maximum duration for reading the entire
 	// request, including the body. A zero or negative value means
 	// there will be no timeout.
@@ -185,7 +174,6 @@ func NewConfig(options ...server.Option) *Config {
 		HTTP2:                DefaultHTTP2,
 		HTTP3:                DefaultHTTP3,
 		Gzip:                 DefaultEnableGzip,
-		Router:               DefaultRouter,
 		ReadTimeout:          DefaultReadTimeout,
 		WriteTimeout:         DefaultWriteTimeout,
 		IdleTimeout:          DefaultIdleTimeout,
@@ -196,21 +184,6 @@ func NewConfig(options ...server.Option) *Config {
 	}
 
 	return cfg
-}
-
-// NewRouter uses the config.Router to craete a new router.
-// It fetches the factory from the registered router plugins.
-func (c *Config) NewRouter() (router.Router, error) {
-	if len(c.Router) == 0 {
-		return nil, ErrNoRouter
-	}
-
-	newRouter, ok := router.Plugins.Get(c.Router)
-	if !ok {
-		return nil, ErrRouterNotFound
-	}
-
-	return newRouter(), nil
 }
 
 // WithName sets the entrypoint name. The default name is in the format of
@@ -317,16 +290,6 @@ func WithMaxConcurrentStreams(value int) server.Option {
 		cfg, ok := c.(*Config)
 		if ok {
 			cfg.MaxConcurrentStreams = value
-		}
-	}
-}
-
-// WithRouter sets the router plguin name.
-func WithRouter(router string) server.Option {
-	return func(c server.EntrypointConfigType) {
-		cfg, ok := c.(*Config)
-		if ok {
-			cfg.Router = router
 		}
 	}
 }

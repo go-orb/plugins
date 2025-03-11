@@ -27,7 +27,6 @@ import (
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	_ "github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/slog"
-	_ "github.com/go-orb/plugins/server/http/router/chi"
 )
 
 //nolint:gochecknoglobals

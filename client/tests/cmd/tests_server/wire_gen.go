@@ -29,7 +29,6 @@ import (
 	_ "github.com/go-orb/plugins/server/drpc"
 	_ "github.com/go-orb/plugins/server/grpc"
 	_ "github.com/go-orb/plugins/server/http"
-	_ "github.com/go-orb/plugins/server/http/router/chi"
 )
 
 // Injectors from wire.go:

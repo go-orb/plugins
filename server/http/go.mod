@@ -3,7 +3,6 @@ module github.com/go-orb/plugins/server/http
 go 1.23.6
 
 require (
-	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-orb/go-orb v0.2.2-0.20250311002648-13bc5bcb0777
 	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20250310151257-e3753cc29dd6
 	github.com/go-orb/plugins/codecs/form v0.1.1-0.20250311004605-0d36f94a334f
@@ -13,12 +12,12 @@ require (
 	github.com/go-orb/plugins/config/source/file v0.1.1-0.20250311004605-0d36f94a334f
 	github.com/go-orb/plugins/log/slog v0.1.1-0.20250311004605-0d36f94a334f
 	github.com/google/uuid v1.6.0
+	github.com/julienschmidt/httprouter v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/quic-go/quic-go v0.50.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/net v0.37.0
 	google.golang.org/protobuf v1.36.5
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -43,4 +42,5 @@ require (
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
 	golang.org/x/tools v0.31.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

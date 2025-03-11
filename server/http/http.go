@@ -14,8 +14,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-orb/plugins/server/http/router"
-
 	"log/slog"
 
 	"golang.org/x/net/http2"
@@ -33,13 +31,8 @@ type httpServer struct {
 	Server *http.Server
 }
 
-func (s *Server) newHTTPServer(router router.Router) (*httpServer, error) {
-	var ok bool
-	s.handler, ok = router.(http.Handler)
-
-	if !ok {
-		return nil, ErrRouterHandlerInterface
-	}
+func (s *Server) newHTTPServer(router *Router) (*httpServer, error) {
+	s.handler = router
 
 	if s.config.H2C {
 		s.handler = h2c.NewHandler(s.handler, &http2.Server{

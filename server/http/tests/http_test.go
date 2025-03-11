@@ -37,9 +37,6 @@ import (
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	_ "github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/slog"
-
-	"github.com/go-orb/plugins/server/http/router"
-	_ "github.com/go-orb/plugins/server/http/router/chi"
 )
 
 // TODO(davincible): test get path params
@@ -190,16 +187,6 @@ func TestServerInvalidContentType(t *testing.T) {
 		"Post request failed",
 		"POST Proto",
 	)
-}
-
-func TestServerNoRouter(t *testing.T) {
-	_, cleanup, err := setupServer(t, false, mhttp.WithRouter(""))
-	defer cleanup()
-	require.ErrorIs(t, err, mhttp.ErrNoRouter, "setting an empty router should return an error")
-
-	_, cleanup, err = setupServer(t, false, mhttp.WithRouter("invalid-router"))
-	defer cleanup()
-	require.ErrorIs(t, err, mhttp.ErrRouterNotFound, "setting an invalid router should return an error")
 }
 
 func TestServerNoTLS(t *testing.T) {
@@ -394,9 +381,6 @@ func TestServerFileConfig(t *testing.T) {
 	server.Handlers.Set("Streams", proto.RegisterStreamsHandler(new(handler.EchoHandler)))
 	server.Handlers.Set("handler-1", func(_ any) {})
 	server.Handlers.Set("handler-2", func(_ any) {})
-	router.Middleware.Add("middleware-1", func(h http.Handler) http.Handler { return h })
-	router.Middleware.Add("middleware-2", func(h http.Handler) http.Handler { return h })
-	router.Middleware.Add("middleware-4", func(h http.Handler) http.Handler { return h })
 
 	name := types.ServiceName("com.example.test")
 	version := types.ServiceVersion("v1.0.0")
