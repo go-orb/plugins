@@ -3,7 +3,6 @@ package urfave
 
 import (
 	"fmt"
-	"maps"
 	"slices"
 
 	"iter"
@@ -233,25 +232,28 @@ func (p *parser) run(args []string) ([]*oCli.Flag, error) {
 		p.appContext.ExitGracefully(0)
 	}
 
+	flags := []*oCli.Flag{}
+
 	for n, tf := range p.globalFlags.intFlags {
 		if p.globalFlags.flags[n].Default != tf.Get(ctx) {
 			p.globalFlags.flags[n].Value = tf.Get(ctx)
+			flags = append(flags, p.globalFlags.flags[n])
 		}
 	}
 
 	for n, tf := range p.globalFlags.stringFlags {
 		if p.globalFlags.flags[n].Default != tf.Get(ctx) {
 			p.globalFlags.flags[n].Value = tf.Get(ctx)
+			flags = append(flags, p.globalFlags.flags[n])
 		}
 	}
 
 	for n, tf := range p.globalFlags.stringSliceFlags {
 		if !slices.Equal(p.globalFlags.flags[n].Default.([]string), tf.Get(ctx)) { //nolint:errcheck
 			p.globalFlags.flags[n].Value = tf.Get(ctx)
+			flags = append(flags, p.globalFlags.flags[n])
 		}
 	}
-
-	flags := slices.Collect(maps.Values(p.globalFlags.flags))
 
 	for _, c := range p.commands {
 		for c2 := range c.flatten() {
@@ -260,22 +262,23 @@ func (p *parser) run(args []string) ([]*oCli.Flag, error) {
 				for n, tf := range c2.intFlags {
 					if c2.flags[n].Default != tf.Get(ctx) {
 						c2.flags[n].Value = tf.Get(ctx)
+						flags = append(flags, c2.flags[n])
 					}
 				}
 
 				for n, tf := range c2.stringFlags {
 					if c2.flags[n].Default != tf.Get(ctx) {
 						c2.flags[n].Value = tf.Get(ctx)
+						flags = append(flags, c2.flags[n])
 					}
 				}
 
 				for n, tf := range c2.stringSliceFlags {
 					if !slices.Equal(c2.flags[n].Default.([]string), tf.Get(ctx)) { //nolint:errcheck
 						c2.flags[n].Value = tf.Get(ctx)
+						flags = append(flags, c2.flags[n])
 					}
 				}
-
-				flags = append(flags, slices.Collect(maps.Values(c2.flags))...)
 			}
 		}
 	}
