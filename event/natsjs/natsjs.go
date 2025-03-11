@@ -75,8 +75,8 @@ func New(serviceName string, cfg Config, log log.Logger) (*NatsJS, error) {
 }
 
 // Clone creates a clone of the handler, this is useful for parallel requests.
-func (n *NatsJS) Clone() event.Client {
-	return &NatsJS{
+func (n *NatsJS) Clone() event.Type {
+	return event.Type{Client: &NatsJS{
 		serviceName:  n.serviceName,
 		config:       n.config,
 		logger:       n.logger,
@@ -88,7 +88,7 @@ func (n *NatsJS) Clone() event.Client {
 		replyPool: container.NewPool(func() *pb.Reply { return &pb.Reply{} }),
 
 		consumers: container.NewSafeMap[string, jetstream.ConsumeContext](),
-	}
+	}}
 }
 
 // GetPublishCodec returns the codec used by the handler for publish.
