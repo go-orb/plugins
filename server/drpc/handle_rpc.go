@@ -13,7 +13,6 @@ import (
 
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/util/metadata"
-	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/server/drpc/message"
 	"github.com/zeebo/errs"
 	proto "google.golang.org/protobuf/proto"
@@ -46,11 +45,9 @@ type streamWrapper struct {
 func (s *streamWrapper) Context() context.Context { return s.ctx }
 
 // HandleRPC handles the rpc that has been requested by the stream.
-//
-//nolint:funlen
 func (m *Mux) HandleRPC(stream drpc.Stream, rpc string) (err error) {
-	data, rpcOk := m.rpcs[rpc]
-	if !rpcOk {
+	data, rpcOK := m.rpcs[rpc]
+	if !rpcOK {
 		return drpc.ProtocolError.New("unknown rpc: %q", rpc)
 	}
 
@@ -85,8 +82,8 @@ func (m *Mux) HandleRPC(stream drpc.Stream, rpc string) (err error) {
 	ctx, reqMd := metadata.WithIncoming(ctx)
 	ctx, outMd := metadata.WithOutgoing(ctx)
 
-	dMeta, rpcOk := drpcmetadata.Get(ctx)
-	if !rpcOk {
+	dMeta, rpcOK := drpcmetadata.Get(ctx)
+	if !rpcOK {
 		dMeta = make(map[string]string)
 	}
 
@@ -115,27 +112,17 @@ func (m *Mux) HandleRPC(stream drpc.Stream, rpc string) (err error) {
 	// Calls all middlewares until the actual call.
 	out, err := h(ctx, req)
 
-	if out != nil && err == nil {
+	switch {
+	case err != nil:
+		return errs.Wrap(err)
+	case out != nil && !reflect.ValueOf(out).IsNil():
 		outData, err := anypb.New(out.(proto.Message)) //nolint:errcheck
 		if err != nil {
 			return errs.Wrap(err)
 		}
 
 		return stream.MsgSend(&message.Response{Metadata: outMd, Data: outData, Error: &message.Error{}}, data.enc)
-	} else if err != nil {
-		orbErr := orberrors.From(err)
-
-		wrapped := ""
-		if orbErr.Unwrap() != nil {
-			wrapped = orbErr.Unwrap().Error()
-		}
-
-		return stream.MsgSend(&message.Response{Metadata: outMd, Data: &anypb.Any{}, Error: &message.Error{
-			Code:    int64(orbErr.Code),
-			Message: orbErr.Message,
-			Wrapped: wrapped,
-		}}, data.enc)
+	default:
+		return stream.CloseSend()
 	}
-
-	return stream.CloseSend()
 }

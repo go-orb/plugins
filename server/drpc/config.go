@@ -10,9 +10,6 @@ import (
 const (
 	// DefaultAddress to use for new dRPC servers.
 	DefaultAddress = ":0"
-
-	// DefaultMaxConcurrentStreams for dRPC.
-	DefaultMaxConcurrentStreams = 256
 )
 
 // Config provides options to the entrypoint.
@@ -26,9 +23,6 @@ type Config struct {
 	// If no port is provided, a random port will be selected. To listen on a
 	// specific interface, but with a random port, you can use '<IP>:0'.
 	Address string `json:"address" yaml:"address"`
-
-	// MaxConcurrentStreams is the worker pool size.
-	MaxConcurrentStreams int `json:"maxConcurrentStreams" yaml:"maxConcurrentStreams"`
 
 	// Middlewares is a list of middleware to use.
 	Middlewares []server.MiddlewareConfig `json:"middlewares" yaml:"middlewares"`
@@ -49,8 +43,7 @@ func NewConfig(options ...server.Option) *Config {
 			Plugin:  Plugin,
 			Enabled: true,
 		},
-		Address:              DefaultAddress,
-		MaxConcurrentStreams: DefaultMaxConcurrentStreams,
+		Address: DefaultAddress,
 	}
 
 	for _, option := range options {
@@ -92,16 +85,6 @@ func WithAddress(address string) server.Option {
 		cfg, ok := c.(*Config)
 		if ok {
 			cfg.Address = address
-		}
-	}
-}
-
-// WithMaxConcurrentStreams sets the worker pool size.
-func WithMaxConcurrentStreams(n int) server.Option {
-	return func(c server.EntrypointConfigType) {
-		cfg, ok := c.(*Config)
-		if ok {
-			cfg.MaxConcurrentStreams = n
 		}
 	}
 }

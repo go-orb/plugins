@@ -79,7 +79,7 @@ func (s *Server) Start(ctx context.Context) error {
 
 	s.address = listener.Addr().String()
 
-	s.logger = s.logger.With(slog.String("transport", s.Transport()), slog.String("address", s.Address()))
+	s.logger = s.logger.With(slog.String("transport", s.Transport()), slog.String("address", s.address))
 
 	s.logger.Info("dRPC server listening")
 

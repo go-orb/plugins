@@ -8,6 +8,7 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 
 	"log/slog"
@@ -33,7 +34,8 @@ type Client struct {
 
 	middlewares []client.Middleware
 
-	transports *container.SafeMap[string, Transport]
+	transportLock sync.Mutex
+	transports    *container.Map[string, Transport]
 }
 
 // Logger returns the logger.
@@ -182,8 +184,6 @@ func (c *Client) makeOptions(opts ...client.CallOption) *client.CallOptions {
 	co := &client.CallOptions{
 		ContentType:         c.config.Config.ContentType,
 		PreferredTransports: c.config.Config.PreferredTransports,
-		PoolSize:            c.config.Config.PoolSize,
-		PoolTTL:             c.config.Config.PoolTTL,
 		AnyTransport:        c.config.Config.AnyTransport,
 		Selector:            c.config.Config.Selector,
 		Backoff:             c.config.Config.Backoff,
@@ -206,6 +206,9 @@ func (c *Client) makeOptions(opts ...client.CallOption) *client.CallOptions {
 }
 
 func (c *Client) transportForReq(ctx context.Context, req *client.Req[any, any], opts *client.CallOptions) (Transport, error) {
+	c.transportLock.Lock()
+	defer c.transportLock.Unlock()
+
 	node, err := req.Node(ctx, opts)
 	if err != nil {
 		if errors.Is(err, registry.ErrNotFound) {
@@ -327,7 +330,7 @@ func (c *Client) RequestNoCodec(
 
 				transport, err = c.transportForReq(ctx, req, callOptions)
 				if err == nil {
-					err = transport.RequestNoCodec(ctx, req, result, opts)
+					err = transport.RequestNoCodec(ctx, req, result, callOptions)
 				}
 			}
 		}
@@ -369,7 +372,7 @@ func New(cfg Config, log log.Logger, registry registry.Type) *Client {
 		config:     cfg,
 		logger:     log,
 		registry:   registry,
-		transports: container.NewSafeMap[string, Transport](),
+		transports: container.NewMap[string, Transport](),
 	}
 }
 

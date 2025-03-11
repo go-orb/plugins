@@ -3,15 +3,14 @@ package drpc
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"net"
-	"time"
 
 	"storj.io/drpc"
 	"storj.io/drpc/drpcconn"
 	"storj.io/drpc/drpcerr"
 	"storj.io/drpc/drpcmetadata"
-	"storj.io/drpc/drpcpool"
 
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -22,6 +21,7 @@ import (
 	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/client/orb"
+	"github.com/go-orb/plugins/client/orb_transport/drpc/pool"
 	"github.com/go-orb/plugins/server/drpc/message"
 )
 
@@ -49,18 +49,52 @@ func init() {
 
 // Transport is a go-orb/plugins/client/orb compatible transport.
 type Transport struct {
+	config *orb.Config
 	logger log.Logger
-	pool   *drpcpool.Pool[string, drpcpool.Conn]
+	pool   *pool.Pool
 }
 
 // Start starts the transport.
 func (t *Transport) Start() error {
+	factory := func(dialCtx context.Context, addr string, _ *tls.Config) (*drpcconn.Conn, error) {
+		// Use the dial timeout from options
+		timeoutCtx, cancel := context.WithTimeout(dialCtx, t.config.DialTimeout)
+		defer cancel()
+
+		dialer := net.Dialer{}
+		rawconn, err := dialer.DialContext(timeoutCtx, "tcp", addr)
+
+		if err != nil {
+			t.logger.Error("Failed to dial DRPC server", "address", addr, "error", err)
+			return nil, err
+		}
+
+		// Create a new DRPC connection
+		return drpcconn.New(rawconn), nil
+	}
+
+	t.logger.Debug(
+		"Creating a transport pool",
+		"pool_hosts", t.config.PoolHosts,
+		"pool_size", t.config.PoolSize,
+		"conn_timeout", t.config.ConnectionTimeout,
+		"pool_ttl", t.config.PoolTTL,
+	)
+
+	pool, err := pool.New(factory, t.config.PoolHosts*t.config.PoolSize, t.config.PoolTTL)
+	if err != nil {
+		return orberrors.From(err)
+	}
+
+	t.pool = pool
+
 	return nil
 }
 
 // Stop stop the transport.
 func (t *Transport) Stop(_ context.Context) error {
-	return t.pool.Close()
+	t.pool.Close()
+	return nil
 }
 
 func (t *Transport) String() string {
@@ -86,25 +120,20 @@ func (t *Transport) RequestNoCodec(ctx context.Context, req *client.Req[any, any
 		return orberrors.From(err)
 	}
 
-	dial := func(_ context.Context, address string) (drpcpool.Conn, error) {
-		// dial the drpc server
-		rawconn, err := net.Dial("tcp", address)
-		if err != nil {
-			return nil, err
-		}
-
-		return drpcconn.New(rawconn), nil
+	conn, err := t.pool.Get(ctx, node.Address, nil)
+	if err != nil {
+		return orberrors.From(err)
 	}
+	defer conn.Close()
 
-	conn := t.pool.Get(ctx, node.Address, dial)
-
-	// Add metadata to drpc.
+	// Add metadata to drpc request
 	md, ok := metadata.Outgoing(ctx)
 	if ok {
 		md["Content-Type"] = opts.ContentType
 		ctx = drpcmetadata.AddPairs(ctx, md)
 	}
 
+	// Get codecs for content type conversion
 	contentTypeCodec, err := codecs.GetMime(opts.ContentType)
 	if err != nil {
 		return orberrors.From(err)
@@ -118,17 +147,27 @@ func (t *Transport) RequestNoCodec(ctx context.Context, req *client.Req[any, any
 		}
 	}
 
-	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(opts.RequestTimeout))
+	// Create context with timeout for the request
+	reqCtx, cancel := context.WithTimeout(ctx, opts.RequestTimeout)
 	defer cancel()
 
+	// Prepare response container
 	mdResult := &message.Response{}
+
+	// Invoke the RPC method
 	if err := conn.Invoke(
-		ctx,
+		reqCtx,
 		req.Endpoint(),
 		&encoder{marshaler: contentTypeCodec, unmarshaler: protoCodec},
 		req.Req(),
 		mdResult,
 	); err != nil {
+		conn.Unhealthy()
+
+		if closeErr := conn.Close(); closeErr != nil {
+			t.logger.Error("Failed to close failed connection", "error", closeErr)
+		}
+
 		orbError := orberrors.HTTP(int(drpcerr.Code(err))) //nolint:gosec
 		orbError = orbError.Wrap(err)
 
@@ -169,23 +208,15 @@ func (t *Transport) RequestNoCodec(ctx context.Context, req *client.Req[any, any
 		}
 	}
 
-	err = conn.Close()
-	if err != nil {
-		return orberrors.From(err)
-	}
-
 	return nil
 }
 
 // NewTransport creates a Transport.
 func NewTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, error) {
+	logger.Debug("Creating transport", "pool_hosts", cfg.PoolHosts, "pool_size", cfg.PoolSize, "conn_timeout", cfg.ConnectionTimeout)
+
 	return orb.TransportType{Transport: &Transport{
+		config: cfg,
 		logger: logger,
-		pool: drpcpool.New[string, drpcpool.Conn](
-			drpcpool.Options{
-				Capacity:    cfg.PoolSize,
-				KeyCapacity: cfg.PoolHosts,
-			},
-		),
 	}}, nil
 }
