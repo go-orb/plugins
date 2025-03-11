@@ -3,23 +3,23 @@ module github.com/go-orb/plugins/client/tests
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250311024506-e44d2eb21aa9
+	github.com/go-orb/go-orb v0.2.2-0.20250311132430-0e33342756e5
 	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20250311030251-33347369bbe1
-	github.com/go-orb/plugins/cli/urfave v0.0.0-20250311054754-50035c398c5f
-	github.com/go-orb/plugins/client/orb_transport/drpc v0.0.0-20250311054754-50035c398c5f
-	github.com/go-orb/plugins/client/orb_transport/grpc v0.0.0-20250311054754-50035c398c5f
-	github.com/go-orb/plugins/client/orb_transport/h2c v0.0.0-20250311054754-50035c398c5f
-	github.com/go-orb/plugins/client/orb_transport/http v0.0.0-20250311054754-50035c398c5f
-	github.com/go-orb/plugins/client/orb_transport/https v0.0.0-20250311054754-50035c398c5f
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250311054754-50035c398c5f
-	github.com/go-orb/plugins/codecs/proto v0.1.1-0.20250311054754-50035c398c5f
-	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250311054754-50035c398c5f
-	github.com/go-orb/plugins/config/source/file v0.1.1-0.20250311054754-50035c398c5f
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250311054754-50035c398c5f
-	github.com/go-orb/plugins/server/drpc v0.1.1-0.20250311054754-50035c398c5f
-	github.com/go-orb/plugins/server/grpc v0.1.1-0.20250311054754-50035c398c5f
-	github.com/go-orb/plugins/server/http v0.1.1-0.20250311054754-50035c398c5f
-	github.com/go-orb/plugins/server/memory v0.0.0-20250311054754-50035c398c5f
+	github.com/go-orb/plugins/cli/urfave v0.0.0-20250311132509-af55a9d486b9
+	github.com/go-orb/plugins/client/orb_transport/drpc v0.0.0-20250311132509-af55a9d486b9
+	github.com/go-orb/plugins/client/orb_transport/grpc v0.0.0-20250311132509-af55a9d486b9
+	github.com/go-orb/plugins/client/orb_transport/h2c v0.0.0-20250311132509-af55a9d486b9
+	github.com/go-orb/plugins/client/orb_transport/http v0.0.0-20250311132509-af55a9d486b9
+	github.com/go-orb/plugins/client/orb_transport/https v0.0.0-20250311132509-af55a9d486b9
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250311132509-af55a9d486b9
+	github.com/go-orb/plugins/codecs/proto v0.1.1-0.20250311132509-af55a9d486b9
+	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250311132509-af55a9d486b9
+	github.com/go-orb/plugins/config/source/file v0.1.1-0.20250311132509-af55a9d486b9
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250311132509-af55a9d486b9
+	github.com/go-orb/plugins/server/drpc v0.1.1-0.20250311132509-af55a9d486b9
+	github.com/go-orb/plugins/server/grpc v0.1.1-0.20250311132509-af55a9d486b9
+	github.com/go-orb/plugins/server/http v0.1.1-0.20250311132509-af55a9d486b9
+	github.com/go-orb/plugins/server/memory v0.0.0-20250311132509-af55a9d486b9
 	github.com/go-orb/wire v0.7.0
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/grpc v1.71.0
@@ -31,8 +31,8 @@ require (
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/go-orb/plugins/client/orb v0.1.4-0.20250311054754-50035c398c5f // indirect
-	github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20250311054754-50035c398c5f // indirect
+	github.com/go-orb/plugins/client/orb v0.1.4-0.20250311132509-af55a9d486b9 // indirect
+	github.com/go-orb/plugins/client/orb_transport/basehttp v0.0.0-20250311132509-af55a9d486b9 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/pprof v0.0.0-20250302191652-9094ed2288e7 // indirect
 	github.com/google/subcommands v1.2.0 // indirect
