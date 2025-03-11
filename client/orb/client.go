@@ -175,8 +175,8 @@ func (c *Client) makeOptions(opts ...client.CallOption) *client.CallOptions {
 		AnyTransport:        c.config.Config.AnyTransport,
 		Selector:            c.config.Config.Selector,
 		Backoff:             c.config.Config.Backoff,
-		Retry:               c.config.Config.Retry,
-		Retries:             c.config.Config.Retries,
+		RetryFunc:           client.DefaultCallOptionsRetryFunc,
+		Retries:             client.DefaultCallOptionsRetries,
 		DialTimeout:         c.config.Config.DialTimeout,
 		ConnectionTimeout:   c.config.Config.ConnectionTimeout,
 		RequestTimeout:      c.config.Config.RequestTimeout,
@@ -237,7 +237,7 @@ func (c *Client) transportForReq(ctx context.Context, req *client.Req[any, any],
 		c.transports.Set(node.Transport, transport)
 	}
 
-	return transport, err
+	return transport, nil
 }
 
 // Request does the actual call.
@@ -255,29 +255,11 @@ func (c *Client) Request(
 	// Wrap middlewares
 	call := func(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
 		transport, err := c.transportForReq(ctx, req, callOptions)
-		if err == nil {
-			err = transport.Request(ctx, req, result, opts)
+		if err != nil {
+			return err
 		}
 
-		// Retry logic.
-		if err != nil && callOptions.Retry != nil && callOptions.Retries > 0 {
-			var retryCount int
-			for retryCount < callOptions.Retries {
-				retryCount++
-
-				shouldRetry, rErr := callOptions.Retry(ctx, err, callOptions)
-				if !shouldRetry || rErr != nil {
-					break
-				}
-
-				transport, err = c.transportForReq(ctx, req, callOptions)
-				if err == nil {
-					err = transport.Request(ctx, req, result, callOptions)
-				}
-			}
-		}
-
-		return err
+		return transport.Request(ctx, req, result, opts)
 	}
 	for _, m := range c.middlewares {
 		call = m.Request(call)
