@@ -6,10 +6,10 @@ toolchain go1.24.0
 
 require (
 	github.com/go-micro/plugins/v4/store/nats-js-kv v0.0.0-20240726082623-6831adfdcdc4
-	github.com/go-orb/go-orb v0.2.2-0.20250310150137-28d27c7c856e
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250310151028-2bd0334e556f
-	github.com/go-orb/plugins/kvstore/natsjs v0.0.0-20250310151028-2bd0334e556f
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250310151028-2bd0334e556f
+	github.com/go-orb/go-orb v0.2.2-0.20250311002648-13bc5bcb0777
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250310172112-3472f23d28d9
+	github.com/go-orb/plugins/kvstore/natsjs v0.0.0-20250310172112-3472f23d28d9
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250310172112-3472f23d28d9
 	github.com/nats-io/nats-server/v2 v2.10.26
 	github.com/nats-io/nats.go v1.39.1
 	github.com/stretchr/testify v1.10.0
@@ -44,6 +44,7 @@ require (
 	github.com/nats-io/nkeys v0.4.10 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/nxadm/tail v1.4.11 // indirect
+	github.com/onsi/gomega v1.36.2 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pjbgf/sha1cd v0.3.2 // indirect

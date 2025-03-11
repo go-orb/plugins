@@ -1,9 +1,9 @@
 github.com/cornelk/hashmap v1.0.8 h1:nv0AWgw02n+iDcawr5It4CjQIAcdMMKRrs10HOJYlrc=
 github.com/cornelk/hashmap v1.0.8/go.mod h1:RfZb7JO3RviW/rT6emczVuC/oxpdz4UsSB2LJSclR1k=
-github.com/go-orb/go-orb v0.2.2-0.20250310150137-28d27c7c856e h1:aNZeGsCqC7braUMhRrmBbqVw4QIrY6J2IUyqDZSW8TA=
-github.com/go-orb/go-orb v0.2.2-0.20250310150137-28d27c7c856e/go.mod h1:nnJeJbc7HMursS7XlvoIv7k+IJ3se6Z9lHlnUlMoUJ0=
-github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
-github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
+github.com/go-orb/go-orb v0.2.2-0.20250311002648-13bc5bcb0777 h1:J5XqkohsF/Q/qJowLsJJ8TwLdO3XTd9WVqF2YmMgiNw=
+github.com/go-orb/go-orb v0.2.2-0.20250311002648-13bc5bcb0777/go.mod h1:UgBB26ldvzHNjg6721K2o5DEM6qX44ZHqCW0SanoAFA=
+github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
+github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=

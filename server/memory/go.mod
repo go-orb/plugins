@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/server/memory
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250310150137-28d27c7c856e
+	github.com/go-orb/go-orb v0.2.2-0.20250311002648-13bc5bcb0777
 	github.com/google/uuid v1.6.0
 	github.com/zeebo/errs v1.4.0
 	storj.io/drpc v0.0.34

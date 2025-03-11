@@ -13,10 +13,6 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-function remove_prefix() {
-	echo "${1//\.\//}"
-}
-
 function get_last_tag() {
 	local pkg="$1"
 	local last_tag=$(git tag --list --sort='-creatordate' | grep -E "${pkg}/v[0-9\.]+" | head -n1)
@@ -57,6 +53,7 @@ function update_deps() {
     local pkg="$1"
 
     pushd "${pkg}" >/dev/null || exit
+	go mod tidy || true
     go get -u github.com/go-orb/go-orb@main
     for m in $(grep github.com/go-orb/plugins/ go.mod | grep -E -v "^module" | awk '{ print $1 }'); do 
         if ! go get -u "${m}@main"; then
@@ -106,25 +103,17 @@ function upgrade() {
 }
 
 function upgrade_all() {
-    for pkg in $(python3 ${SCRIPT_DIR}/release_order.py); do
-	    upgrade "${pkg}" "0"
-	done
+    find . -name 'go.mod' -print0 | xargs -0 -n 1 -P 0 ${SCRIPT_DIR}/deps.sh
 }
 
 function upgrade_specific() {
-	set +o noglob
 	while read -r pkg; do
-		# If path contains a star find all relevant packages
-		if echo "${pkg}" | grep -q "\*"; then
-			while read -r p; do
-				update_deps "$(remove_prefix "${p}")" "0"
-			done < <(find "${pkg}" -name 'go.mod' -printf "%h\n")
-		else
-			update_deps "${pkg}" "0"
+		if [[ "${pkg}" == "./.github/go.mod" ]]; then
+			continue
 		fi
+
+		update_deps "${pkg%go.mod}" "0"
 	done < <(echo "${1}" | tr "," "\n")
-	# set -o noglob
-	# set +o noglob
 }
 
 case $1 in

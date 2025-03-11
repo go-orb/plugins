@@ -193,7 +193,7 @@ type parser struct {
 	commands []*parserCommand
 }
 
-//nolint:gocognit,gocyclo,cyclop
+//nolint:gocognit,gocyclo,cyclop,funlen
 func (p *parser) run(args []string) ([]*oCli.Flag, error) {
 	var ctx *uCli.Context
 
