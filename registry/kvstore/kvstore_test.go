@@ -3,6 +3,7 @@ package kvstore
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/go-orb/go-orb/kvstore"
 	"github.com/go-orb/go-orb/log"
@@ -39,7 +40,7 @@ func createRegistries(tb testing.TB) (*tests.TestSuite, func() error, error) {
 	require.True(tb, server.JetStreamEnabled())
 
 	// Create logger
-	logger, err := log.New()
+	logger, err := log.New(log.WithLevel("TRACE"))
 	require.NoError(tb, err)
 
 	// Initialize the store
@@ -85,7 +86,7 @@ func createRegistries(tb testing.TB) (*tests.TestSuite, func() error, error) {
 		return nil
 	}
 
-	return tests.CreateSuite(logger, []registry.Registry{reg1, reg2, reg3}, 0, 0), cleanup, nil
+	return tests.CreateSuite(logger, []registry.Registry{reg1, reg2, reg3}, time.Millisecond*200, 0), cleanup, nil
 }
 
 func TestSuite(t *testing.T) {

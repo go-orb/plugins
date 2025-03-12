@@ -107,8 +107,6 @@ type Registry struct {
 
 	config Config
 
-	id string
-
 	logger log.Logger
 
 	dataStore *dataStore
@@ -122,17 +120,6 @@ func (c *Registry) ServiceName() string {
 // ServiceVersion returns the configured version of this service.
 func (c *Registry) ServiceVersion() string {
 	return c.serviceVersion
-}
-
-// NodeID returns the ID of this service node in the registry.
-func (c *Registry) NodeID() string {
-	if c.id != "" {
-		return c.id
-	}
-
-	c.id = uuid.New().String()
-
-	return c.id
 }
 
 // Start starts the registry.

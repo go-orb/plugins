@@ -1,11 +1,11 @@
 package consul
 
 import (
-	"net"
-	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/go-orb/go-orb/registry"
+	maddr "github.com/go-orb/go-orb/util/addr"
 	"github.com/go-orb/plugins/registry/regutil"
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/api/watch"
@@ -87,38 +87,48 @@ func (cw *consulWatcher) serviceHandler(_ uint64, data interface{}) { //nolint:f
 		return
 	}
 
-	serviceMap := map[string]*registry.Service{}
+	var (
+		haveService bool
+		svc         *registry.Service
+	)
+
+	serviceMap := make(map[string]*registry.Service)
 	serviceName := ""
 
-	for _, entry := range entries {
-		serviceName = entry.Service.Service
+	for _, node := range entries {
 		// version is now a tag
-		version, _ := decodeVersion(entry.Service.Tags)
-		// service ID is now the node id
-		id := entry.Service.ID
-		// key is always the version
-		key := version
-		// address is service address
-		address := entry.Service.Address
+		version, _ := decodeVersion(node.Service.Tags)
 
-		// use node address
-		if len(address) == 0 {
-			address = entry.Node.Address
+		nodeMeta := map[string]string{}
+		svcMeta := map[string]string{}
+
+		for k, v := range node.Service.Meta {
+			if strings.HasPrefix(k, "orb_service_") {
+				svcMeta[strings.TrimPrefix(k, "orb_service_")] = v
+			} else if strings.HasPrefix(k, "orb_node_") {
+				nodeMeta[strings.TrimPrefix(k, "orb_node_")] = v
+			}
 		}
 
-		svc, ok := serviceMap[key]
-		if !ok {
+		// Skip unknown services.
+		if len(nodeMeta) == 0 && len(svcMeta) == 0 {
+			continue
+		}
+
+		svc, haveService = serviceMap[version]
+		if !haveService {
+			serviceName = node.Service.Service
 			svc = &registry.Service{
-				Endpoints: decodeEndpoints(entry.Service.Tags),
-				Name:      entry.Service.Service,
-				Version:   version,
+				Endpoints: decodeEndpoints(node.Service.Tags),
+				Name:      node.Service.Service,
+				Version:   svcMeta["version"],
+				Metadata:  svcMeta,
 			}
-			serviceMap[key] = svc
 		}
 
 		var del bool
 
-		for _, check := range entry.Checks {
+		for _, check := range node.Checks {
 			// delete the node if the status is critical
 			if check.Status == "critical" {
 				del = true
@@ -131,11 +141,30 @@ func (cw *consulWatcher) serviceHandler(_ uint64, data interface{}) { //nolint:f
 			continue
 		}
 
-		svc.Nodes = append(svc.Nodes, &registry.Node{
-			ID:       id,
-			Address:  net.JoinHostPort(address, strconv.Itoa(entry.Service.Port)),
-			Metadata: entry.Service.Meta,
-		})
+		rNode := &registry.Node{
+			ID:       node.Node.ID,
+			Address:  maddr.HostPort(node.Node.Address, node.Service.Port),
+			Metadata: nodeMeta,
+		}
+
+		// Extract the transport from Metadata
+		if transport, ok := node.Service.Meta[metaTransportKey]; ok {
+			rNode.Transport = transport
+			delete(rNode.Metadata, metaTransportKey)
+		} else {
+			continue
+		}
+
+		// Extract the node ID from Metadata
+		if nodeID, ok := node.Service.Meta[metaNodeIDKey]; ok {
+			rNode.ID = nodeID
+			delete(rNode.Metadata, metaNodeIDKey)
+		} else {
+			continue
+		}
+
+		serviceMap[version] = svc
+		svc.Nodes = append(svc.Nodes, rNode)
 	}
 
 	cw.RLock()
@@ -248,7 +277,7 @@ func (cw *consulWatcher) handle(_ uint64, data interface{}) {
 			go tmp()
 
 			cw.watchers[service] = wp
-			cw.next <- &registry.Result{Action: "create", Service: &registry.Service{Name: service}}
+			// cw.next <- &registry.Result{Action: "create", Service: &registry.Service{Name: service}}
 		}
 	}
 

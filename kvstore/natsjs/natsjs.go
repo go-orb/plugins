@@ -374,21 +374,13 @@ func (n *NatsJS) DropDatabase(database string) error {
 }
 
 // Watch exposes the watcher interface from the underlying JetStreamContext.
-//
-//nolint:funlen
 func (n *NatsJS) Watch(
 	ctx context.Context,
 	database,
 	table string,
 	opts ...kvstore.WatchOption,
 ) (<-chan kvstore.WatchEvent, func() error, error) {
-	bucketName := bucketName(database, table, n.config.BucketPerTable)
-
-	if bucketName == "" {
-		return nil, nil, orberrors.ErrBadRequest.Wrap(errors.New("multi bucket watching is not supported"))
-	}
-
-	b, err := n.js.KeyValue(ctx, bucketName)
+	b, err := n.getKVStore(database, table)
 	if err != nil {
 		return nil, nil, orberrors.ErrInternalServerError.Wrap(fmt.Errorf("failed to get bucket: %w", err))
 	}
@@ -444,7 +436,7 @@ func (n *NatsJS) Watch(
 				fallthrough
 			case jetstream.KeyValuePurge:
 				action = kvstore.WatchOpDelete
-				key = natsKey(table, u.Key(), n.config.KeyEncoding, n.config.BucketPerTable)
+				key = orbKey(table, u.Key(), n.config.KeyEncoding, n.config.BucketPerTable)
 			}
 
 			ch <- kvstore.WatchEvent{

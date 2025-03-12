@@ -10,22 +10,22 @@ func init() {
 	registry.Plugins.Add(Name, Provide)
 }
 
+//nolint:gochecknoglobals
 var (
 	// DefaultServiceDelimiter is the default delimiter used to separate service name and version.
-	//nolint:gochecknoglobals
 	DefaultServiceDelimiter = "@"
 
 	// DefaultDatabase is the default database name.
-	//nolint:gochecknoglobals
 	DefaultDatabase = "service-registry"
 
 	// DefaultTable is the default table name.
-	//nolint:gochecknoglobals
 	DefaultTable = "service-registry"
 
 	// DefaultTTL is the default time after which a node is considered stale.
-	//nolint:gochecknoglobals
 	DefaultTTL = 10 * time.Millisecond
+
+	// DefaultCache enables caching.
+	DefaultCache = true
 )
 
 // Name provides the name of this registry.
@@ -46,6 +46,9 @@ type Config struct {
 
 	// Table is the table name in the kvstore.
 	Table string `json:"table" yaml:"table"`
+
+	// Cache enables/disables caching.
+	Cache bool `json:"cache" yaml:"cache"`
 }
 
 // ApplyOptions applies a set of options to the config.
@@ -63,6 +66,7 @@ func NewConfig(opts ...registry.Option) Config {
 		TTL:              DefaultTTL,
 		Database:         DefaultDatabase,
 		Table:            DefaultTable,
+		Cache:            DefaultCache,
 	}
 
 	cfg.ApplyOptions(opts...)
@@ -106,6 +110,16 @@ func WithTable(n string) registry.Option {
 		cfg, ok := c.(*Config)
 		if ok {
 			cfg.Table = n
+		}
+	}
+}
+
+// WithNoCache disables caching.
+func WithNoCache() registry.Option {
+	return func(c registry.ConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.Cache = false
 		}
 	}
 }

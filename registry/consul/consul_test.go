@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+	"time"
 
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
@@ -81,7 +82,7 @@ func createServer() (*tests.TestSuite, func() error, error) {
 		return nil
 	}
 
-	return tests.CreateSuite(logger, []registry.Registry{reg1, reg2, reg3}, 0, 0), cleanup, nil
+	return tests.CreateSuite(logger, []registry.Registry{reg1, reg2, reg3}, time.Millisecond*200, 0), cleanup, nil
 }
 
 func createServer1(tb testing.TB) (*testutil.TestServer, error) {

@@ -62,7 +62,7 @@ func (w *Watcher) Next() (*registry.Result, error) {
 		svc.Name = parts[0]
 
 		// go-orb registers nodes with a - separator
-		svc.Nodes = []*registry.Node{{ID: parts[0] + "-" + parts[1]}}
+		svc.Nodes = []*registry.Node{{ID: parts[1]}}
 		svc.Version = parts[2]
 	} else {
 		if err := w.codec.Unmarshal(kve.Value, &svc); err != nil {
@@ -93,5 +93,9 @@ func (w *Watcher) Next() (*registry.Result, error) {
 
 // Stop stops the watcher.
 func (w *Watcher) Stop() error {
-	return w.stop()
+	if w != nil {
+		return w.stop()
+	}
+
+	return nil
 }

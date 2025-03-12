@@ -25,6 +25,9 @@ const Name = "consul"
 var (
 	DefaultAddresses  = []string{"localhost:8500"}
 	DefaultAllowStale = true
+
+	// DefaultCache enables caching.
+	DefaultCache = true
 )
 
 func init() {
@@ -45,6 +48,9 @@ type Config struct {
 	AllowStale   bool                 `json:"allowStale,omitempty" yaml:"allowStale,omitempty"`
 	QueryOptions *consul.QueryOptions `json:"-"                    yaml:"-"`
 	TCPCheck     time.Duration        `json:"tcpCheck,omitempty"   yaml:"tcpCheck,omitempty"`
+
+	// Cache enables/disables caching.
+	Cache bool `json:"cache,omitempty" yaml:"cache,omitempty"`
 }
 
 // NewConfig creates a new config object.
@@ -56,6 +62,7 @@ func NewConfig(
 	cfg := Config{
 		Config:     registry.NewConfig(),
 		AllowStale: DefaultAllowStale,
+		Cache:      DefaultCache,
 	}
 
 	cfg.ApplyOptions(opts...)
@@ -168,6 +175,16 @@ func WithTCPCheck(t time.Duration) registry.Option {
 		cfg, ok := c.(*Config)
 		if ok {
 			cfg.TCPCheck = t
+		}
+	}
+}
+
+// WithNoCache disables caching.
+func WithNoCache() registry.Option {
+	return func(c registry.ConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.Cache = false
 		}
 	}
 }

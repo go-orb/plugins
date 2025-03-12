@@ -13,6 +13,7 @@ import (
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/orberrors"
+	"github.com/go-orb/plugins/registry/regutil/cache"
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-multierror"
 )
@@ -36,6 +37,9 @@ type Registry struct {
 	logger log.Logger
 
 	kvstore kvstore.Type
+
+	// cache is used to cache registry operations.
+	cache *cache.Cache
 }
 
 // ServiceName returns the configured name of this service.
@@ -62,11 +66,30 @@ func (c *Registry) NodeID() string {
 // Start starts the registry.
 func (c *Registry) Start(ctx context.Context) error {
 	c.ctx = ctx
-	return c.kvstore.Start(ctx)
+
+	// Start the kvstore
+	if err := c.kvstore.Start(ctx); err != nil {
+		return err
+	}
+
+	// Start the cache - this will populate it and begin watching for changes
+	if c.config.Cache {
+		return c.cache.Start(ctx)
+	}
+
+	return nil
 }
 
 // Stop stops the registry.
 func (c *Registry) Stop(ctx context.Context) error {
+	// Stop the cache first
+	if c.config.Cache {
+		if err := c.cache.Stop(ctx); err != nil {
+			c.logger.Warn("Error stopping cache", "error", err)
+		}
+	}
+
+	// Then stop the kvstore
 	return c.kvstore.Stop(ctx)
 }
 
@@ -126,7 +149,11 @@ func (c *Registry) Register(service *registry.Service, _ ...registry.RegisterOpt
 }
 
 // GetService returns a service from the registry.
-func (c *Registry) GetService(name string, _ ...registry.GetOption) ([]*registry.Service, error) {
+func (c *Registry) GetService(name string, opts ...registry.GetOption) ([]*registry.Service, error) {
+	if c.config.Cache {
+		return c.cache.GetService(name, opts...)
+	}
+
 	services, err := c.listServices(kvstore.KeysPrefix(name + c.config.ServiceDelimiter))
 	if err != nil {
 		return nil, err
@@ -141,7 +168,11 @@ func (c *Registry) GetService(name string, _ ...registry.GetOption) ([]*registry
 }
 
 // ListServices lists services within the registry.
-func (c *Registry) ListServices(_ ...registry.ListOption) ([]*registry.Service, error) {
+func (c *Registry) ListServices(opts ...registry.ListOption) ([]*registry.Service, error) {
+	if c.config.Cache {
+		return c.cache.ListServices(opts...)
+	}
+
 	return c.listServices()
 }
 
@@ -255,12 +286,17 @@ func New(
 		return nil, err
 	}
 
-	return &Registry{
+	reg := &Registry{
 		serviceName:    serviceName,
 		serviceVersion: serviceVersion,
 		config:         cfg,
 		logger:         logger,
 		codec:          codec,
 		kvstore:        kvstore,
-	}, nil
+	}
+
+	// Initialize the cache with a reference to this registry
+	reg.cache = cache.New(cache.Config{}, logger, reg)
+
+	return reg, nil
 }

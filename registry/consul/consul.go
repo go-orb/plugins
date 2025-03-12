@@ -19,6 +19,7 @@ import (
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
 	maddr "github.com/go-orb/go-orb/util/addr"
+	"github.com/go-orb/plugins/registry/regutil/cache"
 	"github.com/google/uuid"
 	consul "github.com/hashicorp/consul/api"
 	"github.com/hashicorp/go-multierror"
@@ -42,6 +43,9 @@ type RegistryConsul struct {
 	consulConfig *consul.Config
 
 	queryOptions *consul.QueryOptions
+
+	// cache is used to cache registry operations.
+	cache *cache.Cache
 }
 
 func getDeregisterTTL(t time.Duration) time.Duration {
@@ -187,6 +191,8 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 			metadata["orb_service_"+k] = v
 		}
 
+		metadata["orb_service_version"] = service.Version
+
 		// Add node metadata to the service
 		for k, v := range node.Metadata {
 			metadata["orb_node_"+k] = v
@@ -242,6 +248,10 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 //
 //nolint:funlen,gocyclo
 func (c *RegistryConsul) GetService(name string, _ ...registry.GetOption) ([]*registry.Service, error) {
+	if c.config.Cache {
+		return c.cache.GetService(name)
+	}
+
 	var (
 		rsp []*consul.ServiceEntry
 		err error
@@ -351,6 +361,10 @@ func (c *RegistryConsul) GetService(name string, _ ...registry.GetOption) ([]*re
 
 // ListServices lists services within the registry.
 func (c *RegistryConsul) ListServices(_ ...registry.ListOption) ([]*registry.Service, error) {
+	if c.config.Cache {
+		return c.cache.ListServices()
+	}
+
 	rsp, _, err := c.Client().Catalog().Services(c.queryOptions)
 	if err != nil {
 		return nil, err
@@ -505,20 +519,35 @@ func New(serviceName string, _ string, cfg Config, logger log.Logger) *RegistryC
 	// remove the client
 	cRegistry.client = nil
 
+	// Initialize the cache with a reference to this registry
+	cRegistry.cache = cache.New(cache.Config{}, logger, cRegistry)
+
 	return cRegistry
 }
 
 // Start the registry.
-func (c *RegistryConsul) Start(_ context.Context) error {
+func (c *RegistryConsul) Start(ctx context.Context) error {
 	// setup the client
 	c.Client()
+
+	// Start the cache - this will populate it and begin watching for changes
+	if c.config.Cache {
+		return c.cache.Start(ctx)
+	}
 
 	return nil
 }
 
 // Stop the registry.
-func (c *RegistryConsul) Stop(_ context.Context) error {
-	// remove the client
+func (c *RegistryConsul) Stop(ctx context.Context) error {
+	// Stop the cache first
+	if c.config.Cache {
+		if err := c.cache.Stop(ctx); err != nil {
+			c.logger.Warn("Error stopping cache", "error", err)
+		}
+	}
+
+	// Then remove the client
 	c.client = nil
 
 	return nil
