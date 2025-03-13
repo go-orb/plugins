@@ -3,30 +3,20 @@ package tests
 
 import (
 	"context"
+	"crypto/rand"
+	"errors"
 	"fmt"
-	"net/url"
-	"os"
-	"slices"
-	"time"
 
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/codecs"
-	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
+	"github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/types"
-	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
-	"github.com/go-orb/plugins/client/tests/proto"
+	"github.com/go-orb/plugins/client/tests/proto/echo"
+	"github.com/go-orb/plugins/client/tests/proto/file"
 	"github.com/stretchr/testify/suite"
-
-	// Blank imports here are fine.
-	_ "github.com/go-orb/plugins-experimental/registry/mdns"
-	_ "github.com/go-orb/plugins/codecs/json"
-	_ "github.com/go-orb/plugins/codecs/proto"
-	_ "github.com/go-orb/plugins/codecs/yaml"
-	_ "github.com/go-orb/plugins/config/source/file"
-	_ "github.com/go-orb/plugins/log/slog"
 )
 
 //nolint:gochecknoglobals
@@ -38,18 +28,19 @@ var (
 	DefaultRequests = []TestRequest{
 		{
 			Name:     "32byte",
-			Endpoint: proto.EndpointStreamsCall,
-			Request: &proto.CallRequest{
+			Service:  string(ServiceName),
+			Endpoint: echo.EndpointStreamsCall,
+			Request: &echo.CallRequest{
 				Name: "32byte",
 			},
-			Response: &proto.CallResponse{
+			Response: &echo.CallResponse{
 				Msg: "",
 			},
-			URL: "t",
 		},
 		{
 			Name:        "raw-json",
-			Endpoint:    proto.EndpointStreamsCall,
+			Service:     string(ServiceName),
+			Endpoint:    echo.EndpointStreamsCall,
 			ContentType: "application/json",
 			Request:     `{"name": "Alex"}`,
 			Response: map[string]any{
@@ -58,39 +49,42 @@ var (
 		},
 		{
 			Name:     "default codec with URL",
-			Endpoint: proto.EndpointStreamsCall,
-			Request: &proto.CallRequest{
+			Service:  string(ServiceName),
+			Endpoint: echo.EndpointStreamsCall,
+			Request: &echo.CallRequest{
 				Name: "Alex",
 			},
-			Response: &proto.CallResponse{
+			Response: &echo.CallResponse{
 				Msg: "Hello Alex",
 			},
-			URL: "t",
 		},
 		{
 			Name:     "default codec",
-			Endpoint: proto.EndpointStreamsCall,
-			Request: &proto.CallRequest{
+			Service:  string(ServiceName),
+			Endpoint: echo.EndpointStreamsCall,
+			Request: &echo.CallRequest{
 				Name: "Alex",
 			},
-			Response: &proto.CallResponse{
+			Response: &echo.CallResponse{
 				Msg: "Hello Alex",
 			},
 		},
 		{
 			Name:        "proto",
-			Endpoint:    proto.EndpointStreamsCall,
+			Service:     string(ServiceName),
+			Endpoint:    echo.EndpointStreamsCall,
 			ContentType: "application/x-protobuf",
-			Request: &proto.CallRequest{
+			Request: &echo.CallRequest{
 				Name: "Alex",
 			},
-			Response: &proto.CallResponse{
+			Response: &echo.CallResponse{
 				Msg: "Hello Alex",
 			},
 		},
 		{
 			Name:        "json",
-			Endpoint:    proto.EndpointStreamsCall,
+			Service:     string(ServiceName),
+			Endpoint:    echo.EndpointStreamsCall,
 			ContentType: "application/json",
 			Request: map[string]any{
 				"name": "Alex",
@@ -101,17 +95,27 @@ var (
 		},
 		{
 			Name:     "error request",
-			Endpoint: proto.EndpointStreamsCall,
+			Service:  string(ServiceName),
+			Endpoint: echo.EndpointStreamsCall,
 			Error:    true,
-			Request: &proto.CallRequest{
+			Request: &echo.CallRequest{
 				Name: "error",
 			},
-			Response: &proto.CallResponse{
+			Response: &echo.CallResponse{
 				Msg: "Hello Alex",
 			},
 		},
 	}
 )
+
+// SetupData contains the setup data for a test.
+type SetupData struct {
+	Logger      log.Logger
+	Registry    registry.Type
+	Entrypoints []server.Entrypoint
+	Ctx         context.Context
+	Stop        context.CancelFunc
+}
 
 // TestSuite runs a bunch of tests.
 type TestSuite struct {
@@ -125,20 +129,23 @@ type TestSuite struct {
 
 	logger   log.Logger
 	registry registry.Type
+	client   client.Type
 
-	serverRunner *PackageRunner
-	client       client.Type
+	entrypoints []server.Entrypoint
+	ctx         context.Context
+	setupServer func(service types.ServiceName) (*SetupData, error)
+	stopServer  context.CancelFunc
 
 	// To create more clients in Benchmarks.
 	clientName types.ServiceName
-	configData types.ConfigData
 }
 
 // NewSuite creates a new test suite.
-func NewSuite(_ string, transports []string, requests ...TestRequest) *TestSuite {
+func NewSuite(setupServer func(service types.ServiceName) (*SetupData, error), transports []string, requests ...TestRequest) *TestSuite {
 	s := new(TestSuite)
 
 	s.Transports = transports
+	s.setupServer = setupServer
 
 	if len(requests) == 0 {
 		s.Requests = DefaultRequests
@@ -156,8 +163,6 @@ type TestRequest struct {
 	PreferredTransports []string
 	// ContentType overwrites the client's content-type.
 	ContentType string
-	// URL when set bypasses the registry.
-	URL string
 	// Expect an error?
 	Error bool
 
@@ -167,118 +172,63 @@ type TestRequest struct {
 
 // SetupSuite setups the test suite.
 func (s *TestSuite) SetupSuite() {
-	version := types.ServiceVersion("v1.0.0")
+	var err error
 
-	cURLs := []*url.URL{}
-
-	cfgData, err := config.Read(cURLs)
+	setupData, err := s.setupServer(ServiceName)
 	if err != nil {
-		s.Require().NoError(err, "while parsing a config")
+		s.Require().NoError(err, "while setting up the server")
 	}
 
-	s.configData = cfgData
+	s.logger = setupData.Logger
+	s.registry = setupData.Registry
+	s.entrypoints = setupData.Entrypoints
+	s.ctx = setupData.Ctx
+	s.stopServer = setupData.Stop
+
 	s.clientName = types.ServiceName("client")
 
-	ctx := context.Background()
-	components := types.NewComponents()
+	s.client, err = client.ProvideNoOpts(s.clientName, nil, &types.Components{}, s.logger, s.registry)
+	s.Require().NoError(err, "while setting up the client")
 
-	// Logger
-	logger, err := log.New()
-	s.Require().NoError(err, "while setting up logger")
-	s.Require().NoError(logger.Start(ctx))
-	s.logger = logger
+	s.Require().NoError(s.logger.Start(s.ctx))
+	s.Require().NoError(s.registry.Start(s.ctx))
 
-	// Registry
-	reg, err := registry.Provide(s.clientName, version, cfgData, components, logger)
-	if err != nil {
-		s.Require().NoError(err, "while creating a registry")
+	for _, ep := range s.entrypoints {
+		s.Require().NoError(ep.Start(s.ctx))
 	}
 
-	s.Require().NoError(reg.Start(ctx))
-	s.registry = reg
-
-	// Client
-	c, err := client.Provide(s.clientName, cfgData, components, logger, reg)
-	if err != nil {
-		s.Require().NoError(err, "while creating a client")
-	}
-
-	s.Require().NoError(c.Start(ctx))
-	s.client = c
-
-	if len(s.Transports) == 0 {
-		s.Transports = s.client.Config().PreferredTransports
-	}
-
-	// Start a server
-	pro := []PackageRunnerOption{
-		// WithNumProcesses(5),
-		// WithRunEnv("GOMAXPROCS=1"),
-		WithRunEnv("GOMAXPROCS=" + os.Getenv("GOMAXPROCS")),
-		WithArgs("--config", "../../cmd/tests_server/config.yaml"),
-	}
-	// if logger.Level() <= slog.LevelDebug {
-	pro = append(pro, WithStdOut(os.Stdout), WithStdErr(os.Stderr))
-	// }
-
-	s.serverRunner = NewPackageRunner(
-		logger,
-		"github.com/go-orb/plugins/client/tests/cmd/tests_server",
-		"",
-		pro...,
-	)
-	s.Require().NoError(s.serverRunner.Build())
-	s.Require().NoError(s.serverRunner.Start())
-
-	// Wait for the server to be registered (up to 5 seconds)
-	for i := 0; i < 5; i++ {
-		time.Sleep(time.Second)
-
-		if _, err = s.client.ResolveService(context.Background(), string(ServiceName), s.Transports...); err == nil {
-			break
-		}
-	}
-
-	if err != nil {
-		s.Require().NoError(err, "failed to wait for the server")
-		s.Require().NoError(s.serverRunner.Kill(), "while stopping the server sub process")
-	}
+	s.Require().NoError(s.client.Start(s.ctx))
 }
 
 // TearDownSuite runs after all tests.
 func (s *TestSuite) TearDownSuite() {
+	s.stopServer()
+
 	ctx := context.Background()
 
-	err := s.client.Stop(ctx)
-	s.Require().NoError(err, "while stopping the client")
+	s.Require().NoError(s.client.Stop(ctx), "while stopping the client")
 
-	err = s.registry.Stop(ctx)
-	s.Require().NoError(err, "while stopping the registry")
+	s.Require().NoError(s.registry.Stop(ctx))
 
-	err = s.logger.Stop(ctx)
-	s.Require().NoError(err, "while stopping the logger")
-
-	if s.serverRunner != nil {
-		s.Require().NoError(s.serverRunner.Kill(), "while stopping the server sub process")
+	for _, ep := range s.entrypoints {
+		s.Require().NoError(ep.Stop(ctx))
 	}
+
+	s.Require().NoError(s.logger.Stop(ctx), "while stopping the logger")
 }
 
-func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest, clientWire client.Type) {
+func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest, clientWire client.Type, transport string) {
 	opts := []client.CallOption{}
 	if req.ContentType != "" {
 		opts = append(opts, client.WithContentType(req.ContentType))
 	}
 
-	if req.URL != "" {
-		opts = append(opts, client.WithURL(req.URL))
-	}
-
 	if len(s.Transports) != 0 {
-		opts = append(opts, client.WithPreferredTransports(s.Transports...))
+		opts = append(opts, client.WithPreferredTransports(transport))
 	}
 
 	if req.ContentType == "" || req.ContentType == codecs.MimeProto {
-		rsp, err := client.Request[proto.CallResponse](
+		rsp, err := client.Request[echo.CallResponse](
 			ctx,
 			clientWire,
 			req.Service,
@@ -291,7 +241,7 @@ func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest, clientWire 
 			s.Require().Error(err)
 		} else {
 			s.Require().NoError(err)
-			s.Equal(req.Response.(*proto.CallResponse).GetMsg(), rsp.GetMsg(), "unexpected response") //nolint:errcheck
+			s.Equal(req.Response.(*echo.CallResponse).GetMsg(), rsp.GetMsg(), "unexpected response") //nolint:errcheck
 		}
 
 		return
@@ -314,39 +264,17 @@ func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest, clientWire 
 	}
 }
 
-// TestResolveServiceTransport checks if the right transport has been selected.
-func (s *TestSuite) TestResolveServiceTransport() {
-	ctx := context.Background()
-
-	nodes, err := s.client.ResolveService(ctx, string(ServiceName), s.Transports...)
-	s.Require().NoError(err)
-
-	node, err := s.client.Config().Selector(ctx, string(ServiceName), nodes, s.Transports, false)
-	s.Require().NoError(err)
-
-	s.Require().True(slices.Contains(s.Transports, node.Transport))
-}
-
 // TestRunRequests makes the configured requests.
 func (s *TestSuite) TestRunRequests() {
-	for _, oReq := range s.Requests {
-		ctx := context.Background()
-		req := oReq
+	for _, t := range s.Transports {
+		for _, oReq := range s.Requests {
+			ctx := context.Background()
+			req := oReq
 
-		s.Run(req.Name, func() {
-			req.Service = string(ServiceName)
-			if req.URL == "t" {
-				nodes, err := s.client.ResolveService(ctx, req.Service, s.Transports...)
-				s.Require().NoError(err)
-
-				node, err := s.client.Config().Selector(ctx, req.Service, nodes, s.Transports, false)
-				s.Require().NoError(err)
-
-				req.URL = fmt.Sprintf("%s://%s", node.Transport, node.Address)
-			}
-
-			s.doRequest(ctx, &req, s.client)
-		})
+			s.Run(fmt.Sprintf("%s/%s", t, req.Name), func() {
+				s.doRequest(ctx, &req, s.client, t)
+			})
+		}
 	}
 }
 
@@ -354,12 +282,12 @@ func (s *TestSuite) TestRunRequests() {
 func (s *TestSuite) TestFailingAuthorization() {
 	responseMd := make(map[string]string)
 	ctx := context.Background()
-	streamsClient := proto.NewStreamsClient(s.client)
+	streamsClient := echo.NewStreamsClient(s.client)
 
 	_, err := streamsClient.AuthorizedCall(
 		ctx,
 		string(ServiceName),
-		&proto.CallRequest{Name: "empty"},
+		&echo.CallRequest{Name: "empty"},
 		client.WithResponseMetadata(responseMd),
 	)
 	s.Require().ErrorIs(err, orberrors.ErrUnauthorized)
@@ -367,21 +295,184 @@ func (s *TestSuite) TestFailingAuthorization() {
 
 // TestMetadata checks if metadata gets transported over the wire.
 func (s *TestSuite) TestMetadata() {
-	ctx := context.Background()
-	ctx, md := metadata.WithOutgoing(ctx)
+	md := make(map[string]string)
 	md["authorization"] = "Bearer pleaseHackMe"
 
-	responseMd := make(map[string]string)
-	streamsClient := proto.NewStreamsClient(s.client)
-	_, err := streamsClient.AuthorizedCall(
-		ctx,
-		string(ServiceName),
-		&proto.CallRequest{Name: "empty"},
-		client.WithResponseMetadata(responseMd),
-	)
-	s.Require().NoError(err)
+	for _, t := range s.Transports {
+		s.Run(t, func() {
+			responseMd := make(map[string]string)
+			streamsClient := echo.NewStreamsClient(s.client)
+			_, err := streamsClient.AuthorizedCall(
+				context.Background(),
+				string(ServiceName),
+				&echo.CallRequest{Name: "empty"},
+				client.WithMetadata(md),
+				client.WithResponseMetadata(responseMd),
+			)
+			s.Require().NoError(err)
 
-	rspHandler, ok := responseMd["tracing-id"]
-	s.Require().True(ok, "Transport does not transport metadata - tracing-id")
-	s.Require().Equal("asfdjhladhsfashf", rspHandler)
+			rspHandler, ok := responseMd["tracing-id"]
+			s.Require().True(ok, "Transport does not transport metadata - tracing-id")
+			s.Require().Equal("asfdjhladhsfashf", rspHandler)
+		})
+	}
+}
+
+// TestFileUpload tests the client streaming functionality for file uploads.
+func (s *TestSuite) TestFileUpload() {
+	// Create a file service client
+	fileClient := file.NewFileServiceClient(s.client)
+
+	for _, t := range s.Transports {
+		s.Run(t, func() {
+			// Create a context for the stream
+			ctx := context.Background()
+
+			// Open a stream to the service
+			stream, err := fileClient.UploadFile(ctx, string(ServiceName), client.WithPreferredTransports(t))
+			if errors.Is(err, orberrors.ErrNotImplemented) {
+				// Transport does not support streaming.
+				return
+			}
+
+			s.Require().NoError(err, "Failed to open stream")
+
+			// Send multiple chunks of data
+			chunkCount := 5
+			for i := 0; i < chunkCount; i++ {
+				// Create test data
+				data := make([]byte, 1024) // 1KB chunks
+				_, err := rand.Read(data)
+				s.Require().NoError(err, "Failed to generate random data")
+
+				// Send the chunk
+				chunk := &file.FileChunk{
+					Filename:    fmt.Sprintf("test-file-%d.bin", i),
+					ContentType: "application/octet-stream",
+					Data:        data,
+				}
+
+				err = stream.Send(chunk)
+				s.Require().NoError(err, "Failed to send chunk")
+			}
+
+			// Close the stream to tell the server we're done sending data
+			// This will signal EOF to the server
+			err = stream.CloseSend()
+			s.Require().NoError(err, "Failed to close send stream")
+
+			// Get the response
+			response := file.UploadResponse{}
+			err = stream.Recv(&response)
+			s.Require().NoError(err, "Failed to receive response")
+			s.Require().NotEmpty(response.GetId(), "Response ID should not be empty")
+			s.Require().True(response.GetSuccess(), "Upload should be successful")
+
+			err = stream.Close()
+			s.Require().NoError(err, "Failed to close stream")
+		})
+	}
+}
+
+// TestAuthorizedFileUpload tests the authorized client streaming functionality for file uploads.
+func (s *TestSuite) TestAuthorizedFileUpload() {
+	// Create a file service client
+	fileClient := file.NewFileServiceClient(s.client)
+
+	for _, t := range s.Transports {
+		s.Run(t+"/Unauthorized", func() {
+			// Create a context for the stream
+			ctx := context.Background()
+
+			// Open a stream to the service
+			stream, err := fileClient.AuthorizedUploadFile(ctx, string(ServiceName), client.WithPreferredTransports(t))
+			if errors.Is(err, orberrors.ErrNotImplemented) {
+				// Transport does not support streaming.
+				return
+			}
+
+			s.Require().NoError(err, "Failed to open stream")
+
+			// Create test data
+			data := make([]byte, 1024) // 1KB chunk
+			_, err = rand.Read(data)
+			s.Require().NoError(err, "Failed to generate random data")
+
+			// Send the chunk
+			chunk := &file.FileChunk{
+				Filename:    "test-file.bin",
+				ContentType: "application/octet-stream",
+				Data:        data,
+			}
+
+			err = stream.Send(chunk)
+			s.Require().NoError(err, "Failed to send initial chunk")
+
+			// Close the stream - this will trigger the server to process the request
+			err = stream.CloseSend()
+			s.Require().NoError(err, "Failed to close stream")
+
+			// Try to receive response, which should fail with unauthorized error
+			var response file.UploadResponse
+			err = stream.Recv(&response)
+			s.Require().Error(err, "Should fail with unauthorized error")
+			s.Require().ErrorIs(err, orberrors.ErrUnauthorized, "Should be an unauthorized error")
+		})
+	}
+
+	for _, t := range s.Transports {
+		s.Run(t+"/Authorized", func() {
+			// Track response metadata
+			md := make(map[string]string)
+			md["authorization"] = "Bearer pleaseHackMe"
+			responseMd := make(map[string]string)
+
+			// Open a stream to the service
+			stream, err := fileClient.AuthorizedUploadFile(context.Background(), string(ServiceName),
+				client.WithPreferredTransports(t),
+				client.WithMetadata(md),
+				client.WithResponseMetadata(responseMd),
+			)
+			if errors.Is(err, orberrors.ErrNotImplemented) {
+				// Transport does not support streaming.
+				return
+			}
+
+			s.Require().NoError(err, "Failed to open stream")
+
+			// Send multiple chunks of data
+			chunkCount := 3
+			for i := 0; i < chunkCount; i++ {
+				// Create test data
+				data := make([]byte, 1024) // 1KB chunks
+				_, err := rand.Read(data)
+				s.Require().NoError(err, "Failed to generate random data")
+
+				// Send the chunk
+				chunk := &file.FileChunk{
+					Filename:    fmt.Sprintf("test-file-%d.bin", i),
+					ContentType: "application/octet-stream",
+					Data:        data,
+				}
+
+				err = stream.Send(chunk)
+				s.Require().NoError(err, "Failed to send chunk")
+			}
+
+			// Close the stream
+			err = stream.CloseSend()
+			s.Require().NoError(err, "Failed to close stream")
+
+			// Get the response
+			var response file.UploadResponse
+			err = stream.Recv(&response)
+			s.Require().NoError(err, "Failed to receive response")
+			s.Require().NotEmpty(response.GetId(), "Response ID should not be empty")
+			s.Require().True(response.GetSuccess(), "Upload should be successful")
+
+			// Verify response metadata
+			s.Require().Equal("true", responseMd["bytes-received"], "Expected bytes-received metadata")
+			s.Require().Equal("completed", responseMd["total-size"], "Expected total-size metadata")
+		})
+	}
 }

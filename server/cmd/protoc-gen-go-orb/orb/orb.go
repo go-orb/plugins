@@ -98,9 +98,9 @@ func genService(file *protogen.File, generated *protogen.GeneratedFile, service 
 
 	for _, method := range service.Methods {
 		// gRPC streaming is not suppoerted at the moment
-		if method.Desc.IsStreamingClient() || method.Desc.IsStreamingServer() {
-			continue
-		}
+		// if method.Desc.IsStreamingClient() || method.Desc.IsStreamingServer() {
+		// 	continue
+		// }
 
 		serviceDescription.AddMethod(
 			buildMethodDesc(generated, method, http.MethodPost,
@@ -149,14 +149,16 @@ func buildMethodDesc(generated *protogen.GeneratedFile, protogenMethod *protogen
 	}
 
 	return methodDesc{
-		Name:         protogenMethod.GoName,
-		OriginalName: string(protogenMethod.Desc.Name()),
-		Num:          methodSets[protogenMethod.GoName],
-		Request:      generated.QualifiedGoIdent(protogenMethod.Input.GoIdent),
-		Reply:        generated.QualifiedGoIdent(protogenMethod.Output.GoIdent),
-		Path:         path,
-		Method:       fMethod(method),
-		MethodUpper:  method,
+		Name:            protogenMethod.GoName,
+		OriginalName:    string(protogenMethod.Desc.Name()),
+		Num:             methodSets[protogenMethod.GoName],
+		Request:         generated.QualifiedGoIdent(protogenMethod.Input.GoIdent),
+		Reply:           generated.QualifiedGoIdent(protogenMethod.Output.GoIdent),
+		Path:            path,
+		Method:          fMethod(method),
+		MethodUpper:     method,
+		ClientStreaming: protogenMethod.Desc.IsStreamingClient(),
+		ServerStreaming: protogenMethod.Desc.IsStreamingServer(),
 	}
 }
 

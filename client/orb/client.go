@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"net/http"
+	"net/url"
 	"strconv"
 	"sync"
 	"time"
@@ -19,7 +19,6 @@ import (
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/container"
-	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
 )
 
@@ -94,8 +93,36 @@ func (c *Client) With(opts ...client.Option) error {
 	return err
 }
 
-// ResolveService resolves a servicename to a Node with the help of the registry.
-func (c *Client) ResolveService(
+// selectNode returns a node for the given service and endpoint.
+func (c *Client) selectNode(ctx context.Context, service string, endpoint string, opts *client.CallOptions) (string, string, error) {
+	if opts.URL != "" {
+		myUrl, err := url.Parse(opts.URL)
+		if err != nil {
+			return "", "", orberrors.ErrBadRequest.Wrap(err)
+		}
+
+		return myUrl.Host, myUrl.Scheme, nil
+	}
+
+	// Resolve the service to a list of nodes in a per transport map.
+	nodes, err := c.resolveService(ctx, service, opts.PreferredTransports...)
+	if err != nil {
+		c.Logger().Error("Failed to resolve service", "error", err, "service", service)
+		return "", "", err
+	}
+
+	// Run the configured Selector to get a node from the resolved nodes.
+	node, err := opts.Selector(ctx, service, nodes, opts.PreferredTransports, opts.AnyTransport)
+	if err != nil {
+		c.Logger().Error("Failed to resolve service", "error", err, "service", service)
+		return "", "", err
+	}
+
+	return node.Address, node.Transport, nil
+}
+
+// resolveService resolves a servicename to a Node with the help of the registry.
+func (c *Client) resolveService(
 	_ context.Context,
 	service string,
 	preferredTransports ...string,
@@ -174,15 +201,20 @@ func (c *Client) makeOptions(opts ...client.CallOption) *client.CallOptions {
 		PreferredTransports: c.config.Config.PreferredTransports,
 		AnyTransport:        c.config.Config.AnyTransport,
 		Selector:            c.config.Config.Selector,
-		Backoff:             c.config.Config.Backoff,
-		RetryFunc:           client.DefaultCallOptionsRetryFunc,
-		Retries:             client.DefaultCallOptionsRetries,
 		DialTimeout:         c.config.Config.DialTimeout,
 		ConnectionTimeout:   c.config.Config.ConnectionTimeout,
 		RequestTimeout:      c.config.Config.RequestTimeout,
 		StreamTimeout:       c.config.Config.StreamTimeout,
 		ConnClose:           false,
 		TLSConfig:           c.config.Config.TLSConfig,
+
+		Metadata:         map[string]string{},
+		ResponseMetadata: map[string]string{},
+
+		RetryFunc:          client.DefaultCallOptionsRetryFunc,
+		Retries:            client.DefaultCallOptionsRetries,
+		MaxCallRecvMsgSize: client.DefaultMaxCallRecvMsgSize,
+		MaxCallSendMsgSize: client.DefaultMaxCallSendMsgSize,
 	}
 
 	// Apply options.
@@ -193,80 +225,142 @@ func (c *Client) makeOptions(opts ...client.CallOption) *client.CallOptions {
 	return co
 }
 
-func (c *Client) transportForReq(ctx context.Context, req *client.Req[any, any], opts *client.CallOptions) (Transport, error) {
+func (c *Client) transport(ctx context.Context, transport string, opts *client.CallOptions) (Transport, error) {
 	c.transportLock.Lock()
 	defer c.transportLock.Unlock()
 
-	node, err := req.Node(ctx, opts)
-	if err != nil {
-		if errors.Is(err, registry.ErrNotFound) {
-			return nil, orberrors.HTTP(http.StatusServiceUnavailable)
-		}
-
-		return nil, orberrors.ErrInternalServerError.Wrap(err)
-	}
-
 	// Try to fetch the transport from the internal registry.
-	transport, ok := c.transports.Get(node.Transport)
-
-	if !ok {
-		// Failed to get it from the registry, try to create a new one.
-		tcreator, ok := Transports.Get(node.Transport)
-		if !ok {
-			c.logger.Error("Failed to create a transport", slog.String("service", req.Service()), slog.String("transport", node.Transport))
-			return nil, fmt.Errorf("%w: %w (%s)", orberrors.ErrInternalServerError, client.ErrFailedToCreateTransport, node.Transport)
-		}
-
-		transport, err = tcreator(c.logger.With("transport", node.Transport), &c.config)
-		if err != nil {
-			c.logger.Error(
-				"Failed to create a transport",
-				slog.String("service", req.Service()),
-				slog.String("transport", node.Transport),
-				slog.Any("error", err),
-			)
-
-			return nil, fmt.Errorf("%w: %w (%s)", orberrors.ErrInternalServerError, client.ErrFailedToCreateTransport, node.Transport)
-		}
-
-		if err := transport.Start(); err != nil {
-			return nil, orberrors.From(err)
-		}
-
-		// Store the transport for later use.
-		c.transports.Set(node.Transport, transport)
+	t, ok := c.transports.Get(transport)
+	if ok {
+		return t, nil
 	}
 
-	return transport, nil
+	// Failed to get it from the registry, try to create a new one.
+	tcreator, ok := Transports.Get(transport)
+	if !ok {
+		c.logger.Error("Failed to create a transport", slog.String("transport", transport))
+		return nil, orberrors.ErrInternalServerError.Wrap(
+			fmt.Errorf("%w: %s", client.ErrFailedToCreateTransport, transport),
+		)
+	}
+
+	t, err := tcreator(c.logger.With("transport", transport), &c.config)
+	if err != nil {
+		c.logger.Error(
+			"Failed to create a transport",
+			slog.String("transport", transport),
+			slog.Any("error", err),
+		)
+
+		return nil, orberrors.ErrInternalServerError.Wrap(
+			fmt.Errorf("%w: %s", client.ErrFailedToCreateTransport, transport),
+		)
+	}
+
+	if err := t.Start(); err != nil {
+		return nil, orberrors.From(err)
+	}
+
+	// Store the transport for later use.
+	c.transports.Set(transport, t)
+
+	return t, nil
 }
 
 // Request does the actual call.
 func (c *Client) Request(
 	ctx context.Context,
-	req *client.Req[any, any],
+	service string,
+	endpoint string,
+	req any,
 	result any,
 	opts ...client.CallOption,
 ) error {
-	callOptions := c.makeOptions(opts...)
+	options := c.makeOptions(opts...)
 
-	// Add metadata to the context.
-	ctx, _ = metadata.WithOutgoing(ctx)
-
-	// Wrap middlewares
-	call := func(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
-		transport, err := c.transportForReq(ctx, req, callOptions)
-		if err != nil {
-			return err
-		}
-
-		return transport.Request(ctx, req, result, opts)
-	}
-	for _, m := range c.middlewares {
-		call = m.Request(call)
+	address, transport, err := c.selectNode(ctx, service, endpoint, options)
+	if err != nil {
+		return err
 	}
 
-	// The actual call.
-	return call(ctx, req, result, callOptions)
+	t, err := c.transport(ctx, transport, options)
+	if err != nil {
+		return err
+	}
+
+	infos := client.RequestInfos{
+		Service:   service,
+		Endpoint:  endpoint,
+		Transport: transport,
+		Address:   address,
+	}
+
+	// Add request infos to context
+	ctx = context.WithValue(ctx, client.RequestInfosKey{}, &infos)
+	err = t.Request(ctx, infos, req, result, options)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Stream opens a bidirectional stream to the service endpoint.
+func (c *Client) Stream(
+	ctx context.Context,
+	service string,
+	endpoint string,
+	opts ...client.CallOption,
+) (client.StreamIface[any, any], error) {
+	options := c.makeOptions(opts...)
+
+	address, transport, err := c.selectNode(ctx, service, endpoint, options)
+	if err != nil {
+		return nil, err
+	}
+
+	t, err := c.transport(ctx, transport, options)
+	if err != nil {
+		return nil, err
+	}
+
+	infos := client.RequestInfos{
+		Service:   service,
+		Endpoint:  endpoint,
+		Transport: transport,
+		Address:   address,
+	}
+
+	// Add request infos to context
+	ctx = context.WithValue(ctx, client.RequestInfosKey{}, &infos)
+
+	stream, err := t.Stream(ctx, infos, options)
+	if err != nil {
+		// Don't cancel here - the context is owned by the caller
+		c.logger.Error("stream failed", "error", err, "address", address, "transport", transport)
+
+		return nil, err
+	}
+
+	return stream, nil
+}
+
+// streamWithCancel wraps a stream to ensure the context is canceled when the stream is closed.
+type streamWithCancel struct {
+	client.StreamIface[any, any]
+	cancel context.CancelFunc
+	closed bool
+}
+
+// Close closes the stream and cancels the context.
+func (s *streamWithCancel) Close() error {
+	if s.closed {
+		return nil
+	}
+
+	s.closed = true
+
+	return s.StreamIface.Close()
 }
 
 // New creates a new orb client. This functions should rarely be called manually.
@@ -275,7 +369,7 @@ func New(cfg Config, log log.Logger, registry registry.Type) *Client {
 	// Filter out unknown preferred transports from config.
 	nPTransports := []string{}
 
-	for _, pt := range cfg.PreferredTransports {
+	for _, pt := range cfg.Config.PreferredTransports {
 		if _, ok := Transports.Get(pt); ok {
 			nPTransports = append(nPTransports, pt)
 		}
@@ -290,7 +384,7 @@ func New(cfg Config, log log.Logger, registry registry.Type) *Client {
 		})
 	}
 
-	cfg.PreferredTransports = nPTransports
+	cfg.Config.PreferredTransports = nPTransports
 
 	return &Client{
 		config:     cfg,
@@ -326,7 +420,7 @@ func Provide(
 	newClient := New(cfg, logger, registry)
 
 	//nolint:nestif
-	if config.HasKey[[]any](sections, "middlewares", data) || len(cfg.Middleware) > 0 {
+	if config.HasKey[[]any](sections, "middlewares", data) || len(cfg.Config.Middleware) > 0 {
 		// Get and factory them all.
 		middlewares := []client.Middleware{}
 
@@ -354,7 +448,7 @@ func Provide(
 			middlewares = append(middlewares, m)
 		}
 
-		for _, m := range cfg.Middleware {
+		for _, m := range cfg.Config.Middleware {
 			fac, ok := client.Middlewares.Get(m.Name)
 			if !ok {
 				return client.Type{}, fmt.Errorf("Client middleware '%s' not found, did you import it?", m.Name)

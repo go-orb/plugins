@@ -45,35 +45,34 @@ func (m *Middleware) String() string {
 func (m *Middleware) Request(
 	next client.MiddlewareRequestHandler,
 ) client.MiddlewareRequestHandler {
-	return func(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
-		node, err := req.Node(ctx, opts)
-		if err != nil {
-			// Call the client/next middleware on resolve errors, this might trigger the retry logic.
-			return next(ctx, req, result, opts)
+	return func(ctx context.Context, service string, endpoint string, req any, result any, opts *client.CallOptions) error {
+		infos, ok := client.RequestInfo(ctx)
+		if !ok {
+			return next(ctx, service, endpoint, req, result, opts)
 		}
 
 		m.logger.TraceContext(
 			ctx,
 			"Making a request",
-			"url", fmt.Sprintf("%s://%s%s", node.Transport, node.Address, req.Endpoint()),
+			"url", fmt.Sprintf("%s://%s%s", infos.Transport, infos.Address, endpoint),
 			"content-type", opts.ContentType,
 		)
 
-		err = next(ctx, req, result, opts)
+		err := next(ctx, service, endpoint, req, result, opts)
 
 		if err != nil {
 			m.logger.ErrorContext(
 				ctx,
 				"Got an error",
 				"error", err,
-				"url", fmt.Sprintf("%s://%s%s", node.Transport, node.Address, req.Endpoint()),
+				"url", fmt.Sprintf("%s://%s%s", infos.Transport, infos.Address, endpoint),
 				"content-type", opts.ContentType,
 			)
 		} else {
 			m.logger.TraceContext(
 				ctx,
 				"Got a result",
-				"url", fmt.Sprintf("%s://%s%s", node.Transport, node.Address, req.Endpoint()),
+				"url", fmt.Sprintf("%s://%s%s", infos.Transport, infos.Address, endpoint),
 				"content-type", opts.ContentType,
 			)
 		}

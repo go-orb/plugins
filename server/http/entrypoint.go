@@ -26,7 +26,6 @@ import (
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/addr"
 	mtls "github.com/go-orb/go-orb/util/tls"
-	"github.com/google/uuid"
 
 	mtcp "github.com/go-orb/plugins/server/http/utils/tcp"
 	mudp "github.com/go-orb/plugins/server/http/utils/udp"
@@ -314,15 +313,9 @@ func (s *Server) Transport() string {
 	return "http"
 }
 
-// EntrypointID returns the id (uuid) of this entrypoint in the registry.
+// EntrypointID returns the id (configured name) of this entrypoint in the registry.
 func (s *Server) EntrypointID() string {
-	if s.entrypointID != "" {
-		return s.entrypointID
-	}
-
-	s.entrypointID = fmt.Sprintf("%s-%s", s.registry.ServiceName(), uuid.New().String())
-
-	return s.entrypointID
+	return s.config.Name
 }
 
 // String returns the entrypoint type; http.

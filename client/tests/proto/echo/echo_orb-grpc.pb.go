@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-orb  v0.0.1
 // - protoc             v5.29.2
-// source: echo.proto
+// source: echo/echo.proto
 
-package proto
+package echo
 
 import (
 	context "context"
@@ -117,5 +117,5 @@ var Streams_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "echo.proto",
+	Metadata: "echo/echo.proto",
 }

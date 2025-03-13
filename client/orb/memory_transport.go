@@ -33,15 +33,26 @@ func (t *MemoryTransport) Name() string {
 }
 
 // Request does the actual rpc request to the server.
-func (t *MemoryTransport) Request(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
-	t.logger.Debug("requesting memory server", "service", req.Service())
-
-	server, err := client.ResolveMemoryServer(req.Service())
+func (t *MemoryTransport) Request(ctx context.Context, infos client.RequestInfos, req any, result any, opts *client.CallOptions) error {
+	server, err := client.ResolveMemoryServer(infos.Service)
 	if err != nil {
 		return orberrors.ErrInternalServerError.Wrap(err)
 	}
 
-	return server.Request(ctx, req, result, opts)
+	return server.Request(ctx, infos, req, result, opts)
+}
+
+// Stream opens a bidirectional stream to the memory server.
+func (t *MemoryTransport) Stream(ctx context.Context, infos client.RequestInfos, opts *client.CallOptions) (client.StreamIface[any, any], error) {
+	t.logger.Debug("creating stream to memory server", "service", infos.Service)
+
+	// server, err := client.ResolveMemoryServer(infos.Service)
+	// if err != nil {
+	// 	return nil, orberrors.ErrInternalServerError.Wrap(err)
+	// }
+
+	return nil, orberrors.ErrNotImplemented
+	// return server.Stream(ctx, req, opts)
 }
 
 // NewTransport creates a Transport.

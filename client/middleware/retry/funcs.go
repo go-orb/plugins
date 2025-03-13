@@ -3,6 +3,7 @@ package retry
 import (
 	"context"
 	"errors"
+	"net/http"
 	"time"
 
 	"github.com/go-orb/go-orb/client"
@@ -28,12 +29,12 @@ func OnTimeoutError(ctx context.Context, err error, options *client.CallOptions)
 		switch orbe.Code {
 		// Retry on timeout, not on 500 internal server error, as that is a business
 		// logic error that should be handled by the user.
-		case 408:
+		case http.StatusRequestTimeout:
 			return true, nil
-		case 504:
+		case http.StatusGatewayTimeout:
 			fallthrough
 		// Retry on connection error: Service Unavailable
-		case 503:
+		case http.StatusServiceUnavailable:
 			timeout := time.After(options.DialTimeout)
 			select {
 			case <-ctx.Done():
@@ -61,10 +62,10 @@ func OnConnectionError(ctx context.Context, err error, options *client.CallOptio
 	err = orberrors.From(err)
 	if errors.As(err, &orbe) {
 		switch orbe.Code {
-		case 504:
+		case http.StatusGatewayTimeout:
 			fallthrough
 		// Retry on connection error: Service Unavailable
-		case 503:
+		case http.StatusServiceUnavailable:
 			timeout := time.After(options.DialTimeout)
 			select {
 			case <-ctx.Done():

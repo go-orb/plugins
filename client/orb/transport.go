@@ -15,7 +15,11 @@ type Transport interface {
 	Name() string
 
 	// Request does the actual call to the service, it's important that any errors returned by Request are orberrors.
-	Request(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error
+	Request(ctx context.Context, infos client.RequestInfos, req any, result any, opts *client.CallOptions) error
+
+	// Stream opens a bidirectional stream to the service endpoint.
+	// It handles streaming communication with the service.
+	Stream(ctx context.Context, infos client.RequestInfos, opts *client.CallOptions) (client.StreamIface[any, any], error)
 }
 
 // TransportType is the type returned by NewTransportFunc.

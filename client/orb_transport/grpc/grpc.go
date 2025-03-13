@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"net"
 	"sync"
 
 	"google.golang.org/grpc"
@@ -16,7 +17,6 @@ import (
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/log"
-	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/client/orb"
 	"github.com/go-orb/plugins/client/orb_transport/grpc/pool"
@@ -51,37 +51,25 @@ func (t *Transport) Start() error {
 		encoding.RegisterCodec(codec)
 	}
 
-	factory := func(_ context.Context, addr string, tlsConfig *tls.Config) (*grpc.ClientConn, error) {
-		gopts := []grpc.DialOption{}
+	t.poolLock.Lock()
+	defer t.poolLock.Unlock()
 
-		//nolint:gocritic
-		if tlsConfig != nil {
-			gopts = append(gopts, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)))
-		} else if t.name == "grpcs" {
-			creds := credentials.NewTLS(&tls.Config{InsecureSkipVerify: true, NextProtos: []string{"h2"}}) //nolint:gosec
-			gopts = append(gopts, grpc.WithTransportCredentials(creds))
-		} else {
-			gopts = append(gopts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-		}
-
-		// TODO(jochumdev): Bring back opts.DialTimeout
-		return grpc.NewClient(addr, gopts...)
+	if t.pool != nil {
+		return nil
 	}
 
-	t.logger.Debug(
-		"Creating a transport pool",
-		"pool_hosts", t.config.PoolHosts,
-		"pool_size", t.config.PoolSize,
-		"conn_timeout", t.config.ConnectionTimeout,
-		"pool_ttl", t.config.PoolTTL,
-	)
+	// Create a factory function for connections
+	factory := func(ctx context.Context, addr string, tlsConfig *tls.Config) (*grpc.ClientConn, error) {
+		return t.createConn(ctx, addr, tlsConfig)
+	}
 
-	pool, err := pool.New(factory, t.config.PoolHosts*t.config.PoolSize, t.config.PoolTTL)
+	// Create the pool
+	var err error
+
+	t.pool, err = pool.New(factory, t.config.PoolSize, t.config.PoolTTL)
 	if err != nil {
-		return orberrors.From(err)
+		return toOrbError(err)
 	}
-
-	t.pool = pool
 
 	return nil
 }
@@ -93,6 +81,7 @@ func (t *Transport) Stop(_ context.Context) error {
 
 	if t.pool != nil {
 		t.pool.Close()
+		t.pool = nil
 	}
 
 	return nil
@@ -129,26 +118,19 @@ func toOrbError(err error) error {
 }
 
 // Request does the actual rpc request to the server.
-func (t *Transport) Request(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
-	node, err := req.Node(ctx, opts)
-	if err != nil {
-		return orberrors.From(err)
-	}
-
-	conn, err := t.pool.Get(ctx, node.Address, opts.TLSConfig)
+func (t *Transport) Request(ctx context.Context, infos client.RequestInfos, req any, result any, opts *client.CallOptions) error {
+	conn, err := t.pool.Get(ctx, infos.Address, opts.TLSConfig)
 	if err != nil {
 		return toOrbError(err)
 	}
 
 	// Append go-orb metadata to grpc.
-	if md, ok := metadata.Outgoing(ctx); ok {
-		kv := []string{}
-		for k, v := range md {
-			kv = append(kv, k, v)
-		}
-
-		ctx = gmetadata.AppendToOutgoingContext(ctx, kv...)
+	kv := []string{}
+	for k, v := range opts.Metadata {
+		kv = append(kv, k, v)
 	}
+
+	ctx = gmetadata.AppendToOutgoingContext(ctx, kv...)
 
 	ctx, cancel := context.WithTimeout(ctx, opts.RequestTimeout)
 	defer cancel()
@@ -160,7 +142,10 @@ func (t *Transport) Request(ctx context.Context, req *client.Req[any, any], resu
 		callOpts = append(callOpts, grpc.CallContentSubtype("json"))
 	}
 
-	err = conn.Invoke(ctx, req.Endpoint(), req.Req(), result, callOpts...)
+	// Add request infos to context
+	ctx = context.WithValue(ctx, client.RequestInfosKey{}, &infos)
+
+	err = conn.Invoke(ctx, infos.Endpoint, req, result, callOpts...)
 	if err != nil {
 		conn.Unhealthy()
 		_ = conn.Close() //nolint:errcheck
@@ -182,13 +167,205 @@ func (t *Transport) Request(ctx context.Context, req *client.Req[any, any], resu
 	return nil
 }
 
+// Stream creates a bidirectional gRPC stream to the service endpoint.
+func (t *Transport) Stream(ctx context.Context, infos client.RequestInfos, opts *client.CallOptions) (client.StreamIface[any, any], error) {
+	var cancel context.CancelFunc
+
+	// Apply timeout to the stream if configured.
+	if opts.StreamTimeout > 0 {
+		ctx, cancel = context.WithTimeout(ctx, opts.StreamTimeout)
+	} else {
+		// The caller will handle cancellation when the stream is closed.
+		ctx, cancel = context.WithCancel(ctx)
+	}
+
+	// Set the gRPC headers.
+	pairs := make([]string, 0, len(opts.Metadata)*2)
+	for k, v := range opts.Metadata {
+		pairs = append(pairs, k, v)
+	}
+
+	// Call gRPC service.
+	callOpts := []grpc.CallOption{}
+
+	grpcMd := gmetadata.Pairs(pairs...)
+	callOpts = append(callOpts, grpc.Header(&grpcMd))
+
+	// Get an existing connection from the pool.
+	conn, err := t.pool.Get(ctx, infos.Address, opts.TLSConfig)
+	if err != nil {
+		cancel()
+		return nil, toOrbError(err)
+	}
+
+	// Create a new gRPC stream.
+	grpcStream, err := conn.ClientConn.NewStream(ctx, &grpc.StreamDesc{
+		StreamName:    infos.Endpoint,
+		ServerStreams: true,
+		ClientStreams: true,
+	}, infos.Endpoint, callOpts...)
+
+	if err != nil {
+		conn.Unhealthy()
+		_ = conn.Close() //nolint:errcheck
+
+		cancel()
+
+		return nil, toOrbError(err)
+	}
+
+	// Wrap the gRPC stream in our Stream interface.
+	return &grpcClientStream{
+		closed:     false,
+		sendClosed: false,
+		stream:     grpcStream,
+		ctx:        ctx,
+		conn:       conn,
+		cancel:     cancel,
+	}, nil
+}
+
+// grpcClientStream wraps a gRPC stream to implement the client.Stream interface.
+type grpcClientStream struct {
+	stream     grpc.ClientStream
+	ctx        context.Context
+	conn       *pool.ClientConn
+	cancel     context.CancelFunc
+	closed     bool
+	sendClosed bool
+}
+
+// Context returns the context for this stream.
+func (g *grpcClientStream) Context() context.Context {
+	return g.ctx
+}
+
+// Send sends a message to the stream.
+func (g *grpcClientStream) Send(msg interface{}) error {
+	if g.closed {
+		return orberrors.ErrBadRequest.Wrap(errors.New("stream is closed"))
+	}
+
+	if g.sendClosed {
+		return orberrors.ErrBadRequest.Wrap(errors.New("send direction is closed"))
+	}
+
+	if err := g.stream.SendMsg(msg); err != nil {
+		g.conn.Unhealthy()
+		return toOrbError(err)
+	}
+
+	return nil
+}
+
+// Recv receives a message from the stream.
+func (g *grpcClientStream) Recv(msg interface{}) error {
+	if g.closed {
+		return orberrors.ErrBadRequest.Wrap(errors.New("stream is closed"))
+	}
+
+	if err := g.stream.RecvMsg(msg); err != nil {
+		g.conn.Unhealthy()
+		return toOrbError(err)
+	}
+
+	return nil
+}
+
+// Close closes the stream.
+func (g *grpcClientStream) Close() error {
+	if g.closed {
+		return nil
+	}
+
+	g.closed = true
+	g.sendClosed = true
+
+	// Cancel the context
+	if g.cancel != nil {
+		g.cancel()
+	}
+
+	// Close the stream
+	err := g.stream.CloseSend()
+
+	// Also return the connection to the pool
+	if g.conn != nil {
+		_ = g.conn.Close() //nolint:errcheck
+	}
+
+	return err
+}
+
+// CloseSend closes the send direction of the stream but leaves the receive side open.
+// This allows the client to signal it's done sending while still being able to receive responses.
+func (g *grpcClientStream) CloseSend() error {
+	if g.closed {
+		return orberrors.ErrBadRequest.Wrap(errors.New("stream is closed"))
+	}
+
+	if g.sendClosed {
+		return nil
+	}
+
+	g.sendClosed = true
+	return g.stream.CloseSend()
+}
+
+// SendMsg is an alias for Send to satisfy the client.Stream interface.
+func (g *grpcClientStream) SendMsg(m interface{}) error {
+	return g.Send(m)
+}
+
+// RecvMsg is an alias for Recv to satisfy the client.Stream interface.
+func (g *grpcClientStream) RecvMsg(m interface{}) error {
+	return g.Recv(m)
+}
+
+// createConn creates a new grpc client with the given config.
+func (t *Transport) createConn(_ context.Context, addr string, tlsConfig *tls.Config) (*grpc.ClientConn, error) {
+	var opts []grpc.DialOption
+
+	// Setup authentication.
+	switch {
+	case tlsConfig != nil:
+		creds := credentials.NewTLS(tlsConfig)
+		opts = append(opts, grpc.WithTransportCredentials(creds))
+	case t.name == "grpcs":
+		creds := credentials.NewTLS(&tls.Config{InsecureSkipVerify: true, NextProtos: []string{"h2"}}) //nolint:gosec
+		opts = append(opts, grpc.WithTransportCredentials(creds))
+	default:
+		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	}
+
+	// Setup dialer.
+	opts = append(opts, grpc.WithContextDialer(func(_ context.Context, addr string) (net.Conn, error) {
+		return net.DialTimeout("tcp", addr, t.config.DialTimeout)
+	}))
+
+	// Increase the max receive buffer size to 10MB to allow for large gRPC messages.
+	// Note: this is probably only has an effect if the underlying protocol is TCP.
+	opts = append(opts, grpc.WithDefaultCallOptions(
+		grpc.MaxCallRecvMsgSize(10*1024*1024),
+		grpc.MaxCallSendMsgSize(10*1024*1024),
+	))
+
+	// Connect.
+	conn, err := grpc.NewClient(addr, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	return conn, nil
+}
+
 // NewTransport creates a Transport.
 func NewTransport(name string) func(logger log.Logger, cfg *orb.Config) (orb.TransportType, error) {
 	return func(logger log.Logger, cfg *orb.Config) (orb.TransportType, error) {
 		return orb.TransportType{Transport: &Transport{
-			name:   name,
-			config: cfg,
 			logger: logger,
+			config: cfg,
+			name:   name,
 		}}, nil
 	}
 }

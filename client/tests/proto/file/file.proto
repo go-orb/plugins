@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package file;
+
+option go_package = "./file;file";
+
+service FileService {
+  // Client streaming RPC for file upload
+  rpc UploadFile(stream FileChunk) returns (UploadResponse);
+  rpc AuthorizedUploadFile(stream FileChunk) returns (UploadResponse);
+}
+
+message FileChunk {
+  // File metadata (only sent in the first chunk)
+  string filename = 1;
+  string content_type = 2;
+  
+  // The actual chunk of data
+  bytes data = 3;
+}
+
+message UploadResponse {
+  string id = 1;           // ID of the uploaded file
+  int64 size = 2;          // Total size received
+  string filename = 3;     // Name of the file
+  bool success = 4;        // Whether upload succeeded
+}

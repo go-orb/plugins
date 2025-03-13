@@ -17,7 +17,7 @@ var (
 type Config struct {
 	// RetryFunc is the retry function.
 	// Default is OnConnectionError.
-	RetryFunc client.RetryFunc `json:"retryFunc,omitempty" yaml:"retryFunc,omitempty"`
+	RetryFunc client.RetryFunc `json:"-" yaml:"-"`
 
 	// Retries is the number of times a request is tried.
 	// Set it to 0 to disable retries.

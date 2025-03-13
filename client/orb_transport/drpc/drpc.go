@@ -17,7 +17,6 @@ import (
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/log"
-	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/client/orb"
 	"github.com/go-orb/plugins/client/orb_transport/drpc/pool"
@@ -102,25 +101,24 @@ func (t *Transport) Name() string {
 }
 
 // Request does the actual rpc request to the server.
-//
-//nolint:gocyclo
-func (t *Transport) Request(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
-	node, err := req.Node(ctx, opts)
-	if err != nil {
-		return orberrors.From(err)
-	}
-
-	conn, err := t.pool.Get(ctx, node.Address, nil)
+func (t *Transport) Request(ctx context.Context, infos client.RequestInfos, req any, result any, opts *client.CallOptions) error {
+	conn, err := t.pool.Get(ctx, infos.Address, nil)
 	if err != nil {
 		return orberrors.From(err)
 	}
 
 	// Add metadata to drpc request
-	md, ok := metadata.Outgoing(ctx)
-	if ok {
-		md["Content-Type"] = opts.ContentType
-		ctx = drpcmetadata.AddPairs(ctx, md)
+	// Add metadata to drpc request
+	md := opts.Metadata
+	if md == nil {
+		md = map[string]string{}
 	}
+
+	md["Content-Type"] = opts.ContentType
+	ctx = drpcmetadata.AddPairs(ctx, md)
+
+	// Add request infos to context
+	ctx = context.WithValue(ctx, client.RequestInfosKey{}, &infos)
 
 	// Get codecs for content type conversion
 	contentTypeCodec, err := codecs.GetMime(opts.ContentType)
@@ -146,9 +144,9 @@ func (t *Transport) Request(ctx context.Context, req *client.Req[any, any], resu
 	// Invoke the RPC method
 	if err := conn.Invoke(
 		reqCtx,
-		req.Endpoint(),
+		infos.Endpoint,
 		&encoder{marshaler: contentTypeCodec, unmarshaler: protoCodec},
-		req.Req(),
+		req,
 		mdResult,
 	); err != nil {
 		conn.Unhealthy()
@@ -194,6 +192,101 @@ func (t *Transport) Request(ctx context.Context, req *client.Req[any, any], resu
 	}
 
 	return nil
+}
+
+// Stream creates a bidirectional DRPC stream to the service endpoint.
+func (t *Transport) Stream(ctx context.Context, infos client.RequestInfos, opts *client.CallOptions) (client.StreamIface[any, any], error) {
+	var cancel context.CancelFunc
+
+	// Apply timeout to the stream if configured
+	if opts.StreamTimeout > 0 {
+		ctx, cancel = context.WithTimeout(ctx, opts.StreamTimeout)
+	} else {
+		// The caller will handle cancellation when the stream is closed
+		ctx, cancel = context.WithCancel(ctx)
+	}
+
+	factory := func(dialCtx context.Context, addr string, _ *tls.Config) (*drpcconn.Conn, error) {
+		// Use the dial timeout from options
+		timeoutCtx, cancel := context.WithTimeout(dialCtx, t.config.DialTimeout)
+		defer cancel()
+
+		dialer := net.Dialer{}
+		rawconn, err := dialer.DialContext(timeoutCtx, "tcp", addr)
+
+		if err != nil {
+			t.logger.Error("Failed to dial DRPC server", "address", addr, "error", err)
+			return nil, err
+		}
+
+		// Create a new DRPC connection
+		return drpcconn.New(rawconn), nil
+	}
+
+	// Get an existing connection from the pool
+	conn, err := factory(ctx, infos.Address, nil)
+	if err != nil {
+		cancel()
+		return nil, orberrors.From(err)
+	}
+
+	// Add metadata to drpc request
+	md := opts.Metadata
+	md["Content-Type"] = opts.ContentType
+	ctx = drpcmetadata.AddPairs(ctx, md)
+
+	// Get codecs for content type conversion
+	contentTypeCodec, err := codecs.GetMime(opts.ContentType)
+	if err != nil {
+		_ = conn.Close() //nolint:errcheck
+
+		cancel()
+
+		return nil, orberrors.From(err)
+	}
+
+	protoCodec := contentTypeCodec
+	if opts.ContentType != codecs.MimeProto {
+		protoCodec, err = codecs.GetMime(codecs.MimeProto)
+		if err != nil {
+			_ = conn.Close() //nolint:errcheck
+
+			cancel()
+
+			return nil, orberrors.From(err)
+		}
+	}
+
+	// Create a new DRPC stream
+	drpcStream, err := conn.NewStream(ctx, infos.Endpoint, &encoder{
+		marshaler:   contentTypeCodec,
+		unmarshaler: protoCodec,
+	})
+	if err != nil {
+		_ = conn.Close() //nolint:errcheck
+
+		cancel()
+
+		orbError := orberrors.HTTP(int(drpcerr.Code(err))) //nolint:gosec
+
+		return nil, orbError.Wrap(err)
+	}
+
+	// Wrap the DRPC stream in our Stream interface
+	return &drpcClientStream[any, any]{
+		closed:           false,
+		sendClosed:       false,
+		opts:             opts,
+		stream:           drpcStream,
+		ctx:              ctx,
+		conn:             conn,
+		cancel:           cancel,
+		contentTypeCodec: contentTypeCodec,
+		encoder: &encoder{
+			marshaler:   contentTypeCodec,
+			unmarshaler: protoCodec,
+		},
+	}, nil
 }
 
 // NewTransport creates a Transport.

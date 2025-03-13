@@ -48,7 +48,7 @@ func (m *Middleware) String() string {
 func (m *Middleware) Request(
 	next client.MiddlewareRequestHandler,
 ) client.MiddlewareRequestHandler {
-	return func(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
+	return func(ctx context.Context, service string, endpoint string, req any, result any, opts *client.CallOptions) error {
 		var err error
 
 		// Get config.
@@ -64,11 +64,11 @@ func (m *Middleware) Request(
 
 		// If retries is set to 0 or no retry function is provided, just execute the request once
 		if retries <= 0 || retryFunc == nil {
-			return next(ctx, req, result, opts)
+			return next(ctx, service, endpoint, req, result, opts)
 		}
 
 		// First attempt
-		err = next(ctx, req, result, opts)
+		err = next(ctx, service, endpoint, req, result, opts)
 		if err == nil {
 			return nil
 		}
@@ -110,7 +110,7 @@ func (m *Middleware) Request(
 			}
 
 			// Attempt the request again
-			err = next(ctx, req, result, opts)
+			err = next(ctx, service, endpoint, req, result, opts)
 			if err == nil {
 				return nil
 			}

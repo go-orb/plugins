@@ -19,7 +19,6 @@ import (
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
-	"github.com/google/uuid"
 	"storj.io/drpc"
 )
 
@@ -131,13 +130,9 @@ func (s *Server) Transport() string {
 	return "memory"
 }
 
-// EntrypointID returns the id (uuid) of this entrypoint in the registry.
+// EntrypointID returns the id (configured name) of this entrypoint in the registry.
 func (s *Server) EntrypointID() string {
-	if s.entrypointID == "" {
-		s.entrypointID = uuid.New().String()
-	}
-
-	return s.entrypointID
+	return s.config.Name
 }
 
 // String returns the entrypoint type.
@@ -317,13 +312,13 @@ func (m *Stream) MsgRecv(msg drpc.Message, _ drpc.Encoding) error {
 }
 
 // Request implements the client.MemoryServer interface.
-func (s *Server) Request(ctx context.Context, req *client.Req[any, any], result any, opts *client.CallOptions) error {
+func (s *Server) Request(ctx context.Context, infos client.RequestInfos, req any, result any, opts *client.CallOptions) error {
 	// Extract the service and method from the request
-	service := req.Service()
-	endpoint := req.Endpoint()
+	service := infos.Service
+	endpoint := infos.Endpoint
 
 	// Get a reference to the actual request data, making sure it's not nil
-	requestData := req.Req()
+	requestData := req
 	if requestData == nil {
 		// If Req() returns nil, use the entire req object as the request
 		// This ensures we always have something to work with
@@ -336,6 +331,9 @@ func (s *Server) Request(ctx context.Context, req *client.Req[any, any], result 
 
 	reqMd[metadata.Service] = service
 	reqMd[metadata.Method] = endpoint
+
+	// Add request infos to context
+	ctx = context.WithValue(ctx, client.RequestInfosKey{}, &infos)
 
 	// Create a memory stream to handle the request/response
 	stream := &Stream{
@@ -354,6 +352,11 @@ func (s *Server) Request(ctx context.Context, req *client.Req[any, any], result 
 	}
 
 	return nil
+}
+
+// Stream not yet implemented.
+func (s *Server) Stream(ctx context.Context, infos client.RequestInfos, opts *client.CallOptions) (client.StreamIface[any, any], error) {
+	return nil, orberrors.ErrNotImplemented.Wrap(client.ErrStreamNotSupported)
 }
 
 // Provide creates a new entrypoint for a single address. You can create

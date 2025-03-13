@@ -16,7 +16,6 @@ import (
 	orbserver "github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/addr"
-	"github.com/google/uuid"
 )
 
 var _ orbserver.Entrypoint = (*Server)(nil)
@@ -42,9 +41,6 @@ type Server struct {
 	middlewares []orbserver.Middleware
 
 	endpoints []string
-
-	// entrypointID is the entrypointID (uuid) of this entrypoint in the registry.
-	entrypointID string
 
 	started bool
 }
@@ -142,15 +138,9 @@ func (s *Server) Transport() string {
 	return "drpc"
 }
 
-// EntrypointID returns the id (uuid) of this entrypoint in the registry.
+// EntrypointID returns the id of this entrypoint (node) in the registry.
 func (s *Server) EntrypointID() string {
-	if s.entrypointID != "" {
-		return s.entrypointID
-	}
-
-	s.entrypointID = fmt.Sprintf("%s-%s", s.registry.ServiceName(), uuid.New().String())
-
-	return s.entrypointID
+	return s.registry.ServiceName() + types.DefaultSeparator + s.config.Name
 }
 
 // String returns the entrypoint type.

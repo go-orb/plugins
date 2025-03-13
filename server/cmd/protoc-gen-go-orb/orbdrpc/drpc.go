@@ -303,7 +303,7 @@ func (d *drpc) generateUnimplementedServerMethod(method *protogen.Method) {
 }
 
 func (d *drpc) generateServerReceiver(method *protogen.Method) {
-	d.P("func (srv interface{}, ctx context.Context, in1, in2 interface{}) (" + d.Ident("storj.io/drpc", "Message") + ", error) {")
+	d.P("func (srv interface{}, ctx " + d.Ident("context", "Context") + ", in1, in2 interface{}) (" + d.Ident("storj.io/drpc", "Message") + ", error) {")
 	if !method.Desc.IsStreamingServer() && !method.Desc.IsStreamingClient() {
 		d.P("return srv.(", d.ServerIface(method.Parent), ").")
 	} else {

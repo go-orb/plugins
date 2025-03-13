@@ -4,9 +4,9 @@
 // - protoc-gen-go-orb        v0.0.1
 // - protoc                   v5.29.2
 //
-// source: echo.proto
+// source: echo/echo.proto
 
-package proto
+package echo
 
 import (
 	context "context"
@@ -17,25 +17,25 @@ import (
 	drpcerr "storj.io/drpc/drpcerr"
 )
 
-type drpcEncoding_File_echo_proto struct{}
+type drpcEncoding_File_echo_echo_proto struct{}
 
-func (drpcEncoding_File_echo_proto) Marshal(msg drpc.Message) ([]byte, error) {
+func (drpcEncoding_File_echo_echo_proto) Marshal(msg drpc.Message) ([]byte, error) {
 	return proto.Marshal(msg.(proto.Message))
 }
 
-func (drpcEncoding_File_echo_proto) MarshalAppend(buf []byte, msg drpc.Message) ([]byte, error) {
+func (drpcEncoding_File_echo_echo_proto) MarshalAppend(buf []byte, msg drpc.Message) ([]byte, error) {
 	return proto.MarshalOptions{}.MarshalAppend(buf, msg.(proto.Message))
 }
 
-func (drpcEncoding_File_echo_proto) Unmarshal(buf []byte, msg drpc.Message) error {
+func (drpcEncoding_File_echo_echo_proto) Unmarshal(buf []byte, msg drpc.Message) error {
 	return proto.Unmarshal(buf, msg.(proto.Message))
 }
 
-func (drpcEncoding_File_echo_proto) JSONMarshal(msg drpc.Message) ([]byte, error) {
+func (drpcEncoding_File_echo_echo_proto) JSONMarshal(msg drpc.Message) ([]byte, error) {
 	return protojson.Marshal(msg.(proto.Message))
 }
 
-func (drpcEncoding_File_echo_proto) JSONUnmarshal(buf []byte, msg drpc.Message) error {
+func (drpcEncoding_File_echo_echo_proto) JSONUnmarshal(buf []byte, msg drpc.Message) error {
 	return protojson.Unmarshal(buf, msg.(proto.Message))
 }
 
@@ -61,7 +61,7 @@ func (DRPCStreamsDescription) NumMethods() int { return 2 }
 func (DRPCStreamsDescription) Method(n int) (string, drpc.Encoding, drpc.Receiver, interface{}, bool) {
 	switch n {
 	case 0:
-		return "/echo.Streams/Call", drpcEncoding_File_echo_proto{},
+		return "/echo.Streams/Call", drpcEncoding_File_echo_echo_proto{},
 			func(srv interface{}, ctx context.Context, in1, in2 interface{}) (drpc.Message, error) {
 				return srv.(DRPCStreamsServer).
 					Call(
@@ -70,7 +70,7 @@ func (DRPCStreamsDescription) Method(n int) (string, drpc.Encoding, drpc.Receive
 					)
 			}, DRPCStreamsServer.Call, true
 	case 1:
-		return "/echo.Streams/AuthorizedCall", drpcEncoding_File_echo_proto{},
+		return "/echo.Streams/AuthorizedCall", drpcEncoding_File_echo_echo_proto{},
 			func(srv interface{}, ctx context.Context, in1, in2 interface{}) (drpc.Message, error) {
 				return srv.(DRPCStreamsServer).
 					AuthorizedCall(
@@ -97,7 +97,7 @@ func (x *drpcStreams_CallStream) GetStream() drpc.Stream {
 }
 
 func (x *drpcStreams_CallStream) SendAndClose(m *CallResponse) error {
-	if err := x.MsgSend(m, drpcEncoding_File_echo_proto{}); err != nil {
+	if err := x.MsgSend(m, drpcEncoding_File_echo_echo_proto{}); err != nil {
 		return err
 	}
 	return x.CloseSend()
@@ -117,7 +117,7 @@ func (x *drpcStreams_AuthorizedCallStream) GetStream() drpc.Stream {
 }
 
 func (x *drpcStreams_AuthorizedCallStream) SendAndClose(m *CallResponse) error {
-	if err := x.MsgSend(m, drpcEncoding_File_echo_proto{}); err != nil {
+	if err := x.MsgSend(m, drpcEncoding_File_echo_echo_proto{}); err != nil {
 		return err
 	}
 	return x.CloseSend()
