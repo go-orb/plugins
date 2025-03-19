@@ -5,10 +5,10 @@ go 1.23.6
 require (
 	github.com/go-orb/go-orb v0.2.2-0.20250319034248-591f06b783eb
 	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20250319034329-8761f25ddecc
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250319043309-58bf0a9e8223
-	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250319043309-58bf0a9e8223
-	github.com/go-orb/plugins/config/source/file v0.1.1-0.20250319043309-58bf0a9e8223
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250319043309-58bf0a9e8223
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250319044614-36c0ea4e5bd9
+	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250319044614-36c0ea4e5bd9
+	github.com/go-orb/plugins/config/source/file v0.1.1-0.20250319044614-36c0ea4e5bd9
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250319044614-36c0ea4e5bd9
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/grpc v1.71.0
 	google.golang.org/protobuf v1.36.5

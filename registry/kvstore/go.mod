@@ -4,11 +4,11 @@ go 1.23.6
 
 require (
 	github.com/go-orb/go-orb v0.2.2-0.20250319034248-591f06b783eb
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250319043309-58bf0a9e8223
-	github.com/go-orb/plugins/kvstore/natsjs v0.0.0-20250319043309-58bf0a9e8223
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250319043309-58bf0a9e8223
-	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250319043309-58bf0a9e8223
-	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250319043309-58bf0a9e8223
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250319044614-36c0ea4e5bd9
+	github.com/go-orb/plugins/kvstore/natsjs v0.0.0-20250319044614-36c0ea4e5bd9
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250319044614-36c0ea4e5bd9
+	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250319044614-36c0ea4e5bd9
+	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250319044614-36c0ea4e5bd9
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/nats-io/nats-server/v2 v2.10.26
