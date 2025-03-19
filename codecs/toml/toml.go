@@ -26,6 +26,7 @@ func (t *Toml) Marshal(v any) ([]byte, error) {
 	if err := toml.NewEncoder(&buf).Encode(v); err != nil {
 		return nil, err
 	}
+
 	return buf.Bytes(), nil
 }
 
@@ -38,6 +39,7 @@ func (t *Toml) Unmarshal(data []byte, v any) error {
 // NewEncoder returns an Encoder which writes bytes sequence into "w".
 func (t *Toml) NewEncoder(w io.Writer) codecs.Encoder {
 	encoder := toml.NewEncoder(w)
+
 	return codecs.EncoderFunc(func(v any) error {
 		return encoder.Encode(v)
 	})
@@ -51,6 +53,7 @@ func (t *Toml) NewDecoder(r io.Reader) codecs.Decoder {
 		if err != nil {
 			return err
 		}
+
 		return toml.Unmarshal(data, v)
 	})
 }
