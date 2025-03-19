@@ -93,15 +93,22 @@ func (c *Client) With(opts ...client.Option) error {
 	return err
 }
 
-// selectNode returns a node for the given service and endpoint.
-func (c *Client) selectNode(ctx context.Context, service string, endpoint string, opts *client.CallOptions) (string, string, error) {
+// SelectService selects a service node.
+func (c *Client) SelectService(ctx context.Context, service string, opts ...client.CallOption) (string, string, error) {
+	options := c.makeOptions(opts...)
+
+	return c.selectNode(ctx, service, options)
+}
+
+// selectNode returns a node for the given service.
+func (c *Client) selectNode(ctx context.Context, service string, opts *client.CallOptions) (string, string, error) {
 	if opts.URL != "" {
-		myUrl, err := url.Parse(opts.URL)
+		myURL, err := url.Parse(opts.URL)
 		if err != nil {
 			return "", "", orberrors.ErrBadRequest.Wrap(err)
 		}
 
-		return myUrl.Host, myUrl.Scheme, nil
+		return myURL.Host, myURL.Scheme, nil
 	}
 
 	// Resolve the service to a list of nodes in a per transport map.
@@ -225,26 +232,27 @@ func (c *Client) makeOptions(opts ...client.CallOption) *client.CallOptions {
 	return co
 }
 
-func (c *Client) transport(ctx context.Context, transport string, opts *client.CallOptions) (Transport, error) {
+func (c *Client) transport(transport string) (Transport, error) {
 	c.transportLock.Lock()
 	defer c.transportLock.Unlock()
 
 	// Try to fetch the transport from the internal registry.
-	t, ok := c.transports.Get(transport)
+	transportInstance, ok := c.transports.Get(transport)
 	if ok {
-		return t, nil
+		return transportInstance, nil
 	}
 
 	// Failed to get it from the registry, try to create a new one.
 	tcreator, ok := Transports.Get(transport)
 	if !ok {
 		c.logger.Error("Failed to create a transport", slog.String("transport", transport))
+
 		return nil, orberrors.ErrInternalServerError.Wrap(
 			fmt.Errorf("%w: %s", client.ErrFailedToCreateTransport, transport),
 		)
 	}
 
-	t, err := tcreator(c.logger.With("transport", transport), &c.config)
+	transportInstance, err := tcreator(c.logger.With("transport", transport), &c.config)
 	if err != nil {
 		c.logger.Error(
 			"Failed to create a transport",
@@ -257,14 +265,14 @@ func (c *Client) transport(ctx context.Context, transport string, opts *client.C
 		)
 	}
 
-	if err := t.Start(); err != nil {
+	if err := transportInstance.Start(); err != nil {
 		return nil, orberrors.From(err)
 	}
 
 	// Store the transport for later use.
-	c.transports.Set(transport, t)
+	c.transports.Set(transport, transportInstance)
 
-	return t, nil
+	return transportInstance, nil
 }
 
 // Request does the actual call.
@@ -278,12 +286,12 @@ func (c *Client) Request(
 ) error {
 	options := c.makeOptions(opts...)
 
-	address, transport, err := c.selectNode(ctx, service, endpoint, options)
+	address, transport, err := c.selectNode(ctx, service, options)
 	if err != nil {
 		return err
 	}
 
-	t, err := c.transport(ctx, transport, options)
+	t, err := c.transport(transport)
 	if err != nil {
 		return err
 	}
@@ -297,6 +305,7 @@ func (c *Client) Request(
 
 	// Add request infos to context
 	ctx = context.WithValue(ctx, client.RequestInfosKey{}, &infos)
+
 	err = t.Request(ctx, infos, req, result, options)
 	if err != nil {
 		return err
@@ -314,12 +323,12 @@ func (c *Client) Stream(
 ) (client.StreamIface[any, any], error) {
 	options := c.makeOptions(opts...)
 
-	address, transport, err := c.selectNode(ctx, service, endpoint, options)
+	address, transport, err := c.selectNode(ctx, service, options)
 	if err != nil {
 		return nil, err
 	}
 
-	t, err := c.transport(ctx, transport, options)
+	t, err := c.transport(transport)
 	if err != nil {
 		return nil, err
 	}
@@ -343,24 +352,6 @@ func (c *Client) Stream(
 	}
 
 	return stream, nil
-}
-
-// streamWithCancel wraps a stream to ensure the context is canceled when the stream is closed.
-type streamWithCancel struct {
-	client.StreamIface[any, any]
-	cancel context.CancelFunc
-	closed bool
-}
-
-// Close closes the stream and cancels the context.
-func (s *streamWithCancel) Close() error {
-	if s.closed {
-		return nil
-	}
-
-	s.closed = true
-
-	return s.StreamIface.Close()
 }
 
 // New creates a new orb client. This functions should rarely be called manually.
