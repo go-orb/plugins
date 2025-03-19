@@ -45,9 +45,6 @@ type Server struct {
 	logger   log.Logger
 	registry registry.Type
 
-	// entrypointID is the entrypointID (uuid) of this entrypoint in the registry.
-	entrypointID string
-
 	// router is not exported as you can't change the router after server creation.
 	// The router here is merely a reference to the router that is used in the servers
 	// themselves. You can fetch the router with the getter, and register handlers,

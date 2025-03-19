@@ -55,7 +55,11 @@ func setupServer(sn types.ServiceName) (*tests.SetupData, error) {
 	fileHInstance := new(filehandler.Handler)
 	fileHRegister := fileproto.RegisterFileServiceHandler(fileHInstance)
 
-	ep1, err := grpc.New(grpc.NewConfig(server.WithEntrypointName("grpc"), grpc.WithHandlers(hRegister, fileHRegister), grpc.WithInsecure()), logger, reg)
+	ep1, err := grpc.New(
+		grpc.NewConfig(server.WithEntrypointName("grpc"),
+			grpc.WithHandlers(hRegister, fileHRegister),
+			grpc.WithInsecure(),
+		), logger, reg)
 	if err != nil {
 		cancel()
 

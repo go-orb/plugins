@@ -81,7 +81,8 @@ func newConsulWatcher(regConsul *RegistryConsul, opts ...registry.WatchOption) (
 	return watcher, nil
 }
 
-func (cw *consulWatcher) serviceHandler(_ uint64, data interface{}) { //nolint:funlen,gocognit,gocyclo
+//nolint:funlen,gocognit,gocyclo,cyclop
+func (cw *consulWatcher) serviceHandler(_ uint64, data interface{}) {
 	entries, ok := data.([]*api.ServiceEntry)
 	if !ok {
 		return
@@ -277,7 +278,6 @@ func (cw *consulWatcher) handle(_ uint64, data interface{}) {
 			go tmp()
 
 			cw.watchers[service] = wp
-			// cw.next <- &registry.Result{Action: "create", Service: &registry.Service{Name: service}}
 		}
 	}
 

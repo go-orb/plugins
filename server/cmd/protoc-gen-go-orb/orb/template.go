@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"strings"
 	"text/template"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
-//nolint:gochecknoglobals,lll
+//nolint:lll
 const templateStr = `
 import (
 	"context"
@@ -488,7 +491,7 @@ type protoFile struct {
 func (f protoFile) Render() string {
 	funcMap := template.FuncMap{
 		"ToLower": strings.ToLower,
-		"Title":   strings.Title,
+		"Title":   cases.Title(language.English),
 	}
 
 	tmpl, err := template.New("orb").Funcs(funcMap).Parse(templateStr)

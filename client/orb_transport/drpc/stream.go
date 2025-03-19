@@ -44,7 +44,7 @@ func (d *drpcClientStream[TReq, TResp]) Send(msg TReq) error {
 	}
 
 	if err := d.stream.MsgSend(msg, d.encoder); err != nil {
-		d.conn.Close()
+		_ = d.conn.Close()                                      //nolint:errcheck
 		return orberrors.HTTP(int(drpcerr.Code(err))).Wrap(err) //nolint:gosec
 	}
 
@@ -67,7 +67,7 @@ func (d *drpcClientStream[TReq, TResp]) Recv(msg TResp) error {
 	mdResult := &message.Response{}
 
 	if err := d.stream.MsgRecv(mdResult, d.encoder); err != nil {
-		d.conn.Close()
+		_ = d.conn.Close()                                      //nolint:errcheck
 		return orberrors.HTTP(int(drpcerr.Code(err))).Wrap(err) //nolint:gosec
 	}
 
@@ -79,6 +79,7 @@ func (d *drpcClientStream[TReq, TResp]) Recv(msg TResp) error {
 	}
 
 	// Unmarshal the result.
+	//nolint:nestif
 	if d.opts.ContentType == codecs.MimeProto {
 		protoMsg, ok := any(msg).(proto.Message)
 		if ok {

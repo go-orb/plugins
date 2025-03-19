@@ -106,7 +106,7 @@ func (m *Mux) HandleRPC(stream drpc.Stream, rpc string) (err error) {
 		reqMd[metadata.Method] = fmSplit[2]
 	}
 
-	req := interface{}(stream)
+	var req interface{}
 
 	if data.in1 != streamType {
 		// Check for content type in metadata

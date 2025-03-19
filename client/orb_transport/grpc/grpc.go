@@ -309,6 +309,7 @@ func (g *grpcClientStream) CloseSend() error {
 	}
 
 	g.sendClosed = true
+
 	return g.stream.CloseSend()
 }
 

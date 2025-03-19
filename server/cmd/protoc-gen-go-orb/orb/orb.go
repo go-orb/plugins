@@ -97,11 +97,6 @@ func genService(file *protogen.File, generated *protogen.GeneratedFile, service 
 	}
 
 	for _, method := range service.Methods {
-		// gRPC streaming is not suppoerted at the moment
-		// if method.Desc.IsStreamingClient() || method.Desc.IsStreamingServer() {
-		// 	continue
-		// }
-
 		serviceDescription.AddMethod(
 			buildMethodDesc(generated, method, http.MethodPost,
 				fmt.Sprintf("/%s/%s", service.Desc.FullName(), method.Desc.Name())))

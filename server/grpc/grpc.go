@@ -40,9 +40,6 @@ type Server struct {
 
 	registry registry.Type
 
-	// entrypointID is the entrypointID (uuid) of this entrypoint in the registry.
-	entrypointID string
-
 	lis net.Listener
 
 	// health server implements the gRPC health protocol.

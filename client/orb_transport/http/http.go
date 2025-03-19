@@ -65,7 +65,7 @@ func (t *Transport) Name() string {
 
 // Request does the actual rpc call to the server.
 //
-//nolint:funlen,gocyclo
+//nolint:gocyclo
 func (t *Transport) Request(ctx context.Context, infos client.RequestInfos, req any, result any, opts *client.CallOptions) error {
 	codec, err := codecs.GetMime(opts.ContentType)
 	if err != nil {
@@ -175,6 +175,8 @@ func NewTransport(
 }
 
 // NewH2CTransport creates a new https transport for the orb client.
+//
+//nolint:dupl
 func NewH2CTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, error) {
 	return NewTransport(
 		"h2c",
@@ -231,8 +233,6 @@ func NewHTTPTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, er
 
 // NewHTTP3Transport creates a new https transport for the orb client.
 // This transport is used for HTTP/3.
-//
-//nolint:dupl
 func NewHTTP3Transport(logger log.Logger, cfg *orb.Config) (orb.TransportType, error) {
 	tlsConfig := &tls.Config{
 		//nolint:gosec

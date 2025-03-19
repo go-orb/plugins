@@ -1,7 +1,9 @@
+// Package file implements a file service.
 package file
 
 import (
 	"context"
+	"errors"
 	"io"
 	"os"
 
@@ -23,7 +25,7 @@ type streamReceiver interface {
 
 // UploadFile implements the ORB interface for FileServiceHandler.
 func (c *Handler) UploadFile(stream file.FileServiceUploadFileStream) error {
-	return c.handleUploadFile(stream, func(totalSize int64, ctx context.Context) error {
+	return c.handleUploadFile(stream, func(totalSize int64, _ context.Context) error {
 		// If we have received chunks, consider the upload complete and send response
 		resp := &file.UploadResponse{
 			Id:      uuid.New().String(),
@@ -45,7 +47,7 @@ func (c *Handler) AuthorizedUploadFile(stream file.FileServiceAuthorizedUploadFi
 		return orberrors.ErrUnauthorized
 	}
 
-	return c.handleUploadFile(stream, func(totalSize int64, ctx context.Context) error {
+	return c.handleUploadFile(stream, func(totalSize int64, _ context.Context) error {
 		// Add metadata to response.
 		_, mdout := metadata.WithOutgoing(ctx)
 		mdout["bytes-received"] = "true"
@@ -80,11 +82,12 @@ func (c *Handler) handleUploadFile(stream streamReceiver, onComplete func(int64,
 	// Process stream and write to /dev/null.
 	for {
 		chunk, err := stream.Recv()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			// End of stream, call completion function if not already done.
 			if !responseWritten {
 				return onComplete(totalSize, stream.Context())
 			}
+
 			return nil
 		}
 
@@ -92,7 +95,7 @@ func (c *Handler) handleUploadFile(stream streamReceiver, onComplete func(int64,
 			return err
 		}
 
-		totalSize += int64(len(chunk.Data))
+		totalSize += int64(len(chunk.GetData()))
 		chunkCount++
 	}
 }

@@ -43,9 +43,6 @@ type Server struct {
 
 	endpoints []string
 
-	// entrypointID is the entrypointID (uuid) of this entrypoint in the registry.
-	entrypointID string
-
 	started bool
 }
 
@@ -355,7 +352,11 @@ func (s *Server) Request(ctx context.Context, infos client.RequestInfos, req any
 }
 
 // Stream not yet implemented.
-func (s *Server) Stream(ctx context.Context, infos client.RequestInfos, opts *client.CallOptions) (client.StreamIface[any, any], error) {
+func (s *Server) Stream(
+	_ context.Context,
+	_ client.RequestInfos,
+	_ *client.CallOptions,
+) (client.StreamIface[any, any], error) {
 	return nil, orberrors.ErrNotImplemented.Wrap(client.ErrStreamNotSupported)
 }
 

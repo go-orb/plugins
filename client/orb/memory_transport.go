@@ -43,7 +43,10 @@ func (t *MemoryTransport) Request(ctx context.Context, infos client.RequestInfos
 }
 
 // Stream opens a bidirectional stream to the memory server.
-func (t *MemoryTransport) Stream(ctx context.Context, infos client.RequestInfos, opts *client.CallOptions) (client.StreamIface[any, any], error) {
+func (t *MemoryTransport) Stream(
+	_ context.Context, infos client.RequestInfos,
+	_ *client.CallOptions,
+) (client.StreamIface[any, any], error) {
 	t.logger.Debug("creating stream to memory server", "service", infos.Service)
 
 	// server, err := client.ResolveMemoryServer(infos.Service)
@@ -52,7 +55,6 @@ func (t *MemoryTransport) Stream(ctx context.Context, infos client.RequestInfos,
 	// }
 
 	return nil, orberrors.ErrNotImplemented
-	// return server.Stream(ctx, req, opts)
 }
 
 // NewTransport creates a Transport.

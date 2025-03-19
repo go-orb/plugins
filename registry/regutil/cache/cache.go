@@ -125,38 +125,38 @@ func (d *dataStore) watch(ctx context.Context) {
 }
 
 // deregisterService removes a service from the cache.
-func (d *dataStore) deregisterService(s *registry.Service) error {
-	store.Lock()
-	defer store.Unlock()
+func (d *dataStore) deregisterService(service *registry.Service) error {
+	d.Lock()
+	defer d.Unlock()
 
-	if s == nil {
+	if service == nil {
 		return nil
 	}
 
 	// If service doesn't exist in our records, nothing to do
-	records, ok := d.Records[s.Name]
+	records, ok := d.Records[service.Name]
 	if !ok {
 		return nil
 	}
 
 	// Get the version record if it exists
-	versionRecord, ok := records[s.Version]
+	versionRecord, ok := records[service.Version]
 	if !ok {
 		return nil
 	}
 
 	// Remove the specific nodes
-	for _, node := range s.Nodes {
+	for _, node := range service.Nodes {
 		delete(versionRecord.Nodes, node.ID)
 	}
 
 	// Clean up empty records
 	if len(versionRecord.Nodes) == 0 {
-		delete(records, s.Version)
+		delete(records, service.Version)
 
 		if len(records) == 0 {
-			d.logger.Trace("Registry removed service completely", "name", s.Name)
-			delete(d.Records, s.Name)
+			d.logger.Trace("Registry removed service completely", "name", service.Name)
+			delete(d.Records, service.Name)
 		}
 	}
 

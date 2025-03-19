@@ -6,9 +6,10 @@ import (
 	"github.com/go-orb/go-orb/registry"
 )
 
-func serviceToRecord(s *registry.Service) record {
-	nodes := make(map[string]node, len(s.Nodes))
-	for _, n := range s.Nodes {
+func serviceToRecord(service *registry.Service) record {
+	nodes := make(map[string]node, len(service.Nodes))
+
+	for _, n := range service.Nodes {
 		mnode := registry.Node{
 			ID:        n.ID,
 			Address:   n.Address,
@@ -21,8 +22,8 @@ func serviceToRecord(s *registry.Service) record {
 		}
 	}
 
-	endpoints := make([]registry.Endpoint, len(s.Endpoints))
-	for i, e := range s.Endpoints {
+	endpoints := make([]registry.Endpoint, len(service.Endpoints))
+	for i, e := range service.Endpoints {
 		endpoints[i] = registry.Endpoint{
 			Name:     e.Name,
 			Request:  e.Request,
@@ -32,9 +33,9 @@ func serviceToRecord(s *registry.Service) record {
 	}
 
 	return record{
-		Name:      s.Name,
-		Version:   s.Version,
-		Metadata:  maps.Clone(s.Metadata),
+		Name:      service.Name,
+		Version:   service.Version,
+		Metadata:  maps.Clone(service.Metadata),
 		Nodes:     nodes,
 		Endpoints: endpoints,
 	}
