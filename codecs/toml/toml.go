@@ -20,8 +20,8 @@ func init() {
 // toml files, or web requests.
 type Toml struct{}
 
-// Encode encodes "v" into byte sequence.
-func (t *Toml) Encode(v any) ([]byte, error) {
+// Marshal encodes "v" into byte sequence.
+func (t *Toml) Marshal(v any) ([]byte, error) {
 	var buf bytes.Buffer
 	if err := toml.NewEncoder(&buf).Encode(v); err != nil {
 		return nil, err
@@ -29,9 +29,9 @@ func (t *Toml) Encode(v any) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Decode decodes "data" into "v".
+// Unmarshal decodes "data" into "v".
 // "v" must be a pointer value.
-func (t *Toml) Decode(data []byte, v any) error {
+func (t *Toml) Unmarshal(data []byte, v any) error {
 	return toml.Unmarshal(data, v)
 }
 
@@ -55,8 +55,8 @@ func (t *Toml) NewDecoder(r io.Reader) codecs.Decoder {
 	})
 }
 
-// Encodes returns if this codec is able to encode the given type.
-func (t *Toml) Encodes(v any) bool {
+// Marshals returns if this codec is able to encode the given type.
+func (t *Toml) Marshals(v any) bool {
 	switch v.(type) {
 	case []string:
 		return true
@@ -73,9 +73,9 @@ func (t *Toml) Encodes(v any) bool {
 	}
 }
 
-// Decodes returns if this codec is able to decode the given type.
-func (t *Toml) Decodes(v any) bool {
-	return t.Encodes(v)
+// Unmarshals returns if this codec is able to decode the given type.
+func (t *Toml) Unmarshals(v any) bool {
+	return t.Marshals(v)
 }
 
 // ContentTypes returns the content types the marshaller can handle.
@@ -86,8 +86,8 @@ func (t *Toml) ContentTypes() []string {
 	}
 }
 
-// String returns the codec name.
-func (t *Toml) String() string {
+// Name returns the codec name.
+func (t *Toml) Name() string {
 	return "toml"
 }
 
