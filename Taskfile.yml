@@ -38,4 +38,4 @@ tasks:
   deps:
     desc: Update dependencies on all changed packages to the latest git commit
     cmds:
-      - cmd: ./scripts/deps.sh all
+      - cmd: GOSUMDB=off GOPROXY="direct" ./scripts/deps.sh all

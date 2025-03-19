@@ -2,5 +2,5 @@ github.com/BurntSushi/toml v1.5.0 h1:W5quZX/G/csjUnuI8SUYlsHs9M38FC7znL0lIO+DvMg
 github.com/BurntSushi/toml v1.5.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
 github.com/cornelk/hashmap v1.0.8 h1:nv0AWgw02n+iDcawr5It4CjQIAcdMMKRrs10HOJYlrc=
 github.com/cornelk/hashmap v1.0.8/go.mod h1:RfZb7JO3RviW/rT6emczVuC/oxpdz4UsSB2LJSclR1k=
-github.com/go-orb/go-orb v0.2.1 h1:MUPo361IBDL5xObAESgOCPy4IlrJG+4YBGz6OuMKT1M=
-github.com/go-orb/go-orb v0.2.1/go.mod h1:5LP/2OY9b3N5eOsiVVdU3R78B7kIfNXYNjJi9o0Vbdg=
+github.com/go-orb/go-orb v0.2.2-0.20250319034248-591f06b783eb h1:PRSe2EAuV408aLJuOm7jghIzrXD00n/Q0OxEUhEcUWY=
+github.com/go-orb/go-orb v0.2.2-0.20250319034248-591f06b783eb/go.mod h1:W5PZo2Rg93AfyF+/w5Nb71P4xFBsxdD02WHcv2VVaU0=

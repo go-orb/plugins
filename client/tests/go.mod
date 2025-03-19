@@ -3,10 +3,10 @@ module github.com/go-orb/plugins/client/tests
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250311132430-0e33342756e5
-	github.com/go-orb/plugins/server/drpc v0.1.1-0.20250311132509-af55a9d486b9
-	github.com/go-orb/plugins/server/http v0.1.1-0.20250311132509-af55a9d486b9
-	github.com/go-orb/plugins/server/memory v0.0.0-20250311132509-af55a9d486b9
+	github.com/go-orb/go-orb v0.2.2-0.20250319034248-591f06b783eb
+	github.com/go-orb/plugins/server/drpc v0.1.1-0.20250319043309-58bf0a9e8223
+	github.com/go-orb/plugins/server/http v0.1.1-0.20250319043309-58bf0a9e8223
+	github.com/go-orb/plugins/server/memory v0.0.0-20250319043309-58bf0a9e8223
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/grpc v1.71.0
@@ -18,7 +18,7 @@ require (
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
-	github.com/google/pprof v0.0.0-20250302191652-9094ed2288e7 // indirect
+	github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
