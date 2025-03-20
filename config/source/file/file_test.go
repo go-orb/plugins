@@ -119,14 +119,13 @@ func TestReadFromBase64(t *testing.T) {
 	// Run tests
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := s.readFromBase64(tt.path, tt.b64Content)
+			result, err := s.readFromBase64(tt.path, tt.b64Content)
 
 			if tt.wantErr {
-				require.Error(t, result.Error, "Expected error for %s", tt.name)
+				require.Error(t, err, "Expected error for %s", tt.name)
 			} else {
-				require.NoError(t, result.Error, "Unexpected error: %v", result.Error)
-				require.Equal(t, tt.wantData, result.Data, "Data does not match expected values")
-				require.NotNil(t, result.Marshaler, "Marshaler should not be nil")
+				require.NoError(t, err, "Unexpected error: %v", err)
+				require.Equal(t, tt.wantData, result, "Data does not match expected values")
 			}
 		})
 	}
@@ -190,14 +189,13 @@ func TestReadFromFile(t *testing.T) {
 	// Run tests.
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := s.readFromFile(tt.path)
+			result, err := s.readFromFile(tt.path)
 
 			if tt.wantErr {
-				require.Error(t, result.Error, "Expected error for %s", tt.name)
+				require.Error(t, err, "Expected error for %s", tt.name)
 			} else {
-				require.NoError(t, result.Error, "Unexpected error: %v", result.Error)
-				require.Equal(t, tt.wantData, result.Data, "Data does not match expected values")
-				require.NotNil(t, result.Marshaler, "Marshaler should not be nil")
+				require.NoError(t, err, "Unexpected error: %v", err)
+				require.Equal(t, tt.wantData, result, "Data does not match expected values")
 			}
 		})
 	}
@@ -255,14 +253,13 @@ func TestRead(t *testing.T) {
 			u, err := url.Parse(tt.url)
 			require.NoError(t, err)
 
-			result := s.Read(u)
+			result, err := s.Read(u)
 
 			if tt.wantErr {
-				require.Error(t, result.Error, "Expected error for %s", tt.name)
+				require.Error(t, err, "Expected error for %s", tt.name)
 			} else {
-				require.NoError(t, result.Error, "Unexpected error: %v", result.Error)
-				require.Equal(t, tt.wantData, result.Data, "Data does not match expected values")
-				require.NotNil(t, result.Marshaler, "Marshaler should not be nil")
+				require.NoError(t, err, "Unexpected error: %v", err)
+				require.Equal(t, tt.wantData, result, "Data does not match expected values")
 			}
 		})
 	}

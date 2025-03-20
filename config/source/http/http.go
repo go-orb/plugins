@@ -34,21 +34,12 @@ func (s *Source) Schemes() []string {
 	return []string{"http", "https"}
 }
 
-// PrependSections returns whetever this source needs sections to be prepended.
-func (s *Source) PrependSections() bool {
-	return false
-}
-
 // String returns the name of the source.
 func (s *Source) String() string {
 	return "http"
 }
 
-func (s *Source) Read(myURL *url.URL) source.Data {
-	result := source.Data{
-		Data: make(map[string]any),
-	}
-
+func (s *Source) Read(myURL *url.URL) (map[string]any, error) {
 	path := myURL.Path
 
 	var decoder codecs.Marshaler
@@ -68,11 +59,8 @@ func (s *Source) Read(myURL *url.URL) source.Data {
 	})
 
 	if decoder == nil {
-		result.Error = codecs.ErrNoFileMarshaler
-		return result
+		return nil, codecs.ErrNoFileMarshaler
 	}
-
-	result.Marshaler = decoder
 
 	// Download the file
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
@@ -80,39 +68,33 @@ func (s *Source) Read(myURL *url.URL) source.Data {
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, myURL.String(), nil)
 	if err != nil {
-		result.Error = err
-
-		return result
+		return nil, err
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		result.Error = err
-
-		return result
+		return nil, err
 	}
 
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			log.Error("Error while closing the body", err)
+			log.Error("Error while closing the body", "url", myURL.String(), "error", err)
 		}
 	}()
 
 	if resp.StatusCode != http.StatusOK {
 		if _, err := io.Copy(io.Discard, resp.Body); err != nil {
-			log.Error("Error while closing the body", err)
+			log.Error("Error while closing the body", "url", myURL.String(), "error", err)
 		}
 
-		result.Error = fmt.Errorf("bad response status code '%d', status text: %s", resp.StatusCode, resp.Status)
-
-		return result
+		return nil, fmt.Errorf("bad response status code '%d', status text: %s", resp.StatusCode, resp.Status)
 	}
 
-	if err := decoder.NewDecoder(resp.Body).Decode(&result.Data); err != nil {
-		result.Error = err
+	result := map[string]any{}
 
-		return result
+	if err := decoder.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
 	}
 
-	return result
+	return result, nil
 }

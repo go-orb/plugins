@@ -22,13 +22,13 @@ import (
 //nolint:gochecknoglobals
 var (
 	// ServiceName is the name of the testing service.
-	ServiceName = types.ServiceName("service")
+	ServiceName = "service"
 
 	// DefaultRequests is the list of default requests.
 	DefaultRequests = []TestRequest{
 		{
 			Name:     "32byte",
-			Service:  string(ServiceName),
+			Service:  ServiceName,
 			Endpoint: echo.EndpointStreamsCall,
 			Request: &echo.CallRequest{
 				Name: "32byte",
@@ -39,7 +39,7 @@ var (
 		},
 		{
 			Name:        "raw-json",
-			Service:     string(ServiceName),
+			Service:     ServiceName,
 			Endpoint:    echo.EndpointStreamsCall,
 			ContentType: "application/json",
 			Request:     `{"name": "Alex"}`,
@@ -49,7 +49,7 @@ var (
 		},
 		{
 			Name:     "default codec with URL",
-			Service:  string(ServiceName),
+			Service:  ServiceName,
 			Endpoint: echo.EndpointStreamsCall,
 			Request: &echo.CallRequest{
 				Name: "Alex",
@@ -60,7 +60,7 @@ var (
 		},
 		{
 			Name:     "default codec",
-			Service:  string(ServiceName),
+			Service:  ServiceName,
 			Endpoint: echo.EndpointStreamsCall,
 			Request: &echo.CallRequest{
 				Name: "Alex",
@@ -71,7 +71,7 @@ var (
 		},
 		{
 			Name:        "proto",
-			Service:     string(ServiceName),
+			Service:     ServiceName,
 			Endpoint:    echo.EndpointStreamsCall,
 			ContentType: "application/x-protobuf",
 			Request: &echo.CallRequest{
@@ -83,7 +83,7 @@ var (
 		},
 		{
 			Name:        "json",
-			Service:     string(ServiceName),
+			Service:     ServiceName,
 			Endpoint:    echo.EndpointStreamsCall,
 			ContentType: "application/json",
 			Request: map[string]any{
@@ -95,7 +95,7 @@ var (
 		},
 		{
 			Name:     "error request",
-			Service:  string(ServiceName),
+			Service:  ServiceName,
 			Endpoint: echo.EndpointStreamsCall,
 			Error:    true,
 			Request: &echo.CallRequest{
@@ -133,15 +133,15 @@ type TestSuite struct {
 
 	entrypoints []server.Entrypoint
 	ctx         context.Context
-	setupServer func(service types.ServiceName) (*SetupData, error)
+	setupServer func(service string) (*SetupData, error)
 	stopServer  context.CancelFunc
 
 	// To create more clients in Benchmarks.
-	clientName types.ServiceName
+	clientName string
 }
 
 // NewSuite creates a new test suite.
-func NewSuite(setupServer func(service types.ServiceName) (*SetupData, error), transports []string, requests ...TestRequest) *TestSuite {
+func NewSuite(setupServer func(service string) (*SetupData, error), transports []string, requests ...TestRequest) *TestSuite {
 	s := new(TestSuite)
 
 	s.Transports = transports
@@ -174,7 +174,7 @@ type TestRequest struct {
 func (s *TestSuite) SetupSuite() {
 	var err error
 
-	setupData, err := s.setupServer(ServiceName)
+	setupData, err := s.setupServer(s.clientName)
 	if err != nil {
 		s.Require().NoError(err, "while setting up the server")
 	}
@@ -185,9 +185,9 @@ func (s *TestSuite) SetupSuite() {
 	s.ctx = setupData.Ctx
 	s.stopServer = setupData.Stop
 
-	s.clientName = types.ServiceName("client")
+	s.clientName = "client"
 
-	s.client, err = client.ProvideNoOpts(s.clientName, nil, &types.Components{}, s.logger, s.registry)
+	s.client, err = client.New(nil, &types.Components{}, s.logger, s.registry)
 	s.Require().NoError(err, "while setting up the client")
 
 	s.Require().NoError(s.logger.Start(s.ctx))
@@ -286,7 +286,7 @@ func (s *TestSuite) TestFailingAuthorization() {
 
 	_, err := streamsClient.AuthorizedCall(
 		ctx,
-		string(ServiceName),
+		ServiceName,
 		&echo.CallRequest{Name: "empty"},
 		client.WithResponseMetadata(responseMd),
 	)
@@ -304,7 +304,7 @@ func (s *TestSuite) TestMetadata() {
 			streamsClient := echo.NewStreamsClient(s.client)
 			_, err := streamsClient.AuthorizedCall(
 				context.Background(),
-				string(ServiceName),
+				ServiceName,
 				&echo.CallRequest{Name: "empty"},
 				client.WithMetadata(md),
 				client.WithResponseMetadata(responseMd),
@@ -329,7 +329,7 @@ func (s *TestSuite) TestFileUpload() {
 			ctx := context.Background()
 
 			// Open a stream to the service
-			stream, err := fileClient.UploadFile(ctx, string(ServiceName), client.WithPreferredTransports(t))
+			stream, err := fileClient.UploadFile(ctx, ServiceName, client.WithPreferredTransports(t))
 			if errors.Is(err, orberrors.ErrNotImplemented) {
 				// Transport does not support streaming.
 				return
@@ -385,7 +385,7 @@ func (s *TestSuite) TestAuthorizedFileUpload() {
 			ctx := context.Background()
 
 			// Open a stream to the service
-			stream, err := fileClient.AuthorizedUploadFile(ctx, string(ServiceName), client.WithPreferredTransports(t))
+			stream, err := fileClient.AuthorizedUploadFile(ctx, ServiceName, client.WithPreferredTransports(t))
 			if errors.Is(err, orberrors.ErrNotImplemented) {
 				// Transport does not support streaming.
 				return
@@ -428,7 +428,7 @@ func (s *TestSuite) TestAuthorizedFileUpload() {
 			responseMd := make(map[string]string)
 
 			// Open a stream to the service
-			stream, err := fileClient.AuthorizedUploadFile(context.Background(), string(ServiceName),
+			stream, err := fileClient.AuthorizedUploadFile(context.Background(), ServiceName,
 				client.WithPreferredTransports(t),
 				client.WithMetadata(md),
 				client.WithResponseMetadata(responseMd),

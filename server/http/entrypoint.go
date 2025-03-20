@@ -23,7 +23,6 @@ import (
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
-	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/addr"
 	mtls "github.com/go-orb/go-orb/util/tls"
 
@@ -68,15 +67,14 @@ type Server struct {
 // can serve a HTTP1, HTTP2 and HTTP3 server. If you enable HTTP3 it will listen
 // on both TCP and UDP on the same port.
 func Provide(
-	sections []string,
-	configs types.ConfigData,
+	configData map[string]any,
 	logger log.Logger,
 	reg registry.Type,
 	opts ...server.Option,
 ) (server.Entrypoint, error) {
 	cfg := NewConfig(opts...)
 
-	if err := config.Parse(sections, configs, cfg); err != nil {
+	if err := config.Parse(nil, "", configData, cfg); err != nil {
 		return nil, err
 	}
 
@@ -87,7 +85,7 @@ func Provide(
 			return nil, fmt.Errorf("%w: '%s', did you register it?", server.ErrUnknownMiddleware, cfgMw.Plugin)
 		}
 
-		mw, err := pFunc(append(sections, "middlewares", strconv.Itoa(idx)), configs, logger)
+		mw, err := pFunc([]string{"middlewares"}, strconv.Itoa(idx), configData, logger)
 		if err != nil {
 			return nil, err
 		}

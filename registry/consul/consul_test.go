@@ -10,7 +10,6 @@ import (
 
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
-	"github.com/go-orb/go-orb/types"
 	"github.com/hashicorp/consul/sdk/testutil"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -35,42 +34,21 @@ func createServer() (*tests.TestSuite, func() error, error) {
 		return nil, func() error { return nil }, err
 	}
 
-	cfg1, err := NewConfig(types.ServiceName("test1.service"), nil, WithAddress(server.HTTPAddr))
-	if err != nil {
-		log.Error("failed to create config", "err", err)
-		server.Stop() //nolint:errcheck
-		return nil, func() error { return nil }, err
-	}
-
-	reg1 := New("", "", cfg1, logger)
+	reg1 := New("test1.service", "", NewConfig(WithAddress(server.HTTPAddr)), logger)
 	if err := reg1.Start(ctx); err != nil {
 		log.Error("failed to connect registry one to Consul server", "err", err)
 		server.Stop() //nolint:errcheck
 		return nil, func() error { return nil }, err
 	}
 
-	cfg2, err := NewConfig(types.ServiceName("test2.service"), nil, WithAddress(server.HTTPAddr))
-	if err != nil {
-		log.Error("failed to create config", "err", err)
-		server.Stop() //nolint:errcheck
-		return nil, func() error { return nil }, err
-	}
-
-	reg2 := New("", "", cfg2, logger)
+	reg2 := New("test2.service", "", NewConfig(WithAddress(server.HTTPAddr)), logger)
 	if err := reg2.Start(ctx); err != nil {
 		log.Error("failed to connect registry two to Consul server", "err", err)
 		server.Stop() //nolint:errcheck
 		return nil, func() error { return nil }, err
 	}
 
-	cfg3, err := NewConfig(types.ServiceName("test3.service"), nil, WithAddress(server.HTTPAddr))
-	if err != nil {
-		log.Error("failed to create config", err)
-		server.Stop() //nolint:errcheck
-		return nil, func() error { return nil }, err
-	}
-
-	reg3 := New("", "", cfg3, logger)
+	reg3 := New("test3.service", "", NewConfig(WithAddress(server.HTTPAddr)), logger)
 	if err := reg3.Start(ctx); err != nil {
 		log.Error("failed to connect registry three to Consul server", "err", err)
 		server.Stop() //nolint:errcheck

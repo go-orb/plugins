@@ -25,12 +25,12 @@ import (
 	_ "github.com/go-orb/plugins/log/slog"
 )
 
-func setupServer(sn types.ServiceName) (*tests.SetupData, error) {
+func setupServer(sn string) (*tests.SetupData, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	setupData := &tests.SetupData{}
 
-	sv := types.ServiceVersion("")
+	sv := ""
 
 	logger, err := log.New()
 	if err != nil {
@@ -39,7 +39,7 @@ func setupServer(sn types.ServiceName) (*tests.SetupData, error) {
 		return nil, err
 	}
 
-	reg, err := registry.New(sn, sv, &types.Components{}, registry.NewConfig(), nil, []string{}, logger)
+	reg, err := registry.New(sn, sv, nil, &types.Components{}, logger)
 	if err != nil {
 		cancel()
 

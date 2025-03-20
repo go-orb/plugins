@@ -318,20 +318,20 @@ func TestServerRequestSpecificContentType(t *testing.T) {
 }
 
 func TestServerIntegration(t *testing.T) {
-	name := types.ServiceName("com.example.test")
-	version := types.ServiceVersion("v1.0.0")
+	name := "com.example.test"
+	version := ""
 
 	components := types.NewComponents()
 
-	logger, err := log.Provide(name, nil, components)
+	logger, err := log.New()
 	require.NoError(t, err, "failed to setup the logger")
 
-	reg, err := registry.Provide(name, version, nil, components, logger)
+	reg, err := registry.New(name, version, nil, components, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
 	h := new(handler.EchoHandler)
 
-	srv, err := server.Provide(name, nil, components, logger, reg,
+	srv, err := server.New(nil, logger, reg,
 		server.WithEntrypointConfig(mhttp.NewConfig(
 			mhttp.WithName("test-ep-1"),
 			mhttp.WithAddress(":48081"),
@@ -382,8 +382,8 @@ func TestServerFileConfig(t *testing.T) {
 	server.Handlers.Set("handler-1", func(_ any) {})
 	server.Handlers.Set("handler-2", func(_ any) {})
 
-	name := types.ServiceName("com.example.test")
-	version := types.ServiceVersion("v1.0.0")
+	name := "com.example.test"
+	version := ""
 
 	fURL, err := url.Parse("file://config/config.yaml")
 	t.Logf("%+v", fURL.RawPath)
@@ -391,17 +391,17 @@ func TestServerFileConfig(t *testing.T) {
 
 	components := types.NewComponents()
 
-	config, err := config.Read([]*url.URL{fURL})
+	config, err := config.Read(fURL)
 	require.NoError(t, err, "failed to read file config")
 
-	logger, err := log.Provide(name, nil, components)
+	logger, err := log.New()
 	require.NoError(t, err, "failed to setup the logger")
 
-	reg, err := registry.Provide(name, version, nil, components, logger)
+	reg, err := registry.New(name, version, nil, components, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
 	h := new(handler.EchoHandler)
-	srv, err := server.Provide(name, config, components, logger, reg,
+	srv, err := server.New(config, logger, reg,
 		server.WithEntrypointConfig(mhttp.NewConfig(
 			mhttp.WithName("static-ep-1"),
 			mhttp.WithAddress(":48081"),
@@ -628,7 +628,8 @@ func runBenchmark(b *testing.B, addr string, testFunc func(testing.TB, string) e
 func setupServer(tb testing.TB, nolog bool, opts ...server.Option) (*mhttp.Server, func(), error) {
 	tb.Helper()
 
-	name := types.ServiceName("test-server")
+	name := "test-server"
+	version := "v1.0.0"
 	lopts := []log.Option{}
 	if nolog {
 		lopts = append(lopts, log.WithLevel(log.LevelError.String()))
@@ -640,12 +641,12 @@ func setupServer(tb testing.TB, nolog bool, opts ...server.Option) (*mhttp.Serve
 
 	components := types.NewComponents()
 
-	logger, err := log.Provide(name, nil, components, lopts...)
+	logger, err := log.New(lopts...)
 	if err != nil {
 		return nil, cancel, fmt.Errorf("failed to setup logger: %w", err)
 	}
 
-	reg, err := registry.Provide("app", "v1.0.0", nil, components, logger)
+	reg, err := registry.New(name, version, nil, components, logger)
 	if err != nil {
 		return nil, nil, fmt.Errorf("setup registry: %w", err)
 	}

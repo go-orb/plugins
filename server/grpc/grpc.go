@@ -50,15 +50,14 @@ type Server struct {
 
 // Provide provides a gRPC server by config.
 func Provide(
-	sections []string,
-	configs types.ConfigData,
+	configData map[string]any,
 	logger log.Logger,
 	reg registry.Type,
 	opts ...server.Option,
 ) (server.Entrypoint, error) {
 	cfg := NewConfig(opts...)
 
-	if err := config.Parse(sections, configs, cfg); err != nil {
+	if err := config.Parse(nil, "", configData, cfg); err != nil {
 		return nil, err
 	}
 
@@ -69,7 +68,7 @@ func Provide(
 			return nil, fmt.Errorf("%w: '%s', did you register it?", server.ErrUnknownMiddleware, cfgMw.Plugin)
 		}
 
-		mw, err := pFunc(append(sections, "middlewares", strconv.Itoa(idx)), configs, logger)
+		mw, err := pFunc([]string{"middlewares"}, strconv.Itoa(idx), configData, logger)
 		if err != nil {
 			return nil, err
 		}

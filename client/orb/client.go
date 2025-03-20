@@ -389,37 +389,32 @@ func New(cfg Config, log log.Logger, registry registry.Type) *Client {
 //
 //nolint:gocognit,gocyclo
 func Provide(
-	name types.ServiceName,
-	data types.ConfigData,
+	configData map[string]any,
 	components *types.Components,
 	logger log.Logger,
 	registry registry.Type,
 	opts ...client.Option,
 ) (client.Type, error) {
-	cfg, err := NewConfig(name, data, opts...)
-	if err != nil {
-		return client.Type{}, err
-	}
+	cfg := NewConfig(opts...)
 
-	sections := types.SplitServiceName(name)
-	sections = append(sections, client.DefaultConfigSection)
-
-	if err := config.Parse(sections, data, &cfg); err != nil {
+	if err := config.Parse(nil, client.DefaultConfigSection, configData, &cfg); err != nil {
 		return client.Type{}, err
 	}
 
 	newClient := New(cfg, logger, registry)
 
 	//nolint:nestif
-	if config.HasKey[[]any](sections, "middlewares", data) || len(cfg.Config.Middleware) > 0 {
+	if config.HasKey[[]any]([]string{client.DefaultConfigSection}, "middlewares", configData) || len(cfg.Config.Middleware) > 0 {
 		// Get and factory them all.
 		middlewares := []client.Middleware{}
 
 		for i := 0; ; i++ {
 			mCfg := &client.MiddlewareConfig{}
-			if err := config.Parse(append(sections, "middlewares", strconv.Itoa(i)), data, mCfg); err != nil || mCfg.Name == "" {
+
+			sections := []string{client.DefaultConfigSection, "middlewares"}
+			if err := config.Parse(sections, strconv.Itoa(i), configData, mCfg); err != nil || mCfg.Name == "" {
 				if errors.Is(err, config.ErrNotExistent) || mCfg.Name == "" {
-					logger.Warn("Unable to parse middleware config", "section", append(sections, "middlewares", strconv.Itoa(i)))
+					logger.Warn("Unable to parse middleware config", "section", sections, "key", strconv.Itoa(i))
 					break
 				}
 
@@ -431,7 +426,12 @@ func Provide(
 				return client.Type{}, fmt.Errorf("Client middleware '%s' not found, did you import it?", mCfg.Name)
 			}
 
-			m, err := fac(append(sections, "middlewares", strconv.Itoa(i)), data, client.Type{Client: newClient}, logger)
+			mConfig, err := config.WalkMap([]string{client.DefaultConfigSection, "middlewares", strconv.Itoa(i)}, configData)
+			if err != nil && !errors.Is(err, config.ErrNotExistent) {
+				return client.Type{}, err
+			}
+
+			m, err := fac(mConfig, client.Type{Client: newClient}, logger)
 			if err != nil {
 				return client.Type{}, err
 			}
@@ -445,12 +445,12 @@ func Provide(
 				return client.Type{}, fmt.Errorf("Client middleware '%s' not found, did you import it?", m.Name)
 			}
 
-			myData, err := config.ParseStruct([]string{}, m)
+			mConfig, err := config.ParseStruct([]string{}, m)
 			if err != nil {
 				return client.Type{}, err
 			}
 
-			m, err := fac([]string{}, types.ConfigData{myData}, client.Type{Client: newClient}, logger)
+			m, err := fac(mConfig, client.Type{Client: newClient}, logger)
 			if err != nil {
 				return client.Type{}, err
 			}
@@ -467,7 +467,7 @@ func Provide(
 	instance := client.Type{Client: newClient}
 
 	// Register the client as a component.
-	err = components.Add(&instance, types.PriorityClient)
+	err := components.Add(&instance, types.PriorityClient)
 	if err != nil {
 		logger.Warn("while registering client/orb as a component", "error", err)
 	}

@@ -13,7 +13,6 @@ import (
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/kvstore"
 	"github.com/go-orb/go-orb/log"
-	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
@@ -32,8 +31,6 @@ var _ kvstore.Watcher = (*NatsJS)(nil)
 
 // NatsJS implements the kvstore.KVStore interface using NATS JetStream.
 type NatsJS struct {
-	serviceName string
-
 	config Config
 	logger log.Logger
 
@@ -48,38 +45,33 @@ type NatsJS struct {
 
 // New creates a new NATS JetStream KVStore. This function should rarely be called manually.
 // To create a new KVStore use Provide.
-func New(serviceName string, cfg Config, log log.Logger) (*NatsJS, error) {
+func New(cfg Config, log log.Logger) (*NatsJS, error) {
 	codec, err := codecs.GetMime(codecs.MimeJSON)
 	if err != nil {
 		return nil, err
 	}
 
 	return &NatsJS{
-		serviceName: serviceName,
-		config:      cfg,
-		logger:      log,
-		codec:       codec,
-		ctx:         context.Background(), // Initialize with a background context
+		config: cfg,
+		logger: log,
+		codec:  codec,
+		ctx:    context.Background(), // Initialize with a background context
 	}, nil
 }
 
 // Provide creates a new NatsJS KVStore client.
 func Provide(
-	name types.ServiceName,
-	data types.ConfigData,
+	configData map[string]any,
 	logger log.Logger,
 	opts ...kvstore.Option,
 ) (kvstore.Type, error) {
 	cfg := NewConfig(opts...)
 
-	sections := types.SplitServiceName(name)
-	sections = append(sections, kvstore.DefaultConfigSection)
-
-	if err := config.Parse(sections, data, &cfg); err != nil {
+	if err := config.Parse(nil, kvstore.DefaultConfigSection, configData, &cfg); err != nil {
 		return kvstore.Type{}, err
 	}
 
-	instance, err := New(string(name), cfg, logger)
+	instance, err := New(cfg, logger)
 	if err != nil {
 		return kvstore.Type{}, err
 	}

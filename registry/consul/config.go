@@ -2,14 +2,11 @@ package consul
 
 import (
 	"crypto/tls"
-	"fmt"
 	"time"
 
 	consul "github.com/hashicorp/consul/api"
 
-	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/registry"
-	"github.com/go-orb/go-orb/types"
 )
 
 // metaTransportKey is the key to use to store the scheme in metadata.
@@ -31,7 +28,7 @@ var (
 )
 
 func init() {
-	registry.Plugins.Add(Name, ProvideRegistryConsul)
+	registry.Plugins.Add(Name, Provide)
 }
 
 // Config provides configuration for the consul registry.
@@ -55,10 +52,8 @@ type Config struct {
 
 // NewConfig creates a new config object.
 func NewConfig(
-	serviceName types.ServiceName,
-	datas types.ConfigData,
 	opts ...registry.Option,
-) (Config, error) {
+) Config {
 	cfg := Config{
 		Config:     registry.NewConfig(),
 		AllowStale: DefaultAllowStale,
@@ -67,12 +62,7 @@ func NewConfig(
 
 	cfg.ApplyOptions(opts...)
 
-	sections := types.SplitServiceName(serviceName)
-	if err := config.Parse(append(sections, registry.ComponentType), datas, &cfg); err != nil {
-		return cfg, fmt.Errorf("parse config: %w", err)
-	}
-
-	return cfg, nil
+	return cfg
 }
 
 // ApplyOptions applies a set of options to the config.

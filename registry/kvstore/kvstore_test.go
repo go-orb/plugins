@@ -49,7 +49,7 @@ func createRegistries(tb testing.TB) (*tests.TestSuite, func() error, error) {
 	)
 
 	// Create store
-	store, err := natsjs.New("test-service", storeCfg, logger)
+	store, err := natsjs.New(storeCfg, logger)
 	require.NoError(tb, err)
 
 	err = store.Start(ctx)

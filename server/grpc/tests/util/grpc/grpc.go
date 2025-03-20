@@ -32,7 +32,7 @@ func SetupServer(opts ...server.Option) (server.Entrypoint, func(t *testing.T), 
 
 	components := types.NewComponents()
 
-	reg, err := registry.Provide("app", "v1.0.0", nil, components, logger)
+	reg, err := registry.New("app", "v1.0.0", nil, components, logger)
 	if err != nil {
 		return nil, nil, fmt.Errorf("setup registry: %w", err)
 	}

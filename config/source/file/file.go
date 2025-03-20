@@ -33,17 +33,12 @@ func (s *Source) Schemes() []string {
 	return []string{"", "file"}
 }
 
-// PrependSections returns whetever this source needs sections to be prepended.
-func (s *Source) PrependSections() bool {
-	return false
-}
-
 // String returns the name of the source.
 func (s *Source) String() string {
 	return "file"
 }
 
-func (s *Source) Read(u *url.URL) source.Data {
+func (s *Source) Read(u *url.URL) (map[string]any, error) {
 	// Handle base64-encoded content from URL parameter.
 	if b64Param := u.Query().Get("base64"); b64Param != "" {
 		return s.readFromBase64(u.Path, b64Param)
@@ -54,77 +49,62 @@ func (s *Source) Read(u *url.URL) source.Data {
 }
 
 // readFromBase64 reads config from a base64-encoded string.
-func (s *Source) readFromBase64(path, b64Content string) source.Data {
-	result := source.Data{
-		Data: make(map[string]any),
-	}
+func (s *Source) readFromBase64(path, b64Content string) (map[string]any, error) {
+	result := map[string]any{}
 
 	// Get marshaler for file extension.
 	marshaler := s.getMarshaler(path)
 	if marshaler == nil {
-		result.Error = config.ErrCodecNotFound
-		return result
+		return nil, config.ErrCodecNotFound
 	}
-
-	result.Marshaler = marshaler
 
 	// Decode base64 content.
 	data, err := base64.URLEncoding.DecodeString(b64Content)
 	if err != nil {
-		result.Error = fmt.Errorf("failed to decode base64 config: %w", err)
-		return result
+		return nil, fmt.Errorf("failed to decode base64 config: %w", err)
 	}
 
 	// Unmarshal the data.
-	if err := marshaler.Unmarshal(data, &result.Data); err != nil {
-		result.Error = fmt.Errorf("failed to unmarshal base64 config: %w", err)
-		return result
+	if err := marshaler.Unmarshal(data, &result); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal base64 config: %w", err)
 	}
 
-	return result
+	return result, nil
 }
 
 // readFromFile reads config from a filesystem path.
-func (s *Source) readFromFile(path string) source.Data {
-	result := source.Data{
-		Data: make(map[string]any),
-	}
+func (s *Source) readFromFile(path string) (map[string]any, error) {
+	result := map[string]any{}
 
 	// Check if file exists
 	if _, err := os.Stat(path); err != nil {
-		result.Error = fmt.Errorf("%w: %w", config.ErrFileNotFound, err)
-		return result
+		return nil, fmt.Errorf("%w: %w", config.ErrFileNotFound, err)
 	}
 
 	// Get marshaler for file extension.
 	marshaler := s.getMarshaler(path)
 	if marshaler == nil {
-		result.Error = config.ErrCodecNotFound
-		return result
+		return nil, config.ErrCodecNotFound
 	}
-
-	result.Marshaler = marshaler
 
 	// Open and read the file.
 	fh, err := os.Open(filepath.Clean(path))
 	if err != nil {
-		result.Error = err
-		return result
+		return nil, fmt.Errorf("failed to open config file: %w", err)
 	}
 
 	defer func() {
 		if err := fh.Close(); err != nil {
-			log.Error("failed to close config file", err)
+			log.Error("failed to close config file", "path", path, "error", err)
 		}
 	}()
 
 	// Decode the file content.
-	if err := marshaler.NewDecoder(fh).Decode(&result.Data); err != nil {
-		result.Error = err
-		return result
+	if err := marshaler.NewDecoder(fh).Decode(&result); err != nil {
+		return nil, fmt.Errorf("failed to decode config file: %w", err)
 	}
 
-	return result
+	return result, nil
 }
 
 // getMarshaler finds an appropriate marshaler for the given file path based on extension.

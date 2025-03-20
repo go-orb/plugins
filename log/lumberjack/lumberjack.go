@@ -10,7 +10,6 @@ import (
 
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
-	"github.com/go-orb/go-orb/types"
 
 	"gopkg.in/natefinch/lumberjack.v2"
 )
@@ -66,7 +65,7 @@ type Config struct {
 }
 
 // NewConfig creates a new config.
-func NewConfig(section []string, configs types.ConfigData, opts ...log.Option) (Config, error) {
+func NewConfig(opts ...log.Option) Config {
 	cfg := Config{
 		Config: log.NewConfig(),
 		Format: DefaultFormat,
@@ -76,11 +75,7 @@ func NewConfig(section []string, configs types.ConfigData, opts ...log.Option) (
 		o(&cfg)
 	}
 
-	if err := config.Parse(append(section, "logger"), configs, &cfg); err != nil {
-		return Config{}, err
-	}
-
-	return cfg, nil
+	return cfg
 }
 
 // WithFormat sets the format for the logger.
@@ -218,9 +213,9 @@ func (p *Provider) Key() string {
 }
 
 // Factory is the factory for a slog provider.
-func Factory(sections []string, configs types.ConfigData, opts ...log.Option) (log.ProviderType, error) {
-	cfg, err := NewConfig(sections, configs, opts...)
-	if err != nil {
+func Factory(sections []string, configs map[string]any, opts ...log.Option) (log.ProviderType, error) {
+	cfg := NewConfig(opts...)
+	if err := config.Parse(sections, "logger", configs, &cfg); err != nil {
 		return log.ProviderType{}, err
 	}
 

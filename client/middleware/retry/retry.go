@@ -9,7 +9,6 @@ import (
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
-	"github.com/go-orb/go-orb/types"
 )
 
 func init() {
@@ -127,16 +126,16 @@ func (m *Middleware) Request(
 }
 
 // Provide will be registered to client.Middlewares, it's a factory for this.
-func Provide(sections []string, configs types.ConfigData, _ client.Type, logger log.Logger) (client.Middleware, error) {
+func Provide(configSection map[string]any, _ client.Type, logger log.Logger) (client.Middleware, error) {
 	// Configure the logger.
-	logger, err := logger.WithConfig(sections, configs)
+	logger, err := logger.WithConfig([]string{}, configSection)
 	if err != nil {
 		return nil, err
 	}
 
 	cfg := NewConfig()
 
-	err = config.Parse(sections, configs, cfg)
+	err = config.Parse(nil, "", configSection, cfg)
 	if err != nil {
 		return nil, err
 	}

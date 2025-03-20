@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
@@ -343,23 +342,20 @@ func (c *Registry) Watch(opts ...registry.WatchOption) (registry.Watcher, error)
 
 // Provide creates a new memory registry.
 func Provide(
-	name types.ServiceName,
-	version types.ServiceVersion,
-	datas types.ConfigData,
+	name string,
+	version string,
+	datas map[string]any,
 	_ *types.Components,
 	logger log.Logger,
 	opts ...registry.Option,
 ) (registry.Type, error) {
 	cfg := NewConfig(opts...)
 
-	sections := types.SplitServiceName(name)
-	sections = append(sections, client.DefaultConfigSection)
-
-	if err := config.Parse(sections, datas, &cfg); err != nil {
+	if err := config.Parse(nil, registry.DefaultConfigSection, datas, &cfg); err != nil {
 		return registry.Type{}, err
 	}
 
-	reg := New(string(name), string(version), cfg, logger)
+	reg := New(name, version, cfg, logger)
 
 	return registry.Type{Registry: reg}, nil
 }

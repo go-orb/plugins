@@ -1,11 +1,7 @@
 package orb
 
 import (
-	"fmt"
-
 	"github.com/go-orb/go-orb/client"
-	"github.com/go-orb/go-orb/config"
-	"github.com/go-orb/go-orb/types"
 )
 
 // Name contains the plugins name.
@@ -22,10 +18,8 @@ type Config struct {
 
 // NewConfig creates a new config object.
 func NewConfig(
-	serviceName types.ServiceName,
-	datas types.ConfigData,
 	opts ...client.Option,
-) (Config, error) {
+) Config {
 	cfg := Config{
 		Config: client.NewConfig(),
 	}
@@ -35,10 +29,5 @@ func NewConfig(
 		o(&cfg)
 	}
 
-	sections := types.SplitServiceName(serviceName)
-	if err := config.Parse(append(sections, client.ComponentType), datas, &cfg); err != nil {
-		return cfg, fmt.Errorf("parse config: %w", err)
-	}
-
-	return cfg, nil
+	return cfg
 }

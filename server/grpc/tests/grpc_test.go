@@ -85,19 +85,19 @@ func TestGrpcStartStop(t *testing.T) {
 }
 
 func TestGrpcIntegration(t *testing.T) {
-	name := types.ServiceName("com.example.test")
-	version := types.ServiceVersion("v1.0.0")
+	name := "com.example.test"
+	version := "v1.0.0"
 
 	components := types.NewComponents()
 
-	logger, err := log.Provide(name, nil, components)
+	logger, err := log.New()
 	require.NoError(t, err, "failed to setup logger")
 
-	reg, err := registry.Provide(name, version, nil, components, logger)
+	reg, err := registry.New(name, version, nil, components, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
 	h, _ := server.Handlers.Get("Streams")
-	srv, err := server.Provide(name, nil, components, logger, reg,
+	srv, err := server.New(nil, logger, reg,
 		server.WithEntrypointConfig(mgrpc.NewConfig(
 			mgrpc.WithName("test-ep-1"),
 			mgrpc.WithReflection(true),
@@ -143,27 +143,25 @@ func TestServerFileConfig(t *testing.T) {
 	server.Handlers.Set("handler-1", func(_ any) {})
 	server.Handlers.Set("handler-2", func(_ any) {})
 
-	name := types.ServiceName("com.example.test")
-	version := types.ServiceVersion("v1.0.0")
+	name := "com.example.test"
+	version := "v1.0.0"
 
 	fURL, err := url.Parse("file://config/config.yaml")
 	require.NoError(t, err, "failed to parse file config url")
 	// litter.Dump(fURL)
 	// t.Logf("%+v", fURL.Host)
 
-	config, err := config.Read([]*url.URL{fURL})
+	config, err := config.Read(fURL)
 	require.NoError(t, err, "failed to read file config")
 
-	components := types.NewComponents()
-
-	logger, err := log.Provide(name, nil, components)
+	logger, err := log.New()
 	require.NoError(t, err, "failed to setup logger")
 
-	reg, err := registry.Provide(name, version, nil, components, logger)
+	reg, err := registry.New(name, version, nil, &types.Components{}, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
 	h, _ := server.Handlers.Get("Streams")
-	srv, err := server.Provide(name, config, components, logger, reg,
+	srv, err := server.New(config, logger, reg,
 		server.WithEntrypointConfig(mgrpc.NewConfig(
 			mgrpc.WithName("static-ep-1"),
 			mgrpc.WithAddress(":48081"),

@@ -36,37 +36,18 @@ func (j *CodecJSON) Unmarshal(data []byte, v any) error {
 	return json.Unmarshal(data, v)
 }
 
-type wrapEncoder struct {
-	w    io.Writer
-	impl *json.Encoder
-}
-
-func (j *wrapEncoder) Encode(v any) error {
-	switch vt := v.(type) {
-	case string:
-		_, err := j.w.Write([]byte(vt))
-		return err
-	default:
-		return j.impl.Encode(v)
-	}
-}
-
-// NewEncoder returns a new JSON encoder.
+// NewEncoder returns an Encoder which writes bytes sequence into "w".
 func (j *CodecJSON) NewEncoder(w io.Writer) codecs.Encoder {
-	return &wrapEncoder{w: w, impl: json.NewEncoder(w)}
+	encoder := json.NewEncoder(w)
+
+	return codecs.EncoderFunc(encoder.Encode)
 }
 
-type wrapDecoder struct {
-	impl *json.Decoder
-}
-
-func (j *wrapDecoder) Decode(v any) error {
-	return j.impl.Decode(v)
-}
-
-// NewDecoder returns a new JSON decoder.
+// NewDecoder returns a Decoder which reads byte sequence from "r".
 func (j *CodecJSON) NewDecoder(r io.Reader) codecs.Decoder {
-	return &wrapDecoder{impl: json.NewDecoder(r)}
+	decoder := json.NewDecoder(r)
+
+	return codecs.DecoderFunc(decoder.Decode)
 }
 
 // Marshals returns if this is able to encode the given type.

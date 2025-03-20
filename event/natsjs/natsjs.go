@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-orb/go-orb/cli"
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/event"
 	"github.com/go-orb/go-orb/log"
-	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/container"
 	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
@@ -552,8 +552,7 @@ func (n *NatsJS) Type() string {
 
 // Provide creates a new NatsJS event client.
 func Provide(
-	name types.ServiceName,
-	datas types.ConfigData,
+	svcCtx *cli.ServiceContext,
 	logger log.Logger,
 	opts ...event.Option,
 ) (event.Type, error) {
@@ -562,12 +561,11 @@ func Provide(
 		return event.Type{}, fmt.Errorf("create nats registry config: %w", err)
 	}
 
-	sections := types.SplitServiceName(name)
-	if err := config.Parse(append(sections, event.ComponentType), datas, &cfg); err != nil {
+	if err := config.Parse(nil, event.DefaultConfigSection, svcCtx.Config, &cfg); err != nil {
 		return event.Type{}, fmt.Errorf("parse config: %w", err)
 	}
 
-	instance, err := New(string(name), cfg, logger)
+	instance, err := New(svcCtx.Name(), cfg, logger)
 
 	return event.Type{Client: instance}, err
 }

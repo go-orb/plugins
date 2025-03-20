@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/kvstore"
@@ -242,33 +241,35 @@ func (c *Registry) getNode(s string) (*registry.Service, error) {
 
 // Provide creates a new memory registry.
 func Provide(
-	name types.ServiceName,
-	version types.ServiceVersion,
-	datas types.ConfigData,
-	components *types.Components,
+	name string,
+	version string,
+	datas map[string]any,
+	_ *types.Components,
 	logger log.Logger,
 	opts ...registry.Option,
 ) (registry.Type, error) {
 	cfg := NewConfig(opts...)
 
-	sections := types.SplitServiceName(name)
-	sections = append(sections, client.DefaultConfigSection)
-
-	if err := config.Parse(sections, datas, &cfg); err != nil {
+	if err := config.Parse(nil, registry.DefaultConfigSection, datas, &cfg); err != nil {
 		return registry.Type{}, err
 	}
 
-	kvstore, err := kvstore.Provide(
-		types.JoinServiceName(sections),
-		datas,
-		components,
+	kvstoreDatas := map[string]any{}
+
+	tmp, err := config.WalkMap([]string{registry.DefaultConfigSection}, datas)
+	if err != nil {
+		kvstoreDatas = tmp
+	}
+
+	kvstore, err := kvstore.New(
+		kvstoreDatas,
 		logger,
 	)
 	if err != nil {
 		return registry.Type{}, err
 	}
 
-	reg, err := New(string(name), string(version), cfg, logger, kvstore)
+	reg, err := New(name, version, cfg, logger, kvstore)
 
 	return registry.Type{Registry: reg}, err
 }

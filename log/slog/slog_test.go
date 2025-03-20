@@ -7,7 +7,6 @@ import (
 	"log/slog"
 
 	"github.com/go-orb/go-orb/config"
-	"github.com/go-orb/go-orb/config/source"
 	"github.com/go-orb/go-orb/log"
 	"github.com/stretchr/testify/require"
 
@@ -39,7 +38,7 @@ func TestComponentLogger(t *testing.T) {
 	data, err := config.ParseStruct(sections, &cfg)
 	require.NoError(t, err)
 
-	l2, err := l.WithConfig(sections, []source.Data{data})
+	l2, err := l.WithConfig(sections, data)
 	l2 = l2.With(slog.String("component", "logger"), slog.String("plugin", "slog"))
 	require.NoError(t, err)
 

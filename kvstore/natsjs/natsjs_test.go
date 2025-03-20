@@ -11,7 +11,6 @@ import (
 
 	"github.com/go-orb/go-orb/kvstore"
 	"github.com/go-orb/go-orb/log"
-	"github.com/go-orb/go-orb/types"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats-server/v2/test"
 	"github.com/stretchr/testify/suite"
@@ -107,7 +106,7 @@ func (s *NatsJSTestSuite) SetupSuite() {
 		)
 
 		// Create store
-		store, err := New("test-service-"+cfg.name, storeCfg, logger)
+		store, err := New(storeCfg, logger)
 		s.Require().NoError(err)
 
 		err = store.Start(s.ctx)
@@ -751,51 +750,6 @@ func (s *NatsJSTestSuite) TestLargeData() {
 			s.Equal("large-key", records[0].Key)
 			s.Equal(largeData, records[0].Value)
 			s.Len(records[0].Value, size)
-		})
-	}
-}
-
-func (s *NatsJSTestSuite) TestProvide() {
-	for _, cfg := range s.configs {
-		s.Run(cfg.name, func() {
-			// Test with valid config
-			storeCfg := NewConfig(
-				WithURL(s.natsServer.ClientURL()),
-			)
-			storeCfg.BucketPerTable = cfg.bucketPerTable
-			storeCfg.JSONKeyValues = cfg.jsonKeyValues
-
-			// Convert config to types.ConfigData
-			configData := types.ConfigData{{
-				Data: map[string]any{
-					"kvstore": map[string]any{
-						"natsjs": storeCfg,
-					},
-				},
-			}}
-
-			instance, err := Provide(
-				types.ServiceName("test-service-"+cfg.name),
-				configData,
-				log.Logger{Logger: slog.New(slog.NewTextHandler(io.Discard, nil))},
-				WithURL(s.natsServer.ClientURL()),
-			)
-			s.Require().NoError(err)
-			s.Require().NoError(instance.Start(s.ctx))
-			s.NotNil(instance.KVStore)
-
-			// Test Stop method
-			s.Require().NoError(instance.Stop(s.ctx))
-
-			// Test with invalid config
-			instance, err = Provide(
-				types.ServiceName("test-service-invalid-"+cfg.name),
-				configData,
-				log.Logger{Logger: slog.New(slog.NewTextHandler(io.Discard, nil))},
-				WithURL("invalid://url"),
-			)
-			s.Require().NoError(err)
-			s.Require().Error(instance.Start(s.ctx))
 		})
 	}
 }

@@ -2,7 +2,6 @@
 package toml
 
 import (
-	"bytes"
 	"io"
 
 	"github.com/go-orb/go-orb/codecs"
@@ -22,12 +21,7 @@ type Toml struct{}
 
 // Marshal encodes "v" into byte sequence.
 func (t *Toml) Marshal(v any) ([]byte, error) {
-	var buf bytes.Buffer
-	if err := toml.NewEncoder(&buf).Encode(v); err != nil {
-		return nil, err
-	}
-
-	return buf.Bytes(), nil
+	return toml.Marshal(v)
 }
 
 // Unmarshal decodes "data" into "v".
@@ -40,21 +34,17 @@ func (t *Toml) Unmarshal(data []byte, v any) error {
 func (t *Toml) NewEncoder(w io.Writer) codecs.Encoder {
 	encoder := toml.NewEncoder(w)
 
-	return codecs.EncoderFunc(func(v any) error {
-		return encoder.Encode(v)
-	})
+	return codecs.EncoderFunc(encoder.Encode)
 }
 
 // NewDecoder returns a Decoder which reads byte sequence from "r".
 func (t *Toml) NewDecoder(r io.Reader) codecs.Decoder {
-	return codecs.DecoderFunc(func(v any) error {
-		// BurntSushi/toml 沒有 Reader 解碼器，需要先讀取
-		data, err := io.ReadAll(r)
-		if err != nil {
-			return err
-		}
+	decoder := toml.NewDecoder(r)
 
-		return toml.Unmarshal(data, v)
+	return codecs.DecoderFunc(func(v any) error {
+		_, err := decoder.Decode(v)
+
+		return err
 	})
 }
 
