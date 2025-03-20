@@ -4,10 +4,10 @@ go 1.23.6
 
 require (
 	github.com/go-orb/go-orb v0.2.2-0.20250320211814-c5e283ade629
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320211851-c9c58d2ee351
-	github.com/go-orb/plugins/codecs/proto v0.1.1-0.20250320211851-c9c58d2ee351
-	github.com/go-orb/plugins/event/natsjs v0.1.1-0.20250320211851-c9c58d2ee351
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250320211851-c9c58d2ee351
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320212330-ef40b27f2c99
+	github.com/go-orb/plugins/codecs/proto v0.1.1-0.20250320212330-ef40b27f2c99
+	github.com/go-orb/plugins/event/natsjs v0.1.1-0.20250320212330-ef40b27f2c99
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250320212330-ef40b27f2c99
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/protobuf v1.36.5
 )
