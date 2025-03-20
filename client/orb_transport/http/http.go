@@ -183,17 +183,17 @@ func NewH2CTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, err
 		logger,
 		"http",
 		&http.Client{
-			Timeout: cfg.ConnectionTimeout,
+			Timeout: time.Duration(cfg.ConnectionTimeout),
 			Transport: &http.Transport{
 				MaxIdleConns:          cfg.PoolHosts * cfg.PoolSize,
 				MaxIdleConnsPerHost:   cfg.PoolSize,
 				MaxConnsPerHost:       cfg.PoolSize + 1,
-				IdleConnTimeout:       cfg.PoolTTL,
+				IdleConnTimeout:       time.Duration(cfg.PoolTTL),
 				ExpectContinueTimeout: 1 * time.Second,
 				ForceAttemptHTTP2:     false,
 				DisableKeepAlives:     false,
 				Dial: (&net.Dialer{
-					Timeout:   cfg.DialTimeout,
+					Timeout:   time.Duration(cfg.DialTimeout),
 					KeepAlive: 15 * time.Second,
 					DualStack: false,
 				}).Dial,
@@ -212,17 +212,17 @@ func NewHTTPTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, er
 		logger,
 		"http",
 		&http.Client{
-			Timeout: cfg.ConnectionTimeout,
+			Timeout: time.Duration(cfg.ConnectionTimeout),
 			Transport: &http.Transport{
 				MaxIdleConns:          cfg.PoolHosts * cfg.PoolSize,
 				MaxIdleConnsPerHost:   cfg.PoolSize,
 				MaxConnsPerHost:       cfg.PoolSize + 1,
-				IdleConnTimeout:       cfg.PoolTTL,
+				IdleConnTimeout:       time.Duration(cfg.PoolTTL),
 				ExpectContinueTimeout: 1 * time.Second,
 				ForceAttemptHTTP2:     false,
 				DisableKeepAlives:     false,
 				Dial: (&net.Dialer{
-					Timeout:   cfg.DialTimeout,
+					Timeout:   time.Duration(cfg.DialTimeout),
 					KeepAlive: 15 * time.Second,
 					DualStack: false,
 				}).Dial,
@@ -248,7 +248,7 @@ func NewHTTP3Transport(logger log.Logger, cfg *orb.Config) (orb.TransportType, e
 		logger,
 		"https",
 		&http.Client{
-			Timeout: cfg.ConnectionTimeout,
+			Timeout: time.Duration(cfg.ConnectionTimeout),
 			Transport: &http3.Transport{
 				QUICConfig: &quic.Config{
 					MaxIncomingStreams:         int64(cfg.PoolSize),
@@ -270,19 +270,19 @@ func NewHTTPSTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, e
 		logger,
 		"https",
 		&http.Client{
-			Timeout: cfg.ConnectionTimeout,
+			Timeout: time.Duration(cfg.ConnectionTimeout),
 			Transport: &http.Transport{
 				MaxIdleConns:        cfg.PoolHosts * cfg.PoolSize,
 				MaxIdleConnsPerHost: cfg.PoolSize,
 				MaxConnsPerHost:     cfg.PoolHosts,
-				IdleConnTimeout:     cfg.PoolTTL,
+				IdleConnTimeout:     time.Duration(cfg.PoolTTL),
 				ForceAttemptHTTP2:   false,
 				DisableKeepAlives:   false,
 				DialContext: (&net.Dialer{
-					Timeout:   cfg.DialTimeout,
+					Timeout:   time.Duration(cfg.DialTimeout),
 					KeepAlive: 15 * time.Second,
 				}).DialContext,
-				TLSHandshakeTimeout: cfg.DialTimeout,
+				TLSHandshakeTimeout: time.Duration(cfg.DialTimeout),
 				TLSClientConfig: &tls.Config{
 					//nolint:gosec
 					InsecureSkipVerify: true,

@@ -3,6 +3,7 @@ package natsjs
 import (
 	"time"
 
+	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/event"
 	"github.com/nats-io/nats.go"
 )
@@ -60,7 +61,7 @@ type NatsOptions struct {
 	// ReconnectWait sets the time to backoff after attempting a reconnect
 	// to a server that we were already connected to previously.
 	// Defaults to 2s.
-	ReconnectWait time.Duration `json:"reconnectWait,omitempty" yaml:"reconnectWait,omitempty"`
+	ReconnectWait config.Duration `json:"reconnectWait,omitempty" yaml:"reconnectWait,omitempty"`
 
 	// CustomReconnectDelayCB is invoked after the library tried every
 	// URL in the server list and failed to reconnect. It passes to the
@@ -73,30 +74,30 @@ type NatsOptions struct {
 	// ReconnectJitter sets the upper bound for a random delay added to
 	// ReconnectWait during a reconnect when no TLS is used.
 	// Defaults to 100ms.
-	ReconnectJitter time.Duration `json:"reconnectJitter,omitempty" yaml:"reconnectJitter,omitempty"`
+	ReconnectJitter config.Duration `json:"reconnectJitter,omitempty" yaml:"reconnectJitter,omitempty"`
 
 	// ReconnectJitterTLS sets the upper bound for a random delay added to
 	// ReconnectWait during a reconnect when TLS is used.
 	// Defaults to 1s.
-	ReconnectJitterTLS time.Duration `json:"reconnectJitterTls,omitempty" yaml:"reconnectJitterTls,omitempty"`
+	ReconnectJitterTLS config.Duration `json:"reconnectJitterTls,omitempty" yaml:"reconnectJitterTls,omitempty"`
 
 	// Timeout sets the timeout for a Dial operation on a connection.
 	// Defaults to 2s.
-	Timeout time.Duration `json:"timeout,omitempty" yaml:"timeout,omitempty"`
+	Timeout config.Duration `json:"timeout,omitempty" yaml:"timeout,omitempty"`
 
 	// DrainTimeout sets the timeout for a Drain Operation to complete.
 	// Defaults to 30s.
-	DrainTimeout time.Duration `json:"drainTimeout,omitempty" yaml:"drainTimeout,omitempty"`
+	DrainTimeout config.Duration `json:"drainTimeout,omitempty" yaml:"drainTimeout,omitempty"`
 
 	// FlusherTimeout is the maximum time to wait for write operations
 	// to the underlying connection to complete (including the flusher loop).
 	// Defaults to 1m.
-	FlusherTimeout time.Duration `json:"flusherTimeout,omitempty" yaml:"flusherTimeout,omitempty"`
+	FlusherTimeout config.Duration `json:"flusherTimeout,omitempty" yaml:"flusherTimeout,omitempty"`
 
 	// PingInterval is the period at which the client will be sending ping
 	// commands to the server, disabled if 0 or negative.
 	// Defaults to 2m.
-	PingInterval time.Duration `json:"pingInterval,omitempty" yaml:"pingInterval,omitempty"`
+	PingInterval config.Duration `json:"pingInterval,omitempty" yaml:"pingInterval,omitempty"`
 
 	// MaxPingsOut is the maximum number of pending ping commands that can
 	// be awaiting a response before raising an ErrStaleConnection error.
@@ -223,14 +224,14 @@ func (o NatsOptions) ToOptions() nats.Options {
 		NoRandomize:                 o.NoRandomize,
 		AllowReconnect:              o.AllowReconnect,
 		MaxReconnect:                o.MaxReconnect,
-		ReconnectWait:               o.ReconnectWait,
+		ReconnectWait:               time.Duration(o.ReconnectWait),
 		CustomReconnectDelayCB:      o.CustomReconnectDelayCB,
-		ReconnectJitter:             o.ReconnectJitter,
-		ReconnectJitterTLS:          o.ReconnectJitterTLS,
-		Timeout:                     o.Timeout,
-		DrainTimeout:                o.DrainTimeout,
-		FlusherTimeout:              o.FlusherTimeout,
-		PingInterval:                o.PingInterval,
+		ReconnectJitter:             time.Duration(o.ReconnectJitter),
+		ReconnectJitterTLS:          time.Duration(o.ReconnectJitterTLS),
+		Timeout:                     time.Duration(o.Timeout),
+		DrainTimeout:                time.Duration(o.DrainTimeout),
+		FlusherTimeout:              time.Duration(o.FlusherTimeout),
+		PingInterval:                time.Duration(o.PingInterval),
 		MaxPingsOut:                 o.MaxPingsOut,
 		ClosedCB:                    o.ClosedCB,
 		DisconnectedErrCB:           o.DisconnectedErrCB,
@@ -351,7 +352,7 @@ func WithReconnectWait(reconnectWait time.Duration) event.Option {
 	return func(c event.ConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.NatsOptions.ReconnectWait = reconnectWait
+			cfg.NatsOptions.ReconnectWait = config.Duration(reconnectWait)
 		}
 	}
 }
@@ -361,7 +362,7 @@ func WithReconnectJitter(reconnectJitter time.Duration) event.Option {
 	return func(c event.ConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.NatsOptions.ReconnectJitter = reconnectJitter
+			cfg.NatsOptions.ReconnectJitter = config.Duration(reconnectJitter)
 		}
 	}
 }
@@ -371,7 +372,7 @@ func WithReconnectJitterTLS(reconnectJitterTLS time.Duration) event.Option {
 	return func(c event.ConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.NatsOptions.ReconnectJitterTLS = reconnectJitterTLS
+			cfg.NatsOptions.ReconnectJitterTLS = config.Duration(reconnectJitterTLS)
 		}
 	}
 }
@@ -381,7 +382,7 @@ func WithTimeout(timeout time.Duration) event.Option {
 	return func(c event.ConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.NatsOptions.Timeout = timeout
+			cfg.NatsOptions.Timeout = config.Duration(timeout)
 		}
 	}
 }
@@ -391,7 +392,7 @@ func WithDrainTimeout(drainTimeout time.Duration) event.Option {
 	return func(c event.ConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.NatsOptions.DrainTimeout = drainTimeout
+			cfg.NatsOptions.DrainTimeout = config.Duration(drainTimeout)
 		}
 	}
 }
@@ -401,7 +402,7 @@ func WithFlusherTimeout(flusherTimeout time.Duration) event.Option {
 	return func(c event.ConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.NatsOptions.FlusherTimeout = flusherTimeout
+			cfg.NatsOptions.FlusherTimeout = config.Duration(flusherTimeout)
 		}
 	}
 }
@@ -411,7 +412,7 @@ func WithPingInterval(pingInterval time.Duration) event.Option {
 	return func(c event.ConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.NatsOptions.PingInterval = pingInterval
+			cfg.NatsOptions.PingInterval = config.Duration(pingInterval)
 		}
 	}
 }
@@ -624,16 +625,16 @@ func NewConfig(opts ...event.Option) (Config, error) {
 		NatsOptions: NatsOptions{
 			AllowReconnect:     true,
 			MaxReconnect:       nats.DefaultMaxReconnect,
-			ReconnectWait:      nats.DefaultReconnectWait,
-			ReconnectJitter:    nats.DefaultReconnectJitter,
-			ReconnectJitterTLS: nats.DefaultReconnectJitterTLS,
-			Timeout:            nats.DefaultTimeout,
-			PingInterval:       nats.DefaultPingInterval,
+			ReconnectWait:      config.Duration(nats.DefaultReconnectWait),
+			ReconnectJitter:    config.Duration(nats.DefaultReconnectJitter),
+			ReconnectJitterTLS: config.Duration(nats.DefaultReconnectJitterTLS),
+			Timeout:            config.Duration(nats.DefaultTimeout),
+			PingInterval:       config.Duration(nats.DefaultPingInterval),
 			MaxPingsOut:        nats.DefaultMaxPingOut,
 			SubChanLen:         nats.DefaultMaxChanLen,
 			ReconnectBufSize:   nats.DefaultReconnectBufSize,
-			DrainTimeout:       nats.DefaultDrainTimeout,
-			FlusherTimeout:     nats.DefaultFlusherTimeout,
+			DrainTimeout:       config.Duration(nats.DefaultDrainTimeout),
+			FlusherTimeout:     config.Duration(nats.DefaultFlusherTimeout),
 		},
 
 		RequestCodec:  event.DefaultRequestContentType,

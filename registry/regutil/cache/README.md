@@ -134,5 +134,5 @@ The cache accepts a simple configuration with a TTL value:
 ```go
 type Config struct {
 	// TTL is the time after which a node is considered stale.
-	TTL time.Duration `json:"ttl" yaml:"ttl"`
+	TTL config.Duration `json:"ttl" yaml:"ttl"`
 }

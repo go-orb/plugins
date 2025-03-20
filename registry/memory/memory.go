@@ -50,7 +50,7 @@ func (d *dataStore) Start(ctx context.Context) {
 }
 
 func (d *dataStore) ttlPrune(ctx context.Context) {
-	prune := time.NewTicker(d.config.TTL)
+	prune := time.NewTicker(time.Duration(d.config.TTL))
 	defer prune.Stop()
 
 	for {
@@ -90,7 +90,7 @@ func (d *dataStore) SendEvent(r *registry.Result) {
 			delete(d.Watchers, w.id)
 			d.Unlock()
 		default:
-			timeout := time.After(d.config.WatcherSendTimeout)
+			timeout := time.After(time.Duration(d.config.WatcherSendTimeout))
 			select {
 			case w.res <- r:
 			case <-timeout:

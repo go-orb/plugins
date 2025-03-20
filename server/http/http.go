@@ -42,9 +42,9 @@ func (s *Server) newHTTPServer(router *Router) (*httpServer, error) {
 
 	server := http.Server{
 		Handler:           s,
-		ReadTimeout:       s.config.ReadTimeout,
-		WriteTimeout:      s.config.WriteTimeout,
-		IdleTimeout:       s.config.IdleTimeout,
+		ReadTimeout:       time.Duration(s.config.ReadTimeout),
+		WriteTimeout:      time.Duration(s.config.WriteTimeout),
+		IdleTimeout:       time.Duration(s.config.IdleTimeout),
 		ReadHeaderTimeout: time.Second * 4,
 		// TODO(davincible): do we need to set this? would be nice but doesn't take interface
 		// ErrorLog:          httpServerLogger,

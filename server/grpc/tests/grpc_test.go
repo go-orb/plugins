@@ -151,8 +151,11 @@ func TestServerFileConfig(t *testing.T) {
 	// litter.Dump(fURL)
 	// t.Logf("%+v", fURL.Host)
 
-	config, err := config.Read(fURL)
+	configData, err := config.Read(fURL)
 	require.NoError(t, err, "failed to read file config")
+
+	configData, err = config.WalkMap(types.SplitServiceName(name), configData)
+	require.NoError(t, err, "failed to walk config")
 
 	logger, err := log.New()
 	require.NoError(t, err, "failed to setup logger")
@@ -161,7 +164,7 @@ func TestServerFileConfig(t *testing.T) {
 	require.NoError(t, err, "failed to setup the registry")
 
 	h, _ := server.Handlers.Get("Streams")
-	srv, err := server.New(config, logger, reg,
+	srv, err := server.New(configData, logger, reg,
 		server.WithEntrypointConfig(mgrpc.NewConfig(
 			mgrpc.WithName("static-ep-1"),
 			mgrpc.WithAddress(":48081"),
@@ -203,7 +206,7 @@ func TestServerFileConfig(t *testing.T) {
 	require.True(t, ep.Config().Insecure, "server 3 insecure")
 	require.False(t, ep.Config().HealthService, "server 3 health")
 	require.False(t, ep.Config().Reflection, "server 3 reflection")
-	require.Equal(t, time.Second*11, ep.Config().Timeout, "server 3 timeout")
+	require.Equal(t, config.Duration(time.Second*11), ep.Config().Timeout, "server 3 timeout")
 	require.NoError(t, tgrpc.MakeRequest(ep.Address(), "Alex", nil), "make request")
 
 	_, err = srv.GetEntrypoint("test-ep-4")

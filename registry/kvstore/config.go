@@ -3,6 +3,7 @@ package kvstore
 import (
 	"time"
 
+	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/registry"
 )
 
@@ -39,7 +40,7 @@ type Config struct {
 	ServiceDelimiter string `json:"serviceDelimiter" yaml:"serviceDelimiter"`
 
 	// TTL is the time after which a node is considered stale.
-	TTL time.Duration `json:"ttl" yaml:"ttl"`
+	TTL config.Duration `json:"ttl" yaml:"ttl"`
 
 	// Database is the database name in the kvstore.
 	Database string `json:"database" yaml:"database"`
@@ -63,7 +64,7 @@ func NewConfig(opts ...registry.Option) Config {
 	cfg := Config{
 		Config:           registry.NewConfig(),
 		ServiceDelimiter: DefaultServiceDelimiter,
-		TTL:              DefaultTTL,
+		TTL:              config.Duration(DefaultTTL),
 		Database:         DefaultDatabase,
 		Table:            DefaultTable,
 		Cache:            DefaultCache,
@@ -89,7 +90,7 @@ func WithTTL(n time.Duration) registry.Option {
 	return func(c registry.ConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.TTL = n
+			cfg.TTL = config.Duration(n)
 		}
 	}
 }

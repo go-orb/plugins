@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/server"
 	mtls "github.com/go-orb/go-orb/util/tls"
@@ -132,20 +133,20 @@ type Config struct {
 	// ReadTimeout is the maximum duration for reading the entire
 	// request, including the body. A zero or negative value means
 	// there will be no timeout.
-	ReadTimeout time.Duration `json:"readTimeout" yaml:"readTimeout"`
+	ReadTimeout config.Duration `json:"readTimeout" yaml:"readTimeout"`
 
 	// WriteTimeout is the maximum duration before timing out
 	// writes of the response. It is reset whenever a new
 	// request's header is read. Like ReadTimeout, it does not
 	// let Handlers make decisions on a per-request basis.
 	// A zero or negative value means there will be no timeout.
-	WriteTimeout time.Duration `json:"writeTimeout" yaml:"writeTimeout"`
+	WriteTimeout config.Duration `json:"writeTimeout" yaml:"writeTimeout"`
 
 	// IdleTimeout is the maximum amount of time to wait for the
 	// next request when keep-alives are enabled. If IdleTimeout
 	// is zero, the value of ReadTimeout is used. If both are
 	// zero, there is no timeout.
-	IdleTimeout time.Duration `json:"idleTimeout" yaml:"idleTimeout"`
+	IdleTimeout config.Duration `json:"idleTimeout" yaml:"idleTimeout"`
 
 	// Middlewares is a list of middleware to use.
 	Middlewares []server.MiddlewareConfig `json:"middlewares" yaml:"middlewares"`
@@ -174,9 +175,9 @@ func NewConfig(options ...server.Option) *Config {
 		HTTP2:                DefaultHTTP2,
 		HTTP3:                DefaultHTTP3,
 		Gzip:                 DefaultEnableGzip,
-		ReadTimeout:          DefaultReadTimeout,
-		WriteTimeout:         DefaultWriteTimeout,
-		IdleTimeout:          DefaultIdleTimeout,
+		ReadTimeout:          config.Duration(DefaultReadTimeout),
+		WriteTimeout:         config.Duration(DefaultWriteTimeout),
+		IdleTimeout:          config.Duration(DefaultIdleTimeout),
 	}
 
 	for _, option := range options {
@@ -300,7 +301,7 @@ func WithReadTimeout(timeout time.Duration) server.Option {
 	return func(c server.EntrypointConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.ReadTimeout = timeout
+			cfg.ReadTimeout = config.Duration(timeout)
 		}
 	}
 }
@@ -313,7 +314,7 @@ func WithWriteTimeout(timeout time.Duration) server.Option {
 	return func(c server.EntrypointConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.WriteTimeout = timeout
+			cfg.WriteTimeout = config.Duration(timeout)
 		}
 	}
 }
@@ -325,7 +326,7 @@ func WithIdleTimeout(timeout time.Duration) server.Option {
 	return func(c server.EntrypointConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.IdleTimeout = timeout
+			cfg.IdleTimeout = config.Duration(timeout)
 		}
 	}
 }

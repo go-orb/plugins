@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net"
 	"sync"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -66,7 +67,7 @@ func (t *Transport) Start() error {
 	// Create the pool
 	var err error
 
-	t.pool, err = pool.New(factory, t.config.PoolSize, t.config.PoolTTL)
+	t.pool, err = pool.New(factory, t.config.PoolSize, time.Duration(t.config.PoolTTL))
 	if err != nil {
 		return toOrbError(err)
 	}
@@ -341,7 +342,7 @@ func (t *Transport) createConn(_ context.Context, addr string, tlsConfig *tls.Co
 
 	// Setup dialer.
 	opts = append(opts, grpc.WithContextDialer(func(_ context.Context, addr string) (net.Conn, error) {
-		return net.DialTimeout("tcp", addr, t.config.DialTimeout)
+		return net.DialTimeout("tcp", addr, time.Duration(t.config.DialTimeout))
 	}))
 
 	// Increase the max receive buffer size to 10MB to allow for large gRPC messages.

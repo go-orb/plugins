@@ -3,14 +3,14 @@ module github.com/go-orb/plugins/server/http
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250320211814-c5e283ade629
-	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20250320211907-64885139e0e0
-	github.com/go-orb/plugins/codecs/form v0.1.1-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/codecs/proto v0.1.1-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/config/source/file v0.1.1-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250320212330-ef40b27f2c99
+	github.com/go-orb/go-orb v0.2.2-0.20250320220522-e737f5e0f854
+	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20250320212500-13fd51a437b3
+	github.com/go-orb/plugins/codecs/form v0.1.1-0.20250320212435-efb51edcf7be
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320212435-efb51edcf7be
+	github.com/go-orb/plugins/codecs/proto v0.1.1-0.20250320212435-efb51edcf7be
+	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250320212435-efb51edcf7be
+	github.com/go-orb/plugins/config/source/file v0.1.1-0.20250320212435-efb51edcf7be
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250320212435-efb51edcf7be
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/quic-go/quic-go v0.50.0

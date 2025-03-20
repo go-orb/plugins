@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"net"
+	"time"
 
 	"storj.io/drpc"
 	"storj.io/drpc/drpcconn"
@@ -56,7 +57,7 @@ type Transport struct {
 func (t *Transport) Start() error {
 	factory := func(dialCtx context.Context, addr string, _ *tls.Config) (*drpcconn.Conn, error) {
 		// Use the dial timeout from options
-		timeoutCtx, cancel := context.WithTimeout(dialCtx, t.config.DialTimeout)
+		timeoutCtx, cancel := context.WithTimeout(dialCtx, time.Duration(t.config.DialTimeout))
 		defer cancel()
 
 		dialer := net.Dialer{}
@@ -79,7 +80,7 @@ func (t *Transport) Start() error {
 		"pool_ttl", t.config.PoolTTL,
 	)
 
-	pool, err := pool.New(factory, t.config.PoolHosts*t.config.PoolSize, t.config.PoolTTL)
+	pool, err := pool.New(factory, t.config.PoolHosts*t.config.PoolSize, time.Duration(t.config.PoolTTL))
 	if err != nil {
 		return orberrors.From(err)
 	}
@@ -208,7 +209,7 @@ func (t *Transport) Stream(ctx context.Context, infos client.RequestInfos, opts 
 
 	factory := func(dialCtx context.Context, addr string, _ *tls.Config) (*drpcconn.Conn, error) {
 		// Use the dial timeout from options
-		timeoutCtx, cancel := context.WithTimeout(dialCtx, t.config.DialTimeout)
+		timeoutCtx, cancel := context.WithTimeout(dialCtx, time.Duration(t.config.DialTimeout))
 		defer cancel()
 
 		dialer := net.Dialer{}

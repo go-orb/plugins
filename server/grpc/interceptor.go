@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/go-orb/go-orb/util/metadata"
 	"github.com/go-orb/go-orb/util/orberrors"
@@ -40,7 +41,7 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 
 		var cancel func()
 		if s.config.Timeout > 0 {
-			ctx, cancel = context.WithTimeout(ctx, s.config.Timeout)
+			ctx, cancel = context.WithTimeout(ctx, time.Duration(s.config.Timeout))
 			defer cancel()
 		}
 

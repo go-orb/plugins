@@ -391,8 +391,11 @@ func TestServerFileConfig(t *testing.T) {
 
 	components := types.NewComponents()
 
-	config, err := config.Read(fURL)
+	configData, err := config.Read(fURL)
 	require.NoError(t, err, "failed to read file config")
+
+	configData, err = config.WalkMap(types.SplitServiceName(name), configData)
+	require.NoError(t, err, "failed to walk file config")
 
 	logger, err := log.New()
 	require.NoError(t, err, "failed to setup the logger")
@@ -401,7 +404,7 @@ func TestServerFileConfig(t *testing.T) {
 	require.NoError(t, err, "failed to setup the registry")
 
 	h := new(handler.EchoHandler)
-	srv, err := server.New(config, logger, reg,
+	srv, err := server.New(configData, logger, reg,
 		server.WithEntrypointConfig(mhttp.NewConfig(
 			mhttp.WithName("static-ep-1"),
 			mhttp.WithAddress(":48081"),

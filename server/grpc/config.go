@@ -7,6 +7,7 @@ import (
 
 	"google.golang.org/grpc"
 
+	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/server"
 	mtls "github.com/go-orb/go-orb/util/tls"
@@ -86,7 +87,7 @@ type Config struct {
 	//
 	// The handler still needs to respect the context timeout for this to have
 	// any effect.
-	Timeout time.Duration `json:"timeout" yaml:"timeout"`
+	Timeout config.Duration `json:"timeout" yaml:"timeout"`
 
 	// Listener is a custom listener. If none provided one will be created with
 	// the address and TLS config.
@@ -112,7 +113,7 @@ func NewConfig(options ...server.Option) *Config {
 			Enabled: true,
 		},
 		Address:       DefaultAddress,
-		Timeout:       DefaultTimeout,
+		Timeout:       config.Duration(DefaultTimeout),
 		HealthService: DefaultHealthService,
 		Reflection:    DefaultgRPCReflection,
 		Insecure:      DefaultInsecure,
@@ -177,7 +178,7 @@ func WithTimeout(timeout time.Duration) server.Option {
 	return func(c server.EntrypointConfigType) {
 		cfg, ok := c.(*Config)
 		if ok {
-			cfg.Timeout = timeout
+			cfg.Timeout = config.Duration(timeout)
 		}
 	}
 }

@@ -3,6 +3,7 @@ package memory
 import (
 	"time"
 
+	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/registry"
 )
 
@@ -28,9 +29,9 @@ type Config struct {
 	registry.Config `yaml:",inline"`
 
 	// WatcherSendTimeout is the timeout for sending events to watchers.
-	WatcherSendTimeout time.Duration `json:"watcherSendTimeout" yaml:"watcherSendTimeout"`
+	WatcherSendTimeout config.Duration `json:"watcherSendTimeout" yaml:"watcherSendTimeout"`
 	// TTL is the time after which a node is considered stale.
-	TTL time.Duration `json:"ttl" yaml:"ttl"`
+	TTL config.Duration `json:"ttl" yaml:"ttl"`
 }
 
 // ApplyOptions applies a set of options to the config.
@@ -45,8 +46,8 @@ func NewConfig(opts ...registry.Option) Config {
 	cfg := Config{
 		Config: registry.NewConfig(),
 	}
-	cfg.WatcherSendTimeout = DefaultWatcherSendTimeout
-	cfg.TTL = DefaultTTL
+	cfg.WatcherSendTimeout = config.Duration(DefaultWatcherSendTimeout)
+	cfg.TTL = config.Duration(DefaultTTL)
 
 	cfg.ApplyOptions(opts...)
 
