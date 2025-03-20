@@ -143,9 +143,6 @@ func (t *Transport) Request(ctx context.Context, infos client.RequestInfos, req 
 		callOpts = append(callOpts, grpc.CallContentSubtype("json"))
 	}
 
-	// Add request infos to context
-	ctx = context.WithValue(ctx, client.RequestInfosKey{}, &infos)
-
 	err = conn.Invoke(ctx, infos.Endpoint, req, result, callOpts...)
 	if err != nil {
 		conn.Unhealthy()
@@ -180,17 +177,19 @@ func (t *Transport) Stream(ctx context.Context, infos client.RequestInfos, opts 
 		ctx, cancel = context.WithCancel(ctx)
 	}
 
-	// Set the gRPC headers.
-	pairs := make([]string, 0, len(opts.Metadata)*2)
+	// Append go-orb metadata to grpc.
+	kv := []string{}
 	for k, v := range opts.Metadata {
-		pairs = append(pairs, k, v)
+		kv = append(kv, k, v)
 	}
 
-	// Call gRPC service.
+	ctx = gmetadata.AppendToOutgoingContext(ctx, kv...)
+
 	callOpts := []grpc.CallOption{}
 
-	grpcMd := gmetadata.Pairs(pairs...)
-	callOpts = append(callOpts, grpc.Header(&grpcMd))
+	if opts.ContentType == codecs.MimeJSON {
+		callOpts = append(callOpts, grpc.CallContentSubtype("json"))
+	}
 
 	// Get an existing connection from the pool.
 	conn, err := t.pool.Get(ctx, infos.Address, opts.TLSConfig)
@@ -217,23 +216,25 @@ func (t *Transport) Stream(ctx context.Context, infos client.RequestInfos, opts 
 
 	// Wrap the gRPC stream in our Stream interface.
 	return &grpcClientStream{
-		closed:     false,
-		sendClosed: false,
-		stream:     grpcStream,
-		ctx:        ctx,
-		conn:       conn,
-		cancel:     cancel,
+		closed:               false,
+		sendClosed:           false,
+		stream:               grpcStream,
+		ctx:                  ctx,
+		conn:                 conn,
+		cancel:               cancel,
+		optsResponseMetadata: opts.ResponseMetadata,
 	}, nil
 }
 
 // grpcClientStream wraps a gRPC stream to implement the client.Stream interface.
 type grpcClientStream struct {
-	stream     grpc.ClientStream
-	ctx        context.Context
-	conn       *pool.ClientConn
-	cancel     context.CancelFunc
-	closed     bool
-	sendClosed bool
+	stream               grpc.ClientStream
+	ctx                  context.Context
+	conn                 *pool.ClientConn
+	cancel               context.CancelFunc
+	closed               bool
+	sendClosed           bool
+	optsResponseMetadata map[string]string
 }
 
 // Context returns the context for this stream.
@@ -268,6 +269,18 @@ func (g *grpcClientStream) Recv(msg interface{}) error {
 	if err := g.stream.RecvMsg(msg); err != nil {
 		g.conn.Unhealthy()
 		return toOrbError(err)
+	}
+
+	// Capture response metadata from the gRPC stream
+	if g.optsResponseMetadata != nil {
+		header, err := g.stream.Header()
+		if err == nil {
+			for k, v := range header {
+				if len(v) > 0 {
+					g.optsResponseMetadata[k] = v[0]
+				}
+			}
+		}
 	}
 
 	return nil

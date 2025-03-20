@@ -174,7 +174,7 @@ type TestRequest struct {
 func (s *TestSuite) SetupSuite() {
 	var err error
 
-	setupData, err := s.setupServer(s.clientName)
+	setupData, err := s.setupServer(ServiceName)
 	if err != nil {
 		s.Require().NoError(err, "while setting up the server")
 	}

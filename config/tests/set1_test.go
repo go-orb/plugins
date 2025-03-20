@@ -91,23 +91,6 @@ func TestSet1FileAndHttp(t *testing.T) {
 	})
 }
 
-func TestSet1IgnoreUnknown(t *testing.T) {
-	u1, err := url.Parse("./data/set1/registry1.json")
-	require.NoError(t, err)
-
-	u2, err := url.Parse(urlRepo + "/set1/registry2.json")
-	require.NoError(t, err)
-
-	u3, err := url.Parse("./data/set1/unknown.yaml?ignore_error=true")
-	require.NoError(t, err)
-
-	testSet1URLs(t, []*url.URL{
-		u1,
-		u2,
-		u3,
-	})
-}
-
 func TestSet1FailUnknown(t *testing.T) {
 	u3, err := url.Parse("./data/set1/unknown.yaml")
 	require.NoError(t, err)

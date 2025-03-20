@@ -81,9 +81,75 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 	}
 }
 
+type serverStreamWrapper struct {
+	grpc.ServerStream
+	ctx context.Context
+}
+
+func (s *serverStreamWrapper) Context() context.Context {
+	return s.ctx
+}
+
+func (s *serverStreamWrapper) SendMsg(msg interface{}) error {
+	outMd, ok := metadata.Outgoing(s.ctx)
+
+	if ok && len(outMd) > 0 {
+		gOutMd := make(gmetadata.MD)
+
+		for k, v := range outMd {
+			gOutMd[k] = []string{v}
+		}
+
+		if err := grpc.SendHeader(s.ctx, gOutMd); err != nil {
+			return status.Errorf(codes.Internal, "internal error while sending headers")
+		}
+	}
+
+	return s.ServerStream.SendMsg(msg)
+}
+
 func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
-	return func(srv any, ss grpc.ServerStream, _ *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-		return handler(srv, ss)
+	return func(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		ctx, reqMd := metadata.WithIncoming(ss.Context())
+		ctx, _ = metadata.WithOutgoing(ctx)
+
+		// Copy incoming metadata from grpc to orb.
+		if gReqMd, ok := gmetadata.FromIncomingContext(ctx); ok {
+			for k, v := range gReqMd {
+				if slices.Contains(stdHeaders, k) {
+					continue
+				}
+
+				reqMd[k] = v[0]
+			}
+		}
+
+		fmSplit := strings.Split(info.FullMethod, "/")
+		if len(fmSplit) >= 3 {
+			reqMd[metadata.Service] = fmSplit[1]
+			reqMd[metadata.Method] = fmSplit[2]
+		}
+
+		var cancel func()
+		if s.config.Timeout > 0 {
+			ctx, cancel = context.WithTimeout(ctx, time.Duration(s.config.Timeout))
+			defer cancel()
+		}
+
+		err := handler(srv, &serverStreamWrapper{ss, ctx})
+
+		if err != nil {
+			oErr := orberrors.From(err)
+			gCode := HTTPStatusToCode(oErr.Code)
+
+			if oErr.Wrapped != nil {
+				return status.Errorf(gCode, "%s: %s", oErr.Message, oErr.Wrapped.Error())
+			}
+
+			return status.Errorf(gCode, "%s", oErr.Message)
+		}
+
+		return err
 	}
 }
 

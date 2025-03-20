@@ -27,7 +27,7 @@ func testSet2URLs(t *testing.T, urls []*url.URL) {
 
 	// Merge all data from the URL's.
 	cfg := newRegistryNatsConfig()
-	err := config.Parse([]string{"app", "registry"}, "registry", datas, cfg)
+	err := config.Parse([]string{"app"}, "registry", datas, cfg)
 	require.NoError(t, err)
 
 	// Check if it merges right.
