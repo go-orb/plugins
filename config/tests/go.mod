@@ -3,11 +3,11 @@ module github.com/go-orb/plugins/config/tests
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250320211814-c5e283ade629
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/config/source/file v0.1.1-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/config/source/http v0.1.1-0.20250320212330-ef40b27f2c99
+	github.com/go-orb/go-orb v0.2.2-0.20250320223438-2869142c7d3e
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320223449-ba79667c695a
+	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250320223449-ba79667c695a
+	github.com/go-orb/plugins/config/source/file v0.1.1-0.20250320223449-ba79667c695a
+	github.com/go-orb/plugins/config/source/http v0.1.1-0.20250320223449-ba79667c695a
 	github.com/stretchr/testify v1.10.0
 )
 

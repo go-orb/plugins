@@ -3,11 +3,11 @@ module github.com/go-orb/plugins/registry/consul
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250320211814-c5e283ade629
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250320212330-ef40b27f2c99
+	github.com/go-orb/go-orb v0.2.2-0.20250320223438-2869142c7d3e
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320223449-ba79667c695a
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250320223449-ba79667c695a
+	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250320223449-ba79667c695a
+	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250320223449-ba79667c695a
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/consul/api v1.31.2
 	github.com/hashicorp/consul/sdk v0.16.2

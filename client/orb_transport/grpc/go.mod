@@ -3,15 +3,15 @@ module github.com/go-orb/plugins/client/orb_transport/grpc
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250320211814-c5e283ade629
-	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20250320211907-64885139e0e0
-	github.com/go-orb/plugins/client/orb v0.1.4-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/client/tests v0.2.1-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/codecs/proto v0.1.1-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250320212330-ef40b27f2c99
-	github.com/go-orb/plugins/server/grpc v0.1.1-0.20250320212330-ef40b27f2c99
+	github.com/go-orb/go-orb v0.2.2-0.20250320223438-2869142c7d3e
+	github.com/go-orb/plugins-experimental/registry/mdns v0.0.0-20250320212500-13fd51a437b3
+	github.com/go-orb/plugins/client/orb v0.1.4-0.20250320223449-ba79667c695a
+	github.com/go-orb/plugins/client/tests v0.2.1-0.20250320223449-ba79667c695a
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320223449-ba79667c695a
+	github.com/go-orb/plugins/codecs/proto v0.1.1-0.20250320223449-ba79667c695a
+	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250320223449-ba79667c695a
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250320223449-ba79667c695a
+	github.com/go-orb/plugins/server/grpc v0.1.1-0.20250320223449-ba79667c695a
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/grpc v1.71.0
 )
@@ -20,9 +20,9 @@ require (
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/go-orb/plugins/server/drpc v0.1.1-0.20250320212330-ef40b27f2c99 // indirect
-	github.com/go-orb/plugins/server/http v0.1.1-0.20250320212330-ef40b27f2c99 // indirect
-	github.com/go-orb/plugins/server/memory v0.0.0-20250320212330-ef40b27f2c99 // indirect
+	github.com/go-orb/plugins/server/drpc v0.1.1-0.20250320223449-ba79667c695a // indirect
+	github.com/go-orb/plugins/server/http v0.1.1-0.20250320223449-ba79667c695a // indirect
+	github.com/go-orb/plugins/server/memory v0.0.0-20250320223449-ba79667c695a // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e // indirect
 	github.com/google/uuid v1.6.0 // indirect
