@@ -4,7 +4,7 @@ go 1.23.6
 
 require (
 	github.com/go-orb/go-orb v0.2.2-0.20250320223438-2869142c7d3e
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320223449-ba79667c695a
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320223640-14ee37d40ff5
 	github.com/stretchr/testify v1.10.0
 )
 

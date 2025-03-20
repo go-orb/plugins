@@ -7,10 +7,10 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-orb/go-orb v0.2.2-0.20250320223438-2869142c7d3e h1:/dzN721EqiJogdtjXVp0LBY2+daFm1p84PeB/fV9ya0=
 github.com/go-orb/go-orb v0.2.2-0.20250320223438-2869142c7d3e/go.mod h1:DBamAST285wD+Ydbil1HGl9X19Sj+0xR1ZqFzKDxOgM=
-github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320223449-ba79667c695a h1:TglW/tGBsaw068C5dfDIw0e+kspZNRRNDCY6UoknIm0=
-github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320223449-ba79667c695a/go.mod h1:YhqQyUtPR7LyMor4K3bs1ykoE9L6hrddvqsKs7rEhFI=
-github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250320223449-ba79667c695a h1:6Ua1Si0B19uTjiY70HEImgdtU5sQZwQVTaGIBa11+Tw=
-github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250320223449-ba79667c695a/go.mod h1:FQl1jPgFORf0RRb/ke6Qu54V6Rk5FmvREslgYf64n+o=
+github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320223640-14ee37d40ff5 h1:u+h4Rm6yifIIK2NC+yFto9lVUgx8wZMnA9ES3aRG/sg=
+github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320223640-14ee37d40ff5/go.mod h1:QGhKBlq8+D9cKJT86tOlrUQC0W3h4QvEsr9YFfQ6a3A=
+github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250320223640-14ee37d40ff5 h1:GZV76AG9PwaJ0nj9trh4bVjmhErlCoHdJDpgGAku4/8=
+github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250320223640-14ee37d40ff5/go.mod h1:RQ43qp8cY/yyfZ/rukmMVywaEb3IuC50Eq92qekmnUk=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
