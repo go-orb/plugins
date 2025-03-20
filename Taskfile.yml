@@ -20,6 +20,24 @@ tasks:
           popd 1>/dev/null
         done
 
+  local-test:
+    desc: Run "go test ./..." in all packages with the go.work
+    cmds:
+      - |
+        for i in $(find . -name 'go.mod'); do
+          if [[ "$i" == "./.github/go.mod" ]]; then
+            continue
+          fi
+          pushd ${i:0:-6} 1>/dev/null
+          echo $i
+          OUT=$(go test ./... -v -race -cover 2>&1)
+          if [[ $? -ne 0 ]]; then
+            echo $OUT
+            exit 1
+          fi
+          popd 1>/dev/null
+        done
+
   mod-tidy:
     desc: Run "go mod tidy" in all packages
     cmds:
