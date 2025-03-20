@@ -3,11 +3,11 @@ module github.com/go-orb/plugins/registry/consul
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250319034248-591f06b783eb
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250319044614-36c0ea4e5bd9
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250319044614-36c0ea4e5bd9
-	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250319044614-36c0ea4e5bd9
-	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250319044614-36c0ea4e5bd9
+	github.com/go-orb/go-orb v0.2.2-0.20250320211814-c5e283ade629
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320211851-c9c58d2ee351
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250320211851-c9c58d2ee351
+	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250320211851-c9c58d2ee351
+	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250320211851-c9c58d2ee351
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/consul/api v1.31.2
 	github.com/hashicorp/consul/sdk v0.16.2
@@ -16,6 +16,7 @@ require (
 )
 
 require (
+	dario.cat/mergo v1.0.1 // indirect
 	github.com/armon/go-metrics v0.4.1 // indirect
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect

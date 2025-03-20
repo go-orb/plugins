@@ -4,14 +4,15 @@ go 1.23.6
 
 require (
 	github.com/cornelk/hashmap v1.0.8
-	github.com/go-orb/go-orb v0.2.2-0.20250319034248-591f06b783eb
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250319044614-36c0ea4e5bd9
+	github.com/go-orb/go-orb v0.2.2-0.20250320211814-c5e283ade629
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320211851-c9c58d2ee351
 	github.com/nats-io/nats-server/v2 v2.10.26
 	github.com/nats-io/nats.go v1.39.1
 	github.com/stretchr/testify v1.10.0
 )
 
 require (
+	dario.cat/mergo v1.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
