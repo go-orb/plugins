@@ -7,8 +7,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-orb/go-orb v0.2.2-0.20250320223438-2869142c7d3e h1:/dzN721EqiJogdtjXVp0LBY2+daFm1p84PeB/fV9ya0=
 github.com/go-orb/go-orb v0.2.2-0.20250320223438-2869142c7d3e/go.mod h1:DBamAST285wD+Ydbil1HGl9X19Sj+0xR1ZqFzKDxOgM=
-github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320233537-7c9f16ab8586 h1:kvXqZQsAJtywd2x3j+lTXhTTbQj81omFv2x7UTEs/3c=
-github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320233537-7c9f16ab8586/go.mod h1:QGhKBlq8+D9cKJT86tOlrUQC0W3h4QvEsr9YFfQ6a3A=
+github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320235901-3af29c3a3b34 h1:i4hzlSlt7qTC8Qzgy5PLgDxNwy74FyPbLZhWRzpQgW4=
+github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320235901-3af29c3a3b34/go.mod h1:QGhKBlq8+D9cKJT86tOlrUQC0W3h4QvEsr9YFfQ6a3A=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
