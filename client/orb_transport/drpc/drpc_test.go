@@ -5,13 +5,13 @@ import (
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/plugins/client/tests"
-	"github.com/stretchr/testify/suite"
-
 	"github.com/go-orb/plugins/server/drpc"
 
 	echohandler "github.com/go-orb/plugins/client/tests/handler/echo"
@@ -28,24 +28,20 @@ import (
 	_ "github.com/go-orb/plugins/log/slog"
 )
 
-func setupServer(sn string) (*tests.SetupData, error) {
+func setupServer(sn string, metadata map[string]string) (*tests.SetupData, error) {
 	ctx, cancel := context.WithCancel(context.Background())
-
 	setupData := &tests.SetupData{}
-
 	sv := ""
 
 	logger, err := log.New()
 	if err != nil {
 		cancel()
-
 		return nil, err
 	}
 
 	reg, err := registry.New(sn, sv, nil, &types.Components{}, logger)
 	if err != nil {
 		cancel()
-
 		return nil, err
 	}
 
@@ -55,10 +51,19 @@ func setupServer(sn string) (*tests.SetupData, error) {
 	fileHInstance := new(filehandler.Handler)
 	fileHRegister := fileproto.RegisterFileServiceHandler(fileHInstance)
 
-	ep, err := drpc.New(drpc.NewConfig(drpc.WithHandlers(echoHRegister, fileHRegister)), logger, reg)
+	// 建立配置選項
+	options := []server.Option{
+		drpc.WithHandlers(echoHRegister, fileHRegister),
+	}
+
+	// 如果提供了 metadata，添加到選項中
+	if metadata != nil {
+		options = append(options, server.WithEntrypointMetadata(metadata))
+	}
+
+	ep, err := drpc.New(drpc.NewConfig(options...), logger, reg)
 	if err != nil {
 		cancel()
-
 		return nil, err
 	}
 

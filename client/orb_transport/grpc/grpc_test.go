@@ -28,7 +28,7 @@ import (
 	_ "github.com/go-orb/plugins/log/slog"
 )
 
-func setupServer(sn string) (*tests.SetupData, error) {
+func setupServer(sn string, metadata map[string]string) (*tests.SetupData, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	setupData := &tests.SetupData{}
@@ -59,6 +59,7 @@ func setupServer(sn string) (*tests.SetupData, error) {
 		grpc.NewConfig(server.WithEntrypointName("grpc"),
 			grpc.WithHandlers(hRegister, fileHRegister),
 			grpc.WithInsecure(),
+			server.WithEntrypointMetadata(metadata),
 		), logger, reg)
 	if err != nil {
 		cancel()
@@ -66,7 +67,11 @@ func setupServer(sn string) (*tests.SetupData, error) {
 		return nil, err
 	}
 
-	ep2, err := grpc.New(grpc.NewConfig(server.WithEntrypointName("grpcs"), grpc.WithHandlers(hRegister, fileHRegister)), logger, reg)
+	ep2, err := grpc.New(
+		grpc.NewConfig(server.WithEntrypointName("grpcs"),
+			grpc.WithHandlers(hRegister, fileHRegister),
+			server.WithEntrypointMetadata(metadata),
+		), logger, reg)
 	if err != nil {
 		cancel()
 

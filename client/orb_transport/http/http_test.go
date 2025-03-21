@@ -25,7 +25,7 @@ import (
 	_ "github.com/go-orb/plugins/log/slog"
 )
 
-func setupServer(sn string) (*tests.SetupData, error) {
+func setupServer(sn string, metadata map[string]string) (*tests.SetupData, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	setupData := &tests.SetupData{}
@@ -54,6 +54,7 @@ func setupServer(sn string) (*tests.SetupData, error) {
 			server.WithEntrypointName("http"),
 			http.WithHandlers(hRegister),
 			http.WithInsecure(),
+			server.WithEntrypointMetadata(metadata),
 		),
 		logger,
 		reg,
@@ -70,6 +71,7 @@ func setupServer(sn string) (*tests.SetupData, error) {
 			http.WithHandlers(hRegister),
 			http.WithInsecure(),
 			http.WithAllowH2C(),
+			server.WithEntrypointMetadata(metadata),
 		),
 		logger,
 		reg,
