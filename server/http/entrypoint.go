@@ -12,6 +12,7 @@ package http
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -74,7 +75,7 @@ func Provide(
 ) (server.Entrypoint, error) {
 	cfg := NewConfig(opts...)
 
-	if err := config.Parse(nil, "", configData, cfg); err != nil {
+	if err := config.Parse(nil, "", configData, cfg); err != nil && !errors.Is(err, config.ErrNoSuchKey) {
 		return nil, err
 	}
 

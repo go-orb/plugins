@@ -3,6 +3,7 @@ package retry
 
 import (
 	"context"
+	"errors"
 	"math/rand"
 	"time"
 
@@ -136,7 +137,7 @@ func Provide(configSection map[string]any, _ client.Type, logger log.Logger) (cl
 	cfg := NewConfig()
 
 	err = config.Parse(nil, "", configSection, cfg)
-	if err != nil {
+	if err != nil && !errors.Is(err, config.ErrNoSuchKey) {
 		return nil, err
 	}
 

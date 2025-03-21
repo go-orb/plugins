@@ -215,7 +215,7 @@ func (p *Provider) Key() string {
 // Factory is the factory for a slog provider.
 func Factory(sections []string, configs map[string]any, opts ...log.Option) (log.ProviderType, error) {
 	cfg := NewConfig(opts...)
-	if err := config.Parse(sections, "logger", configs, &cfg); err != nil {
+	if err := config.Parse(sections, "logger", configs, &cfg); err != nil && !errors.Is(err, config.ErrNoSuchKey) {
 		return log.ProviderType{}, err
 	}
 

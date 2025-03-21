@@ -561,7 +561,7 @@ func Provide(
 		return event.Type{}, fmt.Errorf("create nats registry config: %w", err)
 	}
 
-	if err := config.Parse(nil, event.DefaultConfigSection, svcCtx.Config, &cfg); err != nil {
+	if err := config.Parse(nil, event.DefaultConfigSection, svcCtx.Config, &cfg); err != nil && !errors.Is(err, config.ErrNoSuchKey) {
 		return event.Type{}, fmt.Errorf("parse config: %w", err)
 	}
 

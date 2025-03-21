@@ -68,7 +68,7 @@ func TestReadString(t *testing.T) {
 
 	// Must return default
 	str, err = config.SingleGet(data, "string2", "x")
-	require.ErrorIs(t, err, config.ErrNotExistent)
+	require.ErrorIs(t, err, config.ErrNoSuchKey)
 	assert.Equal(t, "x", str)
 }
 
@@ -86,7 +86,7 @@ func TestReadStringSlice(t *testing.T) {
 
 	// Must return default
 	strs, err = config.SingleGet(data, "stringslice2", []string{"a", "b"})
-	require.ErrorIs(t, err, config.ErrNotExistent)
+	require.ErrorIs(t, err, config.ErrNoSuchKey)
 	assert.Equal(t, []string{"a", "b"}, strs)
 }
 

@@ -67,7 +67,7 @@ func Provide(
 ) (kvstore.Type, error) {
 	cfg := NewConfig(opts...)
 
-	if err := config.Parse(nil, kvstore.DefaultConfigSection, configData, &cfg); err != nil {
+	if err := config.Parse(nil, kvstore.DefaultConfigSection, configData, &cfg); err != nil && !errors.Is(err, config.ErrNoSuchKey) {
 		return kvstore.Type{}, err
 	}
 

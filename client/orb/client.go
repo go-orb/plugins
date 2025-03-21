@@ -397,7 +397,7 @@ func Provide(
 ) (client.Type, error) {
 	cfg := NewConfig(opts...)
 
-	if err := config.Parse(nil, client.DefaultConfigSection, configData, &cfg); err != nil {
+	if err := config.Parse(nil, client.DefaultConfigSection, configData, &cfg); err != nil && !errors.Is(err, config.ErrNoSuchKey) {
 		return client.Type{}, err
 	}
 
@@ -412,13 +412,11 @@ func Provide(
 			mCfg := &client.MiddlewareConfig{}
 
 			sections := []string{client.DefaultConfigSection, "middlewares"}
-			if err := config.Parse(sections, strconv.Itoa(i), configData, mCfg); err != nil || mCfg.Name == "" {
-				if errors.Is(err, config.ErrNotExistent) || mCfg.Name == "" {
-					logger.Warn("Unable to parse middleware config", "section", sections, "key", strconv.Itoa(i))
-					break
-				}
 
-				return client.Type{}, err
+			err := config.Parse(sections, strconv.Itoa(i), configData, mCfg)
+			if err != nil && !errors.Is(err, config.ErrNoSuchKey) || mCfg.Name == "" {
+				logger.Warn("Unable to parse middleware config", "section", sections, "key", strconv.Itoa(i))
+				break
 			}
 
 			fac, ok := client.Middlewares.Get(mCfg.Name)
@@ -427,7 +425,7 @@ func Provide(
 			}
 
 			mConfig, err := config.WalkMap([]string{client.DefaultConfigSection, "middlewares", strconv.Itoa(i)}, configData)
-			if err != nil && !errors.Is(err, config.ErrNotExistent) {
+			if err != nil && !errors.Is(err, config.ErrNoSuchKey) {
 				return client.Type{}, err
 			}
 
@@ -446,7 +444,7 @@ func Provide(
 			}
 
 			mConfig, err := config.ParseStruct([]string{}, m)
-			if err != nil {
+			if err != nil && !errors.Is(err, config.ErrNoSuchKey) {
 				return client.Type{}, err
 			}
 

@@ -3,6 +3,7 @@ package drpc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net"
@@ -221,7 +222,7 @@ func Provide(
 ) (orbserver.Entrypoint, error) {
 	cfg := NewConfig(opts...)
 
-	if err := config.Parse(nil, "", configData, cfg); err != nil {
+	if err := config.Parse(nil, "", configData, cfg); err != nil && !errors.Is(err, config.ErrNoSuchKey) {
 		return nil, err
 	}
 
