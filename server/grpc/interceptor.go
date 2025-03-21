@@ -109,8 +109,8 @@ func (s *serverStreamWrapper) SendMsg(msg interface{}) error {
 }
 
 func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
-	return func(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-		ctx, reqMd := metadata.WithIncoming(ss.Context())
+	return func(srv any, serverStream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		ctx, reqMd := metadata.WithIncoming(serverStream.Context())
 		ctx, _ = metadata.WithOutgoing(ctx)
 
 		// Copy incoming metadata from grpc to orb.
@@ -136,7 +136,7 @@ func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
 			defer cancel()
 		}
 
-		err := handler(srv, &serverStreamWrapper{ss, ctx})
+		err := handler(srv, &serverStreamWrapper{serverStream, ctx})
 
 		if err != nil {
 			oErr := orberrors.From(err)
