@@ -327,8 +327,15 @@ func (s *TestSuite) TestMetadataFilter() {
 	const commonServerName = "metadata-server"
 
 	setupDatas := make([]*SetupData, 0, len(regions))
+	clientTypes := make([]client.Type, 0, len(regions))
 
 	defer func() {
+		for _, cli := range clientTypes {
+			if stopErr := cli.Stop(context.Background()); stopErr != nil {
+				s.T().Logf("Error stopping client: %v", stopErr)
+			}
+		}
+
 		for _, setup := range setupDatas {
 			setup.Stop()
 		}
@@ -347,11 +354,20 @@ func (s *TestSuite) TestMetadataFilter() {
 		}
 
 		setupDatas = append(setupDatas, setupData)
+
+		cli, err := client.New(nil, &types.Components{}, setupData.Logger, setupData.Registry)
+		s.Require().NoError(err, "Client creation failed for region "+region)
+
+		s.Require().NoError(cli.Start(setupData.Ctx),
+			"Client start failed for region "+region)
+
+		clientTypes = append(clientTypes, cli)
 	}
 
 	time.Sleep(time.Second)
 
-	echoClient := echo.NewStreamsClient(s.client)
+	mainClient := clientTypes[0]
+	echoClient := echo.NewStreamsClient(mainClient)
 
 	for _, region := range regions {
 		s.Run("Matching region "+region, func() {
