@@ -375,7 +375,7 @@ func (s *TestSuite) TestMetadataFilter() {
 				context.Background(),
 				commonServerName,
 				&echo.CallRequest{Name: "test"},
-				client.WithMetadata(map[string]string{"region": region}),
+				client.WithRegistryMetadata("region", region),
 			)
 
 			s.Require().NoError(err, "Request with matching region should succeed")
@@ -387,7 +387,7 @@ func (s *TestSuite) TestMetadataFilter() {
 				context.Background(),
 				commonServerName,
 				&echo.CallRequest{Name: "test"},
-				client.WithMetadata(map[string]string{"region": "wrong-region"}),
+				client.WithRegistryMetadata("region", "wrong-region"),
 			)
 
 			s.Require().Error(err, "Request with non-matching region should fail")
