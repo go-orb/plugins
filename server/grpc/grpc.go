@@ -249,6 +249,11 @@ func (s *Server) Transport() string {
 	return "grpc"
 }
 
+// Metadata returns the metadata of this entrypoint.
+func (s *Server) Metadata() map[string]string {
+	return s.config.Metadata
+}
+
 // EntrypointID returns the id of this entrypoint (node) in the registry.
 func (s *Server) EntrypointID() string {
 	return s.registry.ServiceName() + types.DefaultSeparator + s.config.Name
@@ -339,7 +344,7 @@ func (s *Server) registryService() *registry.Service {
 		ID:        s.EntrypointID(),
 		Address:   s.Address(),
 		Transport: s.Transport(),
-		Metadata:  make(map[string]string),
+		Metadata:  s.Metadata(),
 	}
 
 	eps := s.getEndpoints()

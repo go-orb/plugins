@@ -119,7 +119,7 @@ func (c *Client) selectNode(ctx context.Context, service string, opts *client.Ca
 	}
 
 	// Run the configured Selector to get a node from the resolved nodes.
-	node, err := opts.Selector(ctx, service, nodes, opts.PreferredTransports, opts.AnyTransport)
+	node, err := opts.Selector(ctx, service, nodes, opts.PreferredTransports, opts.AnyTransport, opts.Metadata)
 	if err != nil {
 		c.Logger().Error("Failed to resolve service", "error", err, "service", service)
 		return "", "", err

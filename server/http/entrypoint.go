@@ -309,6 +309,11 @@ func (s *Server) Transport() string {
 	return "http"
 }
 
+// Metadata returns the metadata of this entrypoint.
+func (s *Server) Metadata() map[string]string {
+	return s.config.Metadata
+}
+
 // EntrypointID returns the id (configured name) of this entrypoint in the registry.
 func (s *Server) EntrypointID() string {
 	return s.config.Name
@@ -384,7 +389,7 @@ func (s *Server) registryService() (*registry.Service, error) {
 		ID:        s.EntrypointID(),
 		Address:   s.Address(),
 		Transport: s.Transport(),
-		Metadata:  make(map[string]string),
+		Metadata:  s.Metadata(),
 	}
 
 	eps, err := s.getEndpoints()

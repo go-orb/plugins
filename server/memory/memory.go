@@ -131,6 +131,11 @@ func (s *Server) EntrypointID() string {
 	return s.config.Name
 }
 
+// Metadata returns the metadata of this entrypoint.
+func (s *Server) Metadata() map[string]string {
+	return s.config.Metadata
+}
+
 // String returns the entrypoint type.
 func (s *Server) String() string {
 	return s.Type()

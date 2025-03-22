@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/codecs"
@@ -133,7 +134,7 @@ type TestSuite struct {
 
 	entrypoints []server.Entrypoint
 	ctx         context.Context
-	setupServer func(service string) (*SetupData, error)
+	setupServer func(service string, metadata map[string]string) (*SetupData, error)
 	stopServer  context.CancelFunc
 
 	// To create more clients in Benchmarks.
@@ -141,7 +142,8 @@ type TestSuite struct {
 }
 
 // NewSuite creates a new test suite.
-func NewSuite(setupServer func(service string) (*SetupData, error), transports []string, requests ...TestRequest) *TestSuite {
+func NewSuite(setupServer func(service string, metadata map[string]string) (*SetupData, error),
+	transports []string, requests ...TestRequest) *TestSuite {
 	s := new(TestSuite)
 
 	s.Transports = transports
@@ -174,7 +176,7 @@ type TestRequest struct {
 func (s *TestSuite) SetupSuite() {
 	var err error
 
-	setupData, err := s.setupServer(ServiceName)
+	setupData, err := s.setupServer(ServiceName, nil)
 	if err != nil {
 		s.Require().NoError(err, "while setting up the server")
 	}
@@ -218,7 +220,7 @@ func (s *TestSuite) TearDownSuite() {
 }
 
 func (s *TestSuite) doRequest(ctx context.Context, req *TestRequest, clientWire client.Type, transport string) {
-	opts := []client.CallOption{}
+	var opts []client.CallOption
 	if req.ContentType != "" {
 		opts = append(opts, client.WithContentType(req.ContentType))
 	}
@@ -314,6 +316,81 @@ func (s *TestSuite) TestMetadata() {
 			rspHandler, ok := responseMd["tracing-id"]
 			s.Require().True(ok, "Transport does not transport metadata - tracing-id")
 			s.Require().Equal("asfdjhladhsfashf", rspHandler)
+		})
+	}
+}
+
+// TestMetadataFilter tests if metadata gets filtered.
+func (s *TestSuite) TestMetadataFilter() {
+	regions := []string{"as-1", "eu-1", "us-1"}
+
+	const commonServerName = "metadata-server"
+
+	setupDatas := make([]*SetupData, 0, len(regions))
+	clientTypes := make([]client.Type, 0, len(regions))
+
+	defer func() {
+		for _, cli := range clientTypes {
+			if stopErr := cli.Stop(context.Background()); stopErr != nil {
+				s.T().Logf("Error stopping client: %v", stopErr)
+			}
+		}
+
+		for _, setup := range setupDatas {
+			setup.Stop()
+		}
+	}()
+
+	for _, region := range regions {
+		setupData, err := s.setupServer(commonServerName, map[string]string{"region": region})
+		s.Require().NoError(err, "Server setup failed for region "+region)
+
+		s.Require().NoError(setupData.Registry.Start(setupData.Ctx),
+			"Registry start failed for region "+region)
+
+		for _, ep := range setupData.Entrypoints {
+			s.Require().NoError(ep.Start(setupData.Ctx),
+				"Entrypoint start failed for region "+region)
+		}
+
+		setupDatas = append(setupDatas, setupData)
+
+		cli, err := client.New(nil, &types.Components{}, setupData.Logger, setupData.Registry)
+		s.Require().NoError(err, "Client creation failed for region "+region)
+
+		s.Require().NoError(cli.Start(setupData.Ctx),
+			"Client start failed for region "+region)
+
+		clientTypes = append(clientTypes, cli)
+	}
+
+	time.Sleep(time.Second)
+
+	mainClient := clientTypes[0]
+	echoClient := echo.NewStreamsClient(mainClient)
+
+	for _, region := range regions {
+		s.Run("Matching region "+region, func() {
+			resp, err := echoClient.Call(
+				context.Background(),
+				commonServerName,
+				&echo.CallRequest{Name: "test"},
+				client.WithRegistryMetadata("region", region),
+			)
+
+			s.Require().NoError(err, "Request with matching region should succeed")
+			s.Require().Equal("Hello test", resp.GetMsg(), "Unexpected response message")
+		})
+
+		s.Run("Non-matching region for "+region, func() {
+			_, err := echoClient.Call(
+				context.Background(),
+				commonServerName,
+				&echo.CallRequest{Name: "test"},
+				client.WithRegistryMetadata("region", "wrong-region"),
+			)
+
+			s.Require().Error(err, "Request with non-matching region should fail")
 		})
 	}
 }
