@@ -793,7 +793,7 @@ func (r *TestSuite) TestMetadataFiltering() {
 	r.Require().NoError(err)
 
 	// Manually filter for production services
-	prodServices := []*registry.Service{}
+	var prodServices []*registry.Service
 
 	for _, svc := range allServices {
 		// Skip non-test services (those not starting with orb.test.filter)

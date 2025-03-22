@@ -324,24 +324,18 @@ func (s *TestSuite) TestMetadata() {
 func (s *TestSuite) TestMetadataFilter() {
 	regions := []string{"as-1", "eu-1", "us-1"}
 
+	const commonServerName = "metadata-server"
+
 	setupDatas := make([]*SetupData, 0, len(regions))
-	clientTypes := make([]client.Type, 0, len(regions))
 
 	defer func() {
-		for _, cli := range clientTypes {
-			if stopErr := cli.Stop(context.Background()); stopErr != nil {
-				s.T().Logf("Error stopping client: %v", stopErr)
-			}
-		}
-
 		for _, setup := range setupDatas {
 			setup.Stop()
 		}
 	}()
 
 	for _, region := range regions {
-		serverName := "metadata-server-" + region
-		setupData, err := s.setupServer(serverName, map[string]string{"region": region})
+		setupData, err := s.setupServer(commonServerName, map[string]string{"region": region})
 		s.Require().NoError(err, "Server setup failed for region "+region)
 
 		s.Require().NoError(setupData.Registry.Start(setupData.Ctx),
@@ -353,26 +347,17 @@ func (s *TestSuite) TestMetadataFilter() {
 		}
 
 		setupDatas = append(setupDatas, setupData)
-
-		cli, err := client.New(nil, &types.Components{}, setupData.Logger, setupData.Registry)
-		s.Require().NoError(err, "Client creation failed for region "+region)
-
-		s.Require().NoError(cli.Start(setupData.Ctx),
-			"Client start failed for region "+region)
-
-		clientTypes = append(clientTypes, cli)
 	}
 
 	time.Sleep(time.Second)
 
-	for i, region := range regions {
-		serverName := "metadata-server-" + region
-		echoClient := echo.NewStreamsClient(clientTypes[i])
+	echoClient := echo.NewStreamsClient(s.client)
 
+	for _, region := range regions {
 		s.Run("Matching region "+region, func() {
 			resp, err := echoClient.Call(
 				context.Background(),
-				serverName,
+				commonServerName,
 				&echo.CallRequest{Name: "test"},
 				client.WithMetadata(map[string]string{"region": region}),
 			)
@@ -384,7 +369,7 @@ func (s *TestSuite) TestMetadataFilter() {
 		s.Run("Non-matching region for "+region, func() {
 			_, err := echoClient.Call(
 				context.Background(),
-				serverName,
+				commonServerName,
 				&echo.CallRequest{Name: "test"},
 				client.WithMetadata(map[string]string{"region": "wrong-region"}),
 			)

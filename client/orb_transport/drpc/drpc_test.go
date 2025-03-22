@@ -51,12 +51,9 @@ func setupServer(sn string, metadata map[string]string) (*tests.SetupData, error
 	fileHInstance := new(filehandler.Handler)
 	fileHRegister := fileproto.RegisterFileServiceHandler(fileHInstance)
 
-	// 建立配置選項
 	options := []server.Option{
 		drpc.WithHandlers(echoHRegister, fileHRegister),
 	}
-
-	// 如果提供了 metadata，添加到選項中
 	if metadata != nil {
 		options = append(options, server.WithEntrypointMetadata(metadata))
 	}
