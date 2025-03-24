@@ -333,7 +333,7 @@ func (s *TestSuite) TestFileUpload() {
 			// Open a stream to the service
 			stream, err := fileClient.UploadFile(ctx, ServiceName, client.WithPreferredTransports(t))
 			if errors.Is(err, orberrors.ErrNotImplemented) {
-				// Transport does not support streaming.
+				s.T().Skip("Transport does not support streaming.")
 				return
 			}
 
@@ -377,6 +377,8 @@ func (s *TestSuite) TestFileUpload() {
 }
 
 // TestAuthorizedFileUpload tests the authorized client streaming functionality for file uploads.
+//
+//nolint:funlen
 func (s *TestSuite) TestAuthorizedFileUpload() {
 	// Create a file service client
 	fileClient := file.NewFileServiceClient(s.client)
@@ -389,7 +391,7 @@ func (s *TestSuite) TestAuthorizedFileUpload() {
 			// Open a stream to the service
 			stream, err := fileClient.AuthorizedUploadFile(ctx, ServiceName, client.WithPreferredTransports(t))
 			if errors.Is(err, orberrors.ErrNotImplemented) {
-				// Transport does not support streaming.
+				s.T().Skip("Transport does not support streaming.")
 				return
 			}
 
@@ -436,7 +438,7 @@ func (s *TestSuite) TestAuthorizedFileUpload() {
 				client.WithResponseMetadata(responseMd),
 			)
 			if errors.Is(err, orberrors.ErrNotImplemented) {
-				// Transport does not support streaming.
+				s.T().Skip("Transport does not support streaming.")
 				return
 			}
 
