@@ -290,6 +290,10 @@ func (c *RegistryConsul) GetService(ctx context.Context, namespace, region, name
 		services = append(services, serviceNode)
 	}
 
+	if len(services) < 1 {
+		return nil, registry.ErrNotFound
+	}
+
 	return services, nil
 }
 
