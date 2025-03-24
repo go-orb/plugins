@@ -16,12 +16,12 @@ func TestErrorIs(t *testing.T) {
 }
 
 func TestErrorIsWrapped(t *testing.T) {
-	err := orberrors.HTTP(http.StatusUnauthorized).Wrap(errors.New("test"))
+	err := orberrors.HTTP(http.StatusUnauthorized).WrapNew("test")
 	require.ErrorIs(t, err, orberrors.ErrUnauthorized)
 }
 
 func TestErrorIsInAnotherError(t *testing.T) {
-	err := fmt.Errorf("Test: %w", orberrors.HTTP(http.StatusUnauthorized).Wrap(errors.New("test")))
+	err := fmt.Errorf("Test: %w", orberrors.HTTP(http.StatusUnauthorized).WrapNew("test"))
 	require.ErrorIs(t, err, orberrors.ErrUnauthorized)
 }
 
@@ -32,7 +32,7 @@ func TestError(t *testing.T) {
 }
 
 func TestWrappedError(t *testing.T) {
-	err := orberrors.ErrInternalServerError.Wrap(errors.New("testing"))
+	err := orberrors.ErrInternalServerError.WrapNew("testing")
 	expected := "internal server error: testing"
 	require.Equal(t, expected, err.Error())
 }
@@ -69,7 +69,7 @@ func TestFromAndAs(t *testing.T) {
 }
 
 func TestWrappedAs(t *testing.T) {
-	err := orberrors.ErrRequestTimeout.Wrap(errors.New("test"))
+	err := orberrors.ErrRequestTimeout.WrapNew("test")
 	require.Equal(t, "request timeout: test", err.Error())
 	orbe, ok := orberrors.As(err)
 	require.True(t, ok)

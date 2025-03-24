@@ -114,7 +114,7 @@ func (c *Registry) Deregister(_ context.Context, serviceNode registry.ServiceNod
 // Register registers a service within the registry.
 func (c *Registry) Register(_ context.Context, serviceNode registry.ServiceNode) error {
 	if serviceNode.Name == "" {
-		return orberrors.ErrBadRequest.Wrap(errors.New("won't store service with empty name"))
+		return orberrors.ErrBadRequest.WrapNew("won't store service with empty name")
 	}
 
 	key := nodeKey(serviceNode, c.config.ServiceDelimiter)

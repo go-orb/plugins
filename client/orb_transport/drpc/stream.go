@@ -36,11 +36,11 @@ func (d *drpcClientStream[TReq, TResp]) Context() context.Context {
 // Send sends a message to the stream.
 func (d *drpcClientStream[TReq, TResp]) Send(msg TReq) error {
 	if d.closed {
-		return orberrors.ErrBadRequest.Wrap(errors.New("stream is closed"))
+		return orberrors.ErrBadRequest.WrapNew("stream is closed")
 	}
 
 	if d.sendClosed {
-		return orberrors.ErrBadRequest.Wrap(errors.New("send direction is closed"))
+		return orberrors.ErrBadRequest.WrapNew("send direction is closed")
 	}
 
 	if err := d.stream.MsgSend(msg, d.encoder); err != nil {
@@ -54,7 +54,7 @@ func (d *drpcClientStream[TReq, TResp]) Send(msg TReq) error {
 // Recv receives a message from the stream.
 func (d *drpcClientStream[TReq, TResp]) Recv(msg TResp) error {
 	if d.closed {
-		return orberrors.ErrBadRequest.Wrap(errors.New("stream is closed"))
+		return orberrors.ErrBadRequest.WrapNew("stream is closed")
 	}
 
 	// if err := d.stream.MsgRecv(msg, d.encoder); err != nil {
@@ -108,7 +108,7 @@ func (d *drpcClientStream[TReq, TResp]) Recv(msg TResp) error {
 // Close closes the stream.
 func (d *drpcClientStream[TReq, TResp]) Close() error {
 	if d.closed {
-		return orberrors.ErrBadRequest.Wrap(errors.New("stream is closed"))
+		return orberrors.ErrBadRequest.WrapNew("stream is closed")
 	}
 
 	d.closed = true
@@ -139,7 +139,7 @@ func (d *drpcClientStream[TReq, TResp]) Close() error {
 // completion of sending but still need to receive responses.
 func (d *drpcClientStream[TReq, TResp]) CloseSend() error {
 	if d.closed {
-		return orberrors.ErrBadRequest.Wrap(errors.New("stream is closed"))
+		return orberrors.ErrBadRequest.WrapNew("stream is closed")
 	}
 
 	if d.sendClosed {

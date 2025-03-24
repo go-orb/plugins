@@ -245,11 +245,11 @@ func (g *grpcClientStream) Context() context.Context {
 // Send sends a message to the stream.
 func (g *grpcClientStream) Send(msg interface{}) error {
 	if g.closed {
-		return orberrors.ErrBadRequest.Wrap(errors.New("stream is closed"))
+		return orberrors.ErrBadRequest.WrapNew("stream is closed")
 	}
 
 	if g.sendClosed {
-		return orberrors.ErrBadRequest.Wrap(errors.New("send direction is closed"))
+		return orberrors.ErrBadRequest.WrapNew("send direction is closed")
 	}
 
 	if err := g.stream.SendMsg(msg); err != nil {
@@ -263,7 +263,7 @@ func (g *grpcClientStream) Send(msg interface{}) error {
 // Recv receives a message from the stream.
 func (g *grpcClientStream) Recv(msg interface{}) error {
 	if g.closed {
-		return orberrors.ErrBadRequest.Wrap(errors.New("stream is closed"))
+		return orberrors.ErrBadRequest.WrapNew("stream is closed")
 	}
 
 	if err := g.stream.RecvMsg(msg); err != nil {
@@ -315,7 +315,7 @@ func (g *grpcClientStream) Close() error {
 // This allows the client to signal it's done sending while still being able to receive responses.
 func (g *grpcClientStream) CloseSend() error {
 	if g.closed {
-		return orberrors.ErrBadRequest.Wrap(errors.New("stream is closed"))
+		return orberrors.ErrBadRequest.WrapNew("stream is closed")
 	}
 
 	if g.sendClosed {

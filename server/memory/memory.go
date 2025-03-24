@@ -348,15 +348,6 @@ func (s *Server) Request(ctx context.Context, infos client.RequestInfos, req any
 	return nil
 }
 
-// Stream not yet implemented.
-func (s *Server) Stream(
-	_ context.Context,
-	_ client.RequestInfos,
-	_ *client.CallOptions,
-) (client.StreamIface[any, any], error) {
-	return nil, orberrors.ErrNotImplemented.Wrap(client.ErrStreamNotSupported)
-}
-
 // Provide creates a new entrypoint for a single address. You can create
 // multiple entrypoints for multiple addresses and ports.
 func Provide(

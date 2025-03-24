@@ -1,8 +1,6 @@
 package kvstore
 
 import (
-	"errors"
-
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/kvstore"
 	"github.com/go-orb/go-orb/registry"
@@ -24,7 +22,7 @@ type Watcher struct {
 func NewWatcher(s *Registry) (*Watcher, error) {
 	w, ok := s.kvstore.KVStore.(kvstore.Watcher)
 	if !ok {
-		return nil, orberrors.ErrBadRequest.Wrap(errors.New("store does not implement watcher interface"))
+		return nil, orberrors.ErrBadRequest.WrapNew("store does not implement watcher interface")
 	}
 
 	watcher, stop, err := w.Watch(s.ctx, s.config.Database, s.config.Table)
@@ -46,7 +44,7 @@ func NewWatcher(s *Registry) (*Watcher, error) {
 func (w *Watcher) Next() (*registry.Result, error) {
 	kve := <-w.updates
 	if kve.Key == "" {
-		return nil, orberrors.ErrInternalServerError.Wrap(errors.New("watcher stopped"))
+		return nil, orberrors.ErrInternalServerError.WrapNew("watcher stopped")
 	}
 
 	var svc registry.ServiceNode
@@ -77,7 +75,7 @@ func (w *Watcher) Next() (*registry.Result, error) {
 		action = registry.Delete
 	default:
 		_ = w.stop() //nolint:errcheck
-		return nil, orberrors.ErrBadRequest.Wrap(errors.New("invalid operation"))
+		return nil, orberrors.ErrBadRequest.WrapNew("invalid operation")
 	}
 
 	return &registry.Result{
