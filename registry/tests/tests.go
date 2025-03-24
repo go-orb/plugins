@@ -596,6 +596,7 @@ func (r *TestSuite) TestMultipleTransports() {
 	for _, node := range nodes {
 		r.Require().NoError(r.randomRegistry().Register(r.ctx, node))
 	}
+
 	time.Sleep(r.updateTime)
 
 	// Verify each scheme returns the correct node
