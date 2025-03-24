@@ -52,6 +52,10 @@ func (t *Transport) Request(ctx context.Context, infos client.RequestInfos, req 
 		md = map[string]string{}
 	}
 
+	// Set the connection timeout
+	ctx, cancel := context.WithTimeout(ctx, opts.ConnectionTimeout)
+	defer cancel()
+
 	ctx, outMd := metadata.WithOutgoing(ctx)
 	ctx, inMd := metadata.WithIncoming(ctx)
 
@@ -84,6 +88,9 @@ func (t *Transport) Stream(
 	if md == nil {
 		md = map[string]string{}
 	}
+
+	// Set the connection timeout
+	ctx, _ = context.WithTimeout(ctx, opts.ConnectionTimeout)
 
 	ctx, outMd := metadata.WithOutgoing(ctx)
 	ctx, inMd := metadata.WithIncoming(ctx)

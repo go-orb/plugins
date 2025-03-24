@@ -14,8 +14,8 @@ import (
 	"storj.io/drpc"
 )
 
-// convertRequest converts a received request to the expected message type.
-func convertRequest(msg any, received any) error {
+// convertReceived converts a received message to the expected result type.
+func convertReceived(msg any, received any) error {
 	reqValue := reflect.ValueOf(received)
 
 	// Handle case where request is a pointer
@@ -224,7 +224,7 @@ func (s *Stream) Recv(msg any) error {
 			return io.EOF
 		}
 
-		return convertRequest(msg, received)
+		return convertReceived(msg, received)
 	}
 }
 
