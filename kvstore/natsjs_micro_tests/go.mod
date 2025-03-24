@@ -7,9 +7,9 @@ toolchain go1.24.0
 require (
 	github.com/go-micro/plugins/v4/store/nats-js-kv v0.0.0-20240726082623-6831adfdcdc4
 	github.com/go-orb/go-orb v0.2.2-0.20250324112306-5f5f154933b8
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250324112348-29f03eeb679b
-	github.com/go-orb/plugins/kvstore/natsjs v0.0.0-20250324112348-29f03eeb679b
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250324112348-29f03eeb679b
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250324122351-5903fde4d556
+	github.com/go-orb/plugins/kvstore/natsjs v0.0.0-20250324122351-5903fde4d556
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250324122351-5903fde4d556
 	github.com/nats-io/nats-server/v2 v2.10.26
 	github.com/nats-io/nats.go v1.39.1
 	github.com/stretchr/testify v1.10.0
@@ -31,6 +31,8 @@ require (
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.6.2 // indirect
 	github.com/go-git/go-git/v5 v5.14.0 // indirect
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20250324122351-5903fde4d556 // indirect
+	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250324122351-5903fde4d556 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -38,6 +40,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/miekg/dns v1.1.64 // indirect
 	github.com/minio/highwayhash v1.0.3 // indirect
 	github.com/nats-io/jwt/v2 v2.7.3 // indirect
