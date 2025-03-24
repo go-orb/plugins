@@ -4,10 +4,10 @@ go 1.23.6
 
 require (
 	github.com/go-orb/go-orb v0.2.2-0.20250324222940-9b1324dc770e
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250324232053-a7f39c5eb26f
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250324232053-a7f39c5eb26f
-	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250324232053-a7f39c5eb26f
-	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250324232053-a7f39c5eb26f
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250324232220-9b3cf846b28c
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250324232220-9b3cf846b28c
+	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250324232220-9b3cf846b28c
+	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250324232220-9b3cf846b28c
 	github.com/hashicorp/consul/api v1.31.2
 	github.com/hashicorp/consul/sdk v0.16.2
 	github.com/hashicorp/go-hclog v1.6.3
