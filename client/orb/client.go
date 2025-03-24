@@ -168,7 +168,14 @@ func (c *Client) resolveService(
 			break // Service found, exit retry loop
 		}
 
-		c.logger.Debug("service resolution failed, retrying", "service", service, "attempt", retries+1, "error", err)
+		c.logger.Debug(
+			"service resolution failed, retrying",
+			"service", service,
+			"attempt", retries+1,
+			"error", err,
+			"preferredTransports", opts.PreferredTransports,
+		)
+
 		time.Sleep(time.Duration(math.Pow(float64(retries+1), math.E)) * time.Millisecond * 100) // Increasing backoff
 	}
 

@@ -562,6 +562,56 @@ func (r *TestSuite) TestMultipleVersions() {
 	r.Require().NoError(r.randomRegistry().Deregister(r.ctx, serviceV2))
 }
 
+// TestMultipleTransports verifies that the registry correctly handles multiple nodes with the same name but different transports.
+func (r *TestSuite) TestMultipleTransports() {
+	// Create multiple nodes with same name but different schemes
+	nodes := []registry.ServiceNode{
+		{
+			Name:    "test-service",
+			Version: "v1.0.0",
+			Address: "127.0.0.1:8080",
+			Scheme:  "grpc",
+		},
+		{
+			Name:    "test-service",
+			Version: "v1.0.0",
+			Address: "127.0.0.1:8081",
+			Scheme:  "drpc",
+		},
+		{
+			Name:    "test-service",
+			Version: "v1.0.0",
+			Address: "127.0.0.1:8082",
+			Scheme:  "http",
+		},
+		{
+			Name:    "test-service",
+			Version: "v1.0.0",
+			Address: "127.0.0.1:8083",
+			Scheme:  "https",
+		},
+	}
+
+	// Register all nodes
+	for _, node := range nodes {
+		r.Require().NoError(r.randomRegistry().Register(r.ctx, node))
+	}
+	time.Sleep(r.updateTime)
+
+	// Verify each scheme returns the correct node
+	for _, node := range nodes {
+		services, err := r.randomRegistry().GetService(r.ctx, "", "", node.Name, []string{node.Scheme})
+		r.Require().NoError(err)
+		r.Require().Len(services, 1, "Should return only one node with %s Scheme", node.Scheme)
+		r.Require().Equal(node.Scheme, services[0].Scheme, "Should return node with %s Scheme", node.Scheme)
+	}
+
+	// Cleanup all nodes
+	for _, node := range nodes {
+		r.Require().NoError(r.randomRegistry().Deregister(r.ctx, node))
+	}
+}
+
 // BenchmarkListServices benchmarks the performance of listing services.
 func (r *TestSuite) BenchmarkListServices(b *testing.B) {
 	b.Helper()

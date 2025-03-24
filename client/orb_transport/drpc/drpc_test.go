@@ -33,7 +33,7 @@ func setupServer(sn string) (*tests.SetupData, error) {
 
 	setupData := &tests.SetupData{}
 
-	logger, err := log.New(log.WithLevel(log.LevelDebug))
+	logger, err := log.New(log.WithLevel(log.LevelTrace))
 	if err != nil {
 		cancel()
 

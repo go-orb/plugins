@@ -309,6 +309,7 @@ func (s *TestSuite) TestMetadata() {
 				&echo.CallRequest{Name: "empty"},
 				client.WithMetadata(md),
 				client.WithResponseMetadata(responseMd),
+				client.WithPreferredTransports(t),
 			)
 			s.Require().NoError(err)
 
