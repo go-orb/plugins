@@ -1,13 +1,13 @@
 #!/bin/bash
 
 ######################################################################################
-# Release a plugin                                                                   #
+# Update plugin dependencies                                                         #
 #                                                                                    #
 # Usage:                                                                             #
-#   $ release.sh all                                                                 #
-#   $ release.sh server/http                                                         #
-#   $ release.sh server/http,server/grpc                                             #
-#   $ release.sh server/*                                                            #
+#   $ deps.sh main all                                                               #
+#   $ deps.sh main server/http                                                       #
+#   $ deps.sh main server/http,server/grpc                                           #
+#   $ deps.sh main server/*                                                          #
 #                                                                                    #
 ######################################################################################
 
@@ -50,17 +50,18 @@ function check_if_changed() {
 }
 
 function update_deps() {
-    local pkg="$1"
+	local branch="$1"
+    local pkg="$2"
 
     pushd "${pkg}" >/dev/null || exit
 	go mod tidy || true
-    go get -u github.com/go-orb/go-orb@main
+    go get -u github.com/go-orb/go-orb@${branch}
     for m in $(grep github.com/go-orb/plugins/ go.mod | grep -E -v "^module" | awk '{ print $1 }'); do 
-        if ! go get -u "${m}@main"; then
+        if ! go get -u "${m}@${branch}"; then
 			# try another time
 			sleep 5
-			go get -u "${m}@main"
-			if ! go get -u "${m}@main"; then
+			go get -u "${m}@${branch}"
+			if ! go get -u "${m}@${branch}"; then
 				echo "updated_deps: Failed to update dependency ${m}"
 				exit 1
 			fi
@@ -86,12 +87,13 @@ function update_deps() {
 }
 
 function upgrade() {
-	if [[ ! -f "${1}/go.mod" ]]; then
-		echo "Unknown package '${1}' given."
+	if [[ ! -f "${2}/go.mod" ]]; then
+		echo "Unknown package '${2}' given."
 		return 1
 	fi
 
-	local pkg="${1}"
+	local branch="${1}"
+	local pkg="${2}"
 
 	echo "Checking ${pkg}"
 	if check_if_changed "${pkg}"; then
@@ -99,27 +101,31 @@ function upgrade() {
 	fi
 
 	echo "Update deps for ${pkg}"
-    update_deps "${pkg}"
+    update_deps "${branch}" "${pkg}"
 }
 
 function upgrade_all() {
-    find . -name 'go.mod' -print0 | xargs -0 -n 1 -P 0 ${SCRIPT_DIR}/deps.sh
+    find . -name 'go.mod' -print0 | xargs -0 -n 1 -P 0 ${SCRIPT_DIR}/deps.sh "${1}"
 }
 
 function upgrade_specific() {
+	local branch="${1}"
+
 	while read -r pkg; do
 		if [[ "${pkg}" == "./.github/go.mod" ]]; then
 			continue
 		fi
 
-		update_deps "${pkg%go.mod}" "0"
-	done < <(echo "${1}" | tr "," "\n")
+		echo update_deps "${branch}" "${pkg%go.mod}"
+		update_deps "${branch}" "${pkg%go.mod}"
+	done < <(echo "${2}" | tr "," "\n")
 }
 
-case $1 in
+case $2 in
 "all")
-	upgrade_all
+	upgrade_all "${1}"
 	;;
 *)
-	upgrade_specific "${1}"
+	upgrade_specific "${1}" "${2}"
+	;;
 esac

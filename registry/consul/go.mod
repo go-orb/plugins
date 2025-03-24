@@ -3,11 +3,11 @@ module github.com/go-orb/plugins/registry/consul
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250322021706-3e2a0f6ba13b
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250321005411-4d8d626dc29a
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250321005411-4d8d626dc29a
-	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250321005411-4d8d626dc29a
-	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250321005411-4d8d626dc29a
+	github.com/go-orb/go-orb v0.2.2-0.20250324112306-5f5f154933b8
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250324112348-29f03eeb679b
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250324112348-29f03eeb679b
+	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250324112348-29f03eeb679b
+	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250324112348-29f03eeb679b
 	github.com/hashicorp/consul/api v1.31.2
 	github.com/hashicorp/consul/sdk v0.16.2
 	github.com/hashicorp/go-hclog v1.6.3
@@ -33,7 +33,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/miekg/dns v1.1.63 // indirect
+	github.com/miekg/dns v1.1.64 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

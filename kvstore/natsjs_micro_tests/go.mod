@@ -6,10 +6,10 @@ toolchain go1.24.0
 
 require (
 	github.com/go-micro/plugins/v4/store/nats-js-kv v0.0.0-20240726082623-6831adfdcdc4
-	github.com/go-orb/go-orb v0.2.2-0.20250322021706-3e2a0f6ba13b
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250321005411-4d8d626dc29a
-	github.com/go-orb/plugins/kvstore/natsjs v0.0.0-20250321005411-4d8d626dc29a
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250321005411-4d8d626dc29a
+	github.com/go-orb/go-orb v0.2.2-0.20250324112306-5f5f154933b8
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250324112348-29f03eeb679b
+	github.com/go-orb/plugins/kvstore/natsjs v0.0.0-20250324112348-29f03eeb679b
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250324112348-29f03eeb679b
 	github.com/nats-io/nats-server/v2 v2.10.26
 	github.com/nats-io/nats.go v1.39.1
 	github.com/stretchr/testify v1.10.0
@@ -38,7 +38,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
-	github.com/miekg/dns v1.1.63 // indirect
+	github.com/miekg/dns v1.1.64 // indirect
 	github.com/minio/highwayhash v1.0.3 // indirect
 	github.com/nats-io/jwt/v2 v2.7.3 // indirect
 	github.com/nats-io/nkeys v0.4.10 // indirect
