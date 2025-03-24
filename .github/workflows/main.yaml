@@ -14,12 +14,12 @@ jobs:
         with:
           fetch-depth: 0
       - name: Lint files
-        uses: dagger/dagger-for-github@v7
+        uses: dagger/dagger-for-github@8.0.0
         with:
-          version: v0.16.1
-          verb: call
-          args: lint --root=. logs
+          module: github.com/go-orb/plugins
+          call: lint --root=. logs
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+          version: latest
   test:
     name: Unit Tests
     runs-on: ubuntu-24.04
@@ -29,9 +29,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run unit tests
-        uses: dagger/dagger-for-github@v7
+        uses: dagger/dagger-for-github@8.0.0
         with:
-          version: v0.16.1
-          verb: call
-          args: test --root=. logs
+          module: github.com/go-orb/plugins
+          call: test --root=. logs
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+          version: latest
