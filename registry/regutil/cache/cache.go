@@ -4,16 +4,20 @@ package cache
 import (
 	"context"
 	"errors"
-	"fmt"
 	"slices"
+	"strings"
 	"sync"
 
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 )
 
+func serviceKey(s registry.ServiceNode) string {
+	return strings.Join([]string{s.Namespace, s.Region, s.Name}, "@")
+}
+
 func nodeKey(s registry.ServiceNode) string {
-	return fmt.Sprintf("%s:%s:%s:%s:%s:%s", s.Namespace, s.Region, s.Name, s.Version, s.Scheme, s.Address)
+	return strings.Join([]string{s.Namespace, s.Region, s.Name, s.Version, s.Scheme, s.Address}, "@")
 }
 
 type dataStore struct {
@@ -21,7 +25,7 @@ type dataStore struct {
 
 	registry registry.Registry
 
-	Records map[string]registry.ServiceNode
+	Records map[string]map[string]registry.ServiceNode
 
 	watcher     registry.Watcher
 	watchCancel context.CancelFunc
@@ -134,11 +138,18 @@ func (d *dataStore) deregisterServiceNode(serviceNode registry.ServiceNode) erro
 	d.Lock()
 	defer d.Unlock()
 
-	key := nodeKey(serviceNode)
+	sKey := serviceKey(serviceNode)
+	nKey := nodeKey(serviceNode)
 
-	if _, ok := d.Records[key]; ok {
-		d.logger.Trace("deregister", "name", serviceNode.Name, "version", serviceNode.Version, "address", serviceNode.Address)
-		delete(d.Records, key)
+	if records, ok := d.Records[sKey]; ok {
+		if _, ok := records[nKey]; ok {
+			d.logger.Trace("deregister", "name", serviceNode.Name, "version", serviceNode.Version, "address", serviceNode.Address)
+			delete(records, nKey)
+		}
+
+		if len(d.Records[sKey]) == 0 {
+			delete(d.Records, sKey)
+		}
 
 		return nil
 	}
@@ -156,17 +167,26 @@ func (d *dataStore) registerServiceNodeInternal(serviceNode registry.ServiceNode
 	d.Lock()
 	defer d.Unlock()
 
-	if _, ok := d.Records[nodeKey(serviceNode)]; ok {
-		d.Records[nodeKey(serviceNode)] = serviceNode
+	sKey := serviceKey(serviceNode)
+	nKey := nodeKey(serviceNode)
+
+	if _, ok := d.Records[sKey]; ok {
+		records := d.Records[sKey]
+		if _, ok := records[nKey]; ok {
+			records[nKey] = serviceNode
+		} else {
+			d.Records[sKey][nKey] = serviceNode
+		}
 	} else {
 		d.logger.Trace("register", "name", serviceNode.Name, "version", serviceNode.Version, "address", serviceNode.Address)
-		d.Records[nodeKey(serviceNode)] = serviceNode
+		d.Records[sKey] = map[string]registry.ServiceNode{}
+		d.Records[sKey][nKey] = serviceNode
 	}
 }
 
 //nolint:gochecknoglobals
 var store = &dataStore{
-	Records: make(map[string]registry.ServiceNode),
+	Records: make(map[string]map[string]registry.ServiceNode),
 }
 
 func (d *dataStore) Start(ctx context.Context, logger log.Logger, registry registry.Registry) {
@@ -224,24 +244,36 @@ func (c *Cache) GetService(_ context.Context, namespace, region, name string, sc
 
 	services := []registry.ServiceNode{}
 
-	for _, record := range store.Records {
-		if name != "" && record.Name != name {
+	for _, records := range store.Records {
+		if len(records) < 1 {
 			continue
 		}
 
-		if namespace != "" && record.Namespace != namespace {
+		randomRecord := registry.ServiceNode{}
+		for _, record := range records {
+			randomRecord = record
+			break
+		}
+
+		if randomRecord.Namespace != namespace {
 			continue
 		}
 
-		if region != "" && record.Region != region {
+		if randomRecord.Region != region {
 			continue
 		}
 
-		if len(schemes) > 0 && !slices.Contains(schemes, record.Scheme) {
+		if randomRecord.Name != name {
 			continue
 		}
 
-		services = append(services, record)
+		for _, record := range records {
+			if len(schemes) > 0 && !slices.Contains(schemes, record.Scheme) {
+				continue
+			}
+
+			services = append(services, record)
+		}
 	}
 
 	if len(services) == 0 {
@@ -258,20 +290,32 @@ func (c *Cache) ListServices(_ context.Context, namespace, region string, scheme
 
 	services := []registry.ServiceNode{}
 
-	for _, record := range store.Records {
-		if namespace != "" && record.Namespace != namespace {
+	for _, records := range store.Records {
+		if len(records) < 1 {
 			continue
 		}
 
-		if region != "" && record.Region != region {
+		randomRecord := registry.ServiceNode{}
+		for _, record := range records {
+			randomRecord = record
+			break
+		}
+
+		if randomRecord.Namespace != namespace {
 			continue
 		}
 
-		if len(schemes) > 0 && !slices.Contains(schemes, record.Scheme) {
+		if randomRecord.Region != region {
 			continue
 		}
 
-		services = append(services, record)
+		for _, record := range records {
+			if len(schemes) > 0 && !slices.Contains(schemes, record.Scheme) {
+				continue
+			}
+
+			services = append(services, record)
+		}
 	}
 
 	return services, nil
