@@ -21,11 +21,11 @@ import (
 	fileproto "github.com/go-orb/plugins/client/tests/proto/file"
 
 	// Blank imports here are fine.
-	_ "github.com/go-orb/plugins-experimental/registry/mdns"
 	_ "github.com/go-orb/plugins/codecs/json"
 	_ "github.com/go-orb/plugins/codecs/proto"
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	_ "github.com/go-orb/plugins/log/slog"
+	_ "github.com/go-orb/plugins/registry/mdns"
 )
 
 func setupServer(sn string) (*tests.SetupData, error) {
@@ -33,16 +33,14 @@ func setupServer(sn string) (*tests.SetupData, error) {
 
 	setupData := &tests.SetupData{}
 
-	sv := ""
-
-	logger, err := log.New()
+	logger, err := log.New(log.WithLevel(log.LevelDebug))
 	if err != nil {
 		cancel()
 
 		return nil, err
 	}
 
-	reg, err := registry.New(sn, sv, nil, &types.Components{}, logger)
+	reg, err := registry.New(nil, &types.Components{}, logger)
 	if err != nil {
 		cancel()
 
@@ -55,7 +53,11 @@ func setupServer(sn string) (*tests.SetupData, error) {
 	fileHInstance := new(filehandler.Handler)
 	fileHRegister := fileproto.RegisterFileServiceHandler(fileHInstance)
 
-	ep, err := drpc.New(drpc.NewConfig(drpc.WithHandlers(echoHRegister, fileHRegister)), logger, reg)
+	options := []server.Option{
+		drpc.WithHandlers(echoHRegister, fileHRegister),
+	}
+
+	ep, err := drpc.New(sn, "", drpc.NewConfig(options...), logger, reg)
 	if err != nil {
 		cancel()
 

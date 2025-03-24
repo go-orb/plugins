@@ -33,10 +33,10 @@ import (
 	_ "github.com/go-orb/plugins/codecs/json"
 	_ "github.com/go-orb/plugins/codecs/proto"
 
-	_ "github.com/go-orb/plugins-experimental/registry/mdns"
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	_ "github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/slog"
+	_ "github.com/go-orb/plugins/registry/mdns"
 )
 
 // TODO(davincible): test get path params
@@ -326,12 +326,12 @@ func TestServerIntegration(t *testing.T) {
 	logger, err := log.New()
 	require.NoError(t, err, "failed to setup the logger")
 
-	reg, err := registry.New(name, version, nil, components, logger)
+	reg, err := registry.New(nil, components, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
 	h := new(handler.EchoHandler)
 
-	srv, err := server.New(nil, logger, reg,
+	srv, err := server.New(name, version, nil, logger, reg,
 		server.WithEntrypointConfig(mhttp.NewConfig(
 			mhttp.WithName("test-ep-1"),
 			mhttp.WithAddress(":48081"),
@@ -400,11 +400,11 @@ func TestServerFileConfig(t *testing.T) {
 	logger, err := log.New()
 	require.NoError(t, err, "failed to setup the logger")
 
-	reg, err := registry.New(name, version, nil, components, logger)
+	reg, err := registry.New(nil, components, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
 	h := new(handler.EchoHandler)
-	srv, err := server.New(configData, logger, reg,
+	srv, err := server.New(name, version, configData, logger, reg,
 		server.WithEntrypointConfig(mhttp.NewConfig(
 			mhttp.WithName("static-ep-1"),
 			mhttp.WithAddress(":48081"),
@@ -649,7 +649,7 @@ func setupServer(tb testing.TB, nolog bool, opts ...server.Option) (*mhttp.Serve
 		return nil, cancel, fmt.Errorf("failed to setup logger: %w", err)
 	}
 
-	reg, err := registry.New(name, version, nil, components, logger)
+	reg, err := registry.New(nil, components, logger)
 	if err != nil {
 		return nil, nil, fmt.Errorf("setup registry: %w", err)
 	}
@@ -661,7 +661,7 @@ func setupServer(tb testing.TB, nolog bool, opts ...server.Option) (*mhttp.Serve
 
 	cfg := mhttp.NewConfig(opts...)
 
-	server, err := mhttp.New(cfg, logger, reg)
+	server, err := mhttp.New(name, version, cfg, logger, reg)
 	if err != nil {
 		return nil, cancel, fmt.Errorf("failed to provide http server: %w", err)
 	}

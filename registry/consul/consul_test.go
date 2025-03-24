@@ -19,7 +19,7 @@ import (
 	"github.com/go-orb/plugins/registry/tests"
 )
 
-func createServer() (*tests.TestSuite, func() error, error) {
+func createSuite() (*tests.TestSuite, func() error, error) {
 	ctx := context.Background()
 
 	logger, err := log.New(log.WithLevel("TRACE"))
@@ -28,42 +28,37 @@ func createServer() (*tests.TestSuite, func() error, error) {
 		return nil, func() error { return nil }, err
 	}
 
-	server, err := createServer1(&testing.T{})
+	server, err := createServer(&testing.T{})
 	if err != nil {
 		logger.Error("failed to create a consul server", "err", err)
 		return nil, func() error { return nil }, err
 	}
 
-	reg1 := New("test1.service", "", NewConfig(WithAddress(server.HTTPAddr)), logger)
+	reg1 := New(NewConfig(WithAddress(server.HTTPAddr), WithNoCache()), logger)
 	if err := reg1.Start(ctx); err != nil {
 		log.Error("failed to connect registry one to Consul server", "err", err)
 		server.Stop() //nolint:errcheck
 		return nil, func() error { return nil }, err
 	}
 
-	reg2 := New("test2.service", "", NewConfig(WithAddress(server.HTTPAddr)), logger)
+	reg2 := New(NewConfig(WithAddress(server.HTTPAddr)), logger)
 	if err := reg2.Start(ctx); err != nil {
 		log.Error("failed to connect registry two to Consul server", "err", err)
 		server.Stop() //nolint:errcheck
 		return nil, func() error { return nil }, err
 	}
 
-	reg3 := New("test3.service", "", NewConfig(WithAddress(server.HTTPAddr)), logger)
-	if err := reg3.Start(ctx); err != nil {
-		log.Error("failed to connect registry three to Consul server", "err", err)
-		server.Stop() //nolint:errcheck
-		return nil, func() error { return nil }, err
-	}
-
 	cleanup := func() error {
-		_ = server.Stop() //nolint:errcheck
+		_ = reg1.Stop(ctx) //nolint:errcheck
+		_ = reg2.Stop(ctx) //nolint:errcheck
+		_ = server.Stop()  //nolint:errcheck
 		return nil
 	}
 
-	return tests.CreateSuite(logger, []registry.Registry{reg1, reg2, reg3}, time.Millisecond*200, 0), cleanup, nil
+	return tests.CreateSuite(logger, []registry.Registry{reg1, reg2}, time.Millisecond*500), cleanup, nil
 }
 
-func createServer1(tb testing.TB) (*testutil.TestServer, error) {
+func createServer(tb testing.TB) (*testutil.TestServer, error) {
 	tb.Helper()
 
 	// Compile our consul path.
@@ -90,7 +85,7 @@ func createServer1(tb testing.TB) (*testutil.TestServer, error) {
 }
 
 func TestSuite(t *testing.T) {
-	s, cleanup, err := createServer()
+	s, cleanup, err := createSuite()
 	require.NoError(t, err, "while creating a server")
 
 	// Run the tests.
@@ -100,7 +95,7 @@ func TestSuite(t *testing.T) {
 }
 
 func BenchmarkGetService(b *testing.B) {
-	s, cleanup, err := createServer()
+	s, cleanup, err := createSuite()
 	require.NoError(b, err, "while creating a server")
 
 	s.BenchmarkGetService(b)
@@ -109,7 +104,7 @@ func BenchmarkGetService(b *testing.B) {
 }
 
 func BenchmarkParallelGetService(b *testing.B) {
-	s, cleanup, err := createServer()
+	s, cleanup, err := createSuite()
 	require.NoError(b, err, "while creating a server")
 
 	s.BenchmarkGetService(b)
@@ -118,7 +113,7 @@ func BenchmarkParallelGetService(b *testing.B) {
 }
 
 func BenchmarkGetServiceWithNoNodes(b *testing.B) {
-	s, cleanup, err := createServer()
+	s, cleanup, err := createSuite()
 	require.NoError(b, err, "while creating a server")
 
 	s.BenchmarkGetServiceWithNoNodes(b)

@@ -4,22 +4,16 @@ package cache
 import (
 	"context"
 	"errors"
+	"fmt"
+	"slices"
 	"sync"
 
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 )
 
-type node struct {
-	registry.Node
-}
-
-type record struct {
-	Name      string
-	Version   string
-	Metadata  map[string]string
-	Nodes     map[string]node
-	Endpoints []registry.Endpoint
+func nodeKey(s registry.ServiceNode) string {
+	return fmt.Sprintf("%s:%s:%s:%s:%s:%s", s.Namespace, s.Region, s.Name, s.Version, s.Scheme, s.Address)
 }
 
 type dataStore struct {
@@ -27,7 +21,7 @@ type dataStore struct {
 
 	registry registry.Registry
 
-	Records map[string]map[string]record
+	Records map[string]registry.ServiceNode
 
 	watcher     registry.Watcher
 	watchCancel context.CancelFunc
@@ -37,29 +31,39 @@ type dataStore struct {
 }
 
 // populate initializes the cache with services from the registry.
-func (d *dataStore) populate() {
-	services, err := d.registry.ListServices()
+func (d *dataStore) populate(ctx context.Context) {
+	services, err := d.registry.ListServices(ctx, "", "", nil)
 	if err != nil {
 		d.logger.Warn("Failed to list services when populating cache", "error", err)
 		return
 	}
 
-	store.Lock()
-	defer store.Unlock()
-
+	// Create a map to track unique service names
+	serviceNames := make(map[string]registry.ServiceNode)
 	for _, service := range services {
-		fullServices, err := d.registry.GetService(service.Name)
+		serviceNames[nodeKey(service)] = service
+	}
+
+	d.Lock()
+	defer d.Unlock()
+
+	// Fetch full details for each service
+	for _, svc := range serviceNames {
+		serviceNodes, err := d.registry.GetService(ctx, svc.Namespace, svc.Region, svc.Name, nil)
 		if err != nil {
-			d.logger.Warn("Failed to get service details when populating cache", "name", service.Name, "error", err)
+			if !errors.Is(err, registry.ErrNotFound) {
+				d.logger.Warn("Failed to get service details when populating cache", "name", svc.Name, "error", err)
+			}
+
 			continue
 		}
 
-		for _, fullService := range fullServices {
-			d.registerServiceInternal(fullService)
+		for _, serviceNode := range serviceNodes {
+			d.registerServiceNodeInternal(serviceNode)
 		}
 	}
 
-	d.logger.Debug("Populated cache with services from registry")
+	d.logger.Debug("Populated with services from registry")
 }
 
 // startWatching begins watching a registry for service changes and updates the cache accordingly.
@@ -71,16 +75,17 @@ func (d *dataStore) startWatching(ctx context.Context) error {
 	// Start the watcher.
 	var err error
 
-	d.watcher, err = d.registry.Watch()
+	// Create a context for this watcher.
+	var watchCtx context.Context
+	watchCtx, d.watchCancel = context.WithCancel(ctx)
+
+	d.watcher, err = d.registry.Watch(watchCtx)
 	if err != nil {
 		return err
 	}
 
-	// Create a context for this watcher.
-	ctx, d.watchCancel = context.WithCancel(ctx)
-
 	// Start watching in a goroutine.
-	go d.watch(ctx)
+	go d.watch(watchCtx)
 
 	d.logger.Debug("Started watching registry for changes")
 
@@ -101,7 +106,7 @@ func (d *dataStore) watch(ctx context.Context) {
 		result, err := d.watcher.Next()
 		if err != nil {
 			if errors.Is(err, registry.ErrWatcherStopped) {
-				d.logger.Debug("Registry watcher stopped")
+				d.logger.Debug("Registry watcher stopped.")
 				return
 			}
 
@@ -112,10 +117,10 @@ func (d *dataStore) watch(ctx context.Context) {
 
 		// Process the result based on the action.
 		switch result.Action {
-		case "create", "update":
-			d.registerService(result.Service)
-		case "delete":
-			if err := d.deregisterService(result.Service); err != nil {
+		case registry.Create, registry.Update:
+			d.registerServiceNode(result.Node)
+		case registry.Delete:
+			if err := d.deregisterServiceNode(result.Node); err != nil {
 				d.logger.Warn("Error deregistering service from watcher", "error", err)
 			}
 		default:
@@ -124,144 +129,44 @@ func (d *dataStore) watch(ctx context.Context) {
 	}
 }
 
-// deregisterService removes a service from the cache.
-func (d *dataStore) deregisterService(service *registry.Service) error {
+// deregisterServiceNode removes a service from the cache.
+func (d *dataStore) deregisterServiceNode(serviceNode registry.ServiceNode) error {
 	d.Lock()
 	defer d.Unlock()
 
-	if service == nil {
+	key := nodeKey(serviceNode)
+
+	if _, ok := d.Records[key]; ok {
+		d.logger.Trace("deregister", "name", serviceNode.Name, "version", serviceNode.Version, "address", serviceNode.Address)
+		delete(d.Records, key)
+
 		return nil
-	}
-
-	// If service doesn't exist in our records, nothing to do
-	records, ok := d.Records[service.Name]
-	if !ok {
-		return nil
-	}
-
-	// Get the version record if it exists
-	versionRecord, ok := records[service.Version]
-	if !ok {
-		return nil
-	}
-
-	// Remove the specific nodes
-	for _, node := range service.Nodes {
-		delete(versionRecord.Nodes, node.ID)
-	}
-
-	// Clean up empty records
-	if len(versionRecord.Nodes) == 0 {
-		delete(records, service.Version)
-
-		if len(records) == 0 {
-			d.logger.Trace("Registry removed service completely", "name", service.Name)
-			delete(d.Records, service.Name)
-		}
 	}
 
 	return nil
 }
 
-// registerService adds or updates a service in the cache.
-func (d *dataStore) registerService(service *registry.Service) {
+// registerServiceNode adds or updates a service in the cache.
+func (d *dataStore) registerServiceNode(serviceNode registry.ServiceNode) {
+	d.registerServiceNodeInternal(serviceNode)
+}
+
+// registerServiceNodeInternal adds or updates a service in the cache (internal method).
+func (d *dataStore) registerServiceNodeInternal(serviceNode registry.ServiceNode) {
 	d.Lock()
 	defer d.Unlock()
 
-	d.registerServiceInternal(service)
-}
-
-// registerServiceInternal adds or updates a service in the cache (internal method).
-func (d *dataStore) registerServiceInternal(service *registry.Service) {
-	if service == nil {
-		return
-	}
-
-	r := serviceToRecord(service)
-
-	// Create map if it doesn't exist.
-	if _, ok := d.Records[service.Name]; !ok {
-		d.Records[service.Name] = make(map[string]record)
-	}
-
-	if _, ok := d.Records[service.Name][service.Version]; !ok {
-		// New service - store it and we're done.
-		d.Records[service.Name][service.Version] = r
-		d.logger.Trace("registry cache added new service", "name", service.Name, "version", service.Version)
-
-		return
-	}
-
-	// Existing service - update record.
-	existingRecord := d.Records[service.Name][service.Version]
-
-	// Update the service metadata.
-	existingRecord.Metadata = make(map[string]string)
-	for k, v := range service.Metadata {
-		existingRecord.Metadata[k] = v
-	}
-
-	// Update the endpoints.
-	for _, ep := range service.Endpoints {
-		existingRecord.Endpoints = append(existingRecord.Endpoints, registry.Endpoint{
-			Name:     ep.Name,
-			Request:  ep.Request,
-			Response: ep.Response,
-			Metadata: ep.Metadata,
-		})
-	}
-
-	// Track if we made any changes.
-	changes := false
-
-	// Handle nodes.
-	for _, newNode := range service.Nodes {
-		if existingNode, ok := existingRecord.Nodes[newNode.ID]; !ok { //nolint:nestif
-			// This is a new node, add it.
-			changes = true
-			metadata := make(map[string]string)
-
-			for k, v := range newNode.Metadata {
-				metadata[k] = v
-			}
-
-			existingRecord.Nodes[newNode.ID] = node{
-				Node: *newNode,
-			}
-		} else {
-			// This is an existing node, update it.
-			if existingNode.Node.Address != newNode.Address {
-				existingNode.Node.Address = newNode.Address
-				changes = true
-			}
-
-			// Update metadata.
-			for k, v := range newNode.Metadata {
-				if existingValue, ok := existingNode.Metadata[k]; !ok || existingValue != v {
-					if existingNode.Metadata == nil {
-						existingNode.Metadata = make(map[string]string)
-					}
-
-					existingNode.Metadata[k] = v
-					changes = true
-				}
-			}
-		}
-	}
-
-	// If we made changes or this is a regular TTL refresh, send an update.
-	if changes {
-		d.logger.Debug("Updated service", "name", service.Name, "version", service.Version)
+	if _, ok := d.Records[nodeKey(serviceNode)]; ok {
+		d.Records[nodeKey(serviceNode)] = serviceNode
 	} else {
-		d.logger.Trace("Refreshed service TTL", "name", service.Name, "version", service.Version)
+		d.logger.Trace("register", "name", serviceNode.Name, "version", serviceNode.Version, "address", serviceNode.Address)
+		d.Records[nodeKey(serviceNode)] = serviceNode
 	}
-
-	d.Records[service.Name][service.Version] = existingRecord
 }
 
 //nolint:gochecknoglobals
 var store = &dataStore{
-	Records: make(map[string]map[string]record),
+	Records: make(map[string]registry.ServiceNode),
 }
 
 func (d *dataStore) Start(ctx context.Context, logger log.Logger, registry registry.Registry) {
@@ -275,7 +180,7 @@ func (d *dataStore) Start(ctx context.Context, logger log.Logger, registry regis
 			return
 		}
 
-		d.populate()
+		d.populate(ctx)
 	})
 }
 
@@ -300,42 +205,91 @@ func (c *Cache) Start(ctx context.Context) error {
 
 // Stop stops the cache and its watcher.
 func (c *Cache) Stop(_ context.Context) error {
+	if store.watchCancel != nil {
+		store.watchCancel()
+	}
+
 	return nil
 }
 
+// String returns the name of the cache.
+func (c *Cache) String() string {
+	return "registry-cache"
+}
+
 // GetService returns a service from the cache.
-func (c *Cache) GetService(name string, _ ...registry.GetOption) ([]*registry.Service, error) {
+func (c *Cache) GetService(_ context.Context, namespace, region, name string, schemes []string) ([]registry.ServiceNode, error) {
 	store.RLock()
 	defer store.RUnlock()
 
-	records, ok := store.Records[name]
-	if !ok {
-		return nil, registry.ErrNotFound
+	services := []registry.ServiceNode{}
+
+	for _, record := range store.Records {
+		if name != "" && record.Name != name {
+			continue
+		}
+
+		if namespace != "" && record.Namespace != namespace {
+			continue
+		}
+
+		if region != "" && record.Region != region {
+			continue
+		}
+
+		if len(schemes) > 0 && !slices.Contains(schemes, record.Scheme) {
+			continue
+		}
+
+		services = append(services, record)
 	}
 
-	services := make([]*registry.Service, 0, len(records))
-	for _, record := range records {
-		// Convert record back to service.
-		services = append(services, recordToService(record))
+	if len(services) == 0 {
+		return nil, registry.ErrNotFound
 	}
 
 	return services, nil
 }
 
 // ListServices lists services within the cache.
-func (c *Cache) ListServices(_ ...registry.ListOption) ([]*registry.Service, error) {
+func (c *Cache) ListServices(_ context.Context, namespace, region string, schemes []string) ([]registry.ServiceNode, error) {
 	store.RLock()
 	defer store.RUnlock()
 
-	var services []*registry.Service
+	services := []registry.ServiceNode{}
 
-	for _, records := range store.Records {
-		for _, record := range records {
-			services = append(services, recordToService(record))
+	for _, record := range store.Records {
+		if namespace != "" && record.Namespace != namespace {
+			continue
 		}
+
+		if region != "" && record.Region != region {
+			continue
+		}
+
+		if len(schemes) > 0 && !slices.Contains(schemes, record.Scheme) {
+			continue
+		}
+
+		services = append(services, record)
 	}
 
 	return services, nil
+}
+
+// Register registers a service with the cache.
+func (c *Cache) Register(ctx context.Context, serviceNode registry.ServiceNode) error {
+	return c.registry.Register(ctx, serviceNode)
+}
+
+// Deregister deregisters a service with the cache.
+func (c *Cache) Deregister(ctx context.Context, serviceNode registry.ServiceNode) error {
+	return c.registry.Deregister(ctx, serviceNode)
+}
+
+// Watch returns a watcher for the cache.
+func (c *Cache) Watch(ctx context.Context, opts ...registry.WatchOption) (registry.Watcher, error) {
+	return c.registry.Watch(ctx, opts...)
 }
 
 // New creates a new registry cache.
@@ -343,6 +297,6 @@ func New(cfg Config, logger log.Logger, registry registry.Registry) *Cache {
 	return &Cache{
 		config:   cfg,
 		registry: registry,
-		logger:   logger,
+		logger:   logger.With("subcomponent", "registry-cache"),
 	}
 }

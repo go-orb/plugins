@@ -41,6 +41,9 @@ const Plugin = "http"
 // want to listen on multiple interfaces, or multiple ports in parallel, even
 // with the same handler.
 type Server struct {
+	serviceName    string
+	serviceVersion string
+
 	config   *Config
 	logger   log.Logger
 	registry registry.Type
@@ -68,6 +71,8 @@ type Server struct {
 // can serve a HTTP1, HTTP2 and HTTP3 server. If you enable HTTP3 it will listen
 // on both TCP and UDP on the same port.
 func Provide(
+	serviceName string,
+	serviceVersion string,
 	configData map[string]any,
 	logger log.Logger,
 	reg registry.Type,
@@ -104,11 +109,17 @@ func Provide(
 		cfg.OptHandlers = append(cfg.OptHandlers, h)
 	}
 
-	return New(cfg, logger, reg)
+	return New(serviceName, serviceVersion, cfg, logger, reg)
 }
 
 // New creates a http server by options.
-func New(acfg any, logger log.Logger, reg registry.Type) (server.Entrypoint, error) {
+func New(
+	serviceName string,
+	serviceVersion string,
+	acfg any,
+	logger log.Logger,
+	reg registry.Type,
+) (server.Entrypoint, error) {
 	cfg, ok := acfg.(*Config)
 	if !ok {
 		return nil, fmt.Errorf("http invalid config: %v", cfg)
@@ -130,10 +141,12 @@ func New(acfg any, logger log.Logger, reg registry.Type) (server.Entrypoint, err
 	logger = logger.With(slog.String("entrypoint", cfg.Name))
 
 	entrypoint := Server{
-		config:   cfg,
-		logger:   logger,
-		registry: reg,
-		router:   router,
+		serviceName:    serviceName,
+		serviceVersion: serviceVersion,
+		config:         cfg,
+		logger:         logger,
+		registry:       reg,
+		router:         router,
 	}
 
 	entrypoint.config.TLS, err = entrypoint.setupTLS()
@@ -154,7 +167,7 @@ func New(acfg any, logger log.Logger, reg registry.Type) (server.Entrypoint, err
 }
 
 // Start will create the listeners and start the server on the entrypoint.
-func (s *Server) Start(_ context.Context) error {
+func (s *Server) Start(ctx context.Context) error {
 	if s.started {
 		return nil
 	}
@@ -190,7 +203,7 @@ func (s *Server) Start(_ context.Context) error {
 	}()
 
 	if !s.config.HTTP3 {
-		if err := s.register(); err != nil {
+		if err := s.registryRegister(ctx); err != nil {
 			return fmt.Errorf("failed to register the HTTP server: %w", err)
 		}
 
@@ -211,7 +224,7 @@ func (s *Server) Start(_ context.Context) error {
 		}
 	}()
 
-	if err := s.register(); err != nil {
+	if err := s.registryRegister(ctx); err != nil {
 		return fmt.Errorf("failed to register the HTTP server: %w", err)
 	}
 
@@ -231,7 +244,7 @@ func (s *Server) Stop(ctx context.Context) error {
 
 	s.logger.Debug("Stopping")
 
-	if err := s.deregister(); err != nil {
+	if err := s.registryDeregister(ctx); err != nil {
 		return err
 	}
 
@@ -309,11 +322,6 @@ func (s *Server) Transport() string {
 	return "http"
 }
 
-// EntrypointID returns the id (configured name) of this entrypoint in the registry.
-func (s *Server) EntrypointID() string {
-	return s.config.Name
-}
-
 // String returns the entrypoint type; http.
 func (s *Server) String() string {
 	return Plugin
@@ -362,58 +370,20 @@ func (s *Server) setupTLS() (*mtls.Config, error) {
 	return &mtls.Config{Config: config}, nil
 }
 
-//nolint:unparam
-func (s *Server) getEndpoints() ([]*registry.Endpoint, error) {
-	routes := s.router.Routes()
-	result := make([]*registry.Endpoint, len(routes))
-
-	for _, r := range routes {
-		s.logger.Trace("found endpoint", slog.String("name", r))
-
-		result = append(result, &registry.Endpoint{
-			Name:     r,
-			Metadata: map[string]string{"stream": "true"},
-		})
+func (s *Server) registryService() registry.ServiceNode {
+	return registry.ServiceNode{
+		Name:     s.serviceName,
+		Version:  s.serviceVersion,
+		Address:  s.Address(),
+		Scheme:   s.Transport(),
+		Metadata: make(map[string]string),
 	}
-
-	return result, nil
 }
 
-func (s *Server) registryService() (*registry.Service, error) {
-	node := &registry.Node{
-		ID:        s.EntrypointID(),
-		Address:   s.Address(),
-		Transport: s.Transport(),
-		Metadata:  make(map[string]string),
-	}
-
-	eps, err := s.getEndpoints()
-	if err != nil {
-		return nil, err
-	}
-
-	return &registry.Service{
-		Name:      s.registry.ServiceName(),
-		Version:   s.registry.ServiceVersion(),
-		Nodes:     []*registry.Node{node},
-		Endpoints: eps,
-	}, nil
+func (s *Server) registryRegister(ctx context.Context) error {
+	return s.registry.Register(ctx, s.registryService())
 }
 
-func (s *Server) register() error {
-	rService, err := s.registryService()
-	if err != nil {
-		return err
-	}
-
-	return s.registry.Register(rService)
-}
-
-func (s *Server) deregister() error {
-	rService, err := s.registryService()
-	if err != nil {
-		return err
-	}
-
-	return s.registry.Deregister(rService)
+func (s *Server) registryDeregister(ctx context.Context) error {
+	return s.registry.Deregister(ctx, s.registryService())
 }

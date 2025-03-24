@@ -32,12 +32,12 @@ func SetupServer(opts ...server.Option) (server.Entrypoint, func(t *testing.T), 
 
 	components := types.NewComponents()
 
-	reg, err := registry.New("app", "v1.0.0", nil, components, logger)
+	reg, err := registry.New(nil, components, logger)
 	if err != nil {
 		return nil, nil, fmt.Errorf("setup registry: %w", err)
 	}
 
-	srv, err := mgrpc.New(mgrpc.NewConfig(opts...), logger, reg)
+	srv, err := mgrpc.New("app", "v1.0.0", mgrpc.NewConfig(opts...), logger, reg)
 	if err != nil {
 		return nil, nil, fmt.Errorf("setup gRPC server: %w", err)
 	}

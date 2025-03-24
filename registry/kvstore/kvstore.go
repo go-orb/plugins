@@ -4,6 +4,8 @@ package kvstore
 import (
 	"context"
 	"errors"
+	"slices"
+	"strings"
 
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/config"
@@ -13,9 +15,34 @@ import (
 	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/orberrors"
 	"github.com/go-orb/plugins/registry/regutil/cache"
-	"github.com/google/uuid"
-	"github.com/hashicorp/go-multierror"
 )
+
+func nodeKey(s registry.ServiceNode, delimiter string) string {
+	return strings.Join([]string{
+		s.Namespace,
+		s.Region,
+		s.Name,
+		s.Version,
+		s.Scheme,
+		s.Address,
+	}, delimiter)
+}
+
+func keyToServiceNode(key string, delimiter string) (registry.ServiceNode, error) {
+	parts := strings.Split(key, delimiter)
+	if len(parts) != 6 {
+		return registry.ServiceNode{}, errors.New("invalid key format")
+	}
+
+	return registry.ServiceNode{
+		Namespace: parts[0],
+		Region:    parts[1],
+		Name:      parts[2],
+		Version:   parts[3],
+		Scheme:    parts[4],
+		Address:   parts[5],
+	}, nil
+}
 
 // This is here to make sure Registry implements registry.Registry.
 var _ registry.Registry = (*Registry)(nil)
@@ -24,14 +51,9 @@ var _ registry.Registry = (*Registry)(nil)
 type Registry struct {
 	ctx context.Context
 
-	serviceName    string
-	serviceVersion string
-
 	codec codecs.Marshaler
 
 	config Config
-
-	id string
 
 	logger log.Logger
 
@@ -39,27 +61,6 @@ type Registry struct {
 
 	// cache is used to cache registry operations.
 	cache *cache.Cache
-}
-
-// ServiceName returns the configured name of this service.
-func (c *Registry) ServiceName() string {
-	return c.serviceName
-}
-
-// ServiceVersion returns the configured version of this service.
-func (c *Registry) ServiceVersion() string {
-	return c.serviceVersion
-}
-
-// NodeID returns the ID of this service node in the registry.
-func (c *Registry) NodeID() string {
-	if c.id != "" {
-		return c.id
-	}
-
-	c.id = uuid.New().String()
-
-	return c.id
 }
 
 // Start starts the registry.
@@ -103,59 +104,60 @@ func (c *Registry) Type() string {
 }
 
 // Deregister deregisters a service within the registry.
-func (c *Registry) Deregister(s *registry.Service, _ ...registry.DeregisterOption) error {
-	mErr := &multierror.Error{}
+func (c *Registry) Deregister(_ context.Context, serviceNode registry.ServiceNode) error {
+	key := nodeKey(serviceNode, c.config.ServiceDelimiter)
+	c.logger.Trace("deregistering service", "serviceNode", serviceNode, "key", key)
 
-	for _, node := range s.Nodes {
-		key := s.Name + c.config.ServiceDelimiter + node.ID + c.config.ServiceDelimiter + s.Version
-		c.logger.Trace("deregistering service", "service", s, "key", key)
-
-		mErr = multierror.Append(mErr, c.kvstore.Purge(key, c.config.Database, c.config.Table))
-	}
-
-	return mErr.ErrorOrNil()
+	return c.kvstore.Purge(key, c.config.Database, c.config.Table)
 }
 
 // Register registers a service within the registry.
-func (c *Registry) Register(service *registry.Service, _ ...registry.RegisterOption) error {
-	if service == nil {
-		return orberrors.ErrBadRequest.Wrap(errors.New("wont store nil service"))
+func (c *Registry) Register(_ context.Context, serviceNode registry.ServiceNode) error {
+	if serviceNode.Name == "" {
+		return orberrors.ErrBadRequest.Wrap(errors.New("won't store service with empty name"))
 	}
 
-	mErr := &multierror.Error{}
+	key := nodeKey(serviceNode, c.config.ServiceDelimiter)
+	c.logger.Trace("registering service", "serviceNode", serviceNode, "key", key)
 
-	for _, node := range service.Nodes {
-		key := service.Name + c.config.ServiceDelimiter + node.ID + c.config.ServiceDelimiter + service.Version
-		c.logger.Trace("registering service", "service", service, "key", key)
-
-		mService := &registry.Service{
-			Name:      service.Name,
-			Version:   service.Version,
-			Metadata:  service.Metadata,
-			Endpoints: service.Endpoints,
-			Nodes:     []*registry.Node{node},
-		}
-
-		b, err := c.codec.Marshal(mService)
-		if err != nil {
-			return orberrors.ErrInternalServerError.Wrap(err)
-		}
-
-		mErr = multierror.Append(mErr, c.kvstore.Set(key, c.config.Database, c.config.Table, b))
+	b, err := c.codec.Marshal(serviceNode)
+	if err != nil {
+		return orberrors.ErrInternalServerError.Wrap(err)
 	}
 
-	return mErr.ErrorOrNil()
+	return c.kvstore.Set(key, c.config.Database, c.config.Table, b)
 }
 
 // GetService returns a service from the registry.
-func (c *Registry) GetService(name string, opts ...registry.GetOption) ([]*registry.Service, error) {
+func (c *Registry) GetService(ctx context.Context, namespace, region, name string, schemes []string) ([]registry.ServiceNode, error) {
 	if c.config.Cache {
-		return c.cache.GetService(name, opts...)
+		return c.cache.GetService(ctx, namespace, region, name, schemes)
 	}
 
-	services, err := c.listServices(kvstore.KeysPrefix(name + c.config.ServiceDelimiter))
+	key := strings.Join([]string{
+		namespace,
+		region,
+		name,
+	}, c.config.ServiceDelimiter)
+
+	key += c.config.ServiceDelimiter
+
+	services, err := c.listServices(ctx, kvstore.KeysPrefix(key))
 	if err != nil {
 		return nil, err
+	}
+
+	// Filter by schemes if specified
+	if len(schemes) > 0 {
+		var filtered []registry.ServiceNode
+
+		for _, service := range services {
+			if slices.Contains(schemes, service.Scheme) {
+				filtered = append(filtered, service)
+			}
+		}
+
+		services = filtered
 	}
 
 	// If no services found, return ErrNotFound
@@ -167,30 +169,58 @@ func (c *Registry) GetService(name string, opts ...registry.GetOption) ([]*regis
 }
 
 // ListServices lists services within the registry.
-func (c *Registry) ListServices(opts ...registry.ListOption) ([]*registry.Service, error) {
+func (c *Registry) ListServices(ctx context.Context, namespace, region string, schemes []string) ([]registry.ServiceNode, error) {
 	if c.config.Cache {
-		return c.cache.ListServices(opts...)
+		return c.cache.ListServices(ctx, namespace, region, schemes)
 	}
 
-	return c.listServices()
+	key := strings.Join([]string{
+		namespace,
+		region,
+	}, c.config.ServiceDelimiter)
+
+	key += c.config.ServiceDelimiter
+
+	services, err := c.listServices(ctx, kvstore.KeysPrefix(key))
+	if err != nil {
+		return nil, err
+	}
+
+	// Filter by schemes if specified
+	if len(schemes) > 0 {
+		var filtered []registry.ServiceNode
+
+		for _, service := range services {
+			if slices.Contains(schemes, service.Scheme) {
+				filtered = append(filtered, service)
+			}
+		}
+
+		services = filtered
+	}
+
+	return services, nil
 }
 
 // Watch returns a Watcher which you can watch on.
-func (c *Registry) Watch(_ ...registry.WatchOption) (registry.Watcher, error) {
+func (c *Registry) Watch(_ context.Context, _ ...registry.WatchOption) (registry.Watcher, error) {
 	return NewWatcher(c)
 }
 
-func (c *Registry) listServices(opts ...kvstore.KeysOption) ([]*registry.Service, error) {
+func (c *Registry) listServices(
+	_ context.Context,
+	opts ...kvstore.KeysOption,
+) ([]registry.ServiceNode, error) {
 	keys, err := c.kvstore.Keys(c.config.Database, c.config.Table, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	// Use name+version as the key for grouping services
-	serviceMap := map[string]*registry.Service{}
+	// Map to store unique service nodes
+	result := []registry.ServiceNode{}
 
 	for _, k := range keys {
-		s, err := c.getNode(k)
+		svc, err := c.getNode(k)
 		if err != nil {
 			if errors.Is(err, registry.ErrNotFound) {
 				// Skip not found errors and continue
@@ -200,49 +230,33 @@ func (c *Registry) listServices(opts ...kvstore.KeysOption) ([]*registry.Service
 			return nil, err
 		}
 
-		// Create a unique key for this service name and version
-		key := s.Name + "-" + s.Version
-
-		if serviceMap[key] == nil {
-			// First time seeing this service name+version
-			serviceMap[key] = s
-		} else {
-			// Add nodes to existing service entry
-			serviceMap[key].Nodes = append(serviceMap[key].Nodes, s.Nodes...)
-		}
+		result = append(result, svc)
 	}
 
-	svcs := make([]*registry.Service, 0, len(serviceMap))
-	for _, s := range serviceMap {
-		svcs = append(svcs, s)
-	}
-
-	return svcs, nil
+	return result, nil
 }
 
-// getNode retrieves a node from the store. It returns a service to also keep track of the version.
-func (c *Registry) getNode(s string) (*registry.Service, error) {
+// getNode retrieves a node from the store.
+func (c *Registry) getNode(s string) (registry.ServiceNode, error) {
 	recs, err := c.kvstore.Get(s, c.config.Database, c.config.Table)
 	if err != nil {
-		return nil, err
+		return registry.ServiceNode{}, err
 	}
 
 	if len(recs) == 0 {
-		return nil, registry.ErrNotFound
+		return registry.ServiceNode{}, registry.ErrNotFound
 	}
 
-	var svc registry.Service
+	var svc registry.ServiceNode
 	if err := c.codec.Unmarshal(recs[0].Value, &svc); err != nil {
-		return nil, err
+		return registry.ServiceNode{}, err
 	}
 
-	return &svc, nil
+	return svc, nil
 }
 
 // Provide creates a new memory registry.
 func Provide(
-	name string,
-	version string,
 	datas map[string]any,
 	_ *types.Components,
 	logger log.Logger,
@@ -269,15 +283,13 @@ func Provide(
 		return registry.Type{}, err
 	}
 
-	reg, err := New(name, version, cfg, logger, kvstore)
+	reg, err := New(cfg, logger, kvstore)
 
 	return registry.Type{Registry: reg}, err
 }
 
 // New creates a new memory registry.
 func New(
-	serviceName string,
-	serviceVersion string,
 	cfg Config,
 	logger log.Logger,
 	kvstore kvstore.Type,
@@ -288,12 +300,10 @@ func New(
 	}
 
 	reg := &Registry{
-		serviceName:    serviceName,
-		serviceVersion: serviceVersion,
-		config:         cfg,
-		logger:         logger,
-		codec:          codec,
-		kvstore:        kvstore,
+		config:  cfg,
+		logger:  logger.With("component", "registry-kvstore"),
+		codec:   codec,
+		kvstore: kvstore,
 	}
 
 	// Initialize the cache with a reference to this registry

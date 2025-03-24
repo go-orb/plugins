@@ -4,10 +4,7 @@ import (
 	"bytes"
 	"compress/zlib"
 	"encoding/hex"
-	"encoding/json"
 	"io"
-
-	"github.com/go-orb/go-orb/registry"
 )
 
 func encode(buf []byte) string {
@@ -46,60 +43,6 @@ func decode(d string) []byte {
 	zr.Close() //nolint:errcheck,gosec
 
 	return rbuf
-}
-
-func encodeEndpoints(en []*registry.Endpoint) []string {
-	var tags []string
-
-	for _, e := range en {
-		if b, err := json.Marshal(e); err == nil {
-			tags = append(tags, "e-"+encode(b))
-		}
-	}
-
-	return tags
-}
-
-func decodeEndpoints(tags []string) []*registry.Endpoint {
-	var endpoint []*registry.Endpoint
-
-	// use the first format you find
-	var ver byte
-
-	for _, tag := range tags {
-		if len(tag) == 0 || tag[0] != 'e' {
-			continue
-		}
-
-		// check version
-		if ver > 0 && tag[1] != ver {
-			continue
-		}
-
-		var (
-			e   *registry.Endpoint
-			buf []byte
-		)
-
-		// Old encoding was plain
-		if tag[1] == '=' {
-			buf = []byte(tag[2:])
-		}
-
-		// New encoding is hex
-		if tag[1] == '-' {
-			buf = decode(tag[2:])
-		}
-
-		if err := json.Unmarshal(buf, &e); err == nil {
-			endpoint = append(endpoint, e)
-		}
-
-		// set version
-		ver = tag[1]
-	}
-
-	return endpoint
 }
 
 func encodeVersion(v string) []string {

@@ -14,31 +14,31 @@ import (
 	"github.com/go-orb/plugins/registry/tests"
 )
 
-func createRegistries() (*tests.TestSuite, func() error, error) {
+func createSuite() (*tests.TestSuite, func() error, error) {
 	ctx := context.Background()
 
-	logger, err := log.New()
+	logger, err := log.New(log.WithLevel(log.LevelTrace))
 	if err != nil {
 		log.Error("failed to create logger", "err", err)
 		return nil, func() error { return nil }, err
 	}
 
 	cfg1 := NewConfig()
-	reg1 := New("orb.service.test1", "unset", cfg1, logger)
+	reg1 := New(cfg1, logger)
 	if err := reg1.Start(ctx); err != nil {
 		log.Error("failed to connect registry one to Consul server", "err", err)
 		return nil, func() error { return nil }, err
 	}
 
 	cfg2 := NewConfig()
-	reg2 := New("orb.service.test2", "unset", cfg2, logger)
+	reg2 := New(cfg2, logger)
 	if err := reg2.Start(ctx); err != nil {
 		log.Error("failed to connect registry two to Consul server", "err", err)
 		return nil, func() error { return nil }, err
 	}
 
 	cfg3 := NewConfig()
-	reg3 := New("orb.service.test3", "unset", cfg3, logger)
+	reg3 := New(cfg3, logger)
 	if err := reg3.Start(ctx); err != nil {
 		log.Error("failed to connect registry three to Consul server", "err", err)
 		return nil, func() error { return nil }, err
@@ -50,11 +50,11 @@ func createRegistries() (*tests.TestSuite, func() error, error) {
 		return nil
 	}
 
-	return tests.CreateSuite(logger, []registry.Registry{reg1, reg2, reg3}, 0, 0), cleanup, nil
+	return tests.CreateSuite(logger, []registry.Registry{reg1, reg2, reg3}, 0), cleanup, nil
 }
 
 func TestSuite(t *testing.T) {
-	s, cleanup, err := createRegistries()
+	s, cleanup, err := createSuite()
 	require.NoError(t, err, "while creating a server")
 
 	// Run the tests.
@@ -64,7 +64,7 @@ func TestSuite(t *testing.T) {
 }
 
 func BenchmarkGetService(b *testing.B) {
-	s, cleanup, err := createRegistries()
+	s, cleanup, err := createSuite()
 	require.NoError(b, err, "while creating a server")
 
 	s.BenchmarkGetService(b)
@@ -73,7 +73,7 @@ func BenchmarkGetService(b *testing.B) {
 }
 
 func BenchmarkParallelGetService(b *testing.B) {
-	s, cleanup, err := createRegistries()
+	s, cleanup, err := createSuite()
 	require.NoError(b, err, "while creating a server")
 
 	s.BenchmarkGetService(b)
@@ -82,7 +82,7 @@ func BenchmarkParallelGetService(b *testing.B) {
 }
 
 func BenchmarkGetServiceWithNoNodes(b *testing.B) {
-	s, cleanup, err := createRegistries()
+	s, cleanup, err := createSuite()
 	require.NoError(b, err, "while creating a server")
 
 	s.BenchmarkGetServiceWithNoNodes(b)

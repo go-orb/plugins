@@ -1,14 +1,14 @@
 package consul
 
 import (
+	"maps"
 	"strings"
 	"sync"
 
 	"github.com/go-orb/go-orb/registry"
-	maddr "github.com/go-orb/go-orb/util/addr"
-	"github.com/go-orb/plugins/registry/regutil"
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/api/watch"
+	"github.com/hashicorp/go-hclog"
 )
 
 var _ registry.Watcher = (*consulWatcher)(nil)
@@ -23,7 +23,7 @@ type consulWatcher struct {
 	exit chan bool
 
 	sync.RWMutex
-	services map[string][]*registry.Service
+	nodes map[string]registry.ServiceNode
 }
 
 func newConsulWatcher(regConsul *RegistryConsul, opts ...registry.WatchOption) (*consulWatcher, error) {
@@ -38,12 +38,12 @@ func newConsulWatcher(regConsul *RegistryConsul, opts ...registry.WatchOption) (
 		exit:     make(chan bool),
 		next:     make(chan *registry.Result, 10),
 		watchers: make(map[string]*watch.Plan),
-		services: make(map[string][]*registry.Service),
+		nodes:    make(map[string]registry.ServiceNode),
 	}
 
 	// If a specific service is provided, watch that service
 	if len(wo.Service) > 0 {
-		wp, err := watch.Parse(map[string]interface{}{
+		wp, err := watch.Parse(map[string]any{
 			"service": wo.Service,
 			"type":    "service",
 		})
@@ -51,29 +51,29 @@ func newConsulWatcher(regConsul *RegistryConsul, opts ...registry.WatchOption) (
 			return nil, err
 		}
 
+		wp.Logger = hclog.New(&hclog.LoggerOptions{Level: hclog.Off})
 		wp.Handler = watcher.handle
 
-		tmp := func() {
+		go func() {
 			_ = wp.RunWithClientAndHclog(regConsul.Client(), wp.Logger) //nolint:errcheck
-		}
-		go tmp()
+		}()
 
 		watcher.wp = wp
 	} else {
 		// If no service name is specified, watch all services
-		wp, err := watch.Parse(map[string]interface{}{
+		wp, err := watch.Parse(map[string]any{
 			"type": "services",
 		})
 		if err != nil {
 			return nil, err
 		}
 
+		wp.Logger = hclog.New(&hclog.LoggerOptions{Level: hclog.Off})
 		wp.Handler = watcher.handle
 
-		tmp := func() {
+		go func() {
 			_ = wp.RunWithClientAndHclog(regConsul.Client(), wp.Logger) //nolint:errcheck
-		}
-		go tmp()
+		}()
 
 		watcher.wp = wp
 	}
@@ -81,173 +81,107 @@ func newConsulWatcher(regConsul *RegistryConsul, opts ...registry.WatchOption) (
 	return watcher, nil
 }
 
-//nolint:funlen,gocognit,gocyclo,cyclop
-func (cw *consulWatcher) serviceHandler(_ uint64, data interface{}) {
-	entries, ok := data.([]*api.ServiceEntry)
-	if !ok {
+func (cw *consulWatcher) serviceHandler(_ uint64, data any) {
+	entries, entriesOk := data.([]*api.ServiceEntry)
+	if !entriesOk {
 		return
 	}
 
-	var (
-		haveService bool
-		svc         *registry.Service
-	)
-
-	serviceMap := make(map[string]*registry.Service)
-	serviceName := ""
+	serviceNodes := make(map[string]registry.ServiceNode, len(entries))
+	servicePrefix := ""
 
 	for _, node := range entries {
-		// version is now a tag
-		version, _ := decodeVersion(node.Service.Tags)
-
-		nodeMeta := map[string]string{}
 		svcMeta := map[string]string{}
 
 		for k, v := range node.Service.Meta {
-			if strings.HasPrefix(k, "orb_service_") {
-				svcMeta[strings.TrimPrefix(k, "orb_service_")] = v
-			} else if strings.HasPrefix(k, "orb_node_") {
-				nodeMeta[strings.TrimPrefix(k, "orb_node_")] = v
+			if strings.HasPrefix(k, metaPrefix) {
+				svcMeta[strings.TrimPrefix(k, metaPrefix)] = v
 			}
 		}
 
-		// Skip unknown services.
-		if len(nodeMeta) == 0 && len(svcMeta) == 0 {
+		// Try to parse the node ID to get the service node
+		serviceNode, err := idToNode(node.Service.ID)
+		if err != nil {
 			continue
 		}
 
-		svc, haveService = serviceMap[version]
-		if !haveService {
-			serviceName = node.Service.Service
-			svc = &registry.Service{
-				Endpoints: decodeEndpoints(node.Service.Tags),
-				Name:      node.Service.Service,
-				Version:   svcMeta["version"],
-				Metadata:  svcMeta,
-			}
+		// Update with the latest metadata
+		serviceNode.Metadata = svcMeta
+
+		if servicePrefix == "" {
+			servicePrefix = idToPrefix(node.Service.ID)
 		}
 
-		var del bool
-
-		for _, check := range node.Checks {
-			// delete the node if the status is critical
-			if check.Status == "critical" {
-				del = true
-				break
-			}
-		}
-
-		// if delete then skip the node
-		if del {
-			continue
-		}
-
-		rNode := &registry.Node{
-			ID:       node.Node.ID,
-			Address:  maddr.HostPort(node.Node.Address, node.Service.Port),
-			Metadata: nodeMeta,
-		}
-
-		// Extract the transport from Metadata
-		if transport, ok := node.Service.Meta[metaTransportKey]; ok {
-			rNode.Transport = transport
-			delete(rNode.Metadata, metaTransportKey)
-		} else {
-			continue
-		}
-
-		// Extract the node ID from Metadata
-		if nodeID, ok := node.Service.Meta[metaNodeIDKey]; ok {
-			rNode.ID = nodeID
-			delete(rNode.Metadata, metaNodeIDKey)
-		} else {
-			continue
-		}
-
-		serviceMap[version] = svc
-		svc.Nodes = append(svc.Nodes, rNode)
+		serviceNodes[node.Service.ID] = serviceNode
 	}
 
+	// Get a copy of the current services
 	cw.RLock()
-	// make a copy
-	rservices := make(map[string][]*registry.Service)
-	for k, v := range cw.services {
-		rservices[k] = v
-	}
+	currentNodes := make(map[string]registry.ServiceNode)
+	maps.Copy(currentNodes, cw.nodes)
 	cw.RUnlock()
 
-	var newServices []*registry.Service //nolint:prealloc
+	// Check for new nodes.
+	for id, newNode := range serviceNodes {
+		oldNode, entriesOk := currentNodes[id]
+		if !entriesOk {
+			cw.next <- &registry.Result{Action: registry.Create, Node: newNode}
 
-	// serviceMap is the new set of services keyed by name+version
-	for _, newService := range serviceMap {
-		// append to the new set of cached services
-		newServices = append(newServices, newService)
+			// Update the current nodes
+			cw.Lock()
+			cw.nodes[id] = newNode
+			cw.Unlock()
+		} else if !metadataEqual(oldNode.Metadata, newNode.Metadata) {
+			// Check for updates
+			cw.next <- &registry.Result{Action: registry.Update, Node: newNode}
 
-		// check if the service exists in the existing cache
-		oldServices, ok := rservices[serviceName]
-		if !ok {
-			// does not exist? then we're creating brand new entries
-			cw.next <- &registry.Result{Action: "create", Service: newService}
-			continue
-		}
-
-		// service exists. ok let's figure out what to update and delete version wise
-		action := "create"
-
-		for _, oldService := range oldServices {
-			// does this version exist?
-			// no? then default to create
-			if oldService.Version != newService.Version {
-				continue
-			}
-
-			// yes? then it's an update
-			action = "update"
-
-			var nodes []*registry.Node
-			// check the old nodes to see if they've been deleted
-			for _, oldNode := range oldService.Nodes {
-				var seen bool
-
-				for _, newNode := range newService.Nodes {
-					if newNode.ID == oldNode.ID {
-						seen = true
-						break
-					}
-				}
-				// does the old node exist in the new set of nodes
-				// no? then delete that shit
-				if !seen {
-					nodes = append(nodes, oldNode)
-				}
-			}
-
-			// it's an update rather than creation
-			if len(nodes) > 0 {
-				delService := regutil.CopyService(oldService)
-				delService.Nodes = nodes
-				cw.next <- &registry.Result{Action: "delete", Service: delService}
-			}
-		}
-
-		cw.next <- &registry.Result{Action: action, Service: newService}
-	}
-
-	// Now check old versions that may not be in new services map
-	for _, old := range rservices[serviceName] {
-		// old version does not exist in new version map
-		// kill it with fire!
-		if _, ok := serviceMap[old.Version]; !ok {
-			cw.next <- &registry.Result{Action: "delete", Service: old}
+			// Update the current nodes
+			cw.Lock()
+			cw.nodes[id] = newNode
+			cw.Unlock()
 		}
 	}
 
-	cw.Lock()
-	cw.services[serviceName] = newServices
-	cw.Unlock()
+	if servicePrefix == "" {
+		return
+	}
+
+	oldNodes := make(map[string]registry.ServiceNode)
+
+	// Check for deleted nodes
+	for k, v := range currentNodes {
+		if strings.HasPrefix(k, servicePrefix) {
+			oldNodes[k] = v
+		}
+	}
+
+	for id, oldNode := range oldNodes {
+		if _, exists := serviceNodes[id]; !exists {
+			cw.next <- &registry.Result{Action: registry.Delete, Node: oldNode}
+
+			cw.Lock()
+			delete(cw.nodes, id)
+			cw.Unlock()
+		}
+	}
 }
 
-func (cw *consulWatcher) handle(_ uint64, data interface{}) {
+// Helper function to compare metadata.
+func metadataEqual(a, b map[string]string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for k, v := range a {
+		if bv, ok := b[k]; !ok || bv != v {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (cw *consulWatcher) handle(_ uint64, data any) {
 	services, ok := data.(map[string][]string)
 	if !ok {
 		return
@@ -265,56 +199,38 @@ func (cw *consulWatcher) handle(_ uint64, data interface{}) {
 			continue
 		}
 
-		wp, err := watch.Parse(map[string]interface{}{
+		wp, err := watch.Parse(map[string]any{
 			"type":    "service",
 			"service": service,
 		})
 		if err == nil {
+			wp.Logger = hclog.New(&hclog.LoggerOptions{Level: hclog.Off})
 			wp.Handler = cw.serviceHandler
 
-			tmp := func() {
+			go func() {
 				_ = wp.RunWithClientAndHclog(cw.r.Client(), wp.Logger) //nolint:errcheck
-			}
-			go tmp()
+			}()
 
 			cw.watchers[service] = wp
+
+			continue
 		}
 	}
-
-	cw.RLock()
-	// make a copy
-	rservices := make(map[string][]*registry.Service)
-	for k, v := range cw.services {
-		rservices[k] = v
-	}
-	cw.RUnlock()
 
 	// remove unknown services from registry
-	// save the things we want to delete
-	deleted := make(map[string][]*registry.Service)
+	for k := range cw.watchers {
+		if _, ok := services[k]; !ok {
+			delete(cw.watchers, k)
 
-	for service := range rservices {
-		if _, ok := services[service]; !ok {
 			cw.Lock()
-			// save this before deleting
-			deleted[service] = cw.services[service]
-			delete(cw.services, service)
-			cw.Unlock()
-		}
-	}
-
-	// remove unknown services from watchers
-	for service, w := range cw.watchers {
-		if _, ok := services[service]; !ok {
-			w.Stop()
-			delete(cw.watchers, service)
-
-			for _, oldService := range deleted[service] {
-				// send a delete for the service nodes that we're removing
-				cw.next <- &registry.Result{Action: "delete", Service: oldService}
+			for id, node := range cw.nodes {
+				if _, _, name := splitID(id); name == k {
+					cw.next <- &registry.Result{Action: registry.Delete, Node: node}
+					delete(cw.nodes, id)
+				}
 			}
-			// sent the empty list as the last resort to indicate to delete the entire service
-			cw.next <- &registry.Result{Action: "delete", Service: &registry.Service{Name: service}}
+
+			cw.Unlock()
 		}
 	}
 }
@@ -323,11 +239,7 @@ func (cw *consulWatcher) Next() (*registry.Result, error) {
 	select {
 	case <-cw.exit:
 		return nil, registry.ErrWatcherStopped
-	case r, ok := <-cw.next:
-		if !ok {
-			return nil, registry.ErrWatcherStopped
-		}
-
+	case r := <-cw.next:
 		return r, nil
 	}
 }
@@ -337,21 +249,17 @@ func (cw *consulWatcher) Stop() error {
 	case <-cw.exit:
 		return nil
 	default:
+		// stop the watchers
+		for _, wp := range cw.watchers {
+			wp.Stop()
+		}
+
+		if cw.wp != nil {
+			cw.wp.Stop()
+		}
+
 		close(cw.exit)
-
-		if cw.wp == nil {
-			return nil
-		}
-
-		cw.wp.Stop()
-
-		// drain results
-		for {
-			select {
-			case <-cw.next:
-			default:
-				return nil
-			}
-		}
 	}
+
+	return nil
 }
