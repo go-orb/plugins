@@ -20,11 +20,11 @@ import (
 	"github.com/go-orb/plugins/server/grpc/tests/proto"
 	tgrpc "github.com/go-orb/plugins/server/grpc/tests/util/grpc"
 
-	_ "github.com/go-orb/plugins-experimental/registry/mdns"
 	_ "github.com/go-orb/plugins/codecs/json"
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	_ "github.com/go-orb/plugins/config/source/file"
 	_ "github.com/go-orb/plugins/log/slog"
+	_ "github.com/go-orb/plugins/registry/mdns"
 )
 
 func init() {
@@ -93,11 +93,11 @@ func TestGrpcIntegration(t *testing.T) {
 	logger, err := log.New()
 	require.NoError(t, err, "failed to setup logger")
 
-	reg, err := registry.New(name, version, nil, components, logger)
+	reg, err := registry.New(nil, components, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
 	h, _ := server.Handlers.Get("Streams")
-	srv, err := server.New(nil, logger, reg,
+	srv, err := server.New(name, version, nil, logger, reg,
 		server.WithEntrypointConfig(mgrpc.NewConfig(
 			mgrpc.WithName("test-ep-1"),
 			mgrpc.WithReflection(true),
@@ -160,11 +160,11 @@ func TestServerFileConfig(t *testing.T) {
 	logger, err := log.New()
 	require.NoError(t, err, "failed to setup logger")
 
-	reg, err := registry.New(name, version, nil, &types.Components{}, logger)
+	reg, err := registry.New(nil, &types.Components{}, logger)
 	require.NoError(t, err, "failed to setup the registry")
 
 	h, _ := server.Handlers.Get("Streams")
-	srv, err := server.New(configData, logger, reg,
+	srv, err := server.New(name, version, configData, logger, reg,
 		server.WithEntrypointConfig(mgrpc.NewConfig(
 			mgrpc.WithName("static-ep-1"),
 			mgrpc.WithAddress(":48081"),

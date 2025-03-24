@@ -2,7 +2,7 @@ module github.com/go-orb/plugins/registry/regutil
 
 go 1.23.6
 
-require github.com/go-orb/go-orb v0.2.2-0.20250320223438-2869142c7d3e
+require github.com/go-orb/go-orb v0.2.2-0.20250324112306-5f5f154933b8
 
 require (
 	dario.cat/mergo v1.0.1 // indirect

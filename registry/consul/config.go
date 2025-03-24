@@ -9,9 +9,7 @@ import (
 	"github.com/go-orb/go-orb/registry"
 )
 
-// metaTransportKey is the key to use to store the scheme in metadata.
-const metaTransportKey = "__consul__transport"
-const metaNodeIDKey = "__consul__node-id"
+const metaPrefix = "orb_app_"
 
 // Name provides the name of this registry.
 const Name = "consul"

@@ -5,8 +5,8 @@ github.com/cornelk/hashmap v1.0.8/go.mod h1:RfZb7JO3RviW/rT6emczVuC/oxpdz4UsSB2L
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/go-orb/go-orb v0.2.2-0.20250320223438-2869142c7d3e h1:/dzN721EqiJogdtjXVp0LBY2+daFm1p84PeB/fV9ya0=
-github.com/go-orb/go-orb v0.2.2-0.20250320223438-2869142c7d3e/go.mod h1:DBamAST285wD+Ydbil1HGl9X19Sj+0xR1ZqFzKDxOgM=
+github.com/go-orb/go-orb v0.2.2-0.20250324112306-5f5f154933b8 h1:AoIUSRLgbOn+XNQu2nCV1xlwD33j3JgpUiMElOt7PgM=
+github.com/go-orb/go-orb v0.2.2-0.20250324112306-5f5f154933b8/go.mod h1:DBamAST285wD+Ydbil1HGl9X19Sj+0xR1ZqFzKDxOgM=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=

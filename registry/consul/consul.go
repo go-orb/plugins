@@ -6,7 +6,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"maps"
 	"net"
 	"net/http"
 	"runtime"
@@ -15,30 +14,65 @@ import (
 	"strings"
 	"time"
 
+	consul "github.com/hashicorp/consul/api"
+
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/types"
-	maddr "github.com/go-orb/go-orb/util/addr"
+
 	"github.com/go-orb/plugins/registry/regutil/cache"
-	"github.com/google/uuid"
-	consul "github.com/hashicorp/consul/api"
-	"github.com/hashicorp/go-multierror"
 )
+
+const nodeIDDelimiter = "@"
+
+func nodeID(s registry.ServiceNode) string {
+	return strings.Join([]string{
+		s.Namespace,
+		s.Region,
+		s.Name,
+		s.Version,
+		s.Scheme,
+		s.Address,
+	}, nodeIDDelimiter)
+}
+
+func idToNode(id string) (registry.ServiceNode, error) {
+	parts := strings.Split(id, nodeIDDelimiter)
+	if len(parts) != 6 {
+		return registry.ServiceNode{}, errors.New("invalid id format")
+	}
+
+	return registry.ServiceNode{
+		Namespace: parts[0],
+		Region:    parts[1],
+		Name:      parts[2],
+		Version:   parts[3],
+		Scheme:    parts[4],
+		Address:   parts[5],
+		Metadata:  make(map[string]string),
+	}, nil
+}
+
+func splitID(id string) (string, string, string) {
+	splits := strings.Split(id, nodeIDDelimiter)
+
+	return splits[0], splits[1], splits[2]
+}
+
+func idToPrefix(id string) string {
+	return strings.Join(strings.Split(id, nodeIDDelimiter)[:3], nodeIDDelimiter) + nodeIDDelimiter
+}
 
 // This is here to make sure RegistryConsul implements registry.Registry.
 var _ registry.Registry = (*RegistryConsul)(nil)
 
 // RegistryConsul is the consul registry for go-orb.
 type RegistryConsul struct {
-	Address        []string
-	serviceName    string
-	serviceVersion string
+	Address []string
 
 	config Config
 	logger log.Logger
-
-	id string
 
 	client       *consul.Client
 	consulConfig *consul.Config
@@ -85,161 +119,92 @@ func newTransport(config *tls.Config) *http.Transport {
 	return t
 }
 
-// ServiceName returns the configured name of this service.
-func (c *RegistryConsul) ServiceName() string {
-	return c.serviceName
-}
-
-// ServiceVersion returns the configured version of this service.
-func (c *RegistryConsul) ServiceVersion() string {
-	return c.serviceVersion
-}
-
-// NodeID returns the ID of this service node in the registry.
-func (c *RegistryConsul) NodeID() string {
-	if c.id != "" {
-		return c.id
-	}
-
-	c.id = uuid.New().String()
-
-	return c.id
-}
-
 // Deregister deregisters a service within the registry.
-func (c *RegistryConsul) Deregister(s *registry.Service, _ ...registry.DeregisterOption) error {
-	if len(s.Nodes) == 0 {
-		return errors.New("require at least one node")
-	}
-
-	var mErr *multierror.Error
-	for _, node := range s.Nodes {
-		mErr = multierror.Append(
-			mErr,
-			c.Client().Agent().ServiceDeregister(s.Name+"-"+node.ID+"-"+node.Transport),
-		)
-	}
-
-	return mErr.ErrorOrNil()
+func (c *RegistryConsul) Deregister(_ context.Context, serviceNode registry.ServiceNode) error {
+	return c.Client().Agent().ServiceDeregister(nodeID(serviceNode))
 }
 
 // Register registers a service within the registry.
-//
-//nolint:funlen,gocyclo
-func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.RegisterOption) error {
-	if len(service.Nodes) == 0 {
-		return errors.New("require at least one node")
-	}
-
+func (c *RegistryConsul) Register(_ context.Context, serviceNode registry.ServiceNode) error {
 	var (
 		regTCPCheck bool
 		regInterval time.Duration
-		options     registry.RegisterOptions
 	)
-
-	for _, o := range opts {
-		o(&options)
-	}
 
 	if c.config.TCPCheck > 0 {
 		regTCPCheck = true
 		regInterval = c.config.TCPCheck
 	}
 
-	// use all nodes
-	for _, node := range service.Nodes {
-		// encode the tags
-		tags := encodeEndpoints(service.Endpoints)
-		tags = append(tags, encodeVersion(service.Version)...)
+	var check *consul.AgentServiceCheck
 
-		var check *consul.AgentServiceCheck
+	if regTCPCheck {
+		deregTTL := getDeregisterTTL(regInterval)
 
-		if regTCPCheck {
-			deregTTL := getDeregisterTTL(regInterval)
-
-			check = &consul.AgentServiceCheck{
-				TCP:                            node.Address,
-				Interval:                       fmt.Sprintf("%v", regInterval),
-				DeregisterCriticalServiceAfter: fmt.Sprintf("%v", deregTTL),
-			}
-		} else if options.TTL > time.Duration(0) {
-			// if the TTL is greater than 0 create an associated check
-			deregTTL := getDeregisterTTL(options.TTL)
-
-			check = &consul.AgentServiceCheck{
-				TTL:                            fmt.Sprintf("%v", options.TTL),
-				DeregisterCriticalServiceAfter: fmt.Sprintf("%v", deregTTL),
-			}
+		check = &consul.AgentServiceCheck{
+			TCP:                            serviceNode.Address,
+			Interval:                       fmt.Sprintf("%v", regInterval),
+			DeregisterCriticalServiceAfter: fmt.Sprintf("%v", deregTTL),
 		}
+	} else if serviceNode.TTL > time.Duration(0) {
+		// if the TTL is greater than 0 create an associated check
+		deregTTL := getDeregisterTTL(serviceNode.TTL)
 
-		host, pt, err := net.SplitHostPort(node.Address)
-		if err != nil {
-			return err
+		check = &consul.AgentServiceCheck{
+			TTL:                            fmt.Sprintf("%v", serviceNode.TTL),
+			DeregisterCriticalServiceAfter: fmt.Sprintf("%v", deregTTL),
 		}
+	}
 
-		if host == "" {
-			host = node.Address
+	host, pt, err := net.SplitHostPort(serviceNode.Address)
+	if err != nil {
+		return err
+	}
+
+	if host == "" {
+		host = serviceNode.Address
+	}
+
+	port, err := strconv.Atoi(pt)
+	if err != nil {
+		return err
+	}
+
+	metadata := map[string]string{}
+	// Add service metadata to the service
+	for k, v := range serviceNode.Metadata {
+		metadata[metaPrefix+k] = v
+	}
+
+	// register the service
+	asr := &consul.AgentServiceRegistration{
+		ID:      nodeID(serviceNode),
+		Name:    serviceNode.Name,
+		Port:    port,
+		Address: host,
+		Meta:    metadata,
+		Check:   check,
+	}
+
+	// Specify consul connect
+	if c.config.Connect {
+		asr.Connect = &consul.AgentServiceConnect{
+			Native: true,
 		}
+	}
 
-		port, err := strconv.Atoi(pt)
-		if err != nil {
-			return err
-		}
+	if err := c.Client().Agent().ServiceRegister(asr); err != nil {
+		return err
+	}
 
-		metadata := map[string]string{}
-		// Add service metadata to the service
-		for k, v := range service.Metadata {
-			metadata["orb_service_"+k] = v
-		}
+	// if the TTL is 0 we don't mess with the checks
+	if serviceNode.TTL == time.Duration(0) {
+		return nil
+	}
 
-		metadata["orb_service_version"] = service.Version
-
-		// Add node metadata to the service
-		for k, v := range node.Metadata {
-			metadata["orb_node_"+k] = v
-		}
-
-		// Add the transport scheme to metadata if required
-		if _, ok := metadata[metaTransportKey]; !ok {
-			metadata[metaTransportKey] = node.Transport
-		}
-
-		// Add the node ID to metadata if required
-		if _, ok := metadata[metaNodeIDKey]; !ok {
-			metadata[metaNodeIDKey] = node.ID
-		}
-
-		// register the service
-		asr := &consul.AgentServiceRegistration{
-			ID:      service.Name + "-" + node.ID + "-" + node.Transport,
-			Name:    service.Name,
-			Tags:    tags,
-			Port:    port,
-			Address: host,
-			Meta:    metadata,
-			Check:   check,
-		}
-
-		// Specify consul connect
-		if c.config.Connect {
-			asr.Connect = &consul.AgentServiceConnect{
-				Native: true,
-			}
-		}
-
-		if err := c.Client().Agent().ServiceRegister(asr); err != nil {
-			return err
-		}
-
-		// if the TTL is 0 we don't mess with the checks
-		if options.TTL == time.Duration(0) {
-			continue
-		}
-
-		// pass the healthcheck
-		if err := c.Client().Agent().PassTTL("service:"+node.ID+"-"+node.Transport, ""); err != nil {
-			return err
-		}
+	// pass the healthcheck
+	if err := c.Client().Agent().PassTTL("service:"+asr.ID, ""); err != nil {
+		return err
 	}
 
 	return nil
@@ -247,10 +212,10 @@ func (c *RegistryConsul) Register(service *registry.Service, opts ...registry.Re
 
 // GetService returns a service from the registry.
 //
-//nolint:funlen,gocyclo
-func (c *RegistryConsul) GetService(name string, _ ...registry.GetOption) ([]*registry.Service, error) {
+//nolint:gocyclo
+func (c *RegistryConsul) GetService(ctx context.Context, namespace, region, name string, schemes []string) ([]registry.ServiceNode, error) {
 	if c.config.Cache {
-		return c.cache.GetService(name)
+		return c.cache.GetService(ctx, namespace, region, name, schemes)
 	}
 
 	var (
@@ -270,44 +235,41 @@ func (c *RegistryConsul) GetService(name string, _ ...registry.GetOption) ([]*re
 	}
 
 	if len(rsp) == 0 {
-		return []*registry.Service{}, registry.ErrNotFound
+		return []registry.ServiceNode{}, registry.ErrNotFound
 	}
 
-	var (
-		haveService bool
-		svc         *registry.Service
-	)
-
-	serviceMap := make(map[string]*registry.Service)
+	services := []registry.ServiceNode{}
 
 	for _, node := range rsp {
 		if node.Service.Service != name {
-			c.logger.Warn("Service name does not match", "name", name, "service", node.Service.Service)
 			continue
 		}
 
-		// version is now a tag
-		version, _ := decodeVersion(node.Service.Tags)
+		serviceNode, err := idToNode(node.Service.ID)
+		if err != nil {
+			continue
+		}
 
-		nodeMeta := map[string]string{}
 		svcMeta := map[string]string{}
 
 		for k, v := range node.Service.Meta {
-			if strings.HasPrefix(k, "orb_service_") {
-				svcMeta[strings.TrimPrefix(k, "orb_service_")] = v
-			} else if strings.HasPrefix(k, "orb_node_") {
-				nodeMeta[strings.TrimPrefix(k, "orb_node_")] = v
+			if strings.HasPrefix(k, metaPrefix) {
+				svcMeta[strings.TrimPrefix(k, metaPrefix)] = v
 			}
 		}
 
-		svc, haveService = serviceMap[version]
-		if !haveService {
-			svc = &registry.Service{
-				Endpoints: decodeEndpoints(node.Service.Tags),
-				Name:      node.Service.Service,
-				Version:   version,
-				Metadata:  svcMeta,
-			}
+		serviceNode.Metadata = svcMeta
+
+		if serviceNode.Namespace != namespace {
+			continue
+		}
+
+		if serviceNode.Region != region {
+			continue
+		}
+
+		if len(schemes) > 0 && !slices.Contains(schemes, serviceNode.Scheme) {
+			continue
 		}
 
 		var del bool
@@ -325,45 +287,16 @@ func (c *RegistryConsul) GetService(name string, _ ...registry.GetOption) ([]*re
 			continue
 		}
 
-		rNode := &registry.Node{
-			ID:       node.Node.ID,
-			Address:  maddr.HostPort(node.Node.Address, node.Service.Port),
-			Metadata: nodeMeta,
-		}
-
-		// Extract the transport from Metadata
-		if transport, ok := node.Service.Meta[metaTransportKey]; ok {
-			rNode.Transport = transport
-			delete(rNode.Metadata, metaTransportKey)
-		} else {
-			continue
-		}
-
-		// Extract the node ID from Metadata
-		if nodeID, ok := node.Service.Meta[metaNodeIDKey]; ok {
-			rNode.ID = nodeID
-			delete(rNode.Metadata, metaNodeIDKey)
-		} else {
-			continue
-		}
-
-		serviceMap[version] = svc
-		svc.Nodes = append(svc.Nodes, rNode)
-	}
-
-	var services []*registry.Service //nolint:prealloc
-
-	for _, svc := range serviceMap {
-		services = append(services, svc)
+		services = append(services, serviceNode)
 	}
 
 	return services, nil
 }
 
 // ListServices lists services within the registry.
-func (c *RegistryConsul) ListServices(_ ...registry.ListOption) ([]*registry.Service, error) {
+func (c *RegistryConsul) ListServices(ctx context.Context, namespace, region string, schemes []string) ([]registry.ServiceNode, error) {
 	if c.config.Cache {
-		return c.cache.ListServices()
+		return c.cache.ListServices(ctx, namespace, region, schemes)
 	}
 
 	rsp, _, err := c.Client().Catalog().Services(c.queryOptions)
@@ -371,24 +304,26 @@ func (c *RegistryConsul) ListServices(_ ...registry.ListOption) ([]*registry.Ser
 		return nil, err
 	}
 
-	services := map[string]*registry.Service{}
+	var nodes []registry.ServiceNode
 
 	for service := range rsp {
-		svcs, err := c.GetService(service)
+		srvNodes, err := c.GetService(ctx, namespace, region, service, schemes)
 		if err != nil {
+			if errors.Is(err, registry.ErrNotFound) {
+				continue
+			}
+
 			return nil, err
 		}
 
-		for _, svc := range svcs {
-			services[svc.Name+"-"+svc.Version] = svc
-		}
+		nodes = append(nodes, srvNodes...)
 	}
 
-	return slices.Collect(maps.Values(services)), nil
+	return nodes, nil
 }
 
 // Watch returns a Watcher which you can watch on.
-func (c *RegistryConsul) Watch(opts ...registry.WatchOption) (registry.Watcher, error) {
+func (c *RegistryConsul) Watch(_ context.Context, opts ...registry.WatchOption) (registry.Watcher, error) {
 	return newConsulWatcher(c, opts...)
 }
 
@@ -429,8 +364,6 @@ func (c *RegistryConsul) Client() *consul.Client {
 
 // Provide creates a new Consul registry.
 func Provide(
-	name string,
-	version string,
 	datas map[string]any,
 	_ *types.Components,
 	logger log.Logger,
@@ -443,17 +376,16 @@ func Provide(
 	}
 
 	// Return the new registry.
-	reg := New(name, version, cfg, logger)
+	reg := New(cfg, logger)
 
 	return registry.Type{Registry: reg}, nil
 }
 
 // New creates a new consul registry.
-func New(serviceName string, _ string, cfg Config, logger log.Logger) *RegistryConsul {
+func New(cfg Config, logger log.Logger) *RegistryConsul {
 	cRegistry := &RegistryConsul{
-		serviceName: serviceName,
-		config:      cfg,
-		logger:      logger,
+		config: cfg,
+		logger: logger,
 		queryOptions: &consul.QueryOptions{
 			AllowStale: true,
 		},

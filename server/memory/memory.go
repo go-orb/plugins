@@ -28,6 +28,9 @@ const Name = "memory"
 
 // Server is the memory Server for go-orb.
 type Server struct {
+	serviceName    string
+	serviceVersion string
+
 	config   *Config
 	logger   log.Logger
 	registry registry.Type
@@ -64,7 +67,7 @@ func (s *Server) Start(ctx context.Context) error {
 	s.ctx, s.cancelFunc = context.WithCancel(ctx)
 
 	// Register the memory server with the client package
-	client.RegisterMemoryServer(s.registry.ServiceName(), s)
+	client.RegisterMemoryServer(s.serviceName, s)
 
 	s.started = true
 
@@ -86,7 +89,7 @@ func (s *Server) Stop(_ context.Context) error {
 	}
 
 	// Unregister from the client package
-	client.UnregisterMemoryServer(s.registry.ServiceName())
+	client.UnregisterMemoryServer(s.serviceName)
 
 	// Clean up resources
 	s.started = false
@@ -124,11 +127,6 @@ func (s *Server) Address() string {
 // Transport returns the client transport to use: "memory".
 func (s *Server) Transport() string {
 	return "memory"
-}
-
-// EntrypointID returns the id (configured name) of this entrypoint in the registry.
-func (s *Server) EntrypointID() string {
-	return s.config.Name
 }
 
 // String returns the entrypoint type.
@@ -362,6 +360,8 @@ func (s *Server) Stream(
 // Provide creates a new entrypoint for a single address. You can create
 // multiple entrypoints for multiple addresses and ports.
 func Provide(
+	serviceName string,
+	serviceVersion string,
 	configs map[string]any,
 	logger log.Logger,
 	reg registry.Type,
@@ -398,11 +398,17 @@ func Provide(
 		cfg.OptHandlers = append(cfg.OptHandlers, h)
 	}
 
-	return New(cfg, logger, reg)
+	return New(serviceName, serviceVersion, cfg, logger, reg)
 }
 
 // New creates a memory Server from a Config struct.
-func New(acfg any, logger log.Logger, reg registry.Type) (orbserver.Entrypoint, error) {
+func New(
+	serviceName string,
+	serviceVersion string,
+	acfg any,
+	logger log.Logger,
+	reg registry.Type,
+) (orbserver.Entrypoint, error) {
 	cfg, ok := acfg.(*Config)
 	if !ok {
 		return nil, fmt.Errorf("memory invalid config: %v", cfg)
@@ -413,13 +419,15 @@ func New(acfg any, logger log.Logger, reg registry.Type) (orbserver.Entrypoint, 
 	ctx, cancelFunc := context.WithCancel(context.Background())
 
 	entrypoint := Server{
-		config:      cfg,
-		logger:      logger,
-		registry:    reg,
-		handlers:    cfg.OptHandlers,
-		middlewares: cfg.OptMiddlewares,
-		ctx:         ctx,
-		cancelFunc:  cancelFunc,
+		serviceName:    serviceName,
+		serviceVersion: serviceVersion,
+		config:         cfg,
+		logger:         logger,
+		registry:       reg,
+		handlers:       cfg.OptHandlers,
+		middlewares:    cfg.OptMiddlewares,
+		ctx:            ctx,
+		cancelFunc:     cancelFunc,
 	}
 
 	return &entrypoint, nil

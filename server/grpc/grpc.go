@@ -22,7 +22,6 @@ import (
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	"github.com/go-orb/go-orb/server"
-	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/addr"
 	mnet "github.com/go-orb/go-orb/util/net"
 	mtls "github.com/go-orb/go-orb/util/tls"
@@ -33,6 +32,9 @@ var _ server.Entrypoint = (*Server)(nil)
 
 // Server is an entrypoint with a gRPC server.
 type Server struct {
+	serviceName    string
+	serviceVersion string
+
 	server *grpc.Server
 
 	config *Config
@@ -51,6 +53,8 @@ type Server struct {
 
 // Provide provides a gRPC server by config.
 func Provide(
+	serviceName string,
+	serviceVersion string,
 	configData map[string]any,
 	logger log.Logger,
 	reg registry.Type,
@@ -77,11 +81,17 @@ func Provide(
 		cfg.OptMiddlewares = append(cfg.OptMiddlewares, mw)
 	}
 
-	return New(cfg, logger, reg)
+	return New(serviceName, serviceVersion, cfg, logger, reg)
 }
 
 // New creates a gRPC server by options.
-func New(acfg any, logger log.Logger, reg registry.Type) (server.Entrypoint, error) {
+func New(
+	serviceName string,
+	serviceVersion string,
+	acfg any,
+	logger log.Logger,
+	reg registry.Type,
+) (server.Entrypoint, error) {
 	cfg, ok := acfg.(*Config)
 	if !ok {
 		return nil, fmt.Errorf("grpc invalid config: %v", cfg)
@@ -107,9 +117,11 @@ func New(acfg any, logger log.Logger, reg registry.Type) (server.Entrypoint, err
 	}
 
 	srv := Server{
-		config:   cfg,
-		logger:   logger,
-		registry: reg,
+		serviceName:    serviceName,
+		serviceVersion: serviceVersion,
+		config:         cfg,
+		logger:         logger,
+		registry:       reg,
 	}
 
 	srv.setupgRPCServer()
@@ -140,7 +152,7 @@ func (s *Server) setupgRPCServer() {
 }
 
 // Start start the gRPC server.
-func (s *Server) Start(_ context.Context) error {
+func (s *Server) Start(ctx context.Context) error {
 	if s.started {
 		return nil
 	}
@@ -181,7 +193,7 @@ func (s *Server) Start(_ context.Context) error {
 	}
 
 	// Register with registry.
-	if err := s.register(); err != nil {
+	if err := s.registryRegister(ctx); err != nil {
 		return err
 	}
 
@@ -198,7 +210,7 @@ func (s *Server) Stop(ctx context.Context) error {
 
 	s.logger.Info("gRPC server shutting down", "address", s.lis.Addr().String())
 
-	if err := s.deregister(); err != nil {
+	if err := s.registryDeregister(ctx); err != nil {
 		return err
 	}
 
@@ -247,11 +259,6 @@ func (s *Server) Transport() string {
 	}
 
 	return "grpc"
-}
-
-// EntrypointID returns the id of this entrypoint (node) in the registry.
-func (s *Server) EntrypointID() string {
-	return s.registry.ServiceName() + types.DefaultSeparator + s.config.Name
 }
 
 // AddHandler adds a handler for later registration.
@@ -317,45 +324,20 @@ func (s *Server) listen() error {
 	return nil
 }
 
-func (s *Server) getEndpoints() []*registry.Endpoint {
-	sInfo := s.server.GetServiceInfo()
-
-	result := make([]*registry.Endpoint, 0, len(sInfo))
-
-	for k := range sInfo {
-		s.logger.Trace("found endpoint", slog.String("name", k))
-
-		result = append(result, &registry.Endpoint{
-			Name:     k,
-			Metadata: map[string]string{"stream": "true"},
-		})
-	}
-
-	return result
-}
-
-func (s *Server) registryService() *registry.Service {
-	node := &registry.Node{
-		ID:        s.EntrypointID(),
-		Address:   s.Address(),
-		Transport: s.Transport(),
-		Metadata:  make(map[string]string),
-	}
-
-	eps := s.getEndpoints()
-
-	return &registry.Service{
-		Name:      s.registry.ServiceName(),
-		Version:   s.registry.ServiceVersion(),
-		Nodes:     []*registry.Node{node},
-		Endpoints: eps,
+func (s *Server) registryService() registry.ServiceNode {
+	return registry.ServiceNode{
+		Name:     s.serviceName,
+		Version:  s.serviceVersion,
+		Address:  s.Address(),
+		Scheme:   s.Transport(),
+		Metadata: make(map[string]string),
 	}
 }
 
-func (s *Server) register() error {
-	return s.registry.Register(s.registryService())
+func (s *Server) registryRegister(ctx context.Context) error {
+	return s.registry.Register(ctx, s.registryService())
 }
 
-func (s *Server) deregister() error {
-	return s.registry.Deregister(s.registryService())
+func (s *Server) registryDeregister(ctx context.Context) error {
+	return s.registry.Deregister(ctx, s.registryService())
 }

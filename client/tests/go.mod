@@ -3,14 +3,14 @@ module github.com/go-orb/plugins/client/tests
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250320223438-2869142c7d3e
-	github.com/go-orb/plugins/server/drpc v0.1.1-0.20250320235901-3af29c3a3b34
-	github.com/go-orb/plugins/server/http v0.1.1-0.20250320235901-3af29c3a3b34
-	github.com/go-orb/plugins/server/memory v0.0.0-20250320235901-3af29c3a3b34
+	github.com/go-orb/go-orb v0.2.2-0.20250324112306-5f5f154933b8
+	github.com/go-orb/plugins/server/drpc v0.1.1-0.20250324122813-09813c7b9d65
+	github.com/go-orb/plugins/server/http v0.1.1-0.20250324122813-09813c7b9d65
+	github.com/go-orb/plugins/server/memory v0.0.0-20250324122813-09813c7b9d65
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/grpc v1.71.0
-	google.golang.org/protobuf v1.36.5
+	google.golang.org/protobuf v1.36.6
 	storj.io/drpc v0.0.34
 )
 
@@ -24,10 +24,10 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
-	github.com/onsi/ginkgo/v2 v2.23.2 // indirect
+	github.com/onsi/ginkgo/v2 v2.23.3 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/quic-go/qpack v0.5.1 // indirect
-	github.com/quic-go/quic-go v0.50.0 // indirect
+	github.com/quic-go/quic-go v0.50.1 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/zeebo/errs v1.4.0 // indirect
 	go.uber.org/mock v0.5.0 // indirect

@@ -141,7 +141,8 @@ type TestSuite struct {
 }
 
 // NewSuite creates a new test suite.
-func NewSuite(setupServer func(service string) (*SetupData, error), transports []string, requests ...TestRequest) *TestSuite {
+func NewSuite(setupServer func(service string) (*SetupData, error),
+	transports []string, requests ...TestRequest) *TestSuite {
 	s := new(TestSuite)
 
 	s.Transports = transports

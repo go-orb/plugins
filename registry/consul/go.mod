@@ -3,15 +3,14 @@ module github.com/go-orb/plugins/registry/consul
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250320223438-2869142c7d3e
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250320235901-3af29c3a3b34
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250320235901-3af29c3a3b34
-	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250320235901-3af29c3a3b34
-	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250320235901-3af29c3a3b34
-	github.com/google/uuid v1.6.0
+	github.com/go-orb/go-orb v0.2.2-0.20250324112306-5f5f154933b8
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250324122813-09813c7b9d65
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250324122813-09813c7b9d65
+	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250324122813-09813c7b9d65
+	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250324122813-09813c7b9d65
 	github.com/hashicorp/consul/api v1.31.2
 	github.com/hashicorp/consul/sdk v0.16.2
-	github.com/hashicorp/go-multierror v1.1.1
+	github.com/hashicorp/go-hclog v1.6.3
 	github.com/stretchr/testify v1.10.0
 )
 
@@ -23,9 +22,9 @@ require (
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-hclog v1.6.3 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-metrics v0.5.4 // indirect
+	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-rootcerts v1.0.2 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/hashicorp/go-version v1.7.0 // indirect
@@ -34,7 +33,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/miekg/dns v1.1.63 // indirect
+	github.com/miekg/dns v1.1.64 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

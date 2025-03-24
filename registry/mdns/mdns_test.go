@@ -1,0 +1,94 @@
+package mdns
+
+import (
+	"context"
+	"testing"
+	"time"
+
+	"github.com/go-orb/go-orb/log"
+	"github.com/go-orb/go-orb/registry"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
+
+	_ "github.com/go-orb/plugins/codecs/json"
+	_ "github.com/go-orb/plugins/log/slog"
+	"github.com/go-orb/plugins/registry/tests"
+)
+
+func createSuite() (*tests.TestSuite, func() error, error) {
+	ctx := context.Background()
+
+	logger, err := log.New(log.WithLevel(log.LevelTrace))
+	if err != nil {
+		log.Error("failed to create logger", "err", err)
+		return nil, func() error { return nil }, err
+	}
+
+	cfg1 := NewConfig(WithDomain("orb.local"))
+	reg1, err := New(cfg1, logger)
+	if err != nil {
+		log.Error("failed to create registry one", "err", err)
+		return nil, func() error { return nil }, err
+	}
+	if err := reg1.Start(ctx); err != nil {
+		log.Error("failed to connect registry one to Consul server", "err", err)
+		return nil, func() error { return nil }, err
+	}
+
+	// cfg2 := NewConfig(WithDomain("orb.local"))
+	// reg2, err := New(cfg2, logger)
+	// if err != nil {
+	// 	log.Error("failed to create registry two", "err", err)
+	// 	return nil, func() error { return nil }, err
+	// }
+	// if err := reg2.Start(ctx); err != nil {
+	// 	log.Error("failed to connect registry two to Consul server", "err", err)
+	// 	return nil, func() error { return nil }, err
+	// }
+
+	cleanup := func() error {
+		ctx := context.Background()
+		_ = reg1.Stop(ctx) //nolint:errcheck
+		// _ = reg2.Stop(ctx) //nolint:errcheck
+		return nil
+	}
+
+	return tests.CreateSuite(logger, []registry.Registry{reg1}, time.Second), cleanup, nil
+}
+
+func TestSuite(t *testing.T) {
+	s, cleanup, err := createSuite()
+	require.NoError(t, err, "while creating a server")
+
+	// Run the tests.
+	suite.Run(t, s)
+
+	require.NoError(t, cleanup(), "while cleaning up")
+}
+
+func BenchmarkGetService(b *testing.B) {
+	s, cleanup, err := createSuite()
+	require.NoError(b, err, "while creating a server")
+
+	s.BenchmarkGetService(b)
+
+	require.NoError(b, cleanup(), "while cleaning up")
+}
+
+func BenchmarkParallelGetService(b *testing.B) {
+	s, cleanup, err := createSuite()
+	require.NoError(b, err, "while creating a server")
+
+	s.BenchmarkGetService(b)
+
+	require.NoError(b, cleanup(), "while cleaning up")
+}
+
+func BenchmarkGetServiceWithNoNodes(b *testing.B) {
+	s, cleanup, err := createSuite()
+	require.NoError(b, err, "while creating a server")
+
+	s.BenchmarkGetServiceWithNoNodes(b)
+
+	require.NoError(b, cleanup(), "while cleaning up")
+}

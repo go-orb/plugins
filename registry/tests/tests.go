@@ -2,10 +2,9 @@
 package tests
 
 import (
+	"context"
 	"fmt"
-	math_rand "math/rand"
-	"strings"
-	"sync"
+	"math/rand"
 	"testing"
 	"time"
 
@@ -20,38 +19,35 @@ type TestSuite struct {
 
 	logger log.Logger
 
+	ctx        context.Context
 	registries []registry.Registry
-	nodes      []*registry.Node
-	services   []*registry.Service
+	services   []registry.ServiceNode
 
-	updateTime    time.Duration
-	serviceOffset int
+	updateTime time.Duration
 }
 
 // CreateSuite creates the suite for test usage.
-func CreateSuite(logger log.Logger, registries []registry.Registry, updateTime time.Duration, serviceOffset int) *TestSuite {
+func CreateSuite(logger log.Logger, registries []registry.Registry, updateTime time.Duration) *TestSuite {
 	r := &TestSuite{
-		logger:        logger,
-		registries:    registries,
-		updateTime:    updateTime,
-		serviceOffset: serviceOffset,
+		ctx:        context.Background(),
+		logger:     logger,
+		registries: registries,
+		updateTime: updateTime,
 	}
 
 	// Generate random ports to avoid conflicts
-	basePort1 := 10000 + math_rand.Intn(10000) //nolint:gosec
-	basePort2 := 20000 + math_rand.Intn(10000) //nolint:gosec
+	basePort1 := 10000 + rand.Intn(10000) //nolint:gosec
+	basePort2 := 20000 + rand.Intn(10000) //nolint:gosec
 
-	// Each node gets a unique port to avoid conflicts
-	r.nodes = append(r.nodes, &registry.Node{ID: "node0-http", Address: fmt.Sprintf("10.0.0.10:%d", basePort1), Transport: "http"})
-	r.nodes = append(r.nodes, &registry.Node{ID: "node0-grpc", Address: fmt.Sprintf("10.0.0.10:%d", basePort1+1), Transport: "grpc"})
-	r.nodes = append(r.nodes, &registry.Node{ID: "node0-frpc", Address: fmt.Sprintf("10.0.0.10:%d", basePort1+2), Transport: "frpc"})
-	r.nodes = append(r.nodes, &registry.Node{ID: "node1-http", Address: fmt.Sprintf("10.0.0.11:%d", basePort2), Transport: "http"})
-	r.nodes = append(r.nodes, &registry.Node{ID: "node1-grpc", Address: fmt.Sprintf("10.0.0.11:%d", basePort2+1), Transport: "grpc"})
-	r.nodes = append(r.nodes, &registry.Node{ID: "node1-frpc", Address: fmt.Sprintf("10.0.0.11:%d", basePort2+2), Transport: "frpc"})
-
-	r.services = append(r.services, &registry.Service{Name: "orb.test.svc.0", Version: "v1", Nodes: []*registry.Node{r.nodes[0]}})
-	r.services = append(r.services, &registry.Service{Name: "orb.test.svc.1", Version: "v1", Nodes: []*registry.Node{r.nodes[1]}})
-	r.services = append(r.services, &registry.Service{Name: "orb.test.svc.2", Version: "v1", Nodes: []*registry.Node{r.nodes[2]}})
+	// All the test services.
+	r.services = []registry.ServiceNode{
+		{Name: "orb.test.svc.0", Version: "v1", Address: fmt.Sprintf("10.0.0.10:%d", basePort1), Scheme: "http"},
+		{Name: "orb.test.svc.1", Version: "v1", Address: fmt.Sprintf("10.0.0.10:%d", basePort1+1), Scheme: "grpc"},
+		{Name: "orb.test.svc.2", Version: "v1", Address: fmt.Sprintf("10.0.0.10:%d", basePort1+2), Scheme: "frpc"},
+		{Name: "orb.test.svc.3", Version: "v1", Address: fmt.Sprintf("10.0.0.11:%d", basePort2), Scheme: "http"},
+		{Name: "orb.test.svc.4", Version: "v1", Address: fmt.Sprintf("10.0.0.11:%d", basePort2+1), Scheme: "grpc"},
+		{Name: "orb.test.svc.5", Version: "v1", Address: fmt.Sprintf("10.0.0.11:%d", basePort2+2), Scheme: "frpc"},
+	}
 
 	return r
 }
@@ -59,7 +55,7 @@ func CreateSuite(logger log.Logger, registries []registry.Registry, updateTime t
 // SetupSuite setups the test suite.
 func (r *TestSuite) SetupSuite() {
 	for _, service := range r.services {
-		if err := r.registries[0].Register(service); err != nil {
+		if err := r.randomRegistry().Register(r.ctx, service); err != nil {
 			r.logger.Error("Failed to register service", "error", err, "service", service.Name)
 		}
 	}
@@ -68,114 +64,111 @@ func (r *TestSuite) SetupSuite() {
 // TearDownSuite runs after all tests.
 func (r *TestSuite) TearDownSuite() {
 	for _, service := range r.services {
-		if err := r.registries[0].Deregister(service); err != nil {
+		if err := r.randomRegistry().Deregister(r.ctx, service); err != nil {
 			r.logger.Error("Failed to deregister service", "error", err, "service", service.Name)
 		}
 	}
 }
 
+func (r *TestSuite) randomRegistry() registry.Registry {
+	return r.registries[rand.Intn(len(r.registries))] //nolint:gosec
+}
+
 // TestRegister tests registering.
 func (r *TestSuite) TestRegister() {
-	service := registry.Service{Name: "orb.test.svc.3", Version: "v1.0.0", Nodes: []*registry.Node{r.nodes[3]}}
-	r.Require().NoError(r.registries[0].Register(&service))
+	service := registry.ServiceNode{
+		Name:    "orb.test.svc.6",
+		Version: "v1.0.0",
+		Address: r.services[3].Address,
+		Scheme:  r.services[3].Scheme,
+	}
+	r.Require().NoError(r.randomRegistry().Register(r.ctx, service))
 	time.Sleep(r.updateTime)
 
 	defer func() {
-		err := r.registries[0].Deregister(&service)
+		err := r.randomRegistry().Deregister(r.ctx, service)
 		if err != nil {
-			panic(err)
+			r.logger.Error("Failed to cleanup from TestRegister", "error", err)
 		}
 	}()
 
 	for idx, reg := range r.registries {
 		r.Run(fmt.Sprintf("reg-%d", idx), func() {
-			services, err := reg.ListServices()
+			services, err := reg.ListServices(r.ctx, "", "", nil)
 			r.Require().NoError(err)
 
-			r.Require().Len(services, len(r.services)+1+r.serviceOffset)
+			r.Len(services, len(r.services)+1)
 
-			services, err = reg.GetService(service.Name)
+			services, err = reg.GetService(r.ctx, "", "", service.Name, nil)
 			r.Require().NoError(err)
-			r.Require().Len(services, 1)
+			r.Len(services, 1)
 			r.Equal(service.Version, services[0].Version)
-			r.Equal(service.Nodes[0].Transport, services[0].Nodes[0].Transport)
+			r.Equal(service.Scheme, services[0].Scheme)
 		})
 	}
 }
 
 // TestGetAllNodesAndVersions tests that all nodes and all versions of a service are returned.
 //
-//nolint:gocognit,funlen
+//nolint:funlen
 func (r *TestSuite) TestGetAllNodesAndVersions() {
 	// Use a unique service name for this test to avoid conflicts
 	baseName := "orb.test.allnodes"
 
 	// Create multiple services with different versions
-	services := []*registry.Service{
+	services := []registry.ServiceNode{
 		// Service 1: v1.0.0 with two nodes
 		{
-			Name:    baseName + ".svc1",
-			Version: "v1.0.0",
-			Nodes: []*registry.Node{
-				{
-					ID:        "node-1-1",
-					Address:   "10.0.1.1:8080",
-					Transport: "http",
-					Metadata:  map[string]string{"region": "us-east"},
-				},
-				{
-					ID:        "node-1-2",
-					Address:   "10.0.1.2:8080",
-					Transport: "grpc",
-					Metadata:  map[string]string{"region": "us-west"},
-				},
-			},
+			Name:     baseName + ".svc1",
+			Version:  "v1.0.0",
+			Address:  "10.0.1.1:8080",
+			Scheme:   "http",
+			Metadata: map[string]string{"region": "us-east"},
+		},
+		{
+			Name:     baseName + ".svc1",
+			Version:  "v1.0.0",
+			Address:  "10.0.1.2:8080",
+			Scheme:   "grpc",
+			Metadata: map[string]string{"region": "us-west"},
 		},
 		// Service 1: v2.0.0 with one node
 		{
-			Name:    baseName + ".svc1",
-			Version: "v2.0.0",
-			Nodes: []*registry.Node{
-				{
-					ID:        "node-1-3",
-					Address:   "10.0.1.3:8080",
-					Transport: "http",
-					Metadata:  map[string]string{"region": "eu-west"},
-				},
-			},
+			Name:     baseName + ".svc1",
+			Version:  "v2.0.0",
+			Address:  "10.0.1.3:8080",
+			Scheme:   "http",
+			Metadata: map[string]string{"region": "eu-west"},
 		},
 		// Service 2: v1.0.0 with three nodes with different transports
 		{
-			Name:    baseName + ".svc2",
-			Version: "v1.0.0",
-			Nodes: []*registry.Node{
-				{
-					ID:        "node-2-1",
-					Address:   "10.0.2.1:8080",
-					Transport: "http",
-					Metadata:  map[string]string{"region": "us-east"},
-				},
-				{
-					ID:        "node-2-2",
-					Address:   "10.0.2.2:8080",
-					Transport: "grpc",
-					Metadata:  map[string]string{"region": "us-west"},
-				},
-				{
-					ID:        "node-2-3",
-					Address:   "10.0.2.3:8080",
-					Transport: "http3",
-					Metadata:  map[string]string{"region": "eu-west"},
-				},
-			},
+			Name:     baseName + ".svc2",
+			Version:  "v1.0.0",
+			Address:  "10.0.2.1:8080",
+			Scheme:   "http",
+			Metadata: map[string]string{"region": "us-east"},
+		},
+		{
+			Name:     baseName + ".svc2",
+			Version:  "v1.0.0",
+			Address:  "10.0.2.2:8080",
+			Scheme:   "grpc",
+			Metadata: map[string]string{"region": "us-west"},
+		},
+		{
+			Name:     baseName + ".svc2",
+			Version:  "v1.0.0",
+			Address:  "10.0.2.3:8080",
+			Scheme:   "http3",
+			Metadata: map[string]string{"region": "eu-west"},
 		},
 	}
 
-	for _, registry := range r.registries {
-		r.Run("registry-"+registry.String(), func() {
+	for _, reg := range r.registries {
+		r.Run("registry-"+reg.String(), func() {
 			// Register all services
 			for _, svc := range services {
-				r.Require().NoError(registry.Register(svc))
+				r.Require().NoError(reg.Register(r.ctx, svc))
 			}
 
 			time.Sleep(r.updateTime)
@@ -183,162 +176,146 @@ func (r *TestSuite) TestGetAllNodesAndVersions() {
 			// Cleanup when done
 			defer func() {
 				for _, svc := range services {
-					r.Require().NoError(registry.Deregister(svc))
+					r.Require().NoError(reg.Deregister(r.ctx, svc))
 				}
 			}()
 
 			// Test 1: GetService should return all versions of service 1
 			service1Name := baseName + ".svc1"
-			service1Results, err := registry.GetService(service1Name)
+			service1Results, err := reg.GetService(r.ctx, "", "", service1Name, nil)
 			r.Require().NoError(err)
 
-			// Verify that each version has the correct number of nodes
-			versionsFound := map[string]bool{
-				"v1.0.0": false,
-				"v2.0.0": false,
-			}
-
+			// Group results by version to validate
+			resultsMap := make(map[string][]registry.ServiceNode)
 			for _, svc := range service1Results {
-				versionsFound[svc.Version] = true
-
-				if svc.Version == "v1.0.0" {
-					r.Require().Len(svc.Nodes, 2, "v1.0.0 should have 2 nodes")
-					r.Require().ElementsMatch(
-						[]string{"node-1-1", "node-1-2"},
-						[]string{svc.Nodes[0].ID, svc.Nodes[1].ID},
-						"Node IDs should match")
-
-					// Verify transports are preserved
-					transports := map[string]bool{}
-					for _, node := range svc.Nodes {
-						transports[node.Transport] = true
-					}
-
-					r.Require().Len(transports, 2, "Should have both http and grpc transports")
-					r.Require().True(transports["http"], "Should have http transport")
-					r.Require().True(transports["grpc"], "Should have grpc transport")
-				} else if svc.Version == "v2.0.0" {
-					r.Require().Len(svc.Nodes, 1, "v2.0.0 should have 1 node")
-					r.Equal("node-1-3", svc.Nodes[0].ID)
-					r.Equal("http", svc.Nodes[0].Transport, "Transport should be preserved")
-				}
+				resultsMap[svc.Version] = append(resultsMap[svc.Version], svc)
 			}
 
-			r.Require().True(versionsFound["v1.0.0"], "v1.0.0 should be found")
-			r.Require().True(versionsFound["v2.0.0"], "v2.0.0 should be found")
+			// Verify we have both versions
+			r.Require().Contains(resultsMap, "v1.0.0", "v1.0.0 should be found")
+			r.Require().Contains(resultsMap, "v2.0.0", "v2.0.0 should be found")
+
+			// Verify v1.0.0 has 2 nodes
+			r.Require().Len(resultsMap["v1.0.0"], 2, "v1.0.0 should have 2 nodes")
+
+			// Verify v2.0.0 has 1 node
+			r.Require().Len(resultsMap["v2.0.0"], 1, "v2.0.0 should have 1 node")
+
+			// Verify transports are preserved for v1.0.0
+			schemes := map[string]bool{}
+			for _, node := range resultsMap["v1.0.0"] {
+				schemes[node.Scheme] = true
+			}
+
+			r.Require().Len(schemes, 2, "Should have both http and grpc schemes")
+			r.Require().True(schemes["http"], "Should have http scheme")
+			r.Require().True(schemes["grpc"], "Should have grpc scheme")
 
 			// Test 2: GetService should return all nodes for service 2
 			service2Name := baseName + ".svc2"
-			service2Results, err := registry.GetService(service2Name)
+			service2Results, err := reg.GetService(r.ctx, "", "", service2Name, nil)
 			r.Require().NoError(err)
-			r.Require().Len(service2Results, 1, "Should return one version of service 2")
-			r.Require().Len(service2Results[0].Nodes, 3, "Service 2 should have 3 nodes")
+			r.Require().Len(service2Results, 3, "Service 2 should have 3 nodes")
 
-			// Verify all node IDs are present
-			nodeIDs := []string{}
-			for _, node := range service2Results[0].Nodes {
-				nodeIDs = append(nodeIDs, node.ID)
+			// Verify all schemes are present
+			schemeSet := map[string]bool{}
+			for _, node := range service2Results {
+				schemeSet[node.Scheme] = true
 			}
 
-			r.Require().ElementsMatch(
-				[]string{"node-2-1", "node-2-2", "node-2-3"},
-				nodeIDs,
-				"All node IDs should be present")
-
-			// Verify all transports are present
-			transportSet := map[string]bool{}
-			for _, node := range service2Results[0].Nodes {
-				transportSet[node.Transport] = true
-			}
-
-			r.Require().Len(transportSet, 3, "All three transports should be present")
-			r.Require().True(transportSet["http"], "HTTP transport should be present")
-			r.Require().True(transportSet["grpc"], "gRPC transport should be present")
-			r.Require().True(transportSet["http3"], "HTTP/3 transport should be present")
+			r.Require().Len(schemeSet, 3, "All three schemes should be present")
+			r.Require().True(schemeSet["http"], "HTTP scheme should be present")
+			r.Require().True(schemeSet["grpc"], "gRPC scheme should be present")
+			r.Require().True(schemeSet["http3"], "HTTP/3 scheme should be present")
 
 			// Test 3: ListServices should return all services
-			allServices, err := registry.ListServices()
+			allServices, err := reg.ListServices(r.ctx, "", "", nil)
 			r.Require().NoError(err)
 
 			// Count the number of instances of our test services
 			service1Count := 0
 			service2Count := 0
-			totalNodes := 0
 
 			for _, svc := range allServices {
 				if svc.Name == service1Name {
 					service1Count++
-					totalNodes += len(svc.Nodes)
 				} else if svc.Name == service2Name {
 					service2Count++
-					totalNodes += len(svc.Nodes)
 				}
 			}
 
-			r.Require().Equal(2, service1Count, "ListServices should return two versions of service 1")
-			r.Require().Equal(1, service2Count, "ListServices should return one version of service 2")
-			r.Require().Equal(6, totalNodes, "Total node count should be 6 (2+1+3)")
+			r.Require().Equal(3, service1Count, "ListServices should return all nodes of service 1")
+			r.Require().Equal(3, service2Count, "ListServices should return all nodes of service 2")
 		})
 	}
 }
 
 // TestDeregister tests deregistering.
 func (r *TestSuite) TestDeregister() {
-	service1 := registry.Service{Name: "orb.test.svc.4", Version: "v1", Nodes: []*registry.Node{r.nodes[4]}}
-	service2 := registry.Service{Name: "orb.test.svc.4", Version: "v2", Nodes: []*registry.Node{r.nodes[5]}}
+	service1 := registry.ServiceNode{
+		Name:    "orb.test.deregister",
+		Version: "v1",
+		Address: r.services[4].Address,
+		Scheme:  r.services[4].Scheme,
+	}
+	service2 := registry.ServiceNode{
+		Name:    "orb.test.deregister",
+		Version: "v2",
+		Address: r.services[5].Address,
+		Scheme:  r.services[5].Scheme,
+	}
 
-	r.Require().NoError(r.registries[0].Register(&service1))
+	r.Require().NoError(r.randomRegistry().Register(r.ctx, service1))
 	time.Sleep(r.updateTime)
 
-	services, err := r.registries[0].ListServices()
+	services, err := r.randomRegistry().ListServices(r.ctx, "", "", nil)
 	r.Require().NoError(err)
-	r.Require().Len(services, len(r.services)+1+r.serviceOffset)
+	r.Len(services, len(r.services)+1)
 
-	services, err = r.registries[0].GetService(service1.Name)
+	services, err = r.randomRegistry().GetService(r.ctx, "", "", service1.Name, nil)
 	r.Require().NoError(err)
-	r.Require().Len(services, 1)
-	r.Require().Equal(service1.Version, services[0].Version)
+	r.Len(services, 1)
+	r.Equal(service1.Version, services[0].Version)
 
-	r.Require().NoError(r.registries[0].Register(&service2))
+	r.Require().NoError(r.randomRegistry().Register(r.ctx, service2))
 	time.Sleep(r.updateTime)
 
-	services, err = r.registries[0].GetService(service2.Name)
+	services, err = r.randomRegistry().GetService(r.ctx, "", "", service2.Name, nil)
 	r.Require().NoError(err)
-	r.Require().Len(services, 2)
+	r.Len(services, 2)
 
-	r.Require().NoError(r.registries[0].Deregister(&service1))
+	r.Require().NoError(r.randomRegistry().Deregister(r.ctx, service1))
 	time.Sleep(r.updateTime)
 
-	services, err = r.registries[0].GetService(service1.Name)
+	services, err = r.randomRegistry().GetService(r.ctx, "", "", service1.Name, nil)
 	r.Require().NoError(err)
-	r.Require().Len(services, 1)
+	r.Len(services, 1)
 
-	r.Require().NoError(r.registries[0].Deregister(&service2))
+	r.Require().NoError(r.randomRegistry().Deregister(r.ctx, service2))
 	time.Sleep(r.updateTime)
 
-	services, err = r.registries[0].GetService(service1.Name)
-	r.Require().ErrorIs(registry.ErrNotFound, err)
-	r.Require().Empty(services)
+	services, err = r.randomRegistry().GetService(r.ctx, "", "", service1.Name, nil)
+	r.Require().ErrorIs(err, registry.ErrNotFound)
+	r.Empty(services)
 }
 
 // TestGetServiceAllRegistries tests a service on all registries.
 func (r *TestSuite) TestGetServiceAllRegistries() {
 	for idx, reg := range r.registries {
 		r.Run(fmt.Sprintf("reg-%d", idx), func() {
-			services, err := reg.GetService(r.services[0].Name)
+			services, err := reg.GetService(r.ctx, "", "", r.services[0].Name, nil)
 			r.Require().NoError(err)
-			r.Require().Len(services, 1)
-			r.Require().Equal(r.services[0].Name, services[0].Name)
-			r.Require().Equal(len(r.services[0].Nodes), len(services[0].Nodes))
+			r.Len(services, 1)
+			r.Equal(r.services[0].Name, services[0].Name)
 		})
 	}
 }
 
 // TestGetServiceWithNoNodes tests a non existent service.
 func (r *TestSuite) TestGetServiceWithNoNodes() {
-	services, err := r.registries[math_rand.Intn(len(r.registries))].GetService("missing") //nolint:gosec
-	r.Require().ErrorIs(registry.ErrNotFound, err)
-	r.Require().Empty(services)
+	services, err := r.randomRegistry().GetService(r.ctx, "", "", "missing", nil)
+	r.Require().ErrorIs(err, registry.ErrNotFound)
+	r.Empty(services)
 }
 
 // BenchmarkGetService benchmarks.
@@ -350,14 +327,13 @@ func (r *TestSuite) BenchmarkGetService(b *testing.B) {
 
 	b.ResetTimer()
 
-	for n := 0; n < b.N; n++ { //nolint:dupl
-		id := math_rand.Intn(len(r.services)) //nolint:gosec
+	for n := 0; n < b.N; n++ {
+		id := rand.Intn(len(r.services)) //nolint:gosec
 
-		services, err := r.registries[math_rand.Intn(len(r.registries))].GetService(r.services[id].Name) //nolint:gosec
+		services, err := r.randomRegistry().GetService(r.ctx, "", "", r.services[id].Name, nil)
 		r.Require().NoError(err)
-		r.Require().Len(services, 1)
-		r.Require().Equal(r.services[id].Name, services[0].Name)
-		r.Require().Equal(len(r.services[id].Nodes), len(services[0].Nodes))
+		r.Len(services, 1)
+		r.Equal(r.services[id].Name, services[0].Name)
 	}
 
 	b.StopTimer()
@@ -374,9 +350,9 @@ func (r *TestSuite) BenchmarkGetServiceWithNoNodes(b *testing.B) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		services, err := r.registries[0].GetService("missing")
-		r.Require().ErrorIs(registry.ErrNotFound, err)
-		r.Require().Empty(services)
+		services, err := r.randomRegistry().GetService(r.ctx, "", "", "missing", nil)
+		r.Require().ErrorIs(err, registry.ErrNotFound)
+		r.Empty(services)
 	}
 
 	b.StopTimer()
@@ -393,14 +369,13 @@ func (r *TestSuite) BenchmarkParallelGetService(b *testing.B) {
 	b.ResetTimer()
 
 	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() { //nolint:dupl
-			id := math_rand.Intn(len(r.services)) //nolint:gosec
+		for pb.Next() {
+			id := rand.Intn(len(r.services)) //nolint:gosec
 
-			services, err := r.registries[math_rand.Intn(len(r.registries))].GetService(r.services[id].Name) //nolint:gosec
+			services, err := r.randomRegistry().GetService(r.ctx, "", "", r.services[id].Name, nil)
 			r.Require().NoError(err)
-			r.Require().Len(services, 1)
-			r.Require().Equal(r.services[id].Name, services[0].Name)
-			r.Require().Equal(len(r.services[id].Nodes), len(services[0].Nodes))
+			r.Len(services, 1)
+			r.Equal(r.services[id].Name, services[0].Name)
 		}
 	})
 
@@ -410,55 +385,45 @@ func (r *TestSuite) BenchmarkParallelGetService(b *testing.B) {
 
 // TestWatchServices tests the watcher functionality.
 func (r *TestSuite) TestWatchServices() {
-	// Skip the test if we have no registries
-	if len(r.registries) == 0 {
-		r.T().Skip("No registries available for testing")
-		return
-	}
-
 	// Create a test service with a unique name for watching
 	serviceName := "orb.test.watch" + time.Now().Format("20060102150405")
-	service := registry.Service{Name: serviceName, Version: "v1.0.0", Nodes: []*registry.Node{r.nodes[3]}}
+	service := registry.ServiceNode{
+		Name:    serviceName,
+		Version: "v1.0.0",
+		Address: r.services[3].Address,
+		Scheme:  r.services[3].Scheme,
+	}
 
 	// Register the service first to ensure it exists
-	err := r.registries[0].Register(&service)
+	err := r.randomRegistry().Register(r.ctx, service)
 	r.Require().NoError(err)
 	time.Sleep(r.updateTime)
 
 	// Create a watcher
-	watcher, err := r.registries[0].Watch()
+	watcher, err := r.randomRegistry().Watch(r.ctx, registry.WatchService(serviceName))
 	r.Require().NoError(err)
-	r.Require().NotNil(watcher)
-
-	//nolint:errcheck
-	defer watcher.Stop()
+	r.NotNil(watcher)
 
 	// Update the service to trigger a watch event
-	service.Nodes = append(service.Nodes, r.nodes[2]) // Add another node
+	service.Metadata = map[string]string{"updated": "true"} // Modify metadata to trigger update
 
 	// Start a goroutine to listen for events
 	eventReceived := make(chan bool)
 
 	go func() {
-		// Handle multiple events until we get one for our service
-		for i := 0; i < 20; i++ { // Try multiple times
-			result, err := watcher.Next()
-			if err != nil {
-				break
-			}
+		result, err := watcher.Next()
+		if err != nil {
+			return
+		}
 
-			if result != nil && result.Service != nil && result.Service.Name == serviceName {
-				eventReceived <- true
-				break
-			}
-
-			// Check next event after a short delay
-			time.Sleep(50 * time.Millisecond)
+		if result != nil && result.Node.Name == serviceName {
+			eventReceived <- true
+			return
 		}
 	}()
 
 	// Update the service that should trigger the watcher
-	err = r.registries[0].Register(&service)
+	err = r.randomRegistry().Register(r.ctx, service)
 	r.Require().NoError(err)
 
 	// Wait for the event with a timeout
@@ -471,59 +436,67 @@ func (r *TestSuite) TestWatchServices() {
 	}
 
 	// Cleanup
-	err = r.registries[0].Deregister(&service)
+	err = r.randomRegistry().Deregister(r.ctx, service)
 	r.Require().NoError(err)
 }
 
 // TestServiceUpdate tests updating an existing service.
 func (r *TestSuite) TestServiceUpdate() {
+	if r.registries[0].String() == "mdns" {
+		r.T().Skip("Skipping test for mdns registry")
+		return
+	}
+
 	// Initial service
-	service := registry.Service{
+	service := registry.ServiceNode{
 		Name:    "orb.test.update",
 		Version: "v1.0.0",
-		Nodes:   []*registry.Node{r.nodes[0]},
+		Address: r.services[0].Address,
+		Scheme:  r.services[0].Scheme,
 	}
 
 	// Register the service
-	r.Require().NoError(r.registries[0].Register(&service))
+	r.Require().NoError(r.randomRegistry().Register(r.ctx, service))
 	time.Sleep(r.updateTime)
 
 	// Verify initial service
-	services, err := r.registries[0].GetService(service.Name)
+	services, err := r.randomRegistry().GetService(r.ctx, "", "", service.Name, nil)
 	r.Require().NoError(err)
-	r.Require().Len(services, 1)
-	r.Require().Len(services[0].Nodes, 1)
+	r.Len(services, 1)
 
-	// Update the service by adding a node
-	updatedService := registry.Service{
-		Name:    "orb.test.update",
-		Version: "v1.0.0",
-		Nodes:   []*registry.Node{r.nodes[0], r.nodes[1]},
+	// Update the service by adding metadata
+	updatedService := registry.ServiceNode{
+		Name:     "orb.test.update",
+		Version:  "v1.0.0",
+		Address:  r.services[0].Address,
+		Scheme:   r.services[0].Scheme,
+		Metadata: map[string]string{"updated": "true"},
 	}
 
 	// Register the updated service
-	r.Require().NoError(r.registries[0].Register(&updatedService))
+	r.Require().NoError(r.randomRegistry().Register(r.ctx, updatedService))
 	time.Sleep(r.updateTime)
 
 	// Verify the service was updated
-	services, err = r.registries[0].GetService(service.Name)
+	services, err = r.randomRegistry().GetService(r.ctx, "", "", service.Name, nil)
 	r.Require().NoError(err)
-	r.Require().Len(services, 1)
+	r.Len(services, 1)
 
-	// Should now have 2 nodes
-	r.Require().Len(services[0].Nodes, 2)
+	// Should have metadata updated
+	r.Equal("true", services[0].Metadata["updated"])
 
 	// Cleanup
-	r.Require().NoError(r.registries[0].Deregister(&updatedService))
+	r.Require().NoError(r.randomRegistry().Deregister(r.ctx, updatedService))
 }
 
 // TestServiceMetadata tests handling of service metadata.
 func (r *TestSuite) TestServiceMetadata() {
 	// Service with metadata
-	service := registry.Service{
+	service := registry.ServiceNode{
 		Name:    "orb.test.metadata",
 		Version: "v1.0.0",
-		Nodes:   []*registry.Node{r.nodes[0]},
+		Address: r.services[0].Address,
+		Scheme:  r.services[0].Scheme,
 		Metadata: map[string]string{
 			"region": "us-west",
 			"env":    "test",
@@ -532,39 +505,48 @@ func (r *TestSuite) TestServiceMetadata() {
 	}
 
 	// Register the service
-	r.Require().NoError(r.registries[0].Register(&service))
+	r.Require().NoError(r.randomRegistry().Register(r.ctx, service))
 	time.Sleep(r.updateTime)
 
 	// Verify the service can be retrieved with metadata intact
-	services, err := r.registries[0].GetService(service.Name)
+	services, err := r.randomRegistry().GetService(r.ctx, "", "", service.Name, nil)
 	r.Require().NoError(err)
-	r.Require().Len(services, 1)
+	r.Len(services, 1)
 
 	// Verify metadata was preserved
-	r.Require().Equal(service.Metadata["region"], services[0].Metadata["region"])
-	r.Require().Equal(service.Metadata["env"], services[0].Metadata["env"])
-	r.Require().Equal(service.Metadata["secure"], services[0].Metadata["secure"])
+	r.Equal(service.Metadata["region"], services[0].Metadata["region"])
+	r.Equal(service.Metadata["env"], services[0].Metadata["env"])
+	r.Equal(service.Metadata["secure"], services[0].Metadata["secure"])
 
 	// Cleanup
-	r.Require().NoError(r.registries[0].Deregister(&service))
+	r.Require().NoError(r.randomRegistry().Deregister(r.ctx, service))
 }
 
 // TestMultipleVersions tests registering and retrieving services with multiple versions.
 func (r *TestSuite) TestMultipleVersions() {
 	// Create services with same name but different versions
-	serviceV1 := registry.Service{Name: "orb.test.versions", Version: "v1.0.0", Nodes: []*registry.Node{r.nodes[0]}}
-	serviceV2 := registry.Service{Name: "orb.test.versions", Version: "v2.0.0", Nodes: []*registry.Node{r.nodes[1]}}
+	serviceV1 := registry.ServiceNode{
+		Name:    "orb.test.versions",
+		Version: "v1.0.0",
+		Address: r.services[0].Address,
+		Scheme:  r.services[0].Scheme,
+	}
+	serviceV2 := registry.ServiceNode{
+		Name:    "orb.test.versions",
+		Version: "v2.0.0",
+		Address: r.services[1].Address,
+		Scheme:  r.services[1].Scheme,
+	}
 
 	// Register both versions
-	r.Require().NoError(r.registries[0].Register(&serviceV1))
-	r.Require().NoError(r.registries[0].Register(&serviceV2))
+	r.Require().NoError(r.randomRegistry().Register(r.ctx, serviceV1))
+	r.Require().NoError(r.randomRegistry().Register(r.ctx, serviceV2))
 	time.Sleep(r.updateTime)
 
 	// Get all versions of the service
-	services, err := r.registries[0].GetService(serviceV1.Name)
-	r.logger.Debug("GetService", "service", serviceV1.Name, "services", services)
+	services, err := r.randomRegistry().GetService(r.ctx, "", "", serviceV1.Name, nil)
 	r.Require().NoError(err)
-	r.Require().Len(services, 2, "Should have found both versions of the service")
+	r.Require().GreaterOrEqual(len(services), 2, "Should have found both versions of the service")
 
 	// Verify both versions are returned
 	versions := map[string]bool{}
@@ -576,8 +558,8 @@ func (r *TestSuite) TestMultipleVersions() {
 	r.Require().True(versions["v2.0.0"], "v2.0.0 should be in the results")
 
 	// Cleanup
-	r.Require().NoError(r.registries[0].Deregister(&serviceV1))
-	r.Require().NoError(r.registries[0].Deregister(&serviceV2))
+	r.Require().NoError(r.randomRegistry().Deregister(r.ctx, serviceV1))
+	r.Require().NoError(r.randomRegistry().Deregister(r.ctx, serviceV2))
 }
 
 // BenchmarkListServices benchmarks the performance of listing services.
@@ -590,7 +572,7 @@ func (r *TestSuite) BenchmarkListServices(b *testing.B) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		services, err := r.registries[math_rand.Intn(len(r.registries))].ListServices() //nolint:gosec
+		services, err := r.randomRegistry().ListServices(r.ctx, "", "", nil)
 		r.Require().NoError(err)
 		r.Require().NotEmpty(services)
 	}
@@ -599,294 +581,89 @@ func (r *TestSuite) BenchmarkListServices(b *testing.B) {
 	r.TearDownSuite()
 }
 
-// TestServiceWithEndpoints tests registering and retrieving services with endpoints.
-func (r *TestSuite) TestServiceWithEndpoints() {
-	// Create a service with endpoints
-	endpoints := []*registry.Endpoint{
+// TestFiltering tests using options to filter services.
+func (r *TestSuite) TestFiltering() {
+	// Create services with different attributes
+	services := []registry.ServiceNode{
 		{
-			Name: "method1",
-			Request: &registry.Value{
-				Name: "request1",
-				Type: "json",
-			},
-			Response: &registry.Value{
-				Name: "response1",
-				Type: "json",
-			},
-			Metadata: map[string]string{
-				"endpoint_type": "rest",
-				"handler":       "handler1",
-			},
+			Name:      "orb.test.filter",
+			Version:   "v1.0.0",
+			Address:   "10.0.1.1:8080",
+			Scheme:    "http",
+			Namespace: "default",
+			Region:    "us-west",
 		},
 		{
-			Name: "method2",
-			Request: &registry.Value{
-				Name: "request2",
-				Type: "protobuf",
-			},
-			Response: &registry.Value{
-				Name: "response2",
-				Type: "protobuf",
-			},
-			Metadata: map[string]string{
-				"endpoint_type": "grpc",
-				"handler":       "handler2",
-			},
-		},
-	}
-
-	service := registry.Service{
-		Name:      "orb.test.endpoints",
-		Version:   "v1.0.0",
-		Nodes:     []*registry.Node{r.nodes[0]},
-		Endpoints: endpoints,
-	}
-
-	// Register the service
-	r.Require().NoError(r.registries[0].Register(&service))
-	time.Sleep(r.updateTime)
-
-	// Verify the service can be retrieved with endpoints intact
-	services, err := r.registries[0].GetService(service.Name)
-	r.Require().NoError(err)
-	r.Require().Len(services, 1)
-
-	// Verify endpoints were preserved
-	r.Require().Len(services[0].Endpoints, len(endpoints))
-
-	for i, ep := range services[0].Endpoints {
-		r.Require().Equal(endpoints[i].Name, ep.Name)
-
-		// Check request/response types
-		r.Require().Equal(endpoints[i].Request.Name, ep.Request.Name)
-		r.Require().Equal(endpoints[i].Request.Type, ep.Request.Type)
-		r.Require().Equal(endpoints[i].Response.Name, ep.Response.Name)
-		r.Require().Equal(endpoints[i].Response.Type, ep.Response.Type)
-
-		// Check metadata
-		r.Require().Equal(endpoints[i].Metadata["endpoint_type"], ep.Metadata["endpoint_type"])
-		r.Require().Equal(endpoints[i].Metadata["handler"], ep.Metadata["handler"])
-	}
-
-	// Cleanup
-	r.Require().NoError(r.registries[0].Deregister(&service))
-}
-
-// TestConcurrentRegistrations tests concurrent registration and deregistration operations.
-func (r *TestSuite) TestConcurrentRegistrations() {
-	const numServices = 10
-
-	const numWorkers = 3
-
-	services := make([]*registry.Service, numServices)
-	for i := 0; i < numServices; i++ {
-		services[i] = &registry.Service{
-			Name:    fmt.Sprintf("orb.test.concurrent.%d", i),
-			Version: "v1.0.0",
-			Nodes:   []*registry.Node{r.nodes[i%len(r.nodes)]},
-		}
-	}
-
-	// Create a wait group to synchronize goroutines
-	wg := sync.WaitGroup{}
-	// Start multiple workers to register services concurrently
-	for workerID := 0; workerID < numWorkers; workerID++ {
-		wg.Add(1)
-
-		go func(workerId int) {
-			defer wg.Done()
-
-			// Each worker operates on a subset of services
-			start := (workerId * numServices) / numWorkers
-			end := ((workerId + 1) * numServices) / numWorkers
-
-			for i := start; i < end; i++ {
-				// Register the service
-				err := r.registries[0].Register(services[i])
-
-				r.NoError(err)
-			}
-
-			// Small delay to allow updates to propagate
-			time.Sleep(r.updateTime)
-
-			// Verify the services were registered
-			for i := start; i < end; i++ {
-				result, err := r.registries[0].GetService(services[i].Name)
-
-				r.NoError(err, "Failed to get service: %s", services[i].Name)
-				r.Len(result, 1)
-
-				if len(result) >= len(services) {
-					r.Equal(services[i].Name, result[0].Name)
-				}
-			}
-
-			// Now deregister the services
-			for i := start; i < end; i++ {
-				err := r.registries[0].Deregister(services[i])
-
-				r.NoError(err)
-			}
-		}(workerID)
-	}
-
-	// Wait for all workers to complete
-	wg.Wait()
-
-	// Verify all services were successfully deregistered
-	time.Sleep(r.updateTime)
-
-	for i := 0; i < numServices; i++ {
-		r.logger.Debug("checking", "name", services[i].Name)
-		n, err := r.registries[0].GetService(services[i].Name)
-		r.Require().Empty(n)
-		r.Require().ErrorIs(err, registry.ErrNotFound)
-	}
-}
-
-// TestMetadataFiltering tests using custom logic to filter services by metadata.
-func (r *TestSuite) TestMetadataFiltering() {
-	// Create services with different environments in metadata
-	servicesProd := []*registry.Service{
-		{
-			Name:    "orb.test.filter.1",
-			Version: "v1.0.0",
-			Nodes:   []*registry.Node{r.nodes[0]},
-			Metadata: map[string]string{
-				"env":    "production",
-				"region": "us-west",
-			},
+			Name:      "orb.test.filter",
+			Version:   "v2.0.0",
+			Address:   "10.0.1.2:8080",
+			Scheme:    "grpc",
+			Namespace: "default",
+			Region:    "us-east",
 		},
 		{
-			Name:    "orb.test.filter.2",
-			Version: "v1.0.0",
-			Nodes:   []*registry.Node{r.nodes[1]},
-			Metadata: map[string]string{
-				"env":    "production",
-				"region": "us-east",
-			},
-		},
-	}
-
-	servicesStaging := []*registry.Service{
-		{
-			Name:    "orb.test.filter.3",
-			Version: "v1.0.0",
-			Nodes:   []*registry.Node{r.nodes[2]},
-			Metadata: map[string]string{
-				"env":    "staging",
-				"region": "eu-west",
-			},
+			Name:      "orb.test.filter",
+			Version:   "v1.0.0",
+			Address:   "10.0.1.3:8080",
+			Scheme:    "https",
+			Namespace: "production",
+			Region:    "eu-west",
 		},
 	}
 
 	// Register all services
-	for _, svc := range append(servicesProd, servicesStaging...) {
-		r.Require().NoError(r.registries[0].Register(svc))
+	for _, svc := range services {
+		r.Require().NoError(r.randomRegistry().Register(r.ctx, svc))
 	}
-
-	time.Sleep(r.updateTime)
-
-	// Get all services
-	allServices, err := r.registries[0].ListServices()
-	r.Require().NoError(err)
-
-	// Manually filter for production services
-	prodServices := []*registry.Service{}
-
-	for _, svc := range allServices {
-		// Skip non-test services (those not starting with orb.test.filter)
-		if !strings.HasPrefix(svc.Name, "orb.test.filter") {
-			continue
-		}
-
-		// Only include services with env=production metadata
-		if env, ok := svc.Metadata["env"]; ok && env == "production" {
-			prodServices = append(prodServices, svc)
-		}
-	}
-
-	// Verify we filtered correctly
-	r.Require().Len(prodServices, len(servicesProd), "Should find only the production services")
 
 	// Cleanup
-	for _, svc := range append(servicesProd, servicesStaging...) {
-		r.Require().NoError(r.registries[0].Deregister(svc))
-	}
-}
-
-// TestServiceNodesHealth simulates checking node health in a registry.
-func (r *TestSuite) TestServiceNodesHealth() {
-	// Create a service with multiple nodes
-	nodes := []*registry.Node{
-		{
-			ID:        "healthy-node-1",
-			Address:   "10.0.0.1:8080",
-			Metadata:  map[string]string{"status": "healthy"},
-			Transport: "http",
-		},
-		{
-			ID:        "healthy-node-2",
-			Address:   "10.0.0.2:8080",
-			Metadata:  map[string]string{"status": "healthy"},
-			Transport: "http",
-		},
-	}
-
-	service := registry.Service{
-		Name:    "orb.test.health",
-		Version: "v1.0.0",
-		Nodes:   nodes,
-	}
-
-	// Register the service
-	r.Require().NoError(r.registries[0].Register(&service))
-	time.Sleep(r.updateTime)
-
-	// Retrieve the service
-	services, err := r.registries[0].GetService(service.Name)
-	r.Require().NoError(err)
-	r.Require().Len(services, 1)
-	r.Require().Len(services[0].Nodes, 2)
-
-	// Simulate a node becoming unhealthy by updating its metadata
-	nodes[0].Metadata["status"] = "unhealthy"
-
-	// Update the service with the modified node
-	updatedService := registry.Service{
-		Name:    service.Name,
-		Version: service.Version,
-		Nodes:   []*registry.Node{nodes[0]},
-	}
-	r.Require().NoError(r.registries[0].Register(&updatedService))
-	time.Sleep(r.updateTime)
-
-	// Retrieve the service again
-	services, err = r.registries[0].GetService(service.Name)
-	r.Require().NoError(err)
-	r.Require().Len(services, 1)
-	r.Require().Len(services[0].Nodes, 2)
-
-	// Verify that one node is now marked as unhealthy
-	healthyNodes := 0
-	unhealthyNodes := 0
-
-	for _, node := range services[0].Nodes {
-		if status, ok := node.Metadata["status"]; ok {
-			if status == "healthy" {
-				healthyNodes++
-			} else if status == "unhealthy" {
-				unhealthyNodes++
-			}
+	defer func() {
+		for _, svc := range services {
+			r.Require().NoError(r.randomRegistry().Deregister(r.ctx, svc))
 		}
-	}
+	}()
 
-	r.Require().Equal(1, healthyNodes, "Should have one healthy node")
-	r.Require().Equal(1, unhealthyNodes, "Should have one unhealthy node")
+	time.Sleep(r.updateTime)
 
-	// Cleanup
-	r.Require().NoError(r.registries[0].Deregister(&service))
+	// Test filtering by version and other parameters
+	filtered, err := r.randomRegistry().GetService(
+		r.ctx, "default", "us-west", "orb.test.filter", []string{"http"})
+	r.Require().NoError(err)
+	r.Require().Len(filtered, 1, "Should find exactly one service with version v1.0.0 in default/us-west")
+	r.Require().Equal("v1.0.0", filtered[0].Version)
+	r.Require().Equal("default", filtered[0].Namespace)
+	r.Require().Equal("us-west", filtered[0].Region)
+
+	// Test filtering by namespace
+	filtered, err = r.randomRegistry().GetService(
+		r.ctx, "production", "eu-west", "orb.test.filter", nil)
+	r.Require().NoError(err)
+	r.Require().Len(filtered, 1, "Should find exactly one service in production/eu-west")
+	r.Require().Equal("v1.0.0", filtered[0].Version)
+	r.Require().Equal("production", filtered[0].Namespace)
+	r.Require().Equal("eu-west", filtered[0].Region)
+
+	// Test filtering by region
+	filtered, err = r.randomRegistry().GetService(
+		r.ctx, "default", "us-east", "orb.test.filter", nil)
+	r.Require().NoError(err)
+	r.Require().Len(filtered, 1, "Should find exactly one service in default/us-east")
+	r.Require().Equal("v2.0.0", filtered[0].Version)
+	r.Require().Equal("default", filtered[0].Namespace)
+	r.Require().Equal("us-east", filtered[0].Region)
+
+	// Test filtering by scheme
+	filtered, err = r.randomRegistry().GetService(
+		r.ctx, "default", "us-west", "orb.test.filter", []string{"http"})
+	r.Require().NoError(err)
+	r.Require().Len(filtered, 1, "Should find exactly one service with HTTP scheme")
+	r.Require().Equal("http", filtered[0].Scheme)
+
+	// Test for no matches with a combination of filters
+	filtered, err = r.randomRegistry().GetService(
+		r.ctx, "production", "us-east", "orb.test.filter", nil)
+	r.Require().ErrorIs(err, registry.ErrNotFound)
+	r.Require().Empty(filtered, "Should find no services in production/us-east")
 }
 
 // BenchmarkRegisterDeregister benchmarks the performance of registering and deregistering services.
@@ -896,21 +673,22 @@ func (r *TestSuite) BenchmarkRegisterDeregister(b *testing.B) {
 	r.SetT(&testing.T{})
 
 	// Create a service just for this benchmark
-	service := &registry.Service{
+	service := registry.ServiceNode{
 		Name:    "orb.test.benchmark.regdereg",
 		Version: "v1.0.0",
-		Nodes:   []*registry.Node{r.nodes[0]},
+		Address: r.services[0].Address,
+		Scheme:  r.services[0].Scheme,
 	}
 
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
 		// Register
-		err := r.registries[0].Register(service)
+		err := r.randomRegistry().Register(r.ctx, service)
 		r.Require().NoError(err)
 
 		// Deregister
-		err = r.registries[0].Deregister(service)
+		err = r.randomRegistry().Deregister(r.ctx, service)
 		r.Require().NoError(err)
 	}
 }

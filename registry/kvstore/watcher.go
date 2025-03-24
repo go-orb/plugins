@@ -2,7 +2,6 @@ package kvstore
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/kvstore"
@@ -50,20 +49,16 @@ func (w *Watcher) Next() (*registry.Result, error) {
 		return nil, orberrors.ErrInternalServerError.Wrap(errors.New("watcher stopped"))
 	}
 
-	var svc registry.Service
+	var svc registry.ServiceNode
 
 	if kve.Value == nil {
-		// fake a service
-		parts := strings.SplitN(kve.Key, w.serviceDelimiter, 3)
-		if len(parts) != 3 {
-			return nil, orberrors.ErrBadRequest.Wrap(errors.New("invalid service key"))
+		var err error
+
+		svc, err = keyToServiceNode(kve.Key, w.serviceDelimiter)
+		if err != nil {
+			_ = w.stop() //nolint:errcheck
+			return nil, orberrors.ErrBadRequest.Wrap(err)
 		}
-
-		svc.Name = parts[0]
-
-		// go-orb registers nodes with a - separator
-		svc.Nodes = []*registry.Node{{ID: parts[1]}}
-		svc.Version = parts[2]
 	} else {
 		if err := w.codec.Unmarshal(kve.Value, &svc); err != nil {
 			_ = w.stop() //nolint:errcheck
@@ -71,23 +66,23 @@ func (w *Watcher) Next() (*registry.Result, error) {
 		}
 	}
 
-	actionName := ""
+	var action registry.EventType
 
 	switch kve.Operation {
 	case kvstore.WatchOpCreate:
-		actionName = "create"
+		action = registry.Create
 	case kvstore.WatchOpUpdate:
-		actionName = "update"
+		action = registry.Update
 	case kvstore.WatchOpDelete:
-		actionName = "delete"
+		action = registry.Delete
 	default:
 		_ = w.stop() //nolint:errcheck
 		return nil, orberrors.ErrBadRequest.Wrap(errors.New("invalid operation"))
 	}
 
 	return &registry.Result{
-		Service: &svc,
-		Action:  actionName,
+		Node:   svc,
+		Action: action,
 	}, nil
 }
 

@@ -15,7 +15,6 @@ import (
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
 	orbserver "github.com/go-orb/go-orb/server"
-	"github.com/go-orb/go-orb/types"
 	"github.com/go-orb/go-orb/util/addr"
 )
 
@@ -26,6 +25,9 @@ const Plugin = "drpc"
 
 // Server is the drpc Server for go-orb.
 type Server struct {
+	serviceName    string
+	serviceVersion string
+
 	config   *Config
 	logger   log.Logger
 	registry registry.Type
@@ -90,11 +92,11 @@ func (s *Server) Start(ctx context.Context) error {
 
 	s.started = true
 
-	return s.registryRegister()
+	return s.registryRegister(ctx)
 }
 
 // Stop will stop the dRPC server.
-func (s *Server) Stop(_ context.Context) error {
+func (s *Server) Stop(ctx context.Context) error {
 	if !s.started {
 		return nil
 	}
@@ -102,7 +104,7 @@ func (s *Server) Stop(_ context.Context) error {
 	// Stops the dRPC Server.
 	s.cancelFunc()
 
-	return s.registryDeregister()
+	return s.registryDeregister(ctx)
 }
 
 // AddHandler adds a handler for later registration.
@@ -139,11 +141,6 @@ func (s *Server) Transport() string {
 	return "drpc"
 }
 
-// EntrypointID returns the id of this entrypoint (node) in the registry.
-func (s *Server) EntrypointID() string {
-	return s.registry.ServiceName() + types.DefaultSeparator + s.config.Name
-}
-
 // String returns the entrypoint type.
 func (s *Server) String() string {
 	return Plugin
@@ -169,52 +166,29 @@ func (s *Server) Router() *Mux {
 	return s.mux
 }
 
-func (s *Server) getEndpoints() []*registry.Endpoint {
-	result := make([]*registry.Endpoint, 0, len(s.endpoints))
-
-	for _, r := range s.endpoints {
-		s.logger.Trace("found endpoint", "name", r[1:])
-
-		result = append(result, &registry.Endpoint{
-			Name:     r,
-			Metadata: map[string]string{"stream": "true"},
-		})
-	}
-
-	return result
-}
-
-func (s *Server) registryService() *registry.Service {
-	node := &registry.Node{
-		ID:        s.EntrypointID(),
-		Address:   s.Address(),
-		Transport: s.Transport(),
-		Metadata:  make(map[string]string),
-	}
-
-	return &registry.Service{
-		Name:      s.registry.ServiceName(),
-		Version:   s.registry.ServiceVersion(),
-		Nodes:     []*registry.Node{node},
-		Endpoints: s.getEndpoints(),
+func (s *Server) registryService() registry.ServiceNode {
+	return registry.ServiceNode{
+		Name:     s.serviceName,
+		Version:  s.serviceVersion,
+		Address:  s.Address(),
+		Scheme:   s.Transport(),
+		Metadata: make(map[string]string),
 	}
 }
 
-func (s *Server) registryRegister() error {
-	rService := s.registryService()
-
-	return s.registry.Register(rService)
+func (s *Server) registryRegister(ctx context.Context) error {
+	return s.registry.Register(ctx, s.registryService())
 }
 
-func (s *Server) registryDeregister() error {
-	rService := s.registryService()
-
-	return s.registry.Deregister(rService)
+func (s *Server) registryDeregister(ctx context.Context) error {
+	return s.registry.Deregister(ctx, s.registryService())
 }
 
 // Provide creates a new entrypoint for a single address. You can create
 // multiple entrypoints for multiple addresses and ports.
 func Provide(
+	name string,
+	version string,
 	configData map[string]any,
 	logger log.Logger,
 	reg registry.Type,
@@ -251,11 +225,11 @@ func Provide(
 		cfg.OptHandlers = append(cfg.OptHandlers, h)
 	}
 
-	return New(cfg, logger, reg)
+	return New(name, version, cfg, logger, reg)
 }
 
 // New creates a dRPC Server from a Config struct.
-func New(acfg any, logger log.Logger, reg registry.Type) (orbserver.Entrypoint, error) {
+func New(name string, version string, acfg any, logger log.Logger, reg registry.Type) (orbserver.Entrypoint, error) {
 	cfg, ok := acfg.(*Config)
 	if !ok {
 		return nil, fmt.Errorf("drpc invalid config: %v", cfg)
@@ -277,13 +251,15 @@ func New(acfg any, logger log.Logger, reg registry.Type) (orbserver.Entrypoint, 
 	ctx, cancelFunc := context.WithCancel(context.Background())
 
 	entrypoint := Server{
-		config:      cfg,
-		logger:      logger,
-		registry:    reg,
-		handlers:    cfg.OptHandlers,
-		middlewares: cfg.OptMiddlewares,
-		ctx:         ctx,
-		cancelFunc:  cancelFunc,
+		serviceName:    name,
+		serviceVersion: version,
+		config:         cfg,
+		logger:         logger,
+		registry:       reg,
+		handlers:       cfg.OptHandlers,
+		middlewares:    cfg.OptMiddlewares,
+		ctx:            ctx,
+		cancelFunc:     cancelFunc,
 	}
 
 	return &entrypoint, nil

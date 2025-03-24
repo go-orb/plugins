@@ -112,54 +112,57 @@ func (c *Client) selectNode(ctx context.Context, service string, opts *client.Ca
 	}
 
 	// Resolve the service to a list of nodes in a per transport map.
-	nodes, err := c.resolveService(ctx, service, opts.PreferredTransports...)
+	nodes, err := c.resolveService(ctx, service, opts)
 	if err != nil {
 		c.Logger().Error("Failed to resolve service", "error", err, "service", service)
 		return "", "", err
 	}
 
 	// Run the configured Selector to get a node from the resolved nodes.
-	node, err := opts.Selector(ctx, service, nodes, opts.PreferredTransports, opts.AnyTransport)
+	node, err := opts.Selector(ctx, service, nodes)
 	if err != nil {
 		c.Logger().Error("Failed to resolve service", "error", err, "service", service)
 		return "", "", err
 	}
 
-	return node.Address, node.Transport, nil
+	return node.Address, node.Scheme, nil
 }
 
 // resolveService resolves a servicename to a Node with the help of the registry.
 func (c *Client) resolveService(
 	_ context.Context,
 	service string,
-	preferredTransports ...string,
-) (client.NodeMap, error) {
+	opts *client.CallOptions,
+) ([]registry.ServiceNode, error) {
 	if service == "" {
 		return nil, client.ErrServiceArgumentEmpty
 	}
 
 	// Try to resolve the service with retries
 	var (
-		services []*registry.Service
+		services []registry.ServiceNode
 		err      error
 	)
 
-	// Retry up to 3 times with a small delay between attempts
-	for retries := 0; retries < 1000; retries++ {
+	// Retry up to 5 times with a small delay between attempts
+	for retries := 0; retries < 5; retries++ {
 		if _, err := client.ResolveMemoryServer(service); err == nil {
-			rNodes := make(client.NodeMap)
-			rNodes["memory"] = []*registry.Node{
-				{
-					ID:        "memory",
-					Address:   "",
-					Transport: "memory",
-				},
-			}
+			rNodes := make([]registry.ServiceNode, 0)
+			rNodes = append(rNodes, registry.ServiceNode{
+				Name:    service,
+				Scheme:  "memory",
+				Address: "",
+			})
 
 			return rNodes, nil
 		}
 
-		services, err = c.registry.GetService(service)
+		if !opts.AnyTransport {
+			services, err = c.registry.GetService(context.Background(), opts.Namespace, opts.Region, service, nil)
+		} else {
+			services, err = c.registry.GetService(context.Background(), opts.Namespace, opts.Region, service, opts.PreferredTransports)
+		}
+
 		if err == nil && len(services) > 0 {
 			c.logger.Debug("service resolution successful", "service", service)
 			break // Service found, exit retry loop
@@ -178,32 +181,12 @@ func (c *Client) resolveService(
 		return nil, fmt.Errorf("no instances found for service: %s", service)
 	}
 
-	rNodes := make(client.NodeMap)
-
-	// Find nodes to query
-	for _, service := range services {
-		for _, node := range service.Nodes {
-			tNodes, ok := rNodes[node.Transport]
-			if !ok {
-				tNodes = []*registry.Node{}
-			}
-
-			tNodes = append(tNodes, node)
-			rNodes[node.Transport] = tNodes
-		}
-	}
-
-	// Not one node found.
-	if len(rNodes) == 0 {
-		return nil, fmt.Errorf("%w: requested transports was: %s", client.ErrNoNodeFound, preferredTransports)
-	}
-
-	return rNodes, nil
+	return services, nil
 }
 
 func (c *Client) makeOptions(opts ...client.CallOption) *client.CallOptions {
 	// Construct CallOptions, use the client's config as base.
-	co := &client.CallOptions{
+	callOpts := &client.CallOptions{
 		ContentType:         c.config.Config.ContentType,
 		PreferredTransports: c.config.Config.PreferredTransports,
 		AnyTransport:        c.config.Config.AnyTransport,
@@ -222,14 +205,17 @@ func (c *Client) makeOptions(opts ...client.CallOption) *client.CallOptions {
 		Retries:            client.DefaultCallOptionsRetries,
 		MaxCallRecvMsgSize: client.DefaultMaxCallRecvMsgSize,
 		MaxCallSendMsgSize: client.DefaultMaxCallSendMsgSize,
+
+		Namespace: c.config.Config.Namespace,
+		Region:    c.config.Config.Region,
 	}
 
 	// Apply options.
 	for _, o := range opts {
-		o(co)
+		o(callOpts)
 	}
 
-	return co
+	return callOpts
 }
 
 func (c *Client) transport(transport string) (Transport, error) {

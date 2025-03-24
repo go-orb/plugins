@@ -18,19 +18,17 @@ import (
 	echoproto "github.com/go-orb/plugins/client/tests/proto/echo"
 
 	// Blank imports here are fine.
-	_ "github.com/go-orb/plugins-experimental/registry/mdns"
 	_ "github.com/go-orb/plugins/codecs/json"
 	_ "github.com/go-orb/plugins/codecs/proto"
 	_ "github.com/go-orb/plugins/codecs/yaml"
 	_ "github.com/go-orb/plugins/log/slog"
+	_ "github.com/go-orb/plugins/registry/mdns"
 )
 
 func setupServer(sn string) (*tests.SetupData, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	setupData := &tests.SetupData{}
-
-	sv := ""
 
 	logger, err := log.New()
 	if err != nil {
@@ -39,7 +37,7 @@ func setupServer(sn string) (*tests.SetupData, error) {
 		return nil, err
 	}
 
-	reg, err := registry.New(sn, sv, nil, &types.Components{}, logger)
+	reg, err := registry.New(nil, &types.Components{}, logger)
 	if err != nil {
 		cancel()
 
@@ -50,6 +48,8 @@ func setupServer(sn string) (*tests.SetupData, error) {
 	hRegister := echoproto.RegisterStreamsHandler(hInstance)
 
 	ep1, err := http.New(
+		sn,
+		"",
 		http.NewConfig(
 			server.WithEntrypointName("http"),
 			http.WithHandlers(hRegister),
@@ -65,6 +65,8 @@ func setupServer(sn string) (*tests.SetupData, error) {
 	}
 
 	ep2, err := http.New(
+		sn,
+		"",
 		http.NewConfig(
 			server.WithEntrypointName("h2c"),
 			http.WithHandlers(hRegister),
@@ -80,6 +82,8 @@ func setupServer(sn string) (*tests.SetupData, error) {
 		return nil, err
 	}
 	ep3, err := http.New(
+		sn,
+		"",
 		http.NewConfig(
 			server.WithEntrypointName("https"),
 			http.WithHandlers(hRegister),
@@ -93,6 +97,8 @@ func setupServer(sn string) (*tests.SetupData, error) {
 		return nil, err
 	}
 	ep4, err := http.New(
+		sn,
+		"",
 		http.NewConfig(
 			server.WithEntrypointName("http3"),
 			http.WithHandlers(hRegister),

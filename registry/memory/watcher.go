@@ -1,40 +1,31 @@
 package memory
 
 import (
+	"context"
 	"errors"
 
 	"github.com/go-orb/go-orb/registry"
 )
 
 type watcher struct {
-	wo   registry.WatchOptions
-	res  chan *registry.Result
-	exit chan bool
-	id   string
+	ctx context.Context
+
+	wo  registry.WatchOptions
+	res chan *registry.Result
+	id  string
 }
 
 func (m *watcher) Next() (*registry.Result, error) {
 	for {
 		select {
 		case r := <-m.res:
-			if len(m.wo.Service) > 0 && m.wo.Service != r.Service.Name {
+			if len(m.wo.Service) > 0 && m.wo.Service != r.Node.Name {
 				continue
 			}
 
 			return r, nil
-		case <-m.exit:
+		case <-m.ctx.Done():
 			return nil, errors.New("watcher stopped")
 		}
 	}
-}
-
-func (m *watcher) Stop() error {
-	select {
-	case <-m.exit:
-		return nil
-	default:
-		close(m.exit)
-	}
-
-	return nil
 }
