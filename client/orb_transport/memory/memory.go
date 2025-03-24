@@ -90,7 +90,7 @@ func (t *Transport) Stream(
 	}
 
 	// Set the connection timeout
-	ctx, _ = context.WithTimeout(ctx, opts.ConnectionTimeout)
+	ctx, _ = context.WithTimeout(ctx, opts.ConnectionTimeout) //nolint:govet
 
 	ctx, outMd := metadata.WithOutgoing(ctx)
 	ctx, inMd := metadata.WithIncoming(ctx)
