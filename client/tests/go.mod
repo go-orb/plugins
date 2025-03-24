@@ -3,10 +3,10 @@ module github.com/go-orb/plugins/client/tests
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250324112306-5f5f154933b8
-	github.com/go-orb/plugins/server/drpc v0.1.1-0.20250324122813-09813c7b9d65
-	github.com/go-orb/plugins/server/http v0.1.1-0.20250324122813-09813c7b9d65
-	github.com/go-orb/plugins/server/memory v0.0.0-20250324122813-09813c7b9d65
+	github.com/go-orb/go-orb v0.2.2-0.20250324124045-3bdc9fe02ce0
+	github.com/go-orb/plugins/server/drpc v0.1.1-0.20250324183334-8fcc2119e769
+	github.com/go-orb/plugins/server/http v0.1.1-0.20250324183334-8fcc2119e769
+	github.com/go-orb/plugins/server/memory v0.0.0-20250324183334-8fcc2119e769
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/grpc v1.71.0
