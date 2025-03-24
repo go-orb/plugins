@@ -22,10 +22,10 @@ mkdir -p "${WORKDIR}"
 pushd "${WORKDIR}"
 
 if [[ ! -x nats-server ]]; then
-    echo "Downloading NATS ${VERSION}"
+    echo "Downloading NATS ${VERSION}: https://github.com/nats-io/nats-server/releases/download/${VERSION}/${ZIPFILE}.tar.gz"
 
-    curl -s -L https://github.com/nats-io/nats-server/releases/download/${VERSION}/${ZIPFILE}.zip -o nats.zip
-	unzip nats.zip "*/nats-server" 1>/dev/null
+    curl -s -L https://github.com/nats-io/nats-server/releases/download/${VERSION}/${ZIPFILE}.tar.gz -o nats.tar.gz
+	tar -xzf nats.tar.gz
     
     mv "${ZIPFILE}/nats-server" .
     chmod +x nats-server

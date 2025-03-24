@@ -157,7 +157,7 @@ func (c *Client) resolveService(
 			return rNodes, nil
 		}
 
-		if !opts.AnyTransport {
+		if opts.AnyTransport {
 			services, err = c.registry.GetService(context.Background(), opts.Namespace, opts.Region, service, nil)
 		} else {
 			services, err = c.registry.GetService(context.Background(), opts.Namespace, opts.Region, service, opts.PreferredTransports)

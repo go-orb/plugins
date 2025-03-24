@@ -55,7 +55,7 @@ func createSuite() (*tests.TestSuite, func() error, error) {
 		return nil
 	}
 
-	return tests.CreateSuite(logger, []registry.Registry{reg1, reg2}, time.Millisecond*500), cleanup, nil
+	return tests.CreateSuite(logger, []registry.Registry{reg1, reg2}, time.Second), cleanup, nil
 }
 
 func createServer(tb testing.TB) (*testutil.TestServer, error) {
