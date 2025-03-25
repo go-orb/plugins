@@ -31,10 +31,10 @@ if [[ ! -x consul ]]; then
 	rm -f consul.zip
 fi
 
-popd
-
 if [[ ! -x consul ]]; then
 	exit 1
 fi
+
+popd
 
 exit 0
