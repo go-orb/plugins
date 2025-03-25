@@ -17,7 +17,7 @@ jobs:
         uses: dagger/dagger-for-github@8.0.0
         with:
           module: github.com/go-orb/plugins
-          call: lint --root=. logs
+          args: lint --root=. logs
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
           version: latest
   test:
@@ -32,6 +32,6 @@ jobs:
         uses: dagger/dagger-for-github@8.0.0
         with:
           module: github.com/go-orb/plugins
-          call: test --root=. logs
+          args: test --root=. logs
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
           version: latest
