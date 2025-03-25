@@ -5,35 +5,28 @@
         "server": {
           "http": {
             "gzip": true,
-            "entrypoints": [
-              {
-                "name": "test-ep-1",
+            "entrypoints": {
+              "test-ep-1": {
                 "address": ":4512",
                 "http3": true
               },
-              {
-                "name": "test-ep-2",
+              "test-ep-2": {
                 "address": ":4513",
                 "insecure": true,
                 "h2c": true
               },
-              {
-                "name": "test-ep-3",
+              "test-ep-3": {
                 "address": ":4514",
                 "inherit": "test-ep-1"
               },
-              {
-                "name": "test-ep-5",
+              "test-ep-5": {
                 "address": ":4515",
                 "enable": false
               },
-              {
-                "name": "test-ep-6",
-                "address": ":4516",
-                "handlers": ["handler-1", "handler-2"],
-                "middleware": ["middleware-1"]
+              "test-ep-6": {
+                "address": ":4516"
               }
-            ]
+            }
           }
         }
       }

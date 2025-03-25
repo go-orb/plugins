@@ -8,17 +8,17 @@ com:
           - middleware-1
           - middleware-2
         entrypoints:
-          - name: test-ep-1
+          test-ep-1:
             plugin: grpc
             address: :4512
             insecure: true
             reflection: false
-          - name: test-ep-2
+          test-ep-2:
             plugin: grpc
             address: :4513
             health: false
             insecure: true
-          - name: test-ep-3
+          test-ep-3:
             plugin: grpc
             address: :4514
             inherit: test-ep-1
@@ -26,17 +26,11 @@ com:
             insecure: true
             reflection: false
             timeout: 11s
-          - name: test-ep-4
+          test-ep-4:
             plugin: grpc
             address: :4515
             enabled: false
-          - name: test-ep-5
+          test-ep-5:
             plugin: grpc
             address: :4516
             insecure: true
-            handlers:
-              - handler-1
-              - handler-2
-            middleware:
-              - middleware-1
-              - middleware-4

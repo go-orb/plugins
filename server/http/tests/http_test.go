@@ -454,7 +454,7 @@ func TestServerFileConfig(t *testing.T) {
 	require.NoError(t, err, "failed to fetch entrypoint 5")
 	ep = e.(*mhttp.Server) //nolint:errcheck
 	require.True(t, strings.HasSuffix(ep.Address(), ":4516"))
-	require.Len(t, ep.Config().OptHandlers, 3, "Registration len")
+	require.Len(t, ep.Config().OptHandlers, 1, "Registration len")
 	makeRequests(t, "https://"+e.Address(), thttp.TypeHTTP2)
 
 	require.NoError(t, srv.Stop(context.Background()), "failed to start server")

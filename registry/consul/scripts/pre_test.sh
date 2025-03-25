@@ -24,6 +24,7 @@ pushd "${WORKDIR}"
 if [[ ! -x consul ]]; then
 	echo "Downloading consul ${VERSION}"
 
+	echo https://releases.hashicorp.com/consul/${VERSION}/consul_${VERSION}_${GOOS}_${GOARCH}.zip
 	curl -s -L https://releases.hashicorp.com/consul/${VERSION}/consul_${VERSION}_${GOOS}_${GOARCH}.zip -o consul.zip
 	unzip consul.zip 1>/dev/null
 	chmod +x consul
@@ -31,5 +32,9 @@ if [[ ! -x consul ]]; then
 fi
 
 popd
+
+if [[ ! -x consul ]]; then
+	exit 1
+fi
 
 exit 0
