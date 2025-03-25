@@ -17,12 +17,6 @@ type Config struct {
 	// MaxConcurrentStreams is the worker pool size.
 	MaxConcurrentStreams int `json:"maxConcurrentStreams" yaml:"maxConcurrentStreams"`
 
-	// Middlewares is a list of middleware to use.
-	Middlewares []server.MiddlewareConfig `json:"middlewares" yaml:"middlewares"`
-
-	// Handlers is a list of pre-registered handlers.
-	Handlers []string `json:"handlers" yaml:"handlers"`
-
 	// Logger allows you to dynamically change the log level and plugin for a
 	// specific entrypoint.
 	Logger log.Config `json:"logger" yaml:"logger"`
@@ -32,7 +26,6 @@ type Config struct {
 func NewConfig(options ...server.Option) *Config {
 	cfg := &Config{
 		EntrypointConfig: server.EntrypointConfig{
-			Name:    Name,
 			Plugin:  Name,
 			Enabled: true,
 		},
@@ -52,16 +45,6 @@ func WithMaxConcurrentStreams(n int) server.Option {
 		cfg, ok := c.(*Config)
 		if ok {
 			cfg.MaxConcurrentStreams = n
-		}
-	}
-}
-
-// WithMiddleware adds a pre-registered middleware.
-func WithMiddleware(m string) server.Option {
-	return func(c server.EntrypointConfigType) {
-		cfg, ok := c.(*Config)
-		if ok {
-			cfg.Middlewares = append(cfg.Middlewares, server.MiddlewareConfig{Plugin: m})
 		}
 	}
 }

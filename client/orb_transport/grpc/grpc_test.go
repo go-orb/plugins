@@ -56,7 +56,8 @@ func setupServer(sn string) (*tests.SetupData, error) {
 	ep1, err := grpc.New(
 		sn,
 		"",
-		grpc.NewConfig(server.WithEntrypointName("grpc"),
+		"grpc",
+		grpc.NewConfig(
 			grpc.WithHandlers(hRegister, fileHRegister),
 			grpc.WithInsecure(),
 		), logger, reg)
@@ -69,7 +70,8 @@ func setupServer(sn string) (*tests.SetupData, error) {
 	ep2, err := grpc.New(
 		sn,
 		"",
-		grpc.NewConfig(server.WithEntrypointName("grpcs"),
+		"grpcs",
+		grpc.NewConfig(
 			grpc.WithHandlers(hRegister, fileHRegister),
 		), logger, reg)
 	if err != nil {

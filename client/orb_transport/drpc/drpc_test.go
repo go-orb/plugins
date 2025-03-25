@@ -57,7 +57,7 @@ func setupServer(sn string) (*tests.SetupData, error) {
 		drpc.WithHandlers(echoHRegister, fileHRegister),
 	}
 
-	ep, err := drpc.New(sn, "", drpc.NewConfig(options...), logger, reg)
+	ep, err := drpc.New(sn, "", "drpc", drpc.NewConfig(options...), logger, reg)
 	if err != nil {
 		cancel()
 

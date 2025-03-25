@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"strconv"
 
 	"log/slog"
 
@@ -34,6 +33,7 @@ var _ server.Entrypoint = (*Server)(nil)
 type Server struct {
 	serviceName    string
 	serviceVersion string
+	epName         string
 
 	server *grpc.Server
 
@@ -55,6 +55,7 @@ type Server struct {
 func Provide(
 	serviceName string,
 	serviceVersion string,
+	epName string,
 	configData map[string]any,
 	logger log.Logger,
 	reg registry.Type,
@@ -66,28 +67,14 @@ func Provide(
 		return nil, err
 	}
 
-	// Configure Middlewares.
-	for idx, cfgMw := range cfg.Middlewares {
-		pFunc, ok := server.Middlewares.Get(cfgMw.Plugin)
-		if !ok {
-			return nil, fmt.Errorf("%w: '%s', did you register it?", server.ErrUnknownMiddleware, cfgMw.Plugin)
-		}
-
-		mw, err := pFunc([]string{"middlewares"}, strconv.Itoa(idx), configData, logger)
-		if err != nil {
-			return nil, err
-		}
-
-		cfg.OptMiddlewares = append(cfg.OptMiddlewares, mw)
-	}
-
-	return New(serviceName, serviceVersion, cfg, logger, reg)
+	return New(serviceName, serviceVersion, epName, cfg, logger, reg)
 }
 
 // New creates a gRPC server by options.
 func New(
 	serviceName string,
 	serviceVersion string,
+	epName string,
 	acfg any,
 	logger log.Logger,
 	reg registry.Type,
@@ -104,21 +91,10 @@ func New(
 		return nil, fmt.Errorf("grpc validate address '%s': %w", cfg.Address, err)
 	}
 
-	logger = logger.With(slog.String("component", server.ComponentType), slog.String("plugin", Plugin), slog.String("entrypoint", cfg.Name))
-
-	// Get handlers.
-	for _, k := range cfg.Handlers {
-		h, ok := server.Handlers.Get(k)
-		if !ok {
-			return nil, fmt.Errorf("%w: '%s', did you register it?", server.ErrUnknownHandler, k)
-		}
-
-		cfg.OptHandlers = append(cfg.OptHandlers, h)
-	}
-
 	srv := Server{
 		serviceName:    serviceName,
 		serviceVersion: serviceVersion,
+		epName:         epName,
 		config:         cfg,
 		logger:         logger,
 		registry:       reg,
@@ -283,7 +259,7 @@ func (s *Server) Enabled() bool {
 
 // Name returns the entrypoint name.
 func (s *Server) Name() string {
-	return s.config.Name
+	return s.epName
 }
 
 // Type returns the component type.

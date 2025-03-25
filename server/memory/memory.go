@@ -5,8 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
-	"strconv"
 
 	"github.com/go-orb/go-orb/client"
 	"github.com/go-orb/go-orb/config"
@@ -25,6 +23,7 @@ const Name = "memory"
 type Server struct {
 	serviceName    string
 	serviceVersion string
+	epName         string
 
 	config   *Config
 	logger   log.Logger
@@ -209,6 +208,7 @@ func (s *Server) Request(ctx context.Context, infos client.RequestInfos, req any
 func Provide(
 	serviceName string,
 	serviceVersion string,
+	epName string,
 	configs map[string]any,
 	logger log.Logger,
 	reg registry.Type,
@@ -220,38 +220,14 @@ func Provide(
 		return nil, err
 	}
 
-	// Configure Middlewares.
-	for idx, cfgMw := range cfg.Middlewares {
-		pFunc, ok := orbserver.Middlewares.Get(cfgMw.Plugin)
-		if !ok {
-			return nil, fmt.Errorf("%w: '%s', did you register it?", orbserver.ErrUnknownMiddleware, cfgMw.Plugin)
-		}
-
-		mw, err := pFunc([]string{"middlewares"}, strconv.Itoa(idx), configs, logger)
-		if err != nil {
-			return nil, err
-		}
-
-		cfg.OptMiddlewares = append(cfg.OptMiddlewares, mw)
-	}
-
-	// Get handlers.
-	for _, k := range cfg.Handlers {
-		h, ok := orbserver.Handlers.Get(k)
-		if !ok {
-			return nil, fmt.Errorf("%w: '%s', did you register it?", orbserver.ErrUnknownHandler, k)
-		}
-
-		cfg.OptHandlers = append(cfg.OptHandlers, h)
-	}
-
-	return New(serviceName, serviceVersion, cfg, logger, reg)
+	return New(serviceName, serviceVersion, epName, cfg, logger, reg)
 }
 
 // New creates a memory Server from a Config struct.
 func New(
 	serviceName string,
 	serviceVersion string,
+	epName string,
 	acfg any,
 	logger log.Logger,
 	reg registry.Type,
@@ -261,13 +237,12 @@ func New(
 		return nil, fmt.Errorf("memory invalid config: %v", cfg)
 	}
 
-	logger = logger.With(slog.String("entrypoint", cfg.Name))
-
 	ctx, cancelFunc := context.WithCancel(context.Background())
 
 	entrypoint := Server{
 		serviceName:    serviceName,
 		serviceVersion: serviceVersion,
+		epName:         epName,
 		config:         cfg,
 		logger:         logger,
 		registry:       reg,

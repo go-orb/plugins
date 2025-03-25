@@ -98,16 +98,14 @@ func TestGrpcIntegration(t *testing.T) {
 
 	h, _ := server.Handlers.Get("Streams")
 	srv, err := server.New(name, version, nil, logger, reg,
-		server.WithEntrypointConfig(mgrpc.NewConfig(
-			mgrpc.WithName("test-ep-1"),
+		server.WithEntrypointConfig("test-ep-1", mgrpc.NewConfig(
 			mgrpc.WithReflection(true),
 			mgrpc.WithHandlers(h),
 			mgrpc.WithInsecure(),
 			mgrpc.WithReflection(true),
 			mgrpc.WithHealthService(true),
 		)),
-		server.WithEntrypointConfig(mgrpc.NewConfig(
-			mgrpc.WithName("test-ep-2"),
+		server.WithEntrypointConfig("test-ep-2", mgrpc.NewConfig(
 			mgrpc.WithHandlers(h),
 			mgrpc.WithInsecure(),
 			mgrpc.WithReflection(false),
@@ -165,14 +163,12 @@ func TestServerFileConfig(t *testing.T) {
 
 	h, _ := server.Handlers.Get("Streams")
 	srv, err := server.New(name, version, configData, logger, reg,
-		server.WithEntrypointConfig(mgrpc.NewConfig(
-			mgrpc.WithName("static-ep-1"),
+		server.WithEntrypointConfig("static-ep-1", mgrpc.NewConfig(
 			mgrpc.WithAddress(":48081"),
 			mgrpc.WithInsecure(),
 			mgrpc.WithHandlers(h),
 		)),
-		server.WithEntrypointConfig(mgrpc.NewConfig(
-			mgrpc.WithName("test-ep-5"),
+		server.WithEntrypointConfig("test-ep-5", mgrpc.NewConfig(
 			mgrpc.WithHandlers(h),
 		)),
 	)

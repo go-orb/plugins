@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
-	"strconv"
 
 	"storj.io/drpc/drpcserver"
 
@@ -27,6 +26,7 @@ const Plugin = "drpc"
 type Server struct {
 	serviceName    string
 	serviceVersion string
+	epName         string
 
 	config   *Config
 	logger   log.Logger
@@ -153,7 +153,7 @@ func (s *Server) Enabled() bool {
 
 // Name returns the entrypoint name.
 func (s *Server) Name() string {
-	return s.config.Name
+	return s.epName
 }
 
 // Type returns the component type.
@@ -189,6 +189,7 @@ func (s *Server) registryDeregister(ctx context.Context) error {
 func Provide(
 	name string,
 	version string,
+	epName string,
 	configData map[string]any,
 	logger log.Logger,
 	reg registry.Type,
@@ -200,36 +201,11 @@ func Provide(
 		return nil, err
 	}
 
-	// Configure Middlewares.
-	for idx, cfgMw := range cfg.Middlewares {
-		pFunc, ok := orbserver.Middlewares.Get(cfgMw.Plugin)
-		if !ok {
-			return nil, fmt.Errorf("%w: '%s', did you register it?", orbserver.ErrUnknownMiddleware, cfgMw.Plugin)
-		}
-
-		mw, err := pFunc([]string{"middlewares"}, strconv.Itoa(idx), configData, logger)
-		if err != nil {
-			return nil, err
-		}
-
-		cfg.OptMiddlewares = append(cfg.OptMiddlewares, mw)
-	}
-
-	// Get handlers.
-	for _, k := range cfg.Handlers {
-		h, ok := orbserver.Handlers.Get(k)
-		if !ok {
-			return nil, fmt.Errorf("%w: '%s', did you register it?", orbserver.ErrUnknownHandler, k)
-		}
-
-		cfg.OptHandlers = append(cfg.OptHandlers, h)
-	}
-
-	return New(name, version, cfg, logger, reg)
+	return New(name, version, epName, cfg, logger, reg)
 }
 
 // New creates a dRPC Server from a Config struct.
-func New(name string, version string, acfg any, logger log.Logger, reg registry.Type) (orbserver.Entrypoint, error) {
+func New(name string, version string, epName string, acfg any, logger log.Logger, reg registry.Type) (orbserver.Entrypoint, error) {
 	cfg, ok := acfg.(*Config)
 	if !ok {
 		return nil, fmt.Errorf("drpc invalid config: %v", cfg)
@@ -246,13 +222,12 @@ func New(name string, version string, acfg any, logger log.Logger, reg registry.
 		return nil, err
 	}
 
-	logger = logger.With(slog.String("entrypoint", cfg.Name))
-
 	ctx, cancelFunc := context.WithCancel(context.Background())
 
 	entrypoint := Server{
 		serviceName:    name,
 		serviceVersion: version,
+		epName:         epName,
 		config:         cfg,
 		logger:         logger,
 		registry:       reg,

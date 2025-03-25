@@ -50,8 +50,8 @@ func setupServer(sn string) (*tests.SetupData, error) {
 	ep1, err := http.New(
 		sn,
 		"",
+		"http",
 		http.NewConfig(
-			server.WithEntrypointName("http"),
 			http.WithHandlers(hRegister),
 			http.WithInsecure(),
 		),
@@ -67,8 +67,8 @@ func setupServer(sn string) (*tests.SetupData, error) {
 	ep2, err := http.New(
 		sn,
 		"",
+		"h2c",
 		http.NewConfig(
-			server.WithEntrypointName("h2c"),
 			http.WithHandlers(hRegister),
 			http.WithInsecure(),
 			http.WithAllowH2C(),
@@ -84,8 +84,8 @@ func setupServer(sn string) (*tests.SetupData, error) {
 	ep3, err := http.New(
 		sn,
 		"",
+		"https",
 		http.NewConfig(
-			server.WithEntrypointName("https"),
 			http.WithHandlers(hRegister),
 		),
 		logger,
@@ -99,8 +99,8 @@ func setupServer(sn string) (*tests.SetupData, error) {
 	ep4, err := http.New(
 		sn,
 		"",
+		"http3",
 		http.NewConfig(
-			server.WithEntrypointName("http3"),
 			http.WithHandlers(hRegister),
 			http.WithHTTP3(),
 		),

@@ -57,7 +57,7 @@ func setupServer(sn string) (*tests.SetupData, error) {
 		memory.WithHandlers(echoHRegister, fileHRegister),
 	}
 
-	ep, err := memory.New(sn, "", memory.NewConfig(options...), logger, reg)
+	ep, err := memory.New(sn, "", "memory", memory.NewConfig(options...), logger, reg)
 	if err != nil {
 		cancel()
 

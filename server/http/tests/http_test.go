@@ -332,21 +332,18 @@ func TestServerIntegration(t *testing.T) {
 	h := new(handler.EchoHandler)
 
 	srv, err := server.New(name, version, nil, logger, reg,
-		server.WithEntrypointConfig(mhttp.NewConfig(
-			mhttp.WithName("test-ep-1"),
+		server.WithEntrypointConfig("test-ep-1", mhttp.NewConfig(
 			mhttp.WithAddress(":48081"),
 			mhttp.WithHTTP3(),
 			mhttp.WithGzip(),
 			mhttp.WithHandlers(proto.RegisterStreamsHandler(h)),
 		)),
-		server.WithEntrypointConfig(mhttp.NewConfig(
-			mhttp.WithName("test-ep-2"),
+		server.WithEntrypointConfig("test-ep-2", mhttp.NewConfig(
 			mhttp.WithAddress(":48082"),
 			mhttp.WithHTTP3(),
 			mhttp.WithHandlers(proto.RegisterStreamsHandler(h)),
 		)),
-		server.WithEntrypointConfig(mhttp.NewConfig(
-			mhttp.WithName("test-ep-3"),
+		server.WithEntrypointConfig("test-ep-3", mhttp.NewConfig(
 			mhttp.WithAddress(":48083"),
 			mhttp.WithInsecure(),
 			mhttp.WithAllowH2C(),
@@ -405,15 +402,14 @@ func TestServerFileConfig(t *testing.T) {
 
 	h := new(handler.EchoHandler)
 	srv, err := server.New(name, version, configData, logger, reg,
-		server.WithEntrypointConfig(mhttp.NewConfig(
-			mhttp.WithName("static-ep-1"),
+		server.WithEntrypointConfig("static-ep-1", mhttp.NewConfig(
 			mhttp.WithAddress(":48081"),
 			mhttp.WithHTTP3(),
 			mhttp.WithGzip(),
 			mhttp.WithHandlers(proto.RegisterStreamsHandler(h)),
 		)),
-		server.WithEntrypointConfig(mhttp.NewConfig(
-			mhttp.WithName("test-ep-5"),
+		server.WithEntrypointConfig("test-ep-5", mhttp.NewConfig(
+			mhttp.WithAddress(":48085"),
 		)),
 	)
 	require.NoError(t, err, "failed to setup server")
@@ -661,7 +657,7 @@ func setupServer(tb testing.TB, nolog bool, opts ...server.Option) (*mhttp.Serve
 
 	cfg := mhttp.NewConfig(opts...)
 
-	server, err := mhttp.New(name, version, cfg, logger, reg)
+	server, err := mhttp.New(name, version, "test", cfg, logger, reg)
 	if err != nil {
 		return nil, cancel, fmt.Errorf("failed to provide http server: %w", err)
 	}
