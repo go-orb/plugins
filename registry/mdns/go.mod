@@ -3,11 +3,11 @@ module github.com/go-orb/plugins/registry/mdns
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250324222940-9b1324dc770e
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250324232220-9b3cf846b28c
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250324232220-9b3cf846b28c
-	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250324232220-9b3cf846b28c
-	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250324232220-9b3cf846b28c
+	github.com/go-orb/go-orb v0.2.2-0.20250325224458-1123c67083af
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250325224710-41353b6fd7a6
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250325224710-41353b6fd7a6
+	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250325224710-41353b6fd7a6
+	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250325224710-41353b6fd7a6
 	github.com/lithammer/shortuuid/v3 v3.0.7
 	github.com/miekg/dns v1.1.63
 	github.com/stretchr/testify v1.10.0
