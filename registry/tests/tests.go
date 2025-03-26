@@ -17,22 +17,23 @@ import (
 type TestSuite struct {
 	suite.Suite
 
-	logger log.Logger
+	Server any
 
-	ctx        context.Context
-	registries []registry.Registry
+	Logger log.Logger
+
+	Ctx        context.Context
+	Registries []registry.Registry
 	services   []registry.ServiceNode
 
-	updateTime time.Duration
+	UpdateTime time.Duration
+
+	CreateRegistry func(suite *TestSuite) (registry.Registry, error)
 }
 
-// CreateSuite creates the suite for test usage.
-func CreateSuite(logger log.Logger, registries []registry.Registry, updateTime time.Duration) *TestSuite {
-	r := &TestSuite{
-		ctx:        context.Background(),
-		logger:     logger,
-		registries: registries,
-		updateTime: updateTime,
+// SetupSuite setups the test suite.
+func (r *TestSuite) SetupSuite() {
+	if len(r.Registries) < 2 {
+		panic("at least 2 registries are required")
 	}
 
 	// Generate random ports to avoid conflicts
@@ -41,37 +42,44 @@ func CreateSuite(logger log.Logger, registries []registry.Registry, updateTime t
 
 	// All the test services.
 	r.services = []registry.ServiceNode{
-		{Name: "orb.test.svc.0", Version: "v1", Address: fmt.Sprintf("10.0.0.10:%d", basePort1), Scheme: "http"},
-		{Name: "orb.test.svc.1", Version: "v1", Address: fmt.Sprintf("10.0.0.10:%d", basePort1+1), Scheme: "grpc"},
-		{Name: "orb.test.svc.2", Version: "v1", Address: fmt.Sprintf("10.0.0.10:%d", basePort1+2), Scheme: "frpc"},
-		{Name: "orb.test.svc.3", Version: "v1", Address: fmt.Sprintf("10.0.0.11:%d", basePort2), Scheme: "http"},
-		{Name: "orb.test.svc.4", Version: "v1", Address: fmt.Sprintf("10.0.0.11:%d", basePort2+1), Scheme: "grpc"},
-		{Name: "orb.test.svc.5", Version: "v1", Address: fmt.Sprintf("10.0.0.11:%d", basePort2+2), Scheme: "frpc"},
+		{Name: "orb.test.svc.0", Version: "v1", Address: fmt.Sprintf("10.0.0.10:%d", basePort1), Scheme: "http", Node: "http"},
+		{Name: "orb.test.svc.1", Version: "v1", Address: fmt.Sprintf("10.0.0.10:%d", basePort1+1), Scheme: "grpc", Node: "grpc"},
+		{Name: "orb.test.svc.2", Version: "v1", Address: fmt.Sprintf("10.0.0.10:%d", basePort1+2), Scheme: "grpcs", Node: "grpcs"},
+		{Name: "orb.test.svc.3", Version: "v1", Address: fmt.Sprintf("10.0.0.11:%d", basePort2), Scheme: "http", Node: "https"},
+		{Name: "orb.test.svc.4", Version: "v1", Address: fmt.Sprintf("10.0.0.11:%d", basePort2+1), Scheme: "http2", Node: "http2"},
+		{Name: "orb.test.svc.5", Version: "v1", Address: fmt.Sprintf("10.0.0.11:%d", basePort2+2), Scheme: "drpc", Node: "drpc"},
 	}
 
-	return r
-}
+	for _, reg := range r.Registries {
+		err := reg.Start(r.Ctx)
+		r.Require().NoError(err, "while starting a registry")
+	}
 
-// SetupSuite setups the test suite.
-func (r *TestSuite) SetupSuite() {
 	for _, service := range r.services {
-		if err := r.randomRegistry().Register(r.ctx, service); err != nil {
-			r.logger.Error("Failed to register service", "error", err, "service", service.Name)
+		if err := r.Registries[0].Register(r.Ctx, service); err != nil {
+			r.Logger.Error("Failed to register service", "error", err, "service", service.Name)
 		}
 	}
 }
 
 // TearDownSuite runs after all tests.
 func (r *TestSuite) TearDownSuite() {
+	ctx := context.Background()
+
 	for _, service := range r.services {
-		if err := r.randomRegistry().Deregister(r.ctx, service); err != nil {
-			r.logger.Error("Failed to deregister service", "error", err, "service", service.Name)
+		if err := r.Registries[0].Deregister(ctx, service); err != nil {
+			r.Logger.Error("Failed to deregister service", "error", err, "service", service.Name)
 		}
+	}
+
+	for _, reg := range r.Registries {
+		err := reg.Stop(ctx)
+		r.Require().NoError(err, "while stopping a registry")
 	}
 }
 
 func (r *TestSuite) randomRegistry() registry.Registry {
-	return r.registries[rand.Intn(len(r.registries))] //nolint:gosec
+	return r.Registries[rand.Intn(len(r.Registries))] //nolint:gosec
 }
 
 // TestRegister tests registering.
@@ -79,27 +87,28 @@ func (r *TestSuite) TestRegister() {
 	service := registry.ServiceNode{
 		Name:    "orb.test.svc.6",
 		Version: "v1.0.0",
+		Node:    r.services[3].Node,
 		Address: r.services[3].Address,
 		Scheme:  r.services[3].Scheme,
 	}
-	r.Require().NoError(r.randomRegistry().Register(r.ctx, service))
-	time.Sleep(r.updateTime)
+	r.Require().NoError(r.Registries[0].Register(r.Ctx, service))
+	time.Sleep(r.UpdateTime)
 
 	defer func() {
-		err := r.randomRegistry().Deregister(r.ctx, service)
+		err := r.Registries[0].Deregister(r.Ctx, service)
 		if err != nil {
-			r.logger.Error("Failed to cleanup from TestRegister", "error", err)
+			r.Logger.Error("Failed to cleanup from TestRegister", "error", err)
 		}
 	}()
 
-	for idx, reg := range r.registries {
+	for idx, reg := range r.Registries {
 		r.Run(fmt.Sprintf("reg-%d", idx), func() {
-			services, err := reg.ListServices(r.ctx, "", "", nil)
+			services, err := reg.ListServices(r.Ctx, "", "", nil)
 			r.Require().NoError(err)
 
 			r.Len(services, len(r.services)+1)
 
-			services, err = reg.GetService(r.ctx, "", "", service.Name, nil)
+			services, err = reg.GetService(r.Ctx, "", "", service.Name, nil)
 			r.Require().NoError(err)
 			r.Len(services, 1)
 			r.Equal(service.Version, services[0].Version)
@@ -122,6 +131,7 @@ func (r *TestSuite) TestGetAllNodesAndVersions() {
 			Name:     baseName + ".svc1",
 			Version:  "v1.0.0",
 			Address:  "10.0.1.1:8080",
+			Node:     "http1",
 			Scheme:   "http",
 			Metadata: map[string]string{"region": "us-east"},
 		},
@@ -129,6 +139,7 @@ func (r *TestSuite) TestGetAllNodesAndVersions() {
 			Name:     baseName + ".svc1",
 			Version:  "v1.0.0",
 			Address:  "10.0.1.2:8080",
+			Node:     "grpc1",
 			Scheme:   "grpc",
 			Metadata: map[string]string{"region": "us-west"},
 		},
@@ -137,7 +148,8 @@ func (r *TestSuite) TestGetAllNodesAndVersions() {
 			Name:     baseName + ".svc1",
 			Version:  "v2.0.0",
 			Address:  "10.0.1.3:8080",
-			Scheme:   "http",
+			Node:     "drpc",
+			Scheme:   "drpc",
 			Metadata: map[string]string{"region": "eu-west"},
 		},
 		// Service 2: v1.0.0 with three nodes with different transports
@@ -145,6 +157,7 @@ func (r *TestSuite) TestGetAllNodesAndVersions() {
 			Name:     baseName + ".svc2",
 			Version:  "v1.0.0",
 			Address:  "10.0.2.1:8080",
+			Node:     "http-node",
 			Scheme:   "http",
 			Metadata: map[string]string{"region": "us-east"},
 		},
@@ -152,6 +165,7 @@ func (r *TestSuite) TestGetAllNodesAndVersions() {
 			Name:     baseName + ".svc2",
 			Version:  "v1.0.0",
 			Address:  "10.0.2.2:8080",
+			Node:     "grpc-node",
 			Scheme:   "grpc",
 			Metadata: map[string]string{"region": "us-west"},
 		},
@@ -159,30 +173,31 @@ func (r *TestSuite) TestGetAllNodesAndVersions() {
 			Name:     baseName + ".svc2",
 			Version:  "v1.0.0",
 			Address:  "10.0.2.3:8080",
+			Node:     "http3-node",
 			Scheme:   "http3",
 			Metadata: map[string]string{"region": "eu-west"},
 		},
 	}
 
-	for _, reg := range r.registries {
+	for _, reg := range r.Registries {
 		r.Run("registry-"+reg.String(), func() {
 			// Register all services
 			for _, svc := range services {
-				r.Require().NoError(reg.Register(r.ctx, svc))
+				r.Require().NoError(reg.Register(r.Ctx, svc))
 			}
 
-			time.Sleep(r.updateTime)
+			time.Sleep(r.UpdateTime)
 
 			// Cleanup when done
 			defer func() {
 				for _, svc := range services {
-					r.Require().NoError(reg.Deregister(r.ctx, svc))
+					r.Require().NoError(reg.Deregister(r.Ctx, svc))
 				}
 			}()
 
 			// Test 1: GetService should return all versions of service 1
 			service1Name := baseName + ".svc1"
-			service1Results, err := reg.GetService(r.ctx, "", "", service1Name, nil)
+			service1Results, err := reg.GetService(r.Ctx, "", "", service1Name, nil)
 			r.Require().NoError(err)
 
 			// Group results by version to validate
@@ -213,7 +228,7 @@ func (r *TestSuite) TestGetAllNodesAndVersions() {
 
 			// Test 2: GetService should return all nodes for service 2
 			service2Name := baseName + ".svc2"
-			service2Results, err := reg.GetService(r.ctx, "", "", service2Name, nil)
+			service2Results, err := reg.GetService(r.Ctx, "", "", service2Name, nil)
 			r.Require().NoError(err)
 			r.Require().Len(service2Results, 3, "Service 2 should have 3 nodes")
 
@@ -229,7 +244,7 @@ func (r *TestSuite) TestGetAllNodesAndVersions() {
 			r.Require().True(schemeSet["http3"], "HTTP/3 scheme should be present")
 
 			// Test 3: ListServices should return all services
-			allServices, err := reg.ListServices(r.ctx, "", "", nil)
+			allServices, err := reg.ListServices(r.Ctx, "", "", nil)
 			r.Require().NoError(err)
 
 			// Count the number of instances of our test services
@@ -255,55 +270,62 @@ func (r *TestSuite) TestDeregister() {
 	service1 := registry.ServiceNode{
 		Name:    "orb.test.deregister",
 		Version: "v1",
+		Node:    "deregister-node1",
 		Address: r.services[4].Address,
 		Scheme:  r.services[4].Scheme,
 	}
 	service2 := registry.ServiceNode{
 		Name:    "orb.test.deregister",
 		Version: "v2",
+		Node:    "deregister-node2",
 		Address: r.services[5].Address,
 		Scheme:  r.services[5].Scheme,
 	}
 
-	r.Require().NoError(r.randomRegistry().Register(r.ctx, service1))
-	time.Sleep(r.updateTime)
+	getReg, err := r.CreateRegistry(r)
+	r.Require().NoError(err)
 
-	services, err := r.randomRegistry().ListServices(r.ctx, "", "", nil)
+	r.Require().NoError(r.Registries[0].Register(r.Ctx, service1))
+	time.Sleep(r.UpdateTime)
+
+	services, err := getReg.ListServices(r.Ctx, "", "", nil)
 	r.Require().NoError(err)
 	r.Len(services, len(r.services)+1)
 
-	services, err = r.randomRegistry().GetService(r.ctx, "", "", service1.Name, nil)
+	services, err = getReg.GetService(r.Ctx, "", "", service1.Name, nil)
 	r.Require().NoError(err)
 	r.Len(services, 1)
 	r.Equal(service1.Version, services[0].Version)
 
-	r.Require().NoError(r.randomRegistry().Register(r.ctx, service2))
-	time.Sleep(r.updateTime)
+	r.Require().NoError(r.Registries[0].Register(r.Ctx, service2))
+	time.Sleep(r.UpdateTime)
 
-	services, err = r.randomRegistry().GetService(r.ctx, "", "", service2.Name, nil)
+	services, err = getReg.GetService(r.Ctx, "", "", service2.Name, nil)
 	r.Require().NoError(err)
 	r.Len(services, 2)
 
-	r.Require().NoError(r.randomRegistry().Deregister(r.ctx, service1))
-	time.Sleep(r.updateTime)
+	r.Require().NoError(r.Registries[0].Deregister(r.Ctx, service1))
+	time.Sleep(r.UpdateTime)
 
-	services, err = r.randomRegistry().GetService(r.ctx, "", "", service1.Name, nil)
+	services, err = getReg.GetService(r.Ctx, "", "", service1.Name, nil)
 	r.Require().NoError(err)
 	r.Len(services, 1)
 
-	r.Require().NoError(r.randomRegistry().Deregister(r.ctx, service2))
-	time.Sleep(r.updateTime)
+	r.Require().NoError(r.Registries[0].Deregister(r.Ctx, service2))
+	time.Sleep(r.UpdateTime)
 
-	services, err = r.randomRegistry().GetService(r.ctx, "", "", service1.Name, nil)
+	services, err = getReg.GetService(r.Ctx, "", "", service1.Name, nil)
 	r.Require().ErrorIs(err, registry.ErrNotFound)
 	r.Empty(services)
+
+	r.Require().NoError(getReg.Stop(r.Ctx))
 }
 
 // TestGetServiceAllRegistries tests a service on all registries.
 func (r *TestSuite) TestGetServiceAllRegistries() {
-	for idx, reg := range r.registries {
+	for idx, reg := range r.Registries {
 		r.Run(fmt.Sprintf("reg-%d", idx), func() {
-			services, err := reg.GetService(r.ctx, "", "", r.services[0].Name, nil)
+			services, err := reg.GetService(r.Ctx, "", "", r.services[0].Name, nil)
 			r.Require().NoError(err)
 			r.Len(services, 1)
 			r.Equal(r.services[0].Name, services[0].Name)
@@ -311,9 +333,24 @@ func (r *TestSuite) TestGetServiceAllRegistries() {
 	}
 }
 
+// TestGetServiceNewRegistry tests a service on a new registry.
+func (r *TestSuite) TestGetServiceNewRegistry() {
+	getReg, err := r.CreateRegistry(r)
+	r.Require().NoError(err)
+
+	for _, svc := range r.services {
+		services, err := getReg.GetService(r.Ctx, "", "", svc.Name, nil)
+		r.Require().NoError(err)
+		r.Len(services, 1)
+		r.Equal(svc.Name, services[0].Name)
+	}
+
+	r.Require().NoError(getReg.Stop(r.Ctx))
+}
+
 // TestGetServiceWithNoNodes tests a non existent service.
 func (r *TestSuite) TestGetServiceWithNoNodes() {
-	services, err := r.randomRegistry().GetService(r.ctx, "", "", "missing", nil)
+	services, err := r.Registries[1].GetService(r.Ctx, "", "", "missing", nil)
 	r.Require().ErrorIs(err, registry.ErrNotFound)
 	r.Empty(services)
 }
@@ -330,7 +367,7 @@ func (r *TestSuite) BenchmarkGetService(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		id := rand.Intn(len(r.services)) //nolint:gosec
 
-		services, err := r.randomRegistry().GetService(r.ctx, "", "", r.services[id].Name, nil)
+		services, err := r.Registries[1].GetService(r.Ctx, "", "", r.services[id].Name, nil)
 		r.Require().NoError(err)
 		r.Len(services, 1)
 		r.Equal(r.services[id].Name, services[0].Name)
@@ -350,7 +387,7 @@ func (r *TestSuite) BenchmarkGetServiceWithNoNodes(b *testing.B) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		services, err := r.randomRegistry().GetService(r.ctx, "", "", "missing", nil)
+		services, err := r.Registries[1].GetService(r.Ctx, "", "", "missing", nil)
 		r.Require().ErrorIs(err, registry.ErrNotFound)
 		r.Empty(services)
 	}
@@ -372,7 +409,7 @@ func (r *TestSuite) BenchmarkParallelGetService(b *testing.B) {
 		for pb.Next() {
 			id := rand.Intn(len(r.services)) //nolint:gosec
 
-			services, err := r.randomRegistry().GetService(r.ctx, "", "", r.services[id].Name, nil)
+			services, err := r.Registries[1].GetService(r.Ctx, "", "", r.services[id].Name, nil)
 			r.Require().NoError(err)
 			r.Len(services, 1)
 			r.Equal(r.services[id].Name, services[0].Name)
@@ -390,17 +427,18 @@ func (r *TestSuite) TestWatchServices() {
 	service := registry.ServiceNode{
 		Name:    serviceName,
 		Version: "v1.0.0",
+		Node:    r.services[3].Node,
 		Address: r.services[3].Address,
 		Scheme:  r.services[3].Scheme,
 	}
 
 	// Register the service first to ensure it exists
-	err := r.randomRegistry().Register(r.ctx, service)
+	err := r.Registries[0].Register(r.Ctx, service)
 	r.Require().NoError(err)
-	time.Sleep(r.updateTime)
+	time.Sleep(r.UpdateTime)
 
 	// Create a watcher
-	watcher, err := r.randomRegistry().Watch(r.ctx, registry.WatchService(serviceName))
+	watcher, err := r.randomRegistry().Watch(r.Ctx, registry.WatchService(serviceName))
 	r.Require().NoError(err)
 	r.NotNil(watcher)
 
@@ -423,7 +461,7 @@ func (r *TestSuite) TestWatchServices() {
 	}()
 
 	// Update the service that should trigger the watcher
-	err = r.randomRegistry().Register(r.ctx, service)
+	err = r.Registries[0].Register(r.Ctx, service)
 	r.Require().NoError(err)
 
 	// Wait for the event with a timeout
@@ -436,13 +474,13 @@ func (r *TestSuite) TestWatchServices() {
 	}
 
 	// Cleanup
-	err = r.randomRegistry().Deregister(r.ctx, service)
+	err = r.Registries[0].Deregister(r.Ctx, service)
 	r.Require().NoError(err)
 }
 
 // TestServiceUpdate tests updating an existing service.
 func (r *TestSuite) TestServiceUpdate() {
-	if r.registries[0].String() == "mdns" {
+	if r.Registries[0].String() == "mdns" {
 		r.T().Skip("Skipping test for mdns registry")
 		return
 	}
@@ -451,16 +489,17 @@ func (r *TestSuite) TestServiceUpdate() {
 	service := registry.ServiceNode{
 		Name:    "orb.test.update",
 		Version: "v1.0.0",
+		Node:    r.services[0].Node,
 		Address: r.services[0].Address,
 		Scheme:  r.services[0].Scheme,
 	}
 
 	// Register the service
-	r.Require().NoError(r.randomRegistry().Register(r.ctx, service))
-	time.Sleep(r.updateTime)
+	r.Require().NoError(r.Registries[0].Register(r.Ctx, service))
+	time.Sleep(r.UpdateTime)
 
 	// Verify initial service
-	services, err := r.randomRegistry().GetService(r.ctx, "", "", service.Name, nil)
+	services, err := r.Registries[1].GetService(r.Ctx, "", "", service.Name, nil)
 	r.Require().NoError(err)
 	r.Len(services, 1)
 
@@ -468,17 +507,18 @@ func (r *TestSuite) TestServiceUpdate() {
 	updatedService := registry.ServiceNode{
 		Name:     "orb.test.update",
 		Version:  "v1.0.0",
+		Node:     r.services[0].Node,
 		Address:  r.services[0].Address,
 		Scheme:   r.services[0].Scheme,
 		Metadata: map[string]string{"updated": "true"},
 	}
 
 	// Register the updated service
-	r.Require().NoError(r.randomRegistry().Register(r.ctx, updatedService))
-	time.Sleep(r.updateTime)
+	r.Require().NoError(r.Registries[0].Register(r.Ctx, updatedService))
+	time.Sleep(r.UpdateTime)
 
 	// Verify the service was updated
-	services, err = r.randomRegistry().GetService(r.ctx, "", "", service.Name, nil)
+	services, err = r.Registries[1].GetService(r.Ctx, "", "", service.Name, nil)
 	r.Require().NoError(err)
 	r.Len(services, 1)
 
@@ -486,7 +526,7 @@ func (r *TestSuite) TestServiceUpdate() {
 	r.Equal("true", services[0].Metadata["updated"])
 
 	// Cleanup
-	r.Require().NoError(r.randomRegistry().Deregister(r.ctx, updatedService))
+	r.Require().NoError(r.Registries[0].Deregister(r.Ctx, updatedService))
 }
 
 // TestServiceMetadata tests handling of service metadata.
@@ -495,6 +535,7 @@ func (r *TestSuite) TestServiceMetadata() {
 	service := registry.ServiceNode{
 		Name:    "orb.test.metadata",
 		Version: "v1.0.0",
+		Node:    r.services[0].Node,
 		Address: r.services[0].Address,
 		Scheme:  r.services[0].Scheme,
 		Metadata: map[string]string{
@@ -505,11 +546,11 @@ func (r *TestSuite) TestServiceMetadata() {
 	}
 
 	// Register the service
-	r.Require().NoError(r.randomRegistry().Register(r.ctx, service))
-	time.Sleep(r.updateTime)
+	r.Require().NoError(r.Registries[0].Register(r.Ctx, service))
+	time.Sleep(r.UpdateTime)
 
 	// Verify the service can be retrieved with metadata intact
-	services, err := r.randomRegistry().GetService(r.ctx, "", "", service.Name, nil)
+	services, err := r.Registries[1].GetService(r.Ctx, "", "", service.Name, nil)
 	r.Require().NoError(err)
 	r.Len(services, 1)
 
@@ -519,7 +560,7 @@ func (r *TestSuite) TestServiceMetadata() {
 	r.Equal(service.Metadata["secure"], services[0].Metadata["secure"])
 
 	// Cleanup
-	r.Require().NoError(r.randomRegistry().Deregister(r.ctx, service))
+	r.Require().NoError(r.Registries[0].Deregister(r.Ctx, service))
 }
 
 // TestMultipleVersions tests registering and retrieving services with multiple versions.
@@ -528,23 +569,25 @@ func (r *TestSuite) TestMultipleVersions() {
 	serviceV1 := registry.ServiceNode{
 		Name:    "orb.test.versions",
 		Version: "v1.0.0",
+		Node:    "v1-node",
 		Address: r.services[0].Address,
 		Scheme:  r.services[0].Scheme,
 	}
 	serviceV2 := registry.ServiceNode{
 		Name:    "orb.test.versions",
 		Version: "v2.0.0",
+		Node:    "v2-node",
 		Address: r.services[1].Address,
 		Scheme:  r.services[1].Scheme,
 	}
 
 	// Register both versions
-	r.Require().NoError(r.randomRegistry().Register(r.ctx, serviceV1))
-	r.Require().NoError(r.randomRegistry().Register(r.ctx, serviceV2))
-	time.Sleep(r.updateTime)
+	r.Require().NoError(r.Registries[0].Register(r.Ctx, serviceV1))
+	r.Require().NoError(r.Registries[0].Register(r.Ctx, serviceV2))
+	time.Sleep(r.UpdateTime)
 
 	// Get all versions of the service
-	services, err := r.randomRegistry().GetService(r.ctx, "", "", serviceV1.Name, nil)
+	services, err := r.Registries[1].GetService(r.Ctx, "", "", serviceV1.Name, nil)
 	r.Require().NoError(err)
 	r.Require().GreaterOrEqual(len(services), 2, "Should have found both versions of the service")
 
@@ -558,8 +601,8 @@ func (r *TestSuite) TestMultipleVersions() {
 	r.Require().True(versions["v2.0.0"], "v2.0.0 should be in the results")
 
 	// Cleanup
-	r.Require().NoError(r.randomRegistry().Deregister(r.ctx, serviceV1))
-	r.Require().NoError(r.randomRegistry().Deregister(r.ctx, serviceV2))
+	r.Require().NoError(r.Registries[0].Deregister(r.Ctx, serviceV1))
+	r.Require().NoError(r.Registries[0].Deregister(r.Ctx, serviceV2))
 }
 
 // TestMultipleTransports verifies that the registry correctly handles multiple nodes with the same name but different transports.
@@ -569,24 +612,28 @@ func (r *TestSuite) TestMultipleTransports() {
 		{
 			Name:    "test-service",
 			Version: "v1.0.0",
+			Node:    "grpc-node",
 			Address: "127.0.0.1:8080",
 			Scheme:  "grpc",
 		},
 		{
 			Name:    "test-service",
 			Version: "v1.0.0",
+			Node:    "drpc-node",
 			Address: "127.0.0.1:8081",
 			Scheme:  "drpc",
 		},
 		{
 			Name:    "test-service",
 			Version: "v1.0.0",
+			Node:    "http-node",
 			Address: "127.0.0.1:8082",
 			Scheme:  "http",
 		},
 		{
 			Name:    "test-service",
 			Version: "v1.0.0",
+			Node:    "https-node",
 			Address: "127.0.0.1:8083",
 			Scheme:  "https",
 		},
@@ -594,14 +641,15 @@ func (r *TestSuite) TestMultipleTransports() {
 
 	// Register all nodes
 	for _, node := range nodes {
-		r.Require().NoError(r.randomRegistry().Register(r.ctx, node))
+		r.Require().NoError(r.Registries[0].Register(r.Ctx, node))
 	}
 
-	time.Sleep(r.updateTime)
+	time.Sleep(r.UpdateTime)
 
 	// Verify each scheme returns the correct node
 	for _, node := range nodes {
-		services, err := r.randomRegistry().GetService(r.ctx, "", "", node.Name, []string{node.Scheme})
+		services, err := r.Registries[1].GetService(
+			r.Ctx, "", "", node.Name, []string{node.Scheme})
 		r.Require().NoError(err)
 		r.Require().Len(services, 1, "Should return only one node with %s Scheme", node.Scheme)
 		r.Require().Equal(node.Scheme, services[0].Scheme, "Should return node with %s Scheme", node.Scheme)
@@ -609,7 +657,7 @@ func (r *TestSuite) TestMultipleTransports() {
 
 	// Cleanup all nodes
 	for _, node := range nodes {
-		r.Require().NoError(r.randomRegistry().Deregister(r.ctx, node))
+		r.Require().NoError(r.Registries[0].Deregister(r.Ctx, node))
 	}
 }
 
@@ -623,7 +671,7 @@ func (r *TestSuite) BenchmarkListServices(b *testing.B) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		services, err := r.randomRegistry().ListServices(r.ctx, "", "", nil)
+		services, err := r.Registries[1].ListServices(r.Ctx, "", "", nil)
 		r.Require().NoError(err)
 		r.Require().NotEmpty(services)
 	}
@@ -637,24 +685,27 @@ func (r *TestSuite) TestFiltering() {
 	// Create services with different attributes
 	services := []registry.ServiceNode{
 		{
-			Name:      "orb.test.filter",
+			Name:      "filter",
 			Version:   "v1.0.0",
+			Node:      "filter-http-node",
 			Address:   "10.0.1.1:8080",
 			Scheme:    "http",
 			Namespace: "default",
 			Region:    "us-west",
 		},
 		{
-			Name:      "orb.test.filter",
+			Name:      "filter",
 			Version:   "v2.0.0",
+			Node:      "filter-grpc-node",
 			Address:   "10.0.1.2:8080",
 			Scheme:    "grpc",
 			Namespace: "default",
 			Region:    "us-east",
 		},
 		{
-			Name:      "orb.test.filter",
+			Name:      "filter",
 			Version:   "v1.0.0",
+			Node:      "filter-https-node",
 			Address:   "10.0.1.3:8080",
 			Scheme:    "https",
 			Namespace: "production",
@@ -664,21 +715,21 @@ func (r *TestSuite) TestFiltering() {
 
 	// Register all services
 	for _, svc := range services {
-		r.Require().NoError(r.randomRegistry().Register(r.ctx, svc))
+		r.Require().NoError(r.Registries[0].Register(r.Ctx, svc))
 	}
 
 	// Cleanup
 	defer func() {
 		for _, svc := range services {
-			r.Require().NoError(r.randomRegistry().Deregister(r.ctx, svc))
+			r.Require().NoError(r.Registries[0].Deregister(r.Ctx, svc))
 		}
 	}()
 
-	time.Sleep(r.updateTime)
+	time.Sleep(r.UpdateTime)
 
 	// Test filtering by version and other parameters
-	filtered, err := r.randomRegistry().GetService(
-		r.ctx, "default", "us-west", "orb.test.filter", []string{"http"})
+	filtered, err := r.Registries[1].GetService(
+		r.Ctx, "default", "us-west", "filter", []string{"http"})
 	r.Require().NoError(err)
 	r.Require().Len(filtered, 1, "Should find exactly one service with version v1.0.0 in default/us-west")
 	r.Require().Equal("v1.0.0", filtered[0].Version)
@@ -686,8 +737,8 @@ func (r *TestSuite) TestFiltering() {
 	r.Require().Equal("us-west", filtered[0].Region)
 
 	// Test filtering by namespace
-	filtered, err = r.randomRegistry().GetService(
-		r.ctx, "production", "eu-west", "orb.test.filter", nil)
+	filtered, err = r.Registries[1].GetService(
+		r.Ctx, "production", "eu-west", "filter", nil)
 	r.Require().NoError(err)
 	r.Require().Len(filtered, 1, "Should find exactly one service in production/eu-west")
 	r.Require().Equal("v1.0.0", filtered[0].Version)
@@ -695,8 +746,8 @@ func (r *TestSuite) TestFiltering() {
 	r.Require().Equal("eu-west", filtered[0].Region)
 
 	// Test filtering by region
-	filtered, err = r.randomRegistry().GetService(
-		r.ctx, "default", "us-east", "orb.test.filter", nil)
+	filtered, err = r.Registries[1].GetService(
+		r.Ctx, "default", "us-east", "filter", nil)
 	r.Require().NoError(err)
 	r.Require().Len(filtered, 1, "Should find exactly one service in default/us-east")
 	r.Require().Equal("v2.0.0", filtered[0].Version)
@@ -704,15 +755,15 @@ func (r *TestSuite) TestFiltering() {
 	r.Require().Equal("us-east", filtered[0].Region)
 
 	// Test filtering by scheme
-	filtered, err = r.randomRegistry().GetService(
-		r.ctx, "default", "us-west", "orb.test.filter", []string{"http"})
+	filtered, err = r.Registries[1].GetService(
+		r.Ctx, "default", "us-west", "filter", []string{"http"})
 	r.Require().NoError(err)
 	r.Require().Len(filtered, 1, "Should find exactly one service with HTTP scheme")
 	r.Require().Equal("http", filtered[0].Scheme)
 
 	// Test for no matches with a combination of filters
-	filtered, err = r.randomRegistry().GetService(
-		r.ctx, "production", "us-east", "orb.test.filter", nil)
+	filtered, err = r.Registries[1].GetService(
+		r.Ctx, "production", "us-east", "filter", nil)
 	r.Require().ErrorIs(err, registry.ErrNotFound)
 	r.Require().Empty(filtered, "Should find no services in production/us-east")
 }
@@ -727,6 +778,7 @@ func (r *TestSuite) BenchmarkRegisterDeregister(b *testing.B) {
 	service := registry.ServiceNode{
 		Name:    "orb.test.benchmark.regdereg",
 		Version: "v1.0.0",
+		Node:    "benchmark-node",
 		Address: r.services[0].Address,
 		Scheme:  r.services[0].Scheme,
 	}
@@ -735,11 +787,11 @@ func (r *TestSuite) BenchmarkRegisterDeregister(b *testing.B) {
 
 	for n := 0; n < b.N; n++ {
 		// Register
-		err := r.randomRegistry().Register(r.ctx, service)
+		err := r.Registries[0].Register(r.Ctx, service)
 		r.Require().NoError(err)
 
 		// Deregister
-		err = r.randomRegistry().Deregister(r.ctx, service)
+		err = r.Registries[0].Deregister(r.Ctx, service)
 		r.Require().NoError(err)
 	}
 }

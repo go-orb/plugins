@@ -7,9 +7,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-orb/go-orb/log"
+
 	// 	"github.com/go-orb/plugins/registry/mdns/client"
 	"github.com/go-orb/plugins/registry/mdns/server"
 	"github.com/go-orb/plugins/registry/mdns/zone"
+
+	_ "github.com/go-orb/plugins/codecs/json"
+	_ "github.com/go-orb/plugins/log/slog"
 )
 
 func makeService(t *testing.T) *zone.MDNSService {
@@ -38,7 +43,12 @@ func makeServiceWithServiceName(t *testing.T, service string) *zone.MDNSService 
 
 func TestServer_StartStop(t *testing.T) {
 	s := makeService(t)
-	serv, err := server.NewServer(&server.Config{Zone: s, LocalhostChecking: true})
+	l, err := log.New()
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
+	serv, err := server.NewServer(&server.Config{Zone: s, LocalhostChecking: true}, l)
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}
@@ -50,11 +60,16 @@ func TestServer_StartStop(t *testing.T) {
 }
 
 func TestServer_Lookup(t *testing.T) {
+	l, err := log.New()
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
 	serv, err := server.NewServer(
 		&server.Config{
 			Zone:              makeServiceWithServiceName(t, "_foobar._tcp"),
 			LocalhostChecking: true,
-		})
+		}, l)
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}
@@ -95,7 +110,7 @@ func TestServer_Lookup(t *testing.T) {
 		Timeout: 50 * time.Millisecond,
 		Entries: entries,
 	}
-	err = Query(params)
+	err = Query(params, l)
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}

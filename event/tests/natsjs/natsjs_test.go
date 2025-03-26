@@ -50,7 +50,7 @@ func createServer() (log.Logger, event.Client, context.CancelFunc, error) {
 			log.Error("failed to create config", err)
 		}
 
-		handler, err = natsjs.New("org.orb.testservice", cfg, logger)
+		handler, err = natsjs.New(cfg, logger)
 		if err != nil {
 			return log.Logger{}, nil, func() {}, err
 		}

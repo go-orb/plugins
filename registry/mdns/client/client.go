@@ -66,9 +66,9 @@ func DefaultParams(service string) *QueryParam {
 // for a timeout before finishing the query. The results are streamed
 // to a channel. Sends will not block, so clients should make sure to
 // either read or buffer.
-func Query(params *QueryParam) error {
+func Query(params *QueryParam, logger log.Logger) error {
 	// Create a new client
-	client, err := newClient()
+	client, err := newClient(logger)
 	if err != nil {
 		return err
 	}
@@ -106,9 +106,9 @@ func Query(params *QueryParam) error {
 }
 
 // Listen listens indefinitely for multicast updates.
-func Listen(ctx context.Context, entries chan<- *ServiceEntry) error {
+func Listen(ctx context.Context, logger log.Logger, entries chan<- *ServiceEntry) error {
 	// Create a new client
-	client, err := newClient()
+	client, err := newClient(logger)
 	if err != nil {
 		return err
 	}
@@ -162,17 +162,11 @@ func Listen(ctx context.Context, entries chan<- *ServiceEntry) error {
 	}
 }
 
-// Lookup is the same as Query, however it uses all the default parameters.
-func Lookup(service string, entries chan<- *ServiceEntry) error {
-	params := DefaultParams(service)
-	params.Entries = entries
-
-	return Query(params)
-}
-
 // Client provides a query interface that can be used to
 // search for service providers using mDNS.
 type client struct {
+	logger log.Logger
+
 	ipv4UnicastConn *net.UDPConn
 	ipv6UnicastConn *net.UDPConn
 
@@ -186,7 +180,7 @@ type client struct {
 
 // NewClient creates a new mdns Client that can be used to query
 // for records.
-func newClient() (*client, error) { //nolint:funlen,gocyclo
+func newClient(logger log.Logger) (*client, error) { //nolint:funlen,gocyclo
 	// TODO(reddaly): At least attempt to bind to the port required in the spec.
 	// Create a IPv4 listener
 	uconn4, err4 := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: 0})
@@ -265,6 +259,8 @@ func newClient() (*client, error) { //nolint:funlen,gocyclo
 	}
 
 	c := &client{
+		logger: logger,
+
 		ipv4MulticastConn: mconn4,
 		ipv6MulticastConn: mconn6,
 		ipv4UnicastConn:   uconn4,
@@ -424,7 +420,7 @@ func (c *client) query(params *QueryParam) error {
 				m.RecursionDesired = false
 
 				if err := c.sendQuery(m); err != nil {
-					log.Error("[mdns] failed to query instance %s", err, inp.Name)
+					c.logger.Error("failed to query instance", "err", err, "name", inp.Name)
 				}
 			}
 		case <-params.Context.Done():

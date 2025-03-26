@@ -12,7 +12,7 @@ func TestStringFlag(t *testing.T) {
 	flag := cli.NewFlag(
 		"string",
 		"",
-		cli.FlagConfigPaths(cli.FlagConfigPath{Path: []string{"registry", "string"}}),
+		cli.FlagConfigPaths([]string{"registry", "string"}),
 		cli.FlagUsage("demo String flag"),
 	)
 
@@ -33,7 +33,7 @@ func TestIntFlag(t *testing.T) {
 	flag := cli.NewFlag(
 		"int",
 		300,
-		cli.FlagConfigPaths(cli.FlagConfigPath{Path: []string{"registry", "int"}}),
+		cli.FlagConfigPaths([]string{"registry", "int"}),
 		cli.FlagUsage("demo Int flag"),
 	)
 
@@ -54,7 +54,7 @@ func TestStringSliceFlag(t *testing.T) {
 	flag := cli.NewFlag(
 		"stringslice",
 		[]string{"1", "2"},
-		cli.FlagConfigPaths(cli.FlagConfigPath{Path: []string{"registry", "stringslice"}}),
+		cli.FlagConfigPaths([]string{"registry", "stringslice"}),
 		cli.FlagUsage("demo StringSlice flag"),
 	)
 

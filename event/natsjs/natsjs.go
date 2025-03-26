@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-orb/go-orb/cli"
 	"github.com/go-orb/go-orb/codecs"
 	"github.com/go-orb/go-orb/config"
 	"github.com/go-orb/go-orb/event"
@@ -28,8 +27,6 @@ var _ event.Client = (*NatsJS)(nil)
 
 // NatsJS is the nats jetstream event client for go-orb.
 type NatsJS struct {
-	serviceName string
-
 	config Config
 	logger log.Logger
 
@@ -48,7 +45,7 @@ type NatsJS struct {
 
 // New creates a new NATS registry. This functions should rarely be called manually.
 // To create a new registry use Provide.
-func New(serviceName string, cfg Config, log log.Logger) (*NatsJS, error) {
+func New(cfg Config, log log.Logger) (*NatsJS, error) {
 	requestCodec, err := codecs.GetMime(cfg.RequestCodec)
 	if err != nil {
 		return nil, err
@@ -60,7 +57,6 @@ func New(serviceName string, cfg Config, log log.Logger) (*NatsJS, error) {
 	}
 
 	return &NatsJS{
-		serviceName:  serviceName,
 		config:       cfg,
 		logger:       log,
 		requestCodec: requestCodec,
@@ -77,7 +73,6 @@ func New(serviceName string, cfg Config, log log.Logger) (*NatsJS, error) {
 // Clone creates a clone of the handler, this is useful for parallel requests.
 func (n *NatsJS) Clone() event.Type {
 	return event.Type{Client: &NatsJS{
-		serviceName:  n.serviceName,
 		config:       n.config,
 		logger:       n.logger,
 		requestCodec: n.requestCodec,
@@ -552,7 +547,7 @@ func (n *NatsJS) Type() string {
 
 // Provide creates a new NatsJS event client.
 func Provide(
-	svcCtx *cli.ServiceContext,
+	configData map[string]any,
 	logger log.Logger,
 	opts ...event.Option,
 ) (event.Type, error) {
@@ -561,11 +556,11 @@ func Provide(
 		return event.Type{}, fmt.Errorf("create nats registry config: %w", err)
 	}
 
-	if err := config.Parse(nil, event.DefaultConfigSection, svcCtx.Config, &cfg); err != nil && !errors.Is(err, config.ErrNoSuchKey) {
+	if err := config.Parse(nil, event.DefaultConfigSection, configData, &cfg); err != nil && !errors.Is(err, config.ErrNoSuchKey) {
 		return event.Type{}, fmt.Errorf("parse config: %w", err)
 	}
 
-	instance, err := New(svcCtx.Name(), cfg, logger)
+	instance, err := New(cfg, logger)
 
 	return event.Type{Client: instance}, err
 }

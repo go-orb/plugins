@@ -11,7 +11,7 @@ const Name = "mdns"
 //
 //nolint:gochecknoglobals
 var (
-	DefaultDomain = "micro"
+	DefaultDomain = "orb"
 )
 
 func init() {
@@ -32,8 +32,6 @@ func NewConfig(
 	cfg := Config{
 		Config: registry.NewConfig(),
 	}
-
-	cfg.Config.Timeout = 500
 
 	// Apply options.
 	for _, o := range opts {

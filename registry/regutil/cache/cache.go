@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
@@ -32,6 +33,8 @@ type dataStore struct {
 
 	startOnce sync.Once
 	sync.RWMutex
+
+	regCount int64
 }
 
 // populate initializes the cache with services from the registry.
@@ -110,11 +113,11 @@ func (d *dataStore) watch(ctx context.Context) {
 		result, err := d.watcher.Next()
 		if err != nil {
 			if errors.Is(err, registry.ErrWatcherStopped) {
-				d.logger.Debug("Registry watcher stopped.")
+				d.logger.Debug("watcher stopped")
 				return
 			}
 
-			d.logger.Warn("Error getting next event from registry watcher", "error", err)
+			d.logger.Warn("getting next event from watcher", "error", err)
 
 			continue
 		}
@@ -124,11 +127,13 @@ func (d *dataStore) watch(ctx context.Context) {
 		case registry.Create, registry.Update:
 			d.registerServiceNode(result.Node)
 		case registry.Delete:
+			d.logger.Trace("deregister from watcher")
+
 			if err := d.deregisterServiceNode(result.Node); err != nil {
-				d.logger.Warn("Error deregistering service from watcher", "error", err)
+				d.logger.Warn("deregistering service from watcher", "error", err)
 			}
 		default:
-			d.logger.Warn("Unknown watch action", "action", result.Action)
+			d.logger.Warn("unknown watch action", "action", result.Action)
 		}
 	}
 }
@@ -143,7 +148,15 @@ func (d *dataStore) deregisterServiceNode(serviceNode registry.ServiceNode) erro
 
 	if records, ok := d.Records[sKey]; ok {
 		if _, ok := records[nKey]; ok {
-			d.logger.Trace("deregister", "name", serviceNode.Name, "version", serviceNode.Version, "address", serviceNode.Address)
+			d.logger.Trace("deregister",
+				"namespace", serviceNode.Namespace,
+				"region", serviceNode.Region,
+				"name", serviceNode.Name,
+				"version", serviceNode.Version,
+				"address", serviceNode.Address,
+				"scheme", serviceNode.Scheme,
+			)
+
 			delete(records, nKey)
 		}
 
@@ -178,7 +191,6 @@ func (d *dataStore) registerServiceNodeInternal(serviceNode registry.ServiceNode
 			d.Records[sKey][nKey] = serviceNode
 		}
 	} else {
-		d.logger.Trace("register", "name", serviceNode.Name, "version", serviceNode.Version, "address", serviceNode.Address)
 		d.Records[sKey] = map[string]registry.ServiceNode{}
 		d.Records[sKey][nKey] = serviceNode
 	}
@@ -189,7 +201,7 @@ var store = &dataStore{
 	Records: make(map[string]map[string]registry.ServiceNode),
 }
 
-func (d *dataStore) Start(ctx context.Context, logger log.Logger, registry registry.Registry) {
+func (d *dataStore) start(ctx context.Context, logger log.Logger, registry registry.Registry) {
 	d.startOnce.Do(func() {
 		d.logger = logger
 		d.registry = registry
@@ -202,6 +214,16 @@ func (d *dataStore) Start(ctx context.Context, logger log.Logger, registry regis
 
 		d.populate(ctx)
 	})
+
+	atomic.AddInt64(&d.regCount, 1)
+}
+
+func (d *dataStore) stop(_ context.Context) {
+	atomic.AddInt64(&d.regCount, -1)
+
+	if atomic.LoadInt64(&d.regCount) == 0 {
+		d.watchCancel()
+	}
 }
 
 // Cache is a utility for caching registry operations.
@@ -218,16 +240,14 @@ type Cache struct {
 
 // Start starts the cache pruning mechanism and begins watching the registry.
 func (c *Cache) Start(ctx context.Context) error {
-	store.Start(ctx, c.logger, c.registry)
+	store.start(ctx, c.logger, c.registry)
 
 	return nil
 }
 
 // Stop stops the cache and its watcher.
-func (c *Cache) Stop(_ context.Context) error {
-	if store.watchCancel != nil {
-		store.watchCancel()
-	}
+func (c *Cache) Stop(ctx context.Context) error {
+	store.stop(ctx)
 
 	return nil
 }
@@ -322,18 +342,14 @@ func (c *Cache) ListServices(_ context.Context, namespace, region string, scheme
 }
 
 // Register registers a service with the cache.
-func (c *Cache) Register(ctx context.Context, serviceNode registry.ServiceNode) error {
-	return c.registry.Register(ctx, serviceNode)
+func (c *Cache) Register(_ context.Context, serviceNode registry.ServiceNode) error {
+	store.registerServiceNode(serviceNode)
+	return nil
 }
 
 // Deregister deregisters a service with the cache.
-func (c *Cache) Deregister(ctx context.Context, serviceNode registry.ServiceNode) error {
-	return c.registry.Deregister(ctx, serviceNode)
-}
-
-// Watch returns a watcher for the cache.
-func (c *Cache) Watch(ctx context.Context, opts ...registry.WatchOption) (registry.Watcher, error) {
-	return c.registry.Watch(ctx, opts...)
+func (c *Cache) Deregister(_ context.Context, serviceNode registry.ServiceNode) error {
+	return store.deregisterServiceNode(serviceNode)
 }
 
 // New creates a new registry cache.

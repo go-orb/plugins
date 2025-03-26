@@ -8,6 +8,7 @@ require (
 	github.com/go-orb/plugins/log/slog v0.1.1-0.20250325224710-41353b6fd7a6
 	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250325224710-41353b6fd7a6
 	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250325224710-41353b6fd7a6
+	github.com/hashicorp/mdns v1.0.6
 	github.com/lithammer/shortuuid/v3 v3.0.7
 	github.com/miekg/dns v1.1.63
 	github.com/stretchr/testify v1.10.0

@@ -130,7 +130,7 @@ func (c *Client) selectNode(ctx context.Context, service string, opts *client.Ca
 
 // resolveService resolves a servicename to a Node with the help of the registry.
 func (c *Client) resolveService(
-	_ context.Context,
+	ctx context.Context,
 	service string,
 	opts *client.CallOptions,
 ) ([]registry.ServiceNode, error) {
@@ -146,6 +146,10 @@ func (c *Client) resolveService(
 
 	// Retry up to 5 times with a small delay between attempts
 	for retries := 0; retries < 5; retries++ {
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+
 		if _, err := client.ResolveMemoryServer(service); err == nil {
 			rNodes := make([]registry.ServiceNode, 0)
 			rNodes = append(rNodes, registry.ServiceNode{
@@ -158,9 +162,9 @@ func (c *Client) resolveService(
 		}
 
 		if opts.AnyTransport {
-			services, err = c.registry.GetService(context.Background(), opts.Namespace, opts.Region, service, nil)
+			services, err = c.registry.GetService(ctx, opts.Namespace, opts.Region, service, nil)
 		} else {
-			services, err = c.registry.GetService(context.Background(), opts.Namespace, opts.Region, service, opts.PreferredTransports)
+			services, err = c.registry.GetService(ctx, opts.Namespace, opts.Region, service, opts.PreferredTransports)
 		}
 
 		if err == nil && len(services) > 0 {
@@ -176,7 +180,13 @@ func (c *Client) resolveService(
 			"preferredTransports", opts.PreferredTransports,
 		)
 
-		time.Sleep(time.Duration(math.Pow(float64(retries+1), math.E)) * time.Millisecond * 100) // Increasing backoff
+		timer := time.Duration(math.Pow(float64(retries+1), math.E)) * time.Millisecond * 100
+
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-time.After(timer):
+		}
 	}
 
 	if err != nil {

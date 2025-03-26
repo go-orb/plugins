@@ -3,6 +3,7 @@ package memory
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
@@ -14,48 +15,49 @@ import (
 	"github.com/go-orb/plugins/registry/tests"
 )
 
-func createSuite() (*tests.TestSuite, func() error, error) {
+func createRegistry(suite *tests.TestSuite) (registry.Registry, error) {
+	t := suite.T()
+	t.Helper()
+
+	cfg := NewConfig()
+	reg := New(cfg, suite.Logger.With("reg", "custom"))
+	err := reg.Start(suite.Ctx)
+	require.NoError(t, err, "while starting a registry")
+
+	return reg, nil
+}
+
+func createSuite(tb testing.TB) (*tests.TestSuite, func() error) {
+	tb.Helper()
+
 	ctx := context.Background()
 
 	logger, err := log.New(log.WithLevel(log.LevelTrace))
-	if err != nil {
-		log.Error("failed to create logger", "err", err)
-		return nil, func() error { return nil }, err
-	}
+	require.NoError(tb, err, "while creating a logger")
 
 	cfg1 := NewConfig()
-	reg1 := New(cfg1, logger)
-	if err := reg1.Start(ctx); err != nil {
-		log.Error("failed to connect registry one to Consul server", "err", err)
-		return nil, func() error { return nil }, err
-	}
+	reg1 := New(cfg1, logger.With("reg", "reg1"))
+	require.NoError(tb, reg1.Start(ctx), "while starting registry one")
 
 	cfg2 := NewConfig()
-	reg2 := New(cfg2, logger)
-	if err := reg2.Start(ctx); err != nil {
-		log.Error("failed to connect registry two to Consul server", "err", err)
-		return nil, func() error { return nil }, err
-	}
-
-	cfg3 := NewConfig()
-	reg3 := New(cfg3, logger)
-	if err := reg3.Start(ctx); err != nil {
-		log.Error("failed to connect registry three to Consul server", "err", err)
-		return nil, func() error { return nil }, err
-	}
+	reg2 := New(cfg2, logger.With("reg", "reg2"))
+	require.NoError(tb, reg2.Start(ctx), "while starting registry two")
 
 	cleanup := func() error {
-		ctx := context.Background()
-		_ = reg1.Stop(ctx) //nolint:errcheck
 		return nil
 	}
 
-	return tests.CreateSuite(logger, []registry.Registry{reg1, reg2, reg3}, 0), cleanup, nil
+	return &tests.TestSuite{
+		Ctx:            ctx,
+		Logger:         logger,
+		Registries:     []registry.Registry{reg1, reg2},
+		UpdateTime:     time.Second,
+		CreateRegistry: createRegistry,
+	}, cleanup
 }
 
 func TestSuite(t *testing.T) {
-	s, cleanup, err := createSuite()
-	require.NoError(t, err, "while creating a server")
+	s, cleanup := createSuite(t)
 
 	// Run the tests.
 	suite.Run(t, s)
@@ -64,8 +66,7 @@ func TestSuite(t *testing.T) {
 }
 
 func BenchmarkGetService(b *testing.B) {
-	s, cleanup, err := createSuite()
-	require.NoError(b, err, "while creating a server")
+	s, cleanup := createSuite(b)
 
 	s.BenchmarkGetService(b)
 
@@ -73,8 +74,7 @@ func BenchmarkGetService(b *testing.B) {
 }
 
 func BenchmarkParallelGetService(b *testing.B) {
-	s, cleanup, err := createSuite()
-	require.NoError(b, err, "while creating a server")
+	s, cleanup := createSuite(b)
 
 	s.BenchmarkGetService(b)
 
@@ -82,8 +82,7 @@ func BenchmarkParallelGetService(b *testing.B) {
 }
 
 func BenchmarkGetServiceWithNoNodes(b *testing.B) {
-	s, cleanup, err := createSuite()
-	require.NoError(b, err, "while creating a server")
+	s, cleanup := createSuite(b)
 
 	s.BenchmarkGetServiceWithNoNodes(b)
 

@@ -15,50 +15,50 @@ import (
 	"github.com/go-orb/plugins/registry/tests"
 )
 
-func createSuite() (*tests.TestSuite, func() error, error) {
-	ctx := context.Background()
+func createRegistry(suite *tests.TestSuite) (registry.Registry, error) {
+	t := suite.T()
+	t.Helper()
+
+	cfg := NewConfig(WithDomain("orb.local"))
+	reg, err := New(cfg, suite.Logger.With("reg", "custom"))
+	require.NoError(t, err, "while creating a registry")
+	err = reg.Start(suite.Ctx)
+	require.NoError(t, err, "while starting a registry")
+
+	return reg, nil
+}
+
+func createSuite(tb testing.TB) (*tests.TestSuite, func() error) {
+	tb.Helper()
 
 	logger, err := log.New(log.WithLevel(log.LevelTrace))
-	if err != nil {
-		log.Error("failed to create logger", "err", err)
-		return nil, func() error { return nil }, err
-	}
+	require.NoError(tb, err, "while creating a logger")
 
 	cfg1 := NewConfig(WithDomain("orb.local"))
-	reg1, err := New(cfg1, logger)
-	if err != nil {
-		log.Error("failed to create registry one", "err", err)
-		return nil, func() error { return nil }, err
-	}
-	if err := reg1.Start(ctx); err != nil {
-		log.Error("failed to connect registry one to Consul server", "err", err)
-		return nil, func() error { return nil }, err
-	}
+	reg1, err := New(cfg1, logger.With("reg", "reg1"))
+	require.NoError(tb, err, "while creating registry one")
 
-	// cfg2 := NewConfig(WithDomain("orb.local"))
-	// reg2, err := New(cfg2, logger)
-	// if err != nil {
-	// 	log.Error("failed to create registry two", "err", err)
-	// 	return nil, func() error { return nil }, err
-	// }
-	// if err := reg2.Start(ctx); err != nil {
-	// 	log.Error("failed to connect registry two to Consul server", "err", err)
-	// 	return nil, func() error { return nil }, err
-	// }
+	cfg2 := NewConfig(WithDomain("orb.local"))
+	reg2, err := New(cfg2, logger.With("reg", "reg2"))
+	require.NoError(tb, err, "while creating registry two")
 
 	cleanup := func() error {
-		ctx := context.Background()
-		_ = reg1.Stop(ctx) //nolint:errcheck
-		// _ = reg2.Stop(ctx) //nolint:errcheck
 		return nil
 	}
 
-	return tests.CreateSuite(logger, []registry.Registry{reg1}, time.Second), cleanup, nil
+	r := &tests.TestSuite{
+		Ctx:            context.Background(),
+		Logger:         logger,
+		Registries:     []registry.Registry{reg1, reg2},
+		UpdateTime:     time.Second,
+		CreateRegistry: createRegistry,
+	}
+
+	return r, cleanup
 }
 
 func TestSuite(t *testing.T) {
-	s, cleanup, err := createSuite()
-	require.NoError(t, err, "while creating a server")
+	s, cleanup := createSuite(t)
 
 	// Run the tests.
 	suite.Run(t, s)
@@ -67,8 +67,7 @@ func TestSuite(t *testing.T) {
 }
 
 func BenchmarkGetService(b *testing.B) {
-	s, cleanup, err := createSuite()
-	require.NoError(b, err, "while creating a server")
+	s, cleanup := createSuite(b)
 
 	s.BenchmarkGetService(b)
 
@@ -76,8 +75,7 @@ func BenchmarkGetService(b *testing.B) {
 }
 
 func BenchmarkParallelGetService(b *testing.B) {
-	s, cleanup, err := createSuite()
-	require.NoError(b, err, "while creating a server")
+	s, cleanup := createSuite(b)
 
 	s.BenchmarkGetService(b)
 
@@ -85,8 +83,7 @@ func BenchmarkParallelGetService(b *testing.B) {
 }
 
 func BenchmarkGetServiceWithNoNodes(b *testing.B) {
-	s, cleanup, err := createSuite()
-	require.NoError(b, err, "while creating a server")
+	s, cleanup := createSuite(b)
 
 	s.BenchmarkGetServiceWithNoNodes(b)
 

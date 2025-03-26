@@ -12,6 +12,9 @@ import (
 )
 
 const (
+	// DefaultNetwork to use for new HTTP servers.
+	DefaultNetwork = "tcp"
+
 	// DefaultAddress to use for new HTTP servers.
 	DefaultAddress = ":0"
 
@@ -72,13 +75,18 @@ var (
 type Config struct {
 	server.EntrypointConfig `yaml:",inline"`
 
+	// Network to listen on.
+	// Either 'tcp' or 'unix'.
+	Network string `json:"network" yaml:"network"`
+
 	// Address to listen on.
-	// TODO(davincible): implement this, and the address method.
 	// If no IP is provided, an interface will be selected automatically. Private
 	// interfaces are preferred, if none are found a public interface will be used.
 	//
 	// If no port is provided, a random port will be selected. To listen on a
 	// specific interface, but with a random port, you can use '<IP>:0'.
+	//
+	// If network is "unix", the address is the path to the unix socket.
 	Address string `json:"address" yaml:"address"`
 
 	// Insecure will create an HTTP server without TLS, for insecure connections.
@@ -160,6 +168,7 @@ func NewConfig(options ...server.Option) *Config {
 			Plugin:  Plugin,
 			Enabled: true,
 		},
+		Network:              DefaultNetwork,
 		Address:              DefaultAddress,
 		Insecure:             DefaultInsecure,
 		MaxConcurrentStreams: DefaultMaxConcurrentStreams,

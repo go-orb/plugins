@@ -126,6 +126,10 @@ func (c *RegistryConsul) Deregister(_ context.Context, serviceNode registry.Serv
 
 // Register registers a service within the registry.
 func (c *RegistryConsul) Register(_ context.Context, serviceNode registry.ServiceNode) error {
+	if err := serviceNode.Valid(); err != nil {
+		return err
+	}
+
 	var (
 		regTCPCheck bool
 		regInterval time.Duration

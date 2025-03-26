@@ -350,6 +350,7 @@ func (s *Server) registryService() registry.ServiceNode {
 	return registry.ServiceNode{
 		Name:     s.serviceName,
 		Version:  s.serviceVersion,
+		Node:     s.Name(),
 		Address:  s.Address(),
 		Scheme:   s.Transport(),
 		Metadata: make(map[string]string),

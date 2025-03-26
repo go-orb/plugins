@@ -2,6 +2,7 @@ package kvstore
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -18,8 +19,24 @@ import (
 	"github.com/go-orb/plugins/registry/tests"
 )
 
-//nolint:unparam
-func createSuite(tb testing.TB) (*tests.TestSuite, func() error, error) {
+func createRegistry(suite *tests.TestSuite) (registry.Registry, error) {
+	t := suite.T()
+	t.Helper()
+
+	cfg := NewConfig()
+	store, ok := suite.Server.(kvstore.Type)
+	if !ok {
+		return nil, errors.New("while retrieving the store")
+	}
+	reg, err := New(cfg, suite.Logger.With("reg", "custom"), store)
+	require.NoError(t, err, "while creating a registry")
+	err = reg.Start(suite.Ctx)
+	require.NoError(t, err, "while starting a registry")
+
+	return reg, nil
+}
+
+func createSuite(tb testing.TB) (*tests.TestSuite, func() error) {
 	tb.Helper()
 
 	// Create context
@@ -72,19 +89,25 @@ func createSuite(tb testing.TB) (*tests.TestSuite, func() error, error) {
 
 		ctx = context.Background()
 
-		_ = reg1.Stop(ctx)  //nolint:errcheck
-		_ = reg2.Stop(ctx)  //nolint:errcheck
 		_ = store.Stop(ctx) //nolint:errcheck
 		server.Shutdown()
 		return nil
 	}
 
-	return tests.CreateSuite(logger, []registry.Registry{reg1, reg2}, time.Millisecond*200), cleanup, nil
+	r := &tests.TestSuite{
+		Server:         kvstore.Type{KVStore: store},
+		Ctx:            context.Background(),
+		Logger:         logger,
+		Registries:     []registry.Registry{reg1, reg2},
+		UpdateTime:     time.Second,
+		CreateRegistry: createRegistry,
+	}
+
+	return r, cleanup
 }
 
 func TestSuite(t *testing.T) {
-	s, cleanup, err := createSuite(t)
-	require.NoError(t, err, "while creating a server")
+	s, cleanup := createSuite(t)
 
 	// Run the tests.
 	suite.Run(t, s)
@@ -93,8 +116,7 @@ func TestSuite(t *testing.T) {
 }
 
 func BenchmarkGetService(b *testing.B) {
-	s, cleanup, err := createSuite(b)
-	require.NoError(b, err, "while creating a server")
+	s, cleanup := createSuite(b)
 
 	s.BenchmarkGetService(b)
 
@@ -102,10 +124,7 @@ func BenchmarkGetService(b *testing.B) {
 }
 
 func BenchmarkParallelGetService(b *testing.B) {
-	s, cleanup, err := createSuite(b)
-	if err != nil {
-		b.Fatal("Error creating registries:", err)
-	}
+	s, cleanup := createSuite(b)
 
 	s.BenchmarkParallelGetService(b)
 
@@ -113,8 +132,7 @@ func BenchmarkParallelGetService(b *testing.B) {
 }
 
 func BenchmarkGetServiceWithNoNodes(b *testing.B) {
-	s, cleanup, err := createSuite(b)
-	require.NoError(b, err, "while creating a server")
+	s, cleanup := createSuite(b)
 
 	s.BenchmarkGetServiceWithNoNodes(b)
 

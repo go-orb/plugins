@@ -87,6 +87,8 @@ type Config struct {
 type Server struct {
 	config *Config
 
+	logger log.Logger
+
 	ipv4List *net.UDPConn
 	ipv6List *net.UDPConn
 
@@ -99,7 +101,7 @@ type Server struct {
 }
 
 // NewServer is used to create a new mDNS server from a config.
-func NewServer(config *Config) (*Server, error) { //nolint:gocyclo,funlen
+func NewServer(config *Config, logger log.Logger) (*Server, error) { //nolint:gocyclo,funlen
 	setCustomPort(config.Port)
 
 	// Create the listeners
@@ -173,6 +175,7 @@ func NewServer(config *Config) (*Server, error) { //nolint:gocyclo,funlen
 	}
 
 	s := &Server{
+		logger:     logger,
 		config:     config,
 		ipv4List:   ipv4List,
 		ipv6List:   ipv6List,
@@ -247,7 +250,7 @@ func (s *Server) recv(c *net.UDPConn) {
 		}
 
 		if err := s.parsePacket(buf[:n], from); err != nil {
-			log.Error("[ERR] mdns: Failed to handle query", err)
+			s.logger.Error("[ERR] mdns: Failed to handle query", "error", err)
 		}
 	}
 }
@@ -256,7 +259,7 @@ func (s *Server) recv(c *net.UDPConn) {
 func (s *Server) parsePacket(packet []byte, from net.Addr) error {
 	var msg dns.Msg
 	if err := msg.Unpack(packet); err != nil {
-		log.Error("[ERR] mdns: Failed to unpack packet", err)
+		s.logger.Error("[ERR] mdns: Failed to unpack packet", "error", err)
 		return err
 	}
 	// TODO: This is a bit of a hack
@@ -382,6 +385,8 @@ func (s *Server) handleQuestion(q dns.Question) (multicastRecs, unicastRecs []dn
 		return nil, nil
 	}
 
+	s.logger.Trace("Handle question answer", "service", s.config.Zone, "question", q.Name)
+
 	// Handle unicast and multicast responses.
 	// TODO(reddaly): The decision about sending over unicast vs. multicast is not
 	// yet fully compliant with RFC 6762.  For example, the unicast bit should be
@@ -442,7 +447,7 @@ func (s *Server) probe() {
 
 	for i := 0; i < 3; i++ {
 		if err := s.SendMulticast(msg); err != nil {
-			log.Error("[ERR] mdns: failed to send probe", err)
+			s.logger.Error("[ERR] mdns: failed to send probe", "error", err)
 		}
 
 		time.Sleep(time.Duration(randomizer.Intn(250)) * time.Millisecond)
@@ -470,7 +475,7 @@ func (s *Server) probe() {
 
 	for i := 0; i < 3; i++ {
 		if err := s.SendMulticast(resp); err != nil {
-			log.Error("[ERR] mdns: failed to send announcement", err)
+			s.logger.Error("[ERR] mdns: failed to send announcement", "error", err)
 		}
 		select {
 		case <-timer.C:
