@@ -40,7 +40,7 @@ func createSuite(tb testing.TB) (*tests.TestSuite, func() error) {
 	tb.Helper()
 
 	// Create context
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 
 	// Start embedded NATS server for testing
 	tmpDir := tb.TempDir()
@@ -74,13 +74,13 @@ func createSuite(tb testing.TB) (*tests.TestSuite, func() error) {
 
 	// Create first registry without caching
 	cfg1 := NewConfig(WithNoCache())
-	reg1, err := New(cfg1, logger, kvstore.Type{KVStore: store})
+	reg1, err := New(cfg1, logger.With("reg", "reg1"), kvstore.Type{KVStore: store})
 	require.NoError(tb, err)
 	require.NoError(tb, reg1.Start(ctx))
 
 	// Create second registry with caching
 	cfg2 := NewConfig()
-	reg2, err := New(cfg2, logger, kvstore.Type{KVStore: store})
+	reg2, err := New(cfg2, logger.With("reg", "reg2"), kvstore.Type{KVStore: store})
 	require.NoError(tb, err)
 	require.NoError(tb, reg2.Start(ctx))
 
@@ -96,10 +96,10 @@ func createSuite(tb testing.TB) (*tests.TestSuite, func() error) {
 
 	r := &tests.TestSuite{
 		Server:         kvstore.Type{KVStore: store},
-		Ctx:            context.Background(),
+		Ctx:            ctx,
 		Logger:         logger,
 		Registries:     []registry.Registry{reg1, reg2},
-		UpdateTime:     time.Second,
+		UpdateTime:     100 * time.Millisecond,
 		CreateRegistry: createRegistry,
 	}
 

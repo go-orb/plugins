@@ -89,8 +89,7 @@ func (c *Registry) Stop(ctx context.Context) error {
 		}
 	}
 
-	// Then stop the kvstore
-	return c.kvstore.Stop(ctx)
+	return nil
 }
 
 // String returns the plugin name.

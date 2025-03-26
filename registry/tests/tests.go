@@ -32,6 +32,8 @@ type TestSuite struct {
 
 // SetupSuite setups the test suite.
 func (r *TestSuite) SetupSuite() {
+	r.Logger.Info("Setting up suite")
+
 	if len(r.Registries) < 2 {
 		panic("at least 2 registries are required")
 	}
@@ -64,6 +66,8 @@ func (r *TestSuite) SetupSuite() {
 
 // TearDownSuite runs after all tests.
 func (r *TestSuite) TearDownSuite() {
+	r.Logger.Info("Tearing down suite")
+
 	ctx := context.Background()
 
 	for _, service := range r.services {
@@ -76,10 +80,6 @@ func (r *TestSuite) TearDownSuite() {
 		err := reg.Stop(ctx)
 		r.Require().NoError(err, "while stopping a registry")
 	}
-}
-
-func (r *TestSuite) randomRegistry() registry.Registry {
-	return r.Registries[rand.Intn(len(r.Registries))] //nolint:gosec
 }
 
 // TestRegister tests registering.
@@ -438,7 +438,7 @@ func (r *TestSuite) TestWatchServices() {
 	time.Sleep(r.UpdateTime)
 
 	// Create a watcher
-	watcher, err := r.randomRegistry().Watch(r.Ctx, registry.WatchService(serviceName))
+	watcher, err := r.Registries[0].Watch(r.Ctx, registry.WatchService(serviceName))
 	r.Require().NoError(err)
 	r.NotNil(watcher)
 
