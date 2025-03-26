@@ -32,6 +32,7 @@ import (
 	"github.com/lithammer/shortuuid/v3"
 )
 
+const networkUnix = "unix"
 const metaPrefix = "orb_app_"
 const myMetaPrefix = "orb_internal_"
 const nodeIDDelimiter = "@"
@@ -260,6 +261,7 @@ func (m *Registry) Register(_ context.Context, serviceNode registry.ServiceNode)
 	return err
 }
 
+//nolint:funlen
 func (m *Registry) registerNode(node registry.ServiceNode, entries []*mdnsEntry) ([]*mdnsEntry, error) {
 	id := nodeID(node)
 
@@ -273,9 +275,9 @@ func (m *Registry) registerNode(node registry.ServiceNode, entries []*mdnsEntry)
 
 	metadata[myMetaPrefix+"network"] = node.Network
 
-	var s zone.Zone
+	var serverZone zone.Zone
 
-	if node.Network == "unix" {
+	if node.Network == networkUnix { //nolint:nestif
 		metadata[myMetaPrefix+"address"] = node.Address
 
 		txt, err := encode(m.codec, &mdnsTxt{
@@ -287,7 +289,7 @@ func (m *Registry) registerNode(node registry.ServiceNode, entries []*mdnsEntry)
 			return entries, err
 		}
 
-		s, err = zone.NewMDNSService(
+		serverZone, err = zone.NewMDNSService(
 			nodeKey(node),
 			node.Name,
 			serviceDomain(node.Namespace, node.Region, m.config.Domain)+".",
@@ -317,7 +319,7 @@ func (m *Registry) registerNode(node registry.ServiceNode, entries []*mdnsEntry)
 		port, _ := strconv.Atoi(pt) //nolint:errcheck
 
 		// we got here, new node
-		s, err = zone.NewMDNSService(
+		serverZone, err = zone.NewMDNSService(
 			nodeKey(node),
 			node.Name,
 			serviceDomain(node.Namespace, node.Region, m.config.Domain)+".",
@@ -332,7 +334,7 @@ func (m *Registry) registerNode(node registry.ServiceNode, entries []*mdnsEntry)
 	}
 
 	srv, err := server.NewServer(
-		&server.Config{Zone: s, LocalhostChecking: true},
+		&server.Config{Zone: serverZone, LocalhostChecking: true},
 		m.logger,
 	)
 	if err != nil {
@@ -476,7 +478,7 @@ GET_SERVICE:
 				}
 			}
 
-			if txt.Metadata[myMetaPrefix+"network"] == "unix" {
+			if txt.Metadata[myMetaPrefix+"network"] == networkUnix {
 				serviceNode.Address = txt.Metadata[myMetaPrefix+"address"]
 			} else {
 				switch {
@@ -676,7 +678,7 @@ func (w *mdnsWatcher) Next() (*registry.Result, error) {
 			}
 		}
 
-		if txt.Metadata[myMetaPrefix+"network"] == "unix" {
+		if txt.Metadata[myMetaPrefix+"network"] == networkUnix {
 			serviceNode.Address = txt.Metadata[myMetaPrefix+"address"]
 		} else {
 			switch {

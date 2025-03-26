@@ -122,6 +122,8 @@ func (c *RegistryConsul) Deregister(_ context.Context, serviceNode registry.Serv
 }
 
 // Register registers a service within the registry.
+//
+//nolint:funlen
 func (c *RegistryConsul) Register(_ context.Context, serviceNode registry.ServiceNode) error {
 	if err := serviceNode.Valid(); err != nil {
 		return err
@@ -232,7 +234,7 @@ func (c *RegistryConsul) Register(_ context.Context, serviceNode registry.Servic
 
 // GetService returns a service from the registry.
 //
-//nolint:gocyclo
+//nolint:gocyclo,funlen
 func (c *RegistryConsul) GetService(ctx context.Context, namespace, region, name string, schemes []string) ([]registry.ServiceNode, error) {
 	if c.config.Cache {
 		return c.cache.GetService(ctx, namespace, region, name, schemes)
