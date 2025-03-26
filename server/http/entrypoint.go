@@ -138,12 +138,6 @@ func (s *Server) Start(ctx context.Context) error {
 		s.Register(f)
 	}
 
-	var tlsConfig *tls.Config
-
-	if s.config.TLS != nil {
-		tlsConfig = s.config.TLS.Config
-	}
-
 	if s.config.Network == networkUnix { //nolint:nestif
 		s.config.Insecure = true
 
@@ -170,6 +164,12 @@ func (s *Server) Start(ctx context.Context) error {
 		s.config.TLS, err = s.setupTLS()
 		if err != nil {
 			return err
+		}
+
+		var tlsConfig *tls.Config
+
+		if s.config.TLS != nil {
+			tlsConfig = s.config.TLS.Config
 		}
 
 		s.listenerTCP, err = mtcp.BuildListenerTCP(s.config.Address, tlsConfig)
