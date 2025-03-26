@@ -5,10 +5,10 @@ github.com/cornelk/hashmap v1.0.8/go.mod h1:RfZb7JO3RviW/rT6emczVuC/oxpdz4UsSB2L
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/go-orb/go-orb v0.2.2-0.20250326105311-8c4dcbea8f6e h1:Wgrz0Hn0+jjSsk6+d3ZEcbYHPML2GT2gxcgv2y77jxY=
-github.com/go-orb/go-orb v0.2.2-0.20250326105311-8c4dcbea8f6e/go.mod h1:DBamAST285wD+Ydbil1HGl9X19Sj+0xR1ZqFzKDxOgM=
-github.com/go-orb/plugins/codecs/json v0.1.1-0.20250326105649-3c8ed10ebb69 h1:lE68mjFIyPM6GonMRuiEVHaxErLPNppncBY2315fhOU=
-github.com/go-orb/plugins/codecs/json v0.1.1-0.20250326105649-3c8ed10ebb69/go.mod h1:BU9Pr7yShSbrYaOS2WJAFPeLKP96G7BrcS5qQJ//WeE=
+github.com/go-orb/go-orb v0.3.0 h1:+aVRd8Kx/kjavfm/5lsVFj7iGbja5/ZaBzsNqVEUrFE=
+github.com/go-orb/go-orb v0.3.0/go.mod h1:DBamAST285wD+Ydbil1HGl9X19Sj+0xR1ZqFzKDxOgM=
+github.com/go-orb/plugins/codecs/json v0.2.0 h1:4wt51doWFErsy3wW0UHQTwz/fPVj3nqQCwX+d2pacyc=
+github.com/go-orb/plugins/codecs/json v0.2.0/go.mod h1:O2KX4QVZmdRINZSGEmd7iAt2xR0Fc2+G85f0nTBfO/I=
 github.com/klauspost/compress v1.18.0 h1:c/Cqfb0r+Yi+JtIEq73FWXVkRonBlf0CRNYc8Zttxdo=
 github.com/klauspost/compress v1.18.0/go.mod h1:2Pp+KzxcywXVXMr50+X0Q/Lsb43OQHYWRCY2AiWywWQ=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
