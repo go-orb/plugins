@@ -2,7 +2,7 @@ module github.com/go-orb/plugins/client/orb
 
 go 1.23.6
 
-require github.com/go-orb/go-orb v0.2.2-0.20250325224458-1123c67083af
+require github.com/go-orb/go-orb v0.2.2-0.20250326080126-7cf6a7b8fa6e
 
 require (
 	dario.cat/mergo v1.0.1 // indirect

@@ -1,6 +1,6 @@
 github.com/cornelk/hashmap v1.0.8 h1:nv0AWgw02n+iDcawr5It4CjQIAcdMMKRrs10HOJYlrc=
 github.com/cornelk/hashmap v1.0.8/go.mod h1:RfZb7JO3RviW/rT6emczVuC/oxpdz4UsSB2LJSclR1k=
-github.com/go-orb/go-orb v0.2.2-0.20250325224458-1123c67083af h1:UWlBXrFMwV+sJ7J1GfyKEVYxLWQyt9xyd0aH1qcz8+w=
-github.com/go-orb/go-orb v0.2.2-0.20250325224458-1123c67083af/go.mod h1:DBamAST285wD+Ydbil1HGl9X19Sj+0xR1ZqFzKDxOgM=
+github.com/go-orb/go-orb v0.2.2-0.20250326080126-7cf6a7b8fa6e h1:+XgpQ3yl2cf8HKcjq11aIaojLqpd2am3AkcmXrjn7gk=
+github.com/go-orb/go-orb v0.2.2-0.20250326080126-7cf6a7b8fa6e/go.mod h1:DBamAST285wD+Ydbil1HGl9X19Sj+0xR1ZqFzKDxOgM=
 github.com/goccy/go-json v0.10.5 h1:Fq85nIqj+gXn/S5ahsiTlK3TmC85qgirsdTP/+DeaC4=
 github.com/goccy/go-json v0.10.5/go.mod h1:oq7eo15ShAhp70Anwd5lgX2pLfOS3QCiwU/PULtXL6M=
