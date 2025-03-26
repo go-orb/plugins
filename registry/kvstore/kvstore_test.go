@@ -99,7 +99,7 @@ func createSuite(tb testing.TB) (*tests.TestSuite, func() error) {
 		Ctx:            ctx,
 		Logger:         logger,
 		Registries:     []registry.Registry{reg1, reg2},
-		UpdateTime:     100 * time.Millisecond,
+		UpdateTime:     300 * time.Millisecond,
 		CreateRegistry: createRegistry,
 	}
 
