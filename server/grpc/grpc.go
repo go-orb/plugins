@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"os"
+	"path/filepath"
 
 	"log/slog"
 
@@ -82,13 +84,6 @@ func New(
 	cfg, ok := acfg.(*Config)
 	if !ok {
 		return nil, fmt.Errorf("grpc invalid config: %v", cfg)
-	}
-
-	var err error
-
-	cfg.Address, err = addr.GetAddress(cfg.Address)
-	if err != nil {
-		return nil, fmt.Errorf("grpc validate address '%s': %w", cfg.Address, err)
 	}
 
 	srv := Server{
@@ -218,6 +213,11 @@ func (s *Server) Config() *Config {
 	return s.config
 }
 
+// Network returns the network the entrypoint listens on.
+func (s *Server) Network() string {
+	return s.config.Network
+}
+
 // Address returns the address the entypoint listens on,
 // for example: 127.0.0.1:8000 .
 func (s *Server) Address() string {
@@ -230,6 +230,10 @@ func (s *Server) Address() string {
 
 // Transport returns the client transport to use.
 func (s *Server) Transport() string {
+	if s.config.Network == "unix" {
+		return "unix+grpc"
+	}
+
 	if !s.config.Insecure {
 		return "grpcs"
 	}
@@ -273,6 +277,28 @@ func (s *Server) listen() error {
 		return nil
 	}
 
+	if s.config.Network == "unix" {
+		if err := os.MkdirAll(filepath.Dir(s.config.Address), 0o700); err != nil {
+			return fmt.Errorf("while creating the directory for %s: %w", s.config.Address, err)
+		}
+
+		lis, err := net.Listen(s.config.Network, s.config.Address)
+		if err != nil {
+			return err
+		}
+
+		s.lis = lis
+
+		return nil
+	}
+
+	var err error
+
+	s.config.Address, err = addr.GetAddress(s.config.Address)
+	if err != nil {
+		return fmt.Errorf("grpc validate address '%s': %w", s.config.Address, err)
+	}
+
 	if !s.config.Insecure && s.config.TLS == nil {
 		config, err := mtls.GenTLSConfig(s.config.Address)
 		if err != nil {
@@ -306,6 +332,7 @@ func (s *Server) registryService() registry.ServiceNode {
 		Version:  s.serviceVersion,
 		Node:     s.Name(),
 		Address:  s.Address(),
+		Network:  s.Network(),
 		Scheme:   s.Transport(),
 		Metadata: make(map[string]string),
 	}

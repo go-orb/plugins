@@ -10,6 +10,9 @@ import (
 const (
 	// DefaultAddress to use for new dRPC servers.
 	DefaultAddress = ":0"
+
+	// DefaultNetwork to use for new dRPC servers.
+	DefaultNetwork = "tcp"
 )
 
 // Config provides options to the entrypoint.
@@ -18,6 +21,9 @@ type Config struct {
 
 	// Listener can be used to provide your own Listener, when in use `Address` is obsolete.
 	Listener net.Listener `json:"-" yaml:"-"`
+
+	// Network to listen on.
+	Network string `json:"network" yaml:"network"`
 
 	// Address to listen on.
 	// If no port is provided, a random port will be selected. To listen on a
@@ -37,6 +43,7 @@ func NewConfig(options ...server.Option) *Config {
 			Enabled: true,
 		},
 		Address: DefaultAddress,
+		Network: DefaultNetwork,
 	}
 
 	for _, option := range options {
@@ -52,6 +59,16 @@ func WithListener(l net.Listener) server.Option {
 		cfg, ok := c.(*Config)
 		if ok {
 			cfg.Listener = l
+		}
+	}
+}
+
+// WithNetwork sets the network to listen on.
+func WithNetwork(network string) server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.Network = network
 		}
 	}
 }

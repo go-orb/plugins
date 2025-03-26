@@ -77,6 +77,7 @@ type Config struct {
 
 	// Network to listen on.
 	// Either 'tcp' or 'unix'.
+	// Defaults to 'tcp'.
 	Network string `json:"network" yaml:"network"`
 
 	// Address to listen on.
@@ -187,6 +188,16 @@ func NewConfig(options ...server.Option) *Config {
 	}
 
 	return cfg
+}
+
+// WithNetwork specifies the network to listen on.
+func WithNetwork(network string) server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.Network = network
+		}
+	}
 }
 
 // WithAddress specifies the address to listen on.

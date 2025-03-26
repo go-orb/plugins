@@ -16,6 +16,8 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"log/slog"
 
@@ -29,6 +31,8 @@ import (
 	mtcp "github.com/go-orb/plugins/server/http/utils/tcp"
 	mudp "github.com/go-orb/plugins/server/http/utils/udp"
 )
+
+const networkUnix = "unix"
 
 var _ server.Entrypoint = (*Server)(nil)
 
@@ -102,17 +106,6 @@ func New(
 		return nil, fmt.Errorf("http invalid config: %v", cfg)
 	}
 
-	var err error
-
-	cfg.Address, err = addr.GetAddress(cfg.Address)
-	if err != nil {
-		return nil, fmt.Errorf("http validate addr '%s': %w", cfg.Address, err)
-	}
-
-	if err := addr.ValidateAddress(cfg.Address); err != nil {
-		return nil, err
-	}
-
 	router := NewRouter(logger)
 
 	entrypoint := Server{
@@ -125,24 +118,12 @@ func New(
 		router:         router,
 	}
 
-	entrypoint.config.TLS, err = entrypoint.setupTLS()
-	if err != nil {
-		return nil, err
-	}
-
-	entrypoint.httpServer, err = entrypoint.newHTTPServer(router)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create HTTP server: %w", err)
-	}
-
-	if entrypoint.config.HTTP3 {
-		entrypoint.http3Server = entrypoint.newHTTP3Server()
-	}
-
 	return &entrypoint, nil
 }
 
 // Start will create the listeners and start the server on the entrypoint.
+//
+//nolint:gocyclo,funlen
 func (s *Server) Start(ctx context.Context) error {
 	if s.started {
 		return nil
@@ -163,9 +144,43 @@ func (s *Server) Start(ctx context.Context) error {
 		tlsConfig = s.config.TLS.Config
 	}
 
-	s.listenerTCP, err = mtcp.BuildListenerTCP(s.config.Address, tlsConfig)
+	if s.config.Network == networkUnix { //nolint:nestif
+		s.config.Insecure = true
+
+		if err := os.MkdirAll(filepath.Dir(s.config.Address), 0o700); err != nil {
+			return fmt.Errorf("while creating the directory for %s: %w", s.config.Address, err)
+		}
+
+		s.listenerTCP, err = net.Listen(s.config.Network, s.config.Address)
+		if err != nil {
+			return fmt.Errorf("failed to create listener for %s: %w", s.config.Address, err)
+		}
+	} else {
+		var err error
+
+		s.config.Address, err = addr.GetAddress(s.config.Address)
+		if err != nil {
+			return fmt.Errorf("http validate addr '%s': %w", s.config.Address, err)
+		}
+
+		if err := addr.ValidateAddress(s.config.Address); err != nil {
+			return err
+		}
+
+		s.config.TLS, err = s.setupTLS()
+		if err != nil {
+			return err
+		}
+
+		s.listenerTCP, err = mtcp.BuildListenerTCP(s.config.Address, tlsConfig)
+		if err != nil {
+			return err
+		}
+	}
+
+	s.httpServer, err = s.newHTTPServer(s.router)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create HTTP server: %w", err)
 	}
 
 	s.logger = s.logger.With(slog.String("transport", s.Transport()), slog.String("address", s.Address()))
@@ -178,7 +193,7 @@ func (s *Server) Start(ctx context.Context) error {
 		}
 	}()
 
-	if !s.config.HTTP3 {
+	if !s.config.HTTP3 || s.config.Network == networkUnix {
 		if err := s.registryRegister(ctx); err != nil {
 			return fmt.Errorf("failed to register the HTTP server: %w", err)
 		}
@@ -193,6 +208,8 @@ func (s *Server) Start(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to start UDP listener: %w", err)
 	}
+
+	s.http3Server = s.newHTTP3Server()
 
 	go func() {
 		if err := s.http3Server.Start(); err != nil {
@@ -275,6 +292,11 @@ func (s *Server) Register(register server.RegistrationFunc) {
 	register(s)
 }
 
+// Network returns the network the entrypoint is listening on.
+func (s *Server) Network() string {
+	return s.config.Network
+}
+
 // Address returns the address the entrypoint is listening on.
 func (s *Server) Address() string {
 	if s.listenerTCP != nil {
@@ -286,16 +308,18 @@ func (s *Server) Address() string {
 
 // Transport returns the client transport to use.
 func (s *Server) Transport() string {
-	//nolint:gocritic
-	if s.config.H2C {
+	switch {
+	case s.config.Network == networkUnix:
+		return "unix+http"
+	case s.config.H2C:
 		return "h2c"
-	} else if s.config.HTTP3 {
+	case s.config.HTTP3:
 		return "http3"
-	} else if !s.config.Insecure {
+	case !s.config.Insecure:
 		return "https"
+	default:
+		return "http"
 	}
-
-	return "http"
 }
 
 // String returns the entrypoint type; http.
@@ -352,6 +376,7 @@ func (s *Server) registryService() registry.ServiceNode {
 		Version:  s.serviceVersion,
 		Node:     s.Name(),
 		Address:  s.Address(),
+		Network:  s.Network(),
 		Scheme:   s.Transport(),
 		Metadata: make(map[string]string),
 	}

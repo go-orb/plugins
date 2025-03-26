@@ -385,8 +385,6 @@ func (s *Server) handleQuestion(q dns.Question) (multicastRecs, unicastRecs []dn
 		return nil, nil
 	}
 
-	s.logger.Trace("Handle question answer", "service", s.config.Zone, "question", q.Name)
-
 	// Handle unicast and multicast responses.
 	// TODO(reddaly): The decision about sending over unicast vs. multicast is not
 	// yet fully compliant with RFC 6762.  For example, the unicast bit should be

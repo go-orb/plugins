@@ -168,7 +168,7 @@ func (c *Client) resolveService(
 		}
 
 		if err == nil && len(services) > 0 {
-			c.logger.Debug("service resolution successful", "service", service)
+			c.logger.Trace("service resolution successful", "service", service)
 			break // Service found, exit retry loop
 		}
 
@@ -190,7 +190,7 @@ func (c *Client) resolveService(
 	}
 
 	if err != nil {
-		c.logger.Debug("service resolution failed after retries", "service", service, "error", err)
+		c.logger.Warn("service resolution failed after retries", "service", service, "error", err)
 		return nil, err
 	}
 
@@ -248,7 +248,7 @@ func (c *Client) transport(transport string) (Transport, error) {
 	// Failed to get it from the registry, try to create a new one.
 	tcreator, ok := Transports.Get(transport)
 	if !ok {
-		c.logger.Error("Failed to create a transport", slog.String("transport", transport))
+		c.logger.Error("Failed to get a transport creator", slog.String("transport", transport))
 
 		return nil, orberrors.ErrInternalServerError.Wrap(
 			fmt.Errorf("%w: %s", client.ErrFailedToCreateTransport, transport),

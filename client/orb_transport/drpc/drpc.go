@@ -43,14 +43,16 @@ func (e *encoder) Unmarshal(data []byte, msg drpc.Message) error {
 const Name = "drpc"
 
 func init() {
-	orb.RegisterTransport(Name, NewTransport)
+	orb.RegisterTransport(Name, NewTransport("tcp"))
+	orb.RegisterTransport("unix+"+Name, NewTransport("unix"))
 }
 
 // Transport is a go-orb/plugins/client/orb compatible transport.
 type Transport struct {
-	config *orb.Config
-	logger log.Logger
-	pool   *pool.Pool
+	network string
+	config  *orb.Config
+	logger  log.Logger
+	pool    *pool.Pool
 }
 
 // Start starts the transport.
@@ -61,7 +63,7 @@ func (t *Transport) Start() error {
 		defer cancel()
 
 		dialer := net.Dialer{}
-		rawconn, err := dialer.DialContext(timeoutCtx, "tcp", addr)
+		rawconn, err := dialer.DialContext(timeoutCtx, t.network, addr)
 
 		if err != nil {
 			t.logger.Error("Failed to dial DRPC server", "address", addr, "error", err)
@@ -98,6 +100,10 @@ func (t *Transport) Stop(_ context.Context) error {
 
 // Name returns the name of this transport.
 func (t *Transport) Name() string {
+	if t.network == "unix" {
+		return "unix+" + Name
+	}
+
 	return Name
 }
 
@@ -213,7 +219,7 @@ func (t *Transport) Stream(ctx context.Context, infos client.RequestInfos, opts 
 		defer cancel()
 
 		dialer := net.Dialer{}
-		rawconn, err := dialer.DialContext(timeoutCtx, "tcp", addr)
+		rawconn, err := dialer.DialContext(timeoutCtx, t.network, addr)
 
 		if err != nil {
 			t.logger.Error("Failed to dial DRPC server", "address", addr, "error", err)
@@ -291,11 +297,19 @@ func (t *Transport) Stream(ctx context.Context, infos client.RequestInfos, opts 
 }
 
 // NewTransport creates a Transport.
-func NewTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, error) {
-	logger.Debug("Creating transport", "pool_hosts", cfg.PoolHosts, "pool_size", cfg.PoolSize, "conn_timeout", cfg.ConnectionTimeout)
+func NewTransport(network string) func(logger log.Logger, cfg *orb.Config) (orb.TransportType, error) {
+	return func(logger log.Logger, cfg *orb.Config) (orb.TransportType, error) {
+		logger.Debug("Creating transport",
+			"network", network,
+			"pool_hosts", cfg.PoolHosts,
+			"pool_size", cfg.PoolSize,
+			"conn_timeout", cfg.ConnectionTimeout,
+		)
 
-	return orb.TransportType{Transport: &Transport{
-		config: cfg,
-		logger: logger,
-	}}, nil
+		return orb.TransportType{Transport: &Transport{
+			config:  cfg,
+			logger:  logger,
+			network: network,
+		}}, nil
+	}
 }

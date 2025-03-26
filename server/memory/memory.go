@@ -113,6 +113,11 @@ func (s *Server) AddEndpoint(name string) {
 	s.endpoints = append(s.endpoints, name)
 }
 
+// Network returns the network the entrypoint listens on.
+func (s *Server) Network() string {
+	return "memory"
+}
+
 // Address returns an empty string as memory server doesn't have a network address.
 func (s *Server) Address() string {
 	return ""

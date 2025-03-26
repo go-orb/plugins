@@ -3,15 +3,15 @@ module github.com/go-orb/plugins/client/orb_transport/drpc
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250326080126-7cf6a7b8fa6e
-	github.com/go-orb/plugins/client/orb v0.1.4-0.20250326080201-d578694a04b4
-	github.com/go-orb/plugins/client/tests v0.2.1-0.20250326080201-d578694a04b4
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250326080201-d578694a04b4
-	github.com/go-orb/plugins/codecs/proto v0.1.1-0.20250326080201-d578694a04b4
-	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250326080201-d578694a04b4
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250326080201-d578694a04b4
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20250326080201-d578694a04b4
-	github.com/go-orb/plugins/server/drpc v0.1.1-0.20250326080201-d578694a04b4
+	github.com/go-orb/go-orb v0.2.2-0.20250326105311-8c4dcbea8f6e
+	github.com/go-orb/plugins/client/orb v0.1.4-0.20250326092626-f90ec3fbebd0
+	github.com/go-orb/plugins/client/tests v0.2.1-0.20250326092626-f90ec3fbebd0
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250326092626-f90ec3fbebd0
+	github.com/go-orb/plugins/codecs/proto v0.1.1-0.20250326092626-f90ec3fbebd0
+	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250326092626-f90ec3fbebd0
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250326092626-f90ec3fbebd0
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20250326092626-f90ec3fbebd0
+	github.com/go-orb/plugins/server/drpc v0.1.1-0.20250326092626-f90ec3fbebd0
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/protobuf v1.36.6
 	storj.io/drpc v0.0.34
@@ -21,9 +21,9 @@ require (
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250326080201-d578694a04b4 // indirect
-	github.com/go-orb/plugins/server/http v0.1.1-0.20250326080201-d578694a04b4 // indirect
-	github.com/go-orb/plugins/server/memory v0.0.0-20250326080201-d578694a04b4 // indirect
+	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250326092626-f90ec3fbebd0 // indirect
+	github.com/go-orb/plugins/server/http v0.1.1-0.20250326092626-f90ec3fbebd0 // indirect
+	github.com/go-orb/plugins/server/memory v0.0.0-20250326092626-f90ec3fbebd0 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e // indirect
 	github.com/google/uuid v1.6.0 // indirect

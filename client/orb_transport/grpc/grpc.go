@@ -27,15 +27,17 @@ import (
 const Name = "grpc"
 
 func init() {
-	orb.RegisterTransport(Name, NewTransport(Name))
-	orb.RegisterTransport("grpcs", NewTransport("grpcs"))
+	orb.RegisterTransport(Name, NewTransport(Name, "tcp"))
+	orb.RegisterTransport("grpcs", NewTransport("grpcs", "tcp"))
+	orb.RegisterTransport("unix+"+Name, NewTransport("unix+"+Name, "unix"))
 }
 
 // Transport is a go-orb/plugins/client/orb compatible transport.
 type Transport struct {
-	config *orb.Config
-	logger log.Logger
-	name   string
+	config  *orb.Config
+	logger  log.Logger
+	name    string
+	network string
 
 	poolLock sync.Mutex
 	pool     *pool.Pool
@@ -339,6 +341,10 @@ func (g *grpcClientStream) RecvMsg(m interface{}) error {
 
 // createConn creates a new grpc client with the given config.
 func (t *Transport) createConn(_ context.Context, addr string, tlsConfig *tls.Config) (*grpc.ClientConn, error) {
+	if t.network == "unix" {
+		return grpc.NewClient("unix://"+addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	}
+
 	var opts []grpc.DialOption
 
 	// Setup authentication.
@@ -355,7 +361,7 @@ func (t *Transport) createConn(_ context.Context, addr string, tlsConfig *tls.Co
 
 	// Setup dialer.
 	opts = append(opts, grpc.WithContextDialer(func(_ context.Context, addr string) (net.Conn, error) {
-		return net.DialTimeout("tcp", addr, time.Duration(t.config.DialTimeout))
+		return net.DialTimeout(t.network, addr, time.Duration(t.config.DialTimeout))
 	}))
 
 	// Increase the max receive buffer size to 10MB to allow for large gRPC messages.
@@ -375,12 +381,13 @@ func (t *Transport) createConn(_ context.Context, addr string, tlsConfig *tls.Co
 }
 
 // NewTransport creates a Transport.
-func NewTransport(name string) func(logger log.Logger, cfg *orb.Config) (orb.TransportType, error) {
+func NewTransport(name string, network string) func(logger log.Logger, cfg *orb.Config) (orb.TransportType, error) {
 	return func(logger log.Logger, cfg *orb.Config) (orb.TransportType, error) {
 		return orb.TransportType{Transport: &Transport{
-			logger: logger,
-			config: cfg,
-			name:   name,
+			logger:  logger,
+			config:  cfg,
+			network: network,
+			name:    name,
 		}}, nil
 	}
 }

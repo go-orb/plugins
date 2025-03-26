@@ -14,6 +14,9 @@ import (
 )
 
 const (
+	// DefaultNetwork is set to "tcp".
+	DefaultNetwork = "tcp"
+
 	// DefaultAddress to listen on. By default a random port will be selected.
 	DefaultAddress = ":0"
 
@@ -33,6 +36,11 @@ const (
 // Config provides options to the gRPC entrypoint.
 type Config struct {
 	server.EntrypointConfig `yaml:",inline"`
+
+	// Network to listen on.
+	//
+	// Defaults to "tcp".
+	Network string `json:"network" yaml:"network"`
 
 	// Address to listen on.
 	//
@@ -105,6 +113,7 @@ func NewConfig(options ...server.Option) *Config {
 			Plugin:  Plugin,
 			Enabled: true,
 		},
+		Network:       DefaultNetwork,
 		Address:       DefaultAddress,
 		Timeout:       config.Duration(DefaultTimeout),
 		HealthService: DefaultHealthService,
@@ -117,6 +126,16 @@ func NewConfig(options ...server.Option) *Config {
 	}
 
 	return cfg
+}
+
+// WithNetwork specifies the network to listen on.
+func WithNetwork(network string) server.Option {
+	return func(c server.EntrypointConfigType) {
+		cfg, ok := c.(*Config)
+		if ok {
+			cfg.Network = network
+		}
+	}
 }
 
 // WithAddress sets the address to listen on.

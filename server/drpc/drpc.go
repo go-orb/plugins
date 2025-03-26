@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"os"
+	"path/filepath"
 
 	"storj.io/drpc/drpcserver"
 
@@ -70,7 +72,13 @@ func (s *Server) Start(ctx context.Context) error {
 
 	listener := s.config.Listener
 	if listener == nil {
-		listener, err = net.Listen("tcp", s.config.Address)
+		if s.config.Network == "unix" {
+			if err := os.MkdirAll(filepath.Dir(s.config.Address), 0o700); err != nil {
+				return fmt.Errorf("while creating the directory for %s: %w", s.config.Address, err)
+			}
+		}
+
+		listener, err = net.Listen(s.config.Network, s.config.Address)
 		if err != nil {
 			return err
 		}
@@ -127,6 +135,11 @@ func (s *Server) AddEndpoint(name string) {
 	s.endpoints = append(s.endpoints, name)
 }
 
+// Network returns the network the entrypoint is listening on.
+func (s *Server) Network() string {
+	return s.config.Network
+}
+
 // Address returns the address the entrypoint is listening on, for example: [::]:8381.
 func (s *Server) Address() string {
 	if !s.started {
@@ -138,6 +151,10 @@ func (s *Server) Address() string {
 
 // Transport returns the client transport to use: "drpc".
 func (s *Server) Transport() string {
+	if s.config.Network == "unix" {
+		return "unix+drpc"
+	}
+
 	return "drpc"
 }
 
@@ -172,6 +189,7 @@ func (s *Server) registryService() registry.ServiceNode {
 		Version:  s.serviceVersion,
 		Address:  s.Address(),
 		Node:     s.Name(),
+		Network:  s.Network(),
 		Scheme:   s.Transport(),
 		Metadata: make(map[string]string),
 	}
@@ -214,13 +232,15 @@ func New(name string, version string, epName string, acfg any, logger log.Logger
 
 	var err error
 
-	cfg.Address, err = addr.GetAddress(cfg.Address)
-	if err != nil {
-		return nil, fmt.Errorf("drpc validate addr '%s': %w", cfg.Address, err)
-	}
+	if cfg.Network == "tcp" {
+		cfg.Address, err = addr.GetAddress(cfg.Address)
+		if err != nil {
+			return nil, fmt.Errorf("drpc validate addr '%s': %w", cfg.Address, err)
+		}
 
-	if err := addr.ValidateAddress(cfg.Address); err != nil {
-		return nil, err
+		if err := addr.ValidateAddress(cfg.Address); err != nil {
+			return nil, err
+		}
 	}
 
 	ctx, cancelFunc := context.WithCancel(context.Background())

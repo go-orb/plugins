@@ -53,11 +53,26 @@ func setupServer(sn string) (*tests.SetupData, error) {
 	fileHInstance := new(filehandler.Handler)
 	fileHRegister := fileproto.RegisterFileServiceHandler(fileHInstance)
 
-	options := []server.Option{
-		drpc.WithHandlers(echoHRegister, fileHRegister),
+	ep, err := drpc.New(
+		sn, "", "drpc",
+		drpc.NewConfig(
+			drpc.WithHandlers(echoHRegister, fileHRegister),
+		),
+		logger, reg)
+	if err != nil {
+		cancel()
+
+		return nil, err
 	}
 
-	ep, err := drpc.New(sn, "", "drpc", drpc.NewConfig(options...), logger, reg)
+	epUnix, err := drpc.New(
+		sn, "", "unix+drpc",
+		drpc.NewConfig(
+			drpc.WithNetwork("unix"),
+			drpc.WithAddress("/tmp/orb-rps-server-drpc-"+sn+".sock"),
+			drpc.WithHandlers(echoHRegister, fileHRegister),
+		),
+		logger, reg)
 	if err != nil {
 		cancel()
 
@@ -66,7 +81,7 @@ func setupServer(sn string) (*tests.SetupData, error) {
 
 	setupData.Logger = logger
 	setupData.Registry = reg
-	setupData.Entrypoints = []server.Entrypoint{ep}
+	setupData.Entrypoints = []server.Entrypoint{ep, epUnix}
 	setupData.Ctx = ctx
 	setupData.Stop = cancel
 
@@ -74,7 +89,7 @@ func setupServer(sn string) (*tests.SetupData, error) {
 }
 
 func newSuite() *tests.TestSuite {
-	s := tests.NewSuite(setupServer, []string{Name})
+	s := tests.NewSuite(setupServer, []string{Name, "unix+" + Name})
 	// s.Debug = true
 	return s
 }

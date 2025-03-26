@@ -24,11 +24,14 @@ import (
 	"github.com/quic-go/quic-go/http3"
 )
 
+const networkUnix = "unix"
+
 func init() {
-	orb.RegisterTransport("http", NewHTTPTransport)
+	orb.RegisterTransport("http", NewHTTPTransport("tcp"))
 	orb.RegisterTransport("h2c", NewH2CTransport)
 	orb.RegisterTransport("http3", NewHTTP3Transport)
 	orb.RegisterTransport("https", NewHTTPSTransport)
+	orb.RegisterTransport("unix+http", NewHTTPTransport(networkUnix))
 }
 
 //nolint:gochecknoglobals
@@ -41,6 +44,7 @@ type Transport struct {
 	name    string
 	logger  log.Logger
 	hclient *http.Client
+	network string
 	scheme  string
 }
 
@@ -65,7 +69,7 @@ func (t *Transport) Name() string {
 
 // Request does the actual rpc call to the server.
 //
-//nolint:gocyclo
+//nolint:gocyclo,funlen
 func (t *Transport) Request(ctx context.Context, infos client.RequestInfos, req any, result any, opts *client.CallOptions) error {
 	codec, err := codecs.GetMime(opts.ContentType)
 	if err != nil {
@@ -82,13 +86,27 @@ func (t *Transport) Request(ctx context.Context, infos client.RequestInfos, req 
 	ctx, cancel := context.WithTimeout(ctx, opts.ConnectionTimeout)
 	defer cancel()
 
-	// Create a net/http request.
-	hReq, err := http.NewRequestWithContext(
-		ctx,
-		http.MethodPost,
-		fmt.Sprintf("%s://%s%s", t.scheme, infos.Address, infos.Endpoint),
-		buff,
+	var (
+		hReq *http.Request
 	)
+
+	// Create a net/http request.
+	if t.network == networkUnix {
+		hReq, err = http.NewRequestWithContext(
+			ctx,
+			http.MethodPost,
+			fmt.Sprintf("%s://%s%s", t.scheme, networkUnix, infos.Endpoint),
+			buff,
+		)
+	} else {
+		hReq, err = http.NewRequestWithContext(
+			ctx,
+			http.MethodPost,
+			fmt.Sprintf("%s://%s%s", t.scheme, infos.Address, infos.Endpoint),
+			buff,
+		)
+	}
+
 	if err != nil {
 		return orberrors.ErrBadRequest.Wrap(err)
 	}
@@ -103,9 +121,28 @@ func (t *Transport) Request(ctx context.Context, infos client.RequestInfos, req 
 	}
 
 	// Run the request.
-	resp, err := t.hclient.Do(hReq)
-	if err != nil {
-		return orberrors.From(err)
+	var (
+		resp *http.Response
+	)
+
+	if t.network == networkUnix {
+		httpc := http.Client{
+			Transport: &http.Transport{
+				DialContext: func(_ context.Context, _, _ string) (net.Conn, error) {
+					return net.Dial(networkUnix, infos.Address)
+				},
+			},
+		}
+
+		resp, err = httpc.Do(hReq)
+		if err != nil {
+			return orberrors.From(err)
+		}
+	} else {
+		resp, err = t.hclient.Do(hReq)
+		if err != nil {
+			return orberrors.From(err)
+		}
 	}
 
 	buff = bytes.NewBuffer(nil)
@@ -163,25 +200,25 @@ func (t *Transport) Stream(_ context.Context, _ client.RequestInfos, _ *client.C
 
 // NewTransport creates a Transport with a custom http.Client.
 func NewTransport(
-	name string, logger log.Logger, scheme string, hclient *http.Client,
+	name string, logger log.Logger, scheme string, network string, hclient *http.Client,
 ) (orb.TransportType, error) {
 	return orb.TransportType{Transport: &Transport{
 		name:    name,
 		logger:  logger,
 		scheme:  scheme,
+		network: network,
 		hclient: hclient,
 	},
 	}, nil
 }
 
 // NewH2CTransport creates a new https transport for the orb client.
-//
-//nolint:dupl
 func NewH2CTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, error) {
 	return NewTransport(
 		"h2c",
 		logger,
 		"http",
+		"tcp",
 		&http.Client{
 			Timeout: time.Duration(cfg.ConnectionTimeout),
 			Transport: &http.Transport{
@@ -204,31 +241,44 @@ func NewH2CTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, err
 
 // NewHTTPTransport creates a new http transport for the orb client.
 // This transport is used for HTTP/1.1.
-//
-//nolint:dupl
-func NewHTTPTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, error) {
-	return NewTransport(
-		"http",
-		logger,
-		"http",
-		&http.Client{
-			Timeout: time.Duration(cfg.ConnectionTimeout),
-			Transport: &http.Transport{
-				MaxIdleConns:          cfg.PoolHosts * cfg.PoolSize,
-				MaxIdleConnsPerHost:   cfg.PoolSize,
-				MaxConnsPerHost:       cfg.PoolSize + 1,
-				IdleConnTimeout:       time.Duration(cfg.PoolTTL),
-				ExpectContinueTimeout: 1 * time.Second,
-				ForceAttemptHTTP2:     false,
-				DisableKeepAlives:     false,
-				Dial: (&net.Dialer{
-					Timeout:   time.Duration(cfg.DialTimeout),
-					KeepAlive: 15 * time.Second,
-					DualStack: false,
-				}).Dial,
-			},
-		},
-	)
+func NewHTTPTransport(network string) func(log.Logger, *orb.Config) (orb.TransportType, error) {
+	return func(logger log.Logger, cfg *orb.Config) (orb.TransportType, error) {
+		if network == "tcp" {
+			return NewTransport(
+				"http",
+				logger,
+				"http",
+				network,
+				&http.Client{
+					Timeout: time.Duration(cfg.ConnectionTimeout),
+					Transport: &http.Transport{
+						MaxIdleConns:          cfg.PoolHosts * cfg.PoolSize,
+						MaxIdleConnsPerHost:   cfg.PoolSize,
+						MaxConnsPerHost:       cfg.PoolSize + 1,
+						IdleConnTimeout:       time.Duration(cfg.PoolTTL),
+						ExpectContinueTimeout: 1 * time.Second,
+						ForceAttemptHTTP2:     false,
+						DisableKeepAlives:     false,
+						Dial: (&net.Dialer{
+							Timeout:   time.Duration(cfg.DialTimeout),
+							KeepAlive: 15 * time.Second,
+							DualStack: false,
+						}).Dial,
+					},
+				},
+			)
+		} else if network == networkUnix {
+			return NewTransport(
+				"http",
+				logger,
+				"http",
+				network,
+				http.DefaultClient,
+			)
+		}
+
+		return orb.TransportType{}, errors.New("invalid network")
+	}
 }
 
 // NewHTTP3Transport creates a new https transport for the orb client.
@@ -247,6 +297,7 @@ func NewHTTP3Transport(logger log.Logger, cfg *orb.Config) (orb.TransportType, e
 		"http3",
 		logger,
 		"https",
+		"tcp",
 		&http.Client{
 			Timeout: time.Duration(cfg.ConnectionTimeout),
 			Transport: &http3.Transport{
@@ -269,6 +320,7 @@ func NewHTTPSTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, e
 		"https",
 		logger,
 		"https",
+		"tcp",
 		&http.Client{
 			Timeout: time.Duration(cfg.ConnectionTimeout),
 			Transport: &http.Transport{
