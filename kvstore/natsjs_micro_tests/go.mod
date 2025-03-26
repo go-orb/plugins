@@ -6,10 +6,10 @@ toolchain go1.24.0
 
 require (
 	github.com/go-micro/plugins/v4/store/nats-js-kv v0.0.0-20240726082623-6831adfdcdc4
-	github.com/go-orb/go-orb v0.2.2-0.20250326105311-8c4dcbea8f6e
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250326105649-3c8ed10ebb69
-	github.com/go-orb/plugins/kvstore/natsjs v0.0.0-20250326105649-3c8ed10ebb69
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250326105649-3c8ed10ebb69
+	github.com/go-orb/go-orb v0.3.0
+	github.com/go-orb/plugins/codecs/json v0.2.0
+	github.com/go-orb/plugins/kvstore/natsjs v0.1.0
+	github.com/go-orb/plugins/log/slog v0.2.0
 	github.com/nats-io/nats-server/v2 v2.10.26
 	github.com/nats-io/nats.go v1.40.1
 	github.com/stretchr/testify v1.10.0
