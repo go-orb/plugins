@@ -4,11 +4,11 @@ go 1.23.6
 
 require (
 	github.com/go-orb/go-orb v0.2.2-0.20250326105311-8c4dcbea8f6e
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250326092626-f90ec3fbebd0
-	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250326092626-f90ec3fbebd0
-	github.com/go-orb/plugins/config/source/file v0.1.1-0.20250326092626-f90ec3fbebd0
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250326092626-f90ec3fbebd0
-	github.com/go-orb/plugins/registry/mdns v0.0.0-20250326092626-f90ec3fbebd0
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250326105649-3c8ed10ebb69
+	github.com/go-orb/plugins/codecs/yaml v0.1.1-0.20250326105649-3c8ed10ebb69
+	github.com/go-orb/plugins/config/source/file v0.1.1-0.20250326105649-3c8ed10ebb69
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250326105649-3c8ed10ebb69
+	github.com/go-orb/plugins/registry/mdns v0.0.0-20250326105649-3c8ed10ebb69
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/grpc v1.71.0
 	google.golang.org/protobuf v1.36.5
@@ -18,7 +18,7 @@ require (
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/cornelk/hashmap v1.0.8 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250326092626-f90ec3fbebd0 // indirect
+	github.com/go-orb/plugins/registry/regutil v0.1.1-0.20250326105649-3c8ed10ebb69 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
