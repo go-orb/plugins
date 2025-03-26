@@ -23,14 +23,13 @@ func nodeKey(s registry.ServiceNode, delimiter string) string {
 		s.Region,
 		s.Name,
 		s.Version,
-		s.Scheme,
-		s.Address,
+		s.Node,
 	}, delimiter)
 }
 
 func keyToServiceNode(key string, delimiter string) (registry.ServiceNode, error) {
 	parts := strings.Split(key, delimiter)
-	if len(parts) != 6 {
+	if len(parts) != 5 {
 		return registry.ServiceNode{}, errors.New("invalid key format")
 	}
 
@@ -39,8 +38,7 @@ func keyToServiceNode(key string, delimiter string) (registry.ServiceNode, error
 		Region:    parts[1],
 		Name:      parts[2],
 		Version:   parts[3],
-		Scheme:    parts[4],
-		Address:   parts[5],
+		Node:      parts[4],
 	}, nil
 }
 

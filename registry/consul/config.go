@@ -10,6 +10,7 @@ import (
 )
 
 const metaPrefix = "orb_app_"
+const myMetaPrefix = "orb_internal_"
 
 // Name provides the name of this registry.
 const Name = "consul"

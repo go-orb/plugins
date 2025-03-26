@@ -105,6 +105,11 @@ func (cw *consulWatcher) serviceHandler(_ uint64, data any) {
 			continue
 		}
 
+		serviceNode.Node = node.Service.Meta[myMetaPrefix+"node"]
+		serviceNode.Network = node.Service.Meta[myMetaPrefix+"network"]
+		serviceNode.Scheme = node.Service.Meta[myMetaPrefix+"scheme"]
+		serviceNode.Address = node.Service.Meta[myMetaPrefix+"address"]
+
 		// Update with the latest metadata
 		serviceNode.Metadata = svcMeta
 

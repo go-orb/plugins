@@ -355,71 +355,6 @@ func (r *TestSuite) TestGetServiceWithNoNodes() {
 	r.Empty(services)
 }
 
-// BenchmarkGetService benchmarks.
-func (r *TestSuite) BenchmarkGetService(b *testing.B) {
-	b.Helper()
-
-	r.SetT(&testing.T{})
-	r.SetupSuite()
-
-	b.ResetTimer()
-
-	for n := 0; n < b.N; n++ {
-		id := rand.Intn(len(r.services)) //nolint:gosec
-
-		services, err := r.Registries[1].GetService(r.Ctx, "", "", r.services[id].Name, nil)
-		r.Require().NoError(err)
-		r.Len(services, 1)
-		r.Equal(r.services[id].Name, services[0].Name)
-	}
-
-	b.StopTimer()
-	r.TearDownSuite()
-}
-
-// BenchmarkGetServiceWithNoNodes is a 404 benchmark.
-func (r *TestSuite) BenchmarkGetServiceWithNoNodes(b *testing.B) {
-	b.Helper()
-
-	r.SetT(&testing.T{})
-	r.SetupSuite()
-
-	b.ResetTimer()
-
-	for n := 0; n < b.N; n++ {
-		services, err := r.Registries[1].GetService(r.Ctx, "", "", "missing", nil)
-		r.Require().ErrorIs(err, registry.ErrNotFound)
-		r.Empty(services)
-	}
-
-	b.StopTimer()
-	r.TearDownSuite()
-}
-
-// BenchmarkParallelGetService benchmarks.
-func (r *TestSuite) BenchmarkParallelGetService(b *testing.B) {
-	b.Helper()
-
-	r.SetT(&testing.T{})
-	r.SetupSuite()
-
-	b.ResetTimer()
-
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			id := rand.Intn(len(r.services)) //nolint:gosec
-
-			services, err := r.Registries[1].GetService(r.Ctx, "", "", r.services[id].Name, nil)
-			r.Require().NoError(err)
-			r.Len(services, 1)
-			r.Equal(r.services[id].Name, services[0].Name)
-		}
-	})
-
-	b.StopTimer()
-	r.TearDownSuite()
-}
-
 // TestWatchServices tests the watcher functionality.
 func (r *TestSuite) TestWatchServices() {
 	// Create a test service with a unique name for watching
@@ -661,25 +596,6 @@ func (r *TestSuite) TestMultipleTransports() {
 	}
 }
 
-// BenchmarkListServices benchmarks the performance of listing services.
-func (r *TestSuite) BenchmarkListServices(b *testing.B) {
-	b.Helper()
-
-	r.SetT(&testing.T{})
-	r.SetupSuite()
-
-	b.ResetTimer()
-
-	for n := 0; n < b.N; n++ {
-		services, err := r.Registries[1].ListServices(r.Ctx, "", "", nil)
-		r.Require().NoError(err)
-		r.Require().NotEmpty(services)
-	}
-
-	b.StopTimer()
-	r.TearDownSuite()
-}
-
 // TestFiltering tests using options to filter services.
 func (r *TestSuite) TestFiltering() {
 	// Create services with different attributes
@@ -768,6 +684,98 @@ func (r *TestSuite) TestFiltering() {
 	r.Require().Empty(filtered, "Should find no services in production/us-east")
 }
 
+// TestUnixSocket tests a unix socket node.
+func (r *TestSuite) TestUnixSocket() {
+	node := registry.ServiceNode{
+		Name:      "unix-socket",
+		Version:   "v1.0.0",
+		Node:      "unix-node",
+		Network:   "unix",
+		Address:   "/tmp/unix-socket",
+		Scheme:    "unix+grpc",
+		Namespace: "default",
+		Region:    "us-east",
+	}
+
+	r.Require().NoError(r.Registries[0].Register(r.Ctx, node))
+	time.Sleep(r.UpdateTime)
+
+	services, err := r.Registries[1].GetService(
+		r.Ctx, "default", "us-east", "unix-socket", []string{"unix+grpc"})
+
+	r.Require().NoError(err)
+	r.Require().Len(services, 1)
+	r.Require().Equal("unix+grpc", services[0].Scheme)
+	r.Require().Equal("/tmp/unix-socket", services[0].Address)
+
+	r.Require().NoError(r.Registries[0].Deregister(r.Ctx, node))
+}
+
+// BenchmarkGetService benchmarks.
+func (r *TestSuite) BenchmarkGetService(b *testing.B) {
+	b.Helper()
+
+	r.SetT(&testing.T{})
+	r.SetupSuite()
+
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		id := rand.Intn(len(r.services)) //nolint:gosec
+
+		services, err := r.Registries[1].GetService(r.Ctx, "", "", r.services[id].Name, nil)
+		r.Require().NoError(err)
+		r.Len(services, 1)
+		r.Equal(r.services[id].Name, services[0].Name)
+	}
+
+	b.StopTimer()
+	r.TearDownSuite()
+}
+
+// BenchmarkGetServiceWithNoNodes is a 404 benchmark.
+func (r *TestSuite) BenchmarkGetServiceWithNoNodes(b *testing.B) {
+	b.Helper()
+
+	r.SetT(&testing.T{})
+	r.SetupSuite()
+
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		services, err := r.Registries[1].GetService(r.Ctx, "", "", "missing", nil)
+		r.Require().ErrorIs(err, registry.ErrNotFound)
+		r.Empty(services)
+	}
+
+	b.StopTimer()
+	r.TearDownSuite()
+}
+
+// BenchmarkParallelGetService benchmarks.
+func (r *TestSuite) BenchmarkParallelGetService(b *testing.B) {
+	b.Helper()
+
+	r.SetT(&testing.T{})
+	r.SetupSuite()
+
+	b.ResetTimer()
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			id := rand.Intn(len(r.services)) //nolint:gosec
+
+			services, err := r.Registries[1].GetService(r.Ctx, "", "", r.services[id].Name, nil)
+			r.Require().NoError(err)
+			r.Len(services, 1)
+			r.Equal(r.services[id].Name, services[0].Name)
+		}
+	})
+
+	b.StopTimer()
+	r.TearDownSuite()
+}
+
 // BenchmarkRegisterDeregister benchmarks the performance of registering and deregistering services.
 func (r *TestSuite) BenchmarkRegisterDeregister(b *testing.B) {
 	b.Helper()
@@ -794,4 +802,23 @@ func (r *TestSuite) BenchmarkRegisterDeregister(b *testing.B) {
 		err = r.Registries[0].Deregister(r.Ctx, service)
 		r.Require().NoError(err)
 	}
+}
+
+// BenchmarkListServices benchmarks the performance of listing services.
+func (r *TestSuite) BenchmarkListServices(b *testing.B) {
+	b.Helper()
+
+	r.SetT(&testing.T{})
+	r.SetupSuite()
+
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		services, err := r.Registries[1].ListServices(r.Ctx, "", "", nil)
+		r.Require().NoError(err)
+		r.Require().NotEmpty(services)
+	}
+
+	b.StopTimer()
+	r.TearDownSuite()
 }

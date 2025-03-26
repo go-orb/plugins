@@ -32,14 +32,13 @@ func nodeID(s registry.ServiceNode) string {
 		s.Region,
 		s.Name,
 		s.Version,
-		s.Scheme,
-		s.Address,
+		s.Node,
 	}, nodeIDDelimiter)
 }
 
 func idToNode(id string) (registry.ServiceNode, error) {
 	parts := strings.Split(id, nodeIDDelimiter)
-	if len(parts) != 6 {
+	if len(parts) != 5 {
 		return registry.ServiceNode{}, errors.New("invalid id format")
 	}
 
@@ -48,9 +47,7 @@ func idToNode(id string) (registry.ServiceNode, error) {
 		Region:    parts[1],
 		Name:      parts[2],
 		Version:   parts[3],
-		Scheme:    parts[4],
-		Address:   parts[5],
-		Metadata:  make(map[string]string),
+		Node:      parts[4],
 	}, nil
 }
 
@@ -160,18 +157,32 @@ func (c *RegistryConsul) Register(_ context.Context, serviceNode registry.Servic
 		}
 	}
 
-	host, pt, err := net.SplitHostPort(serviceNode.Address)
-	if err != nil {
-		return err
-	}
+	var (
+		host string
+		port int
+	)
 
-	if host == "" {
-		host = serviceNode.Address
-	}
+	if serviceNode.Network == "unix" {
+		host = "127.0.0.1"
+		port = 9999
+	} else {
+		var pt string
 
-	port, err := strconv.Atoi(pt)
-	if err != nil {
-		return err
+		var err error
+
+		host, pt, err = net.SplitHostPort(serviceNode.Address)
+		if err != nil {
+			return err
+		}
+
+		if host == "" {
+			host = serviceNode.Address
+		}
+
+		port, err = strconv.Atoi(pt)
+		if err != nil {
+			return err
+		}
 	}
 
 	metadata := map[string]string{}
@@ -179,6 +190,11 @@ func (c *RegistryConsul) Register(_ context.Context, serviceNode registry.Servic
 	for k, v := range serviceNode.Metadata {
 		metadata[metaPrefix+k] = v
 	}
+
+	metadata[myMetaPrefix+"node"] = serviceNode.Node
+	metadata[myMetaPrefix+"network"] = serviceNode.Network
+	metadata[myMetaPrefix+"address"] = serviceNode.Address
+	metadata[myMetaPrefix+"scheme"] = serviceNode.Scheme
 
 	// register the service
 	asr := &consul.AgentServiceRegistration{
@@ -253,6 +269,11 @@ func (c *RegistryConsul) GetService(ctx context.Context, namespace, region, name
 		if err != nil {
 			continue
 		}
+
+		serviceNode.Node = node.Service.Meta[myMetaPrefix+"node"]
+		serviceNode.Network = node.Service.Meta[myMetaPrefix+"network"]
+		serviceNode.Scheme = node.Service.Meta[myMetaPrefix+"scheme"]
+		serviceNode.Address = node.Service.Meta[myMetaPrefix+"address"]
 
 		svcMeta := map[string]string{}
 

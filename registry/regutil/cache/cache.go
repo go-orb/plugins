@@ -18,7 +18,7 @@ func serviceKey(s registry.ServiceNode) string {
 }
 
 func nodeKey(s registry.ServiceNode) string {
-	return strings.Join([]string{s.Namespace, s.Region, s.Name, s.Version, s.Scheme, s.Address}, "@")
+	return strings.Join([]string{s.Namespace, s.Region, s.Name, s.Version, s.Node}, "@")
 }
 
 type dataStore struct {

@@ -3,10 +3,10 @@ module github.com/go-orb/plugins/registry/memory
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.2.2-0.20250326080126-7cf6a7b8fa6e
-	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250326080201-d578694a04b4
-	github.com/go-orb/plugins/log/slog v0.1.1-0.20250326080201-d578694a04b4
-	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250326080201-d578694a04b4
+	github.com/go-orb/go-orb v0.2.2-0.20250326091612-d0d2bad340e8
+	github.com/go-orb/plugins/codecs/json v0.1.1-0.20250326084104-cfa28357d1be
+	github.com/go-orb/plugins/log/slog v0.1.1-0.20250326084104-cfa28357d1be
+	github.com/go-orb/plugins/registry/tests v0.1.1-0.20250326084104-cfa28357d1be
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.10.0
 )

@@ -271,34 +271,64 @@ func (m *Registry) registerNode(node registry.ServiceNode, entries []*mdnsEntry)
 		metadata[metaPrefix+k] = v
 	}
 
-	txt, err := encode(m.codec, &mdnsTxt{
-		ID:       id,
-		Metadata: metadata,
-	})
+	metadata[myMetaPrefix+"network"] = node.Network
 
-	if err != nil {
-		return entries, err
-	}
+	var s zone.Zone
 
-	host, pt, err := net.SplitHostPort(node.Address)
-	if err != nil {
-		return entries, err
-	}
+	if node.Network == "unix" {
+		metadata[myMetaPrefix+"address"] = node.Address
 
-	port, _ := strconv.Atoi(pt) //nolint:errcheck
+		txt, err := encode(m.codec, &mdnsTxt{
+			ID:       id,
+			Metadata: metadata,
+		})
 
-	// we got here, new node
-	s, err := zone.NewMDNSService(
-		nodeKey(node),
-		node.Name,
-		serviceDomain(node.Namespace, node.Region, m.config.Domain)+".",
-		"",
-		port,
-		[]net.IP{net.ParseIP(host)},
-		txt,
-	)
-	if err != nil {
-		return entries, err
+		if err != nil {
+			return entries, err
+		}
+
+		s, err = zone.NewMDNSService(
+			nodeKey(node),
+			node.Name,
+			serviceDomain(node.Namespace, node.Region, m.config.Domain)+".",
+			"",
+			9999,
+			[]net.IP{net.ParseIP("0.0.0.0")},
+			txt,
+		)
+		if err != nil {
+			return entries, err
+		}
+	} else {
+		txt, err := encode(m.codec, &mdnsTxt{
+			ID:       id,
+			Metadata: metadata,
+		})
+
+		if err != nil {
+			return entries, err
+		}
+
+		host, pt, err := net.SplitHostPort(node.Address)
+		if err != nil {
+			return entries, err
+		}
+
+		port, _ := strconv.Atoi(pt) //nolint:errcheck
+
+		// we got here, new node
+		s, err = zone.NewMDNSService(
+			nodeKey(node),
+			node.Name,
+			serviceDomain(node.Namespace, node.Region, m.config.Domain)+".",
+			"",
+			port,
+			[]net.IP{net.ParseIP(host)},
+			txt,
+		)
+		if err != nil {
+			return entries, err
+		}
 	}
 
 	srv, err := server.NewServer(
@@ -436,22 +466,6 @@ GET_SERVICE:
 				continue
 			}
 
-			addr := ""
-
-			switch {
-			// Prefer IPv4 addrs
-			case len(entry.AddrV4) > 0:
-				addr = net.JoinHostPort(entry.AddrV4.String(), strconv.Itoa(entry.Port))
-			// Else use IPv6
-			case len(entry.AddrV6) > 0:
-				addr = net.JoinHostPort(entry.AddrV6.String(), strconv.Itoa(entry.Port))
-			default:
-				m.logger.Info("invalid address received", "entry", entry.Name)
-				continue
-			}
-
-			serviceNode.Address = addr
-
 			for k, v := range txt.Metadata {
 				if strings.HasPrefix(k, myMetaPrefix) {
 					continue
@@ -459,6 +473,22 @@ GET_SERVICE:
 
 				if strings.HasPrefix(k, metaPrefix) {
 					serviceNode.Metadata[strings.TrimPrefix(k, metaPrefix)] = v
+				}
+			}
+
+			if txt.Metadata[myMetaPrefix+"network"] == "unix" {
+				serviceNode.Address = txt.Metadata[myMetaPrefix+"address"]
+			} else {
+				switch {
+				// Prefer IPv4 addrs
+				case len(entry.AddrV4) > 0:
+					serviceNode.Address = net.JoinHostPort(entry.AddrV4.String(), strconv.Itoa(entry.Port))
+				// Else use IPv6
+				case len(entry.AddrV6) > 0:
+					serviceNode.Address = net.JoinHostPort(entry.AddrV6.String(), strconv.Itoa(entry.Port))
+				default:
+					m.logger.Info("invalid address received", "entry", entry.Name)
+					continue
 				}
 			}
 
@@ -636,22 +666,6 @@ func (w *mdnsWatcher) Next() (*registry.Result, error) {
 			return nil, fmt.Errorf("failed to create service node: %w", err)
 		}
 
-		addr := ""
-
-		switch {
-		// Prefer IPv4 addrs
-		case len(entry.AddrV4) > 0:
-			addr = net.JoinHostPort(entry.AddrV4.String(), strconv.Itoa(entry.Port))
-		// Else use IPv6
-		case len(entry.AddrV6) > 0:
-			addr = net.JoinHostPort(entry.AddrV6.String(), strconv.Itoa(entry.Port))
-		default:
-			w.logger.Info("Invalid address received", "entry", entry.Name)
-			return nil, fmt.Errorf("invalid address received: %s", entry.Name)
-		}
-
-		serviceNode.Address = addr
-
 		for k, v := range txt.Metadata {
 			if strings.HasPrefix(k, myMetaPrefix) {
 				continue
@@ -659,6 +673,22 @@ func (w *mdnsWatcher) Next() (*registry.Result, error) {
 
 			if strings.HasPrefix(k, metaPrefix) {
 				serviceNode.Metadata[strings.TrimPrefix(k, metaPrefix)] = v
+			}
+		}
+
+		if txt.Metadata[myMetaPrefix+"network"] == "unix" {
+			serviceNode.Address = txt.Metadata[myMetaPrefix+"address"]
+		} else {
+			switch {
+			// Prefer IPv4 addrs
+			case len(entry.AddrV4) > 0:
+				serviceNode.Address = net.JoinHostPort(entry.AddrV4.String(), strconv.Itoa(entry.Port))
+			// Else use IPv6
+			case len(entry.AddrV6) > 0:
+				serviceNode.Address = net.JoinHostPort(entry.AddrV6.String(), strconv.Itoa(entry.Port))
+			default:
+				w.logger.Info("invalid address received", "entry", entry.Name)
+				return nil, fmt.Errorf("invalid address received: %s", entry.Name)
 			}
 		}
 

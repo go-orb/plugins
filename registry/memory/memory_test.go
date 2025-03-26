@@ -3,7 +3,6 @@ package memory
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/go-orb/go-orb/log"
 	"github.com/go-orb/go-orb/registry"
@@ -51,7 +50,7 @@ func createSuite(tb testing.TB) (*tests.TestSuite, func() error) {
 		Ctx:            ctx,
 		Logger:         logger,
 		Registries:     []registry.Registry{reg1, reg2},
-		UpdateTime:     time.Second,
+		UpdateTime:     0,
 		CreateRegistry: createRegistry,
 	}, cleanup
 }

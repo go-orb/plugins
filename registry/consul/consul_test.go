@@ -64,7 +64,7 @@ func createSuite(tb testing.TB) (*tests.TestSuite, func() error) {
 		Ctx:            context.Background(),
 		Logger:         logger,
 		Registries:     []registry.Registry{reg1, reg2},
-		UpdateTime:     100 * time.Millisecond,
+		UpdateTime:     time.Second,
 		CreateRegistry: createRegistry,
 	}
 
