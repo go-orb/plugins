@@ -227,7 +227,7 @@ func NewH2CTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, err
 				MaxConnsPerHost:       cfg.PoolSize + 1,
 				IdleConnTimeout:       time.Duration(cfg.PoolTTL),
 				ExpectContinueTimeout: 1 * time.Second,
-				ForceAttemptHTTP2:     false,
+				ForceAttemptHTTP2:     true,
 				DisableKeepAlives:     false,
 				Dial: (&net.Dialer{
 					Timeout:   time.Duration(cfg.DialTimeout),
@@ -324,16 +324,18 @@ func NewHTTPSTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, e
 		&http.Client{
 			Timeout: time.Duration(cfg.ConnectionTimeout),
 			Transport: &http.Transport{
-				MaxIdleConns:        cfg.PoolHosts * cfg.PoolSize,
-				MaxIdleConnsPerHost: cfg.PoolSize,
-				MaxConnsPerHost:     cfg.PoolHosts,
-				IdleConnTimeout:     time.Duration(cfg.PoolTTL),
-				ForceAttemptHTTP2:   false,
-				DisableKeepAlives:   false,
-				DialContext: (&net.Dialer{
+				MaxIdleConns:          cfg.PoolHosts * cfg.PoolSize,
+				MaxIdleConnsPerHost:   cfg.PoolSize,
+				MaxConnsPerHost:       cfg.PoolSize + 1,
+				IdleConnTimeout:       time.Duration(cfg.PoolTTL),
+				ExpectContinueTimeout: 1 * time.Second,
+				ForceAttemptHTTP2:     true,
+				DisableKeepAlives:     false,
+				Dial: (&net.Dialer{
 					Timeout:   time.Duration(cfg.DialTimeout),
 					KeepAlive: 15 * time.Second,
-				}).DialContext,
+					DualStack: false,
+				}).Dial,
 				TLSHandshakeTimeout: time.Duration(cfg.DialTimeout),
 				TLSClientConfig: &tls.Config{
 					//nolint:gosec
