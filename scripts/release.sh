@@ -37,7 +37,7 @@ function remove_prefix() {
 
 function get_last_tag() {
 	local pkg="$1"
-	local last_tag=$(git tag --list --sort='-creatordate' | grep -E "${pkg}/v[0-9\.]+" | head -n1)
+	local last_tag=$(git tag --list --sort='-creatordate' | grep -E "^${pkg}/v[0-9\.]+" | head -n1)
 	if [[ ${last_tag} == "" ]]; then
 		return 1
 	fi
@@ -54,7 +54,7 @@ function check_if_changed() {
 		return 1
 	fi
 
-	if ! git diff --name-only "${last_tag}" HEAD | grep -E "${pkg}/[0-9\.a-zA-Z\-_]+$" > /dev/null; then
+	if ! git diff --name-only "${last_tag}" HEAD | grep -E "^${pkg}/[0-9\.a-zA-Z\-_]+$" > /dev/null; then
 		return 1
 	fi
 	return 0
@@ -196,7 +196,7 @@ function release_specific() {
 		# If path contains a star find all relevant packages
 		if echo "${pkg}" | grep -q "\*"; then
 			while read -r p; do
-				release "$(remove_prefix "${p}")" "0"
+				release "$(remove_prefix "${p}")" "1"
 			done < <(find "${pkg}" -name 'go.mod' -printf "%h\n")
 		else
 			release "${pkg}" "0"
