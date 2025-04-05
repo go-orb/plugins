@@ -87,7 +87,7 @@ func (t *Transport) Request(ctx context.Context, infos client.RequestInfos, req 
 
 	// Encode the request into a *bytes.Buffer{}.
 	buff := t.bufPool.Get().(*bytes.Buffer)
-	if err := codec.NewEncoder(buff).Encode(req); err != nil {
+	if err := codec.NewEncoder(buff).Encode(req); err != nil { //nolint:errcheck
 		return orberrors.ErrBadRequest.Wrap(err)
 	}
 
@@ -108,13 +108,13 @@ func (t *Transport) Request(ctx context.Context, infos client.RequestInfos, req 
 			buff,
 		)
 
-		t.hclient.Transport.(*http.Transport).DialContext = func(ctx context.Context, _, _ string) (net.Conn, error) {
+		t.hclient.Transport.(*http.Transport).DialContext = func(ctx context.Context, _, _ string) (net.Conn, error) { //nolint:errcheck
 			dialer := net.Dialer{
 				Timeout: time.Duration(t.config.DialTimeout),
 			}
+
 			return dialer.DialContext(ctx, t.network, infos.Address)
 		}
-
 	} else {
 		hReq, err = http.NewRequestWithContext(
 			ctx,
