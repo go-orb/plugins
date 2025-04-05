@@ -491,7 +491,7 @@ type protoFile struct {
 func (f protoFile) Render() string {
 	funcMap := template.FuncMap{
 		"ToLower": strings.ToLower,
-		"Title":   cases.Title(language.English),
+		"Title":   cases.Title(language.English).String,
 	}
 
 	tmpl, err := template.New("orb").Funcs(funcMap).Parse(templateStr)
