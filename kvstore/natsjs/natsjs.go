@@ -91,13 +91,13 @@ func (n *NatsJS) Start(ctx context.Context) error {
 
 	n.nc, err = nopts.Connect()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to connect to nats [servers: %v]: %w", n.config.NatsOptions.Servers, err)
 	}
 
 	// Create a JetStream management interface
 	n.js, err = jetstream.New(n.nc)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create jetstream interface: %w", err)
 	}
 
 	return nil
