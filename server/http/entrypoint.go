@@ -311,8 +311,6 @@ func (s *Server) Transport() string {
 	switch {
 	case s.config.Network == networkUnix:
 		return "unix+http"
-	case s.config.H2C:
-		return "h2c"
 	case s.config.HTTP3:
 		return "http3"
 	case !s.config.Insecure:

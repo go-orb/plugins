@@ -6,18 +6,12 @@ package http
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"net/http"
-	"os"
-	"strings"
 	"sync/atomic"
 	"time"
 
 	"log/slog"
-
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 )
 
 // Errors.
@@ -32,13 +26,11 @@ type httpServer struct {
 }
 
 func (s *Server) newHTTPServer(router *Router) (*httpServer, error) {
-	s.handler = router
+	var protocols http.Protocols
 
-	if s.config.H2C {
-		s.handler = h2c.NewHandler(s.handler, &http2.Server{
-			MaxConcurrentStreams: uint32(s.config.MaxConcurrentStreams), //nolint:gosec
-		})
-	}
+	protocols.SetUnencryptedHTTP2(true)
+
+	s.handler = router
 
 	server := http.Server{
 		Handler:           s,
@@ -46,6 +38,8 @@ func (s *Server) newHTTPServer(router *Router) (*httpServer, error) {
 		WriteTimeout:      time.Duration(s.config.WriteTimeout),
 		IdleTimeout:       time.Duration(s.config.IdleTimeout),
 		ReadHeaderTimeout: time.Second * 4,
+		Protocols:         &protocols,
+
 		// TODO(davincible): do we need to set this? would be nice but doesn't take interface
 		// ErrorLog:          httpServerLogger,
 	}
@@ -54,21 +48,6 @@ func (s *Server) newHTTPServer(router *Router) (*httpServer, error) {
 		server.TLSConfig = s.config.TLS.Config
 	} else if !s.config.Insecure && s.config.TLS == nil {
 		return nil, ErrNoTLS
-	}
-
-	if s.config.HTTP2 && !strings.Contains(os.Getenv("GODEBUG"), "http2server=0") {
-		if s.config.TLS != nil {
-			s.config.TLS.NextProtos = append([]string{"h2"}, s.config.TLS.NextProtos...)
-		}
-
-		h2 := http2.Server{
-			MaxConcurrentStreams: uint32(s.config.MaxConcurrentStreams), //nolint:gosec
-			NewWriteScheduler:    func() http2.WriteScheduler { return http2.NewPriorityWriteScheduler(nil) },
-		}
-
-		if err := http2.ConfigureServer(&server, &h2); err != nil {
-			return nil, fmt.Errorf("configure HTTP/2 server: %w", err)
-		}
 	}
 
 	return &httpServer{Server: &server}, nil
