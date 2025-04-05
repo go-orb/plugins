@@ -4,11 +4,11 @@ go 1.23.6
 
 require (
 	github.com/go-orb/go-orb v0.3.1-0.20250405015028-7ca2e976a1d4
-	github.com/go-orb/plugins/codecs/json v0.2.1-0.20250327214241-923546e98d22
-	github.com/go-orb/plugins/kvstore/natsjs v0.1.1-0.20250327214241-923546e98d22
-	github.com/go-orb/plugins/log/slog v0.2.1-0.20250327214241-923546e98d22
-	github.com/go-orb/plugins/registry/regutil v0.2.1-0.20250405015857-1b655cbe2019
-	github.com/go-orb/plugins/registry/tests v0.2.1-0.20250405015857-1b655cbe2019
+	github.com/go-orb/plugins/codecs/json v0.2.1-0.20250405021245-b81f523e83e6
+	github.com/go-orb/plugins/kvstore/natsjs v0.1.1-0.20250405021245-b81f523e83e6
+	github.com/go-orb/plugins/log/slog v0.2.1-0.20250405021245-b81f523e83e6
+	github.com/go-orb/plugins/registry/regutil v0.2.1-0.20250405021245-b81f523e83e6
+	github.com/go-orb/plugins/registry/tests v0.2.1-0.20250405021245-b81f523e83e6
 	github.com/nats-io/nats-server/v2 v2.10.26
 	github.com/stretchr/testify v1.10.0
 )

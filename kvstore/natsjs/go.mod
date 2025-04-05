@@ -5,7 +5,7 @@ go 1.23.6
 require (
 	github.com/cornelk/hashmap v1.0.8
 	github.com/go-orb/go-orb v0.3.1-0.20250405015028-7ca2e976a1d4
-	github.com/go-orb/plugins/codecs/json v0.2.1-0.20250327214241-923546e98d22
+	github.com/go-orb/plugins/codecs/json v0.2.1-0.20250405021245-b81f523e83e6
 	github.com/nats-io/nats-server/v2 v2.10.26
 	github.com/nats-io/nats.go v1.39.1
 	github.com/stretchr/testify v1.10.0
