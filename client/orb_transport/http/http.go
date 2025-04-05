@@ -86,8 +86,8 @@ func (t *Transport) Request(ctx context.Context, infos client.RequestInfos, req 
 	}
 
 	// Encode the request into a *bytes.Buffer{}.
-	buff := t.bufPool.Get().(*bytes.Buffer)
-	if err := codec.NewEncoder(buff).Encode(req); err != nil { //nolint:errcheck
+	buff := t.bufPool.Get().(*bytes.Buffer) //nolint:errcheck
+	if err := codec.NewEncoder(buff).Encode(req); err != nil {
 		return orberrors.ErrBadRequest.Wrap(err)
 	}
 
