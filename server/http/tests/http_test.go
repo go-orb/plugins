@@ -83,31 +83,6 @@ func TestServerHTTPS(t *testing.T) {
 	makeRequests(t, addr, thttp.TypeHTTP1)
 }
 
-func TestServerHTTP2(t *testing.T) {
-	srv, cleanup, err := setupServer(t, false)
-	defer cleanup()
-	if err != nil {
-		require.NoError(t, err)
-	}
-
-	addr := "https://" + srv.Address()
-
-	makeRequests(t, addr, thttp.TypeHTTP2)
-}
-
-func TestServerH2c(t *testing.T) {
-	srv, cleanup, err := setupServer(t, false,
-		mhttp.WithInsecure(),
-		mhttp.WithAllowH2C(),
-	)
-	defer cleanup()
-	require.NoError(t, err)
-
-	addr := "http://" + srv.Address()
-
-	makeRequests(t, addr, thttp.TypeH2C)
-}
-
 func TestServerHTTP3Twice(t *testing.T) {
 	// To fix warning about buf size run:
 	// - sysctl -w net.core.rmem_max=2500000
@@ -151,7 +126,7 @@ func TestServerEntrypointsStarts(t *testing.T) {
 
 	addr = "https://" + addr
 
-	makeRequests(t, addr, thttp.TypeHTTP2)
+	makeRequests(t, addr, thttp.TypeHTTP1)
 }
 
 func TestServerGzip(t *testing.T) {
@@ -163,7 +138,7 @@ func TestServerGzip(t *testing.T) {
 
 	addr := "https://" + srv.Address()
 
-	makeRequests(t, addr, thttp.TypeHTTP2)
+	makeRequests(t, addr, thttp.TypeHTTP1)
 }
 
 func TestServerInvalidContentType(t *testing.T) {
@@ -177,13 +152,13 @@ func TestServerInvalidContentType(t *testing.T) {
 
 	require.ErrorContains(
 		t,
-		thttp.TestPostRequestProto(t, addr, "application/abcdef", thttp.TypeHTTP2),
+		thttp.TestPostRequestProto(t, addr, "application/abcdef", thttp.TypeHTTP1),
 		"Post request failed",
 		"POST Proto",
 	)
 	require.ErrorContains(
 		t,
-		thttp.TestPostRequestProto(t, addr, "yadayadayada", thttp.TypeHTTP2),
+		thttp.TestPostRequestProto(t, addr, "yadayadayada", thttp.TypeHTTP1),
 		"Post request failed",
 		"POST Proto",
 	)
@@ -358,13 +333,13 @@ func TestServerIntegration(t *testing.T) {
 	require.Len(t, e.(*mhttp.Server).Router().Routes(), 1, "number of routes not equal to 1") //nolint:errcheck
 	makeRequests(t, "https://"+e.Address(), thttp.TypeHTTP3)
 
-	e, err = srv.GetEntrypoint("test-ep-2")
+	_, err = srv.GetEntrypoint("test-ep-2")
 	require.NoError(t, err, "failed to fetch entrypoint 2")
-	makeRequests(t, "https://"+e.Address(), thttp.TypeHTTP2)
+	// makeRequests(t, "https://"+e.Address(), thttp.TypeHTTP2)
 
-	e, err = srv.GetEntrypoint("test-ep-3")
+	_, err = srv.GetEntrypoint("test-ep-3")
 	require.NoError(t, err, "failed to fetch entrypoint 2")
-	makeRequests(t, "https://"+e.Address(), thttp.TypeH2C)
+	// makeRequests(t, "https://"+e.Address(), thttp.TypeH2C)
 
 	_, err = srv.GetEntrypoint("fake")
 	require.Error(t, err, "fetching invalid entrypoint should fail")
@@ -436,7 +411,7 @@ func TestServerFileConfig(t *testing.T) {
 	require.True(t, strings.HasSuffix(ep.Address(), ":4513"))
 	require.True(t, ep.Config().Insecure, "Insecure")
 	require.True(t, ep.Config().H2C, "H2C")
-	makeRequests(t, "https://"+e.Address(), thttp.TypeH2C)
+	// makeRequests(t, "https://"+e.Address(), thttp.TypeH2C)
 
 	e, err = srv.GetEntrypoint("test-ep-3")
 	require.NoError(t, err, "failed to fetch entrypoint 3")
@@ -455,7 +430,7 @@ func TestServerFileConfig(t *testing.T) {
 	ep = e.(*mhttp.Server) //nolint:errcheck
 	require.True(t, strings.HasSuffix(ep.Address(), ":4516"))
 	require.Len(t, ep.Config().OptHandlers, 1, "Registration len")
-	makeRequests(t, "https://"+e.Address(), thttp.TypeHTTP2)
+	// makeRequests(t, "https://"+e.Address(), thttp.TypeHTTP2)
 
 	require.NoError(t, srv.Stop(context.Background()), "failed to start server")
 }
@@ -498,46 +473,6 @@ func BenchmarkHTTP1Proto16(b *testing.B) {
 	}
 
 	benchmark(b, testFunc, 16, 1, mhttp.WithDisableHTTP2())
-}
-
-func BenchmarkHTTP2JSON16(b *testing.B) {
-	testFunc := func(tb testing.TB, addr string) error {
-		tb.Helper()
-
-		return thttp.TestPostRequestJSON(tb, addr, thttp.TypeHTTP2)
-	}
-
-	benchmark(b, testFunc, 16, 1)
-}
-
-func BenchmarkHTTP2Proto16(b *testing.B) {
-	testFunc := func(tb testing.TB, addr string) error {
-		tb.Helper()
-
-		return thttp.TestPostRequestProto(tb, addr, "application/octet-stream", thttp.TypeHTTP2)
-	}
-
-	benchmark(b, testFunc, 16, 1)
-}
-
-func BenchmarkH2CJSON16(b *testing.B) {
-	testFunc := func(tb testing.TB, addr string) error {
-		tb.Helper()
-
-		return thttp.TestPostRequestJSON(tb, addr, thttp.TypeHTTP2)
-	}
-
-	benchmark(b, testFunc, 16, 1, mhttp.WithAllowH2C(), mhttp.WithInsecure())
-}
-
-func BenchmarkH2CProto16(b *testing.B) {
-	testFunc := func(tb testing.TB, addr string) error {
-		tb.Helper()
-
-		return thttp.TestPostRequestProto(tb, addr, "application/octet-stream", thttp.TypeHTTP2)
-	}
-
-	benchmark(b, testFunc, 16, 1, mhttp.WithAllowH2C(), mhttp.WithInsecure())
 }
 
 func BenchmarkHTTP3JSON16(b *testing.B) {

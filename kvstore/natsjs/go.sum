@@ -7,8 +7,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-orb/go-orb v0.3.1-0.20250405015028-7ca2e976a1d4 h1:R8fkNwiDrhoVE4mjscPa5s/ckolktsttnxlxFT0ONAQ=
 github.com/go-orb/go-orb v0.3.1-0.20250405015028-7ca2e976a1d4/go.mod h1:DBamAST285wD+Ydbil1HGl9X19Sj+0xR1ZqFzKDxOgM=
-github.com/go-orb/plugins/codecs/json v0.2.1-0.20250405021245-b81f523e83e6 h1:OGvQfnNPR1VX+Ut/GeDKJEGcPLxw+sKJagb+5u+Yahg=
-github.com/go-orb/plugins/codecs/json v0.2.1-0.20250405021245-b81f523e83e6/go.mod h1:O2KX4QVZmdRINZSGEmd7iAt2xR0Fc2+G85f0nTBfO/I=
+github.com/go-orb/plugins/codecs/json v0.2.1-0.20250405021654-a07e18286de4 h1:Jbz4ilpP5H2M2vE2QdbP/iNLg2hBJpRWhuoADbcVhmQ=
+github.com/go-orb/plugins/codecs/json v0.2.1-0.20250405021654-a07e18286de4/go.mod h1:O2KX4QVZmdRINZSGEmd7iAt2xR0Fc2+G85f0nTBfO/I=
 github.com/klauspost/compress v1.18.0 h1:c/Cqfb0r+Yi+JtIEq73FWXVkRonBlf0CRNYc8Zttxdo=
 github.com/klauspost/compress v1.18.0/go.mod h1:2Pp+KzxcywXVXMr50+X0Q/Lsb43OQHYWRCY2AiWywWQ=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
