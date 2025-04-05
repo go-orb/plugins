@@ -192,7 +192,7 @@ function release_all() {
 
 function release_specific() {
 	set +o noglob
-	while read -r pkg; do
+	for pkg in $(echo "${1}" | tr "," "\n"); do
 		# If path contains a star find all relevant packages
 		if echo "${pkg}" | grep -q "\*"; then
 			while read -r p; do
@@ -201,7 +201,7 @@ function release_specific() {
 		else
 			release "${pkg}" "0"
 		fi
-	done < <(echo "${1}" | tr "," "\n")
+	done
 	# set -o noglob
 	# set +o noglob
 }
