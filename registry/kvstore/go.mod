@@ -5,7 +5,7 @@ go 1.23.6
 require (
 	github.com/go-orb/go-orb v0.4.0
 	github.com/go-orb/plugins/codecs/json v0.2.0
-	github.com/go-orb/plugins/kvstore/natsjs v0.2.0
+	github.com/go-orb/plugins/kvstore/natsjs v0.2.1
 	github.com/go-orb/plugins/log/slog v0.2.0
 	github.com/go-orb/plugins/registry/regutil v0.2.0
 	github.com/go-orb/plugins/registry/tests v0.2.0
