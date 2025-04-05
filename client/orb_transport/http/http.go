@@ -239,7 +239,7 @@ func NewHTTPTransport(network string) func(logger log.Logger, cfg *orb.Config) (
 					MaxConnsPerHost:       cfg.PoolSize + 1,
 					IdleConnTimeout:       time.Duration(cfg.PoolTTL),
 					ExpectContinueTimeout: 1 * time.Second,
-					ForceAttemptHTTP2:     true,
+					ForceAttemptHTTP2:     false,
 					DisableKeepAlives:     false,
 					DialContext: func(ctx context.Context, _, addr string) (net.Conn, error) {
 						dialer := net.Dialer{
@@ -312,7 +312,7 @@ func NewHTTPSTransport(logger log.Logger, cfg *orb.Config) (orb.TransportType, e
 				MaxConnsPerHost:       cfg.PoolSize + 1,
 				IdleConnTimeout:       time.Duration(cfg.PoolTTL),
 				ExpectContinueTimeout: 1 * time.Second,
-				ForceAttemptHTTP2:     true,
+				ForceAttemptHTTP2:     false,
 				DisableKeepAlives:     false,
 				Dial: (&net.Dialer{
 					Timeout:   time.Duration(cfg.DialTimeout),
