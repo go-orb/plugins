@@ -101,15 +101,15 @@ func (c *Registry) Type() string {
 }
 
 // Deregister deregisters a service within the registry.
-func (c *Registry) Deregister(_ context.Context, serviceNode registry.ServiceNode) error {
+func (c *Registry) Deregister(ctx context.Context, serviceNode registry.ServiceNode) error {
 	key := nodeKey(serviceNode, c.config.ServiceDelimiter)
 	c.logger.Trace("deregistering service", "serviceNode", serviceNode, "key", key)
 
-	return c.kvstore.Purge(key, c.config.Database, c.config.Table)
+	return c.kvstore.Purge(ctx, key, c.config.Database, c.config.Table)
 }
 
 // Register registers a service within the registry.
-func (c *Registry) Register(_ context.Context, serviceNode registry.ServiceNode) error {
+func (c *Registry) Register(ctx context.Context, serviceNode registry.ServiceNode) error {
 	if err := serviceNode.Valid(); err != nil {
 		return err
 	}
@@ -122,7 +122,7 @@ func (c *Registry) Register(_ context.Context, serviceNode registry.ServiceNode)
 		return orberrors.ErrInternalServerError.Wrap(err)
 	}
 
-	return c.kvstore.Set(key, c.config.Database, c.config.Table, b)
+	return c.kvstore.Set(ctx, key, c.config.Database, c.config.Table, b)
 }
 
 // GetService returns a service from the registry.
@@ -205,10 +205,10 @@ func (c *Registry) Watch(_ context.Context, _ ...registry.WatchOption) (registry
 }
 
 func (c *Registry) listServices(
-	_ context.Context,
+	ctx context.Context,
 	opts ...kvstore.KeysOption,
 ) ([]registry.ServiceNode, error) {
-	keys, err := c.kvstore.Keys(c.config.Database, c.config.Table, opts...)
+	keys, err := c.kvstore.Keys(ctx, c.config.Database, c.config.Table, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +217,7 @@ func (c *Registry) listServices(
 	result := []registry.ServiceNode{}
 
 	for _, k := range keys {
-		svc, err := c.getNode(k)
+		svc, err := c.getNode(ctx, k)
 		if err != nil {
 			if errors.Is(err, registry.ErrNotFound) {
 				// Skip not found errors and continue
@@ -234,8 +234,8 @@ func (c *Registry) listServices(
 }
 
 // getNode retrieves a node from the store.
-func (c *Registry) getNode(s string) (registry.ServiceNode, error) {
-	recs, err := c.kvstore.Get(s, c.config.Database, c.config.Table)
+func (c *Registry) getNode(ctx context.Context, key string) (registry.ServiceNode, error) {
+	recs, err := c.kvstore.Get(ctx, key, c.config.Database, c.config.Table)
 	if err != nil {
 		return registry.ServiceNode{}, err
 	}
