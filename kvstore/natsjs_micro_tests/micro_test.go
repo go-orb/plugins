@@ -36,6 +36,9 @@ type NatsJSMicroTestSuite struct {
 
 	// go-micro store
 	microStore store.Store
+
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 // SetupSuite establishes connection to NATS server and initializes both stores.
@@ -83,11 +86,14 @@ func (s *NatsJSMicroTestSuite) SetupSuite() {
 	)
 	s.Require().NoError(microStore.Init())
 	s.microStore = microStore
+
+	s.ctx, s.cancel = context.WithCancel(context.Background())
 }
 
 // TearDownSuite cleans up resources.
 func (s *NatsJSMicroTestSuite) TearDownSuite() {
 	s.nc.Close()
+	s.cancel()
 }
 
 // TestInteroperability verifies that both implementations can read each other's data.
@@ -95,7 +101,7 @@ func (s *NatsJSMicroTestSuite) TestInteroperability() {
 	// Test writing with go-orb and reading with go-micro
 	s.Run("OrbWriteMicroRead", func() {
 		// Write data using go-orb
-		err := s.orbStore.Set("test-key", "", "", []byte("test-value"))
+		err := s.orbStore.Set(s.ctx, "test-key", "", "", []byte("test-value"))
 		s.Require().NoError(err)
 
 		// Read using go-micro
@@ -115,7 +121,7 @@ func (s *NatsJSMicroTestSuite) TestInteroperability() {
 		s.Require().NoError(err)
 
 		// Read using go-orb
-		records, err := s.orbStore.Get("micro-key", "", "")
+		records, err := s.orbStore.Get(s.ctx, "micro-key", "", "")
 		s.Require().NoError(err)
 		s.Require().Len(records, 1)
 		s.Equal("micro-value", string(records[0].Value))
@@ -128,7 +134,7 @@ func (s *NatsJSMicroTestSuite) TestListInteroperability() {
 	for i := 0; i < 3; i++ {
 		key := fmt.Sprintf("orb-key-%d", i)
 		value := fmt.Sprintf("orb-value-%d", i)
-		err := s.orbStore.Set(key, "", "", []byte(value))
+		err := s.orbStore.Set(s.ctx, key, "", "", []byte(value))
 		s.Require().NoError(err)
 	}
 
@@ -144,7 +150,7 @@ func (s *NatsJSMicroTestSuite) TestListInteroperability() {
 	}
 
 	// List all keys using go-orb
-	orbKeys, err := s.orbStore.Keys("", "")
+	orbKeys, err := s.orbStore.Keys(s.ctx, "", "")
 	s.Require().NoError(err)
 	s.Require().GreaterOrEqual(len(orbKeys), 6) // At least our 6 test keys
 
@@ -170,7 +176,7 @@ func (s *NatsJSMicroTestSuite) TestDeleteInteroperability() {
 	// Write and delete with go-orb, verify with go-micro
 	s.Run("OrbDeleteMicroVerify", func() {
 		// Write with go-orb
-		err := s.orbStore.Set("orb-delete-key", "", "", []byte("delete-me"))
+		err := s.orbStore.Set(s.ctx, "orb-delete-key", "", "", []byte("delete-me"))
 		s.Require().NoError(err)
 
 		// Verify go-micro can see it
@@ -178,13 +184,13 @@ func (s *NatsJSMicroTestSuite) TestDeleteInteroperability() {
 		s.Require().NoError(err)
 
 		// Delete with go-orb
-		err = s.orbStore.Purge("orb-delete-key", "", "")
+		err = s.orbStore.Purge(s.ctx, "orb-delete-key", "", "")
 		s.Require().NoError(err)
 
 		// Verify it's gone in both implementations
 		_, err = s.microStore.Read("orb-delete-key")
 		s.Require().Error(err)
-		_, err = s.orbStore.Get("orb-delete-key", "", "")
+		_, err = s.orbStore.Get(s.ctx, "orb-delete-key", "", "")
 		s.Require().Error(err)
 	})
 
@@ -198,7 +204,7 @@ func (s *NatsJSMicroTestSuite) TestDeleteInteroperability() {
 		s.Require().NoError(err)
 
 		// Verify go-orb can see it
-		_, err = s.orbStore.Get("micro-delete-key", "", "")
+		_, err = s.orbStore.Get(s.ctx, "micro-delete-key", "", "")
 		s.Require().NoError(err)
 
 		// Delete with go-micro
@@ -208,7 +214,7 @@ func (s *NatsJSMicroTestSuite) TestDeleteInteroperability() {
 		// Verify it's gone in both implementations
 		_, err = s.microStore.Read("micro-delete-key")
 		s.Require().Error(err)
-		_, err = s.orbStore.Get("micro-delete-key", "", "")
+		_, err = s.orbStore.Get(s.ctx, "micro-delete-key", "", "")
 		s.Require().Error(err)
 	})
 }
@@ -289,11 +295,13 @@ func BenchmarkOrbSet(b *testing.B) {
 	bm := setupBenchmark(b)
 	defer bm.natsServer.Shutdown()
 
+	ctx := context.Background()
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		key := fmt.Sprintf("key-%d", i)
 		value := fmt.Sprintf("value-%d", i)
-		if err := bm.orbStore.Set(key, "", "", []byte(value)); err != nil {
+		if err := bm.orbStore.Set(ctx, key, "", "", []byte(value)); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -322,14 +330,16 @@ func BenchmarkOrbSetGet(b *testing.B) {
 	bm := setupBenchmark(b)
 	defer bm.natsServer.Shutdown()
 
+	ctx := context.Background()
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		key := fmt.Sprintf("key-%d", i)
 		value := fmt.Sprintf("value-%d", i)
-		if err := bm.orbStore.Set(key, "", "", []byte(value)); err != nil {
+		if err := bm.orbStore.Set(ctx, key, "", "", []byte(value)); err != nil {
 			b.Fatal(err)
 		}
-		if _, err := bm.orbStore.Get(key, "", ""); err != nil {
+		if _, err := bm.orbStore.Get(ctx, key, "", ""); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -361,16 +371,18 @@ func BenchmarkOrbGet(b *testing.B) {
 	bm := setupBenchmark(b)
 	defer bm.natsServer.Shutdown()
 
+	ctx := context.Background()
+
 	// Pre-populate data
 	key := "test-key"
 	value := "test-value"
-	if err := bm.orbStore.Set(key, "", "", []byte(value)); err != nil {
+	if err := bm.orbStore.Set(ctx, key, "", "", []byte(value)); err != nil {
 		b.Fatal(err)
 	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := bm.orbStore.Get(key, "", "")
+		_, err := bm.orbStore.Get(ctx, key, "", "")
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -406,12 +418,14 @@ func BenchmarkOrbList(b *testing.B) {
 	bm := setupBenchmark(b)
 	defer bm.natsServer.Shutdown()
 
+	ctx := context.Background()
+
 	// Pre-populate data
 	for t := 0; t < 100; t++ {
 		for i := 0; i < 1000; i++ {
 			key := fmt.Sprintf("key-%d", i)
 			value := fmt.Sprintf("value-%d", i)
-			if err := bm.orbStore.Set(key, "", fmt.Sprintf("table-%d", t), []byte(value)); err != nil {
+			if err := bm.orbStore.Set(ctx, key, "", fmt.Sprintf("table-%d", t), []byte(value)); err != nil {
 				b.Fatal(err)
 			}
 		}
@@ -419,7 +433,7 @@ func BenchmarkOrbList(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := bm.orbStore.Keys("", fmt.Sprintf("table-%d", rand.Intn(100)))
+		_, err := bm.orbStore.Keys(ctx, "", fmt.Sprintf("table-%d", rand.Intn(100)))
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -459,12 +473,14 @@ func BenchmarkOrbListPagination(b *testing.B) {
 	bm := setupBenchmark(b)
 	defer bm.natsServer.Shutdown()
 
+	ctx := context.Background()
+
 	// Pre-populate data
 	for t := 0; t < 100; t++ {
 		for i := 0; i < 1000; i++ {
 			key := fmt.Sprintf("key-%d", i)
 			value := fmt.Sprintf("value-%d", i)
-			if err := bm.orbStore.Set(key, "", fmt.Sprintf("table-%d", t), []byte(value)); err != nil {
+			if err := bm.orbStore.Set(ctx, key, "", fmt.Sprintf("table-%d", t), []byte(value)); err != nil {
 				b.Fatal(err)
 			}
 		}
@@ -472,7 +488,7 @@ func BenchmarkOrbListPagination(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := bm.orbStore.Keys("", fmt.Sprintf("table-%d", rand.Intn(100)), kvstore.KeysLimit(100), kvstore.KeysOffset(100))
+		_, err := bm.orbStore.Keys(ctx, "", fmt.Sprintf("table-%d", rand.Intn(100)), kvstore.KeysLimit(100), kvstore.KeysOffset(100))
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -523,13 +539,15 @@ func BenchmarkOrbSetLarge(b *testing.B) {
 	bm := setupBenchmark(b)
 	defer bm.natsServer.Shutdown()
 
+	ctx := context.Background()
+
 	// Generate 1MB value
 	value := generateLargeValue(1024 * 1024)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		key := fmt.Sprintf("large-key-%d", i)
-		if err := bm.orbStore.Set(key, "", "", value); err != nil {
+		if err := bm.orbStore.Set(ctx, key, "", "", value); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -560,16 +578,18 @@ func BenchmarkOrbGetLarge(b *testing.B) {
 	bm := setupBenchmark(b)
 	defer bm.natsServer.Shutdown()
 
+	ctx := context.Background()
+
 	// Generate 1MB value and store it
 	key := "large-test-key"
 	value := generateLargeValue(1024 * 1024)
-	if err := bm.orbStore.Set(key, "", "", value); err != nil {
+	if err := bm.orbStore.Set(ctx, key, "", "", value); err != nil {
 		b.Fatal(err)
 	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := bm.orbStore.Get(key, "", "")
+		_, err := bm.orbStore.Get(ctx, key, "", "")
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -608,13 +628,15 @@ func BenchmarkOrbSetGetLarge(b *testing.B) {
 	// Generate 1MB value
 	value := generateLargeValue(1024 * 1024)
 
+	ctx := context.Background()
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		key := fmt.Sprintf("large-key-%d", i)
-		if err := bm.orbStore.Set(key, "", "", value); err != nil {
+		if err := bm.orbStore.Set(ctx, key, "", "", value); err != nil {
 			b.Fatal(err)
 		}
-		if _, err := bm.orbStore.Get(key, "", ""); err != nil {
+		if _, err := bm.orbStore.Get(ctx, key, "", ""); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -651,15 +673,17 @@ func BenchmarkOrbDeleteLarge(b *testing.B) {
 	// Generate 1MB value
 	value := generateLargeValue(1024 * 1024)
 
+	ctx := context.Background()
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		// Write a value first
 		key := fmt.Sprintf("large-key-%d", i)
-		if err := bm.orbStore.Set(key, "", "", value); err != nil {
+		if err := bm.orbStore.Set(ctx, key, "", "", value); err != nil {
 			b.Fatal(err)
 		}
 		// Then delete it
-		if err := bm.orbStore.Purge(key, "", ""); err != nil {
+		if err := bm.orbStore.Purge(ctx, key, "", ""); err != nil {
 			b.Fatal(err)
 		}
 	}

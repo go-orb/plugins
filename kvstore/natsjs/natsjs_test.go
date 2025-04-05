@@ -130,35 +130,35 @@ func (s *NatsJSTestSuite) TestBasicOperations() {
 	for name, store := range s.stores {
 		s.Run(name, func() {
 			// Test Set
-			err := store.Set("test-key", "", "", []byte("test-value"))
+			err := store.Set(s.ctx, "test-key", "", "", []byte("test-value"))
 			s.Require().NoError(err)
 
 			// Test Get
-			records, err := store.Get("test-key", "", "")
+			records, err := store.Get(s.ctx, "test-key", "", "")
 			s.Require().NoError(err)
 			s.Require().Len(records, 1)
 			s.Equal("test-key", records[0].Key)
 			s.Equal([]byte("test-value"), records[0].Value)
 
 			// Test Get for non-existent key
-			_, err = store.Get("non-existent-key", "", "")
+			_, err = store.Get(s.ctx, "non-existent-key", "", "")
 			s.Require().ErrorIs(err, kvstore.ErrNotFound)
 
 			// Test Keys
-			keys, err := store.Keys("", "")
+			keys, err := store.Keys(s.ctx, "", "")
 			s.Require().NoError(err)
 			s.Contains(keys, "test-key")
 
 			// Test Purge
-			err = store.Purge("test-key", "", "")
+			err = store.Purge(s.ctx, "test-key", "", "")
 			s.Require().NoError(err)
 
 			// Verify key is gone
-			_, err = store.Get("test-key", "", "")
+			_, err = store.Get(s.ctx, "test-key", "", "")
 			s.Require().ErrorIs(err, kvstore.ErrNotFound)
 
 			// Test Purge non-existent key (should not error)
-			err = store.Purge("non-existent-key", "", "")
+			err = store.Purge(s.ctx, "non-existent-key", "", "")
 			s.Require().NoError(err)
 		})
 	}
@@ -171,40 +171,40 @@ func (s *NatsJSTestSuite) TestCustomDatabaseAndTable() {
 			table := "custom-table"
 
 			// Test Set with custom db/table
-			err := store.Set("test-key", db, table, []byte("test-value"))
+			err := store.Set(s.ctx, "test-key", db, table, []byte("test-value"))
 			s.Require().NoError(err)
 
 			// Test Get with custom db/table
-			records, err := store.Get("test-key", db, table)
+			records, err := store.Get(s.ctx, "test-key", db, table)
 			s.Require().NoError(err)
 			s.Require().Len(records, 1)
 			s.Equal("test-key", records[0].Key)
 			s.Equal([]byte("test-value"), records[0].Value)
 
 			// Test Keys with custom db/table
-			keys, err := store.Keys(db, table)
+			keys, err := store.Keys(s.ctx, db, table)
 			s.Require().NoError(err)
 			s.Contains(keys, "test-key")
 
 			// Add a few more keys to test Keys method more thoroughly
-			err = store.Set("test-key2", db, table, []byte("test-value2"))
+			err = store.Set(s.ctx, "test-key2", db, table, []byte("test-value2"))
 			s.Require().NoError(err)
-			err = store.Set("test-key3", db, table, []byte("test-value3"))
+			err = store.Set(s.ctx, "test-key3", db, table, []byte("test-value3"))
 			s.Require().NoError(err)
 
 			// Verify multiple keys are returned
-			keys, err = store.Keys(db, table)
+			keys, err = store.Keys(s.ctx, db, table)
 			s.Require().NoError(err)
 			s.Contains(keys, "test-key")
 			s.Contains(keys, "test-key2")
 			s.Contains(keys, "test-key3")
 
 			// Test DropTable
-			err = store.DropTable(db, table)
+			err = store.DropTable(s.ctx, db, table)
 			if s.configs[name].bucketPerTable {
 				s.Require().NoError(err)
 				// Verify table is gone
-				_, err = store.Get("test-key", db, table)
+				_, err = store.Get(s.ctx, "test-key", db, table)
 				s.Require().Error(err)
 			} else {
 				s.Require().Error(err)
@@ -222,23 +222,23 @@ func (s *NatsJSTestSuite) TestDropDatabase() {
 			table2 := "table2"
 
 			// Create some data in different tables
-			err := store.Set("key1", db, table1, []byte("value1"))
+			err := store.Set(s.ctx, "key1", db, table1, []byte("value1"))
 			s.Require().NoError(err)
-			err = store.Set("key2", db, table2, []byte("value2"))
+			err = store.Set(s.ctx, "key2", db, table2, []byte("value2"))
 			s.Require().NoError(err)
 
 			// Drop the database
-			err = store.DropDatabase(db)
+			err = store.DropDatabase(s.ctx, db)
 			s.Require().NoError(err)
 
 			// Verify data is gone from all tables
-			_, err = store.Get("key1", db, table1)
+			_, err = store.Get(s.ctx, "key1", db, table1)
 			s.Require().Error(err)
-			_, err = store.Get("key2", db, table2)
+			_, err = store.Get(s.ctx, "key2", db, table2)
 			s.Require().Error(err)
 
 			// Test dropping non-existent database (should not error)
-			err = store.DropDatabase("non-existent-db")
+			err = store.DropDatabase(s.ctx, "non-existent-db")
 			s.Require().NoError(err)
 		})
 	}
@@ -254,11 +254,11 @@ func (s *NatsJSTestSuite) TestBinaryData() {
 			}
 
 			// Test Set with binary data
-			err := store.Set("binary-key", "bin-db", "bin-table", binaryData)
+			err := store.Set(s.ctx, "binary-key", "bin-db", "bin-table", binaryData)
 			s.Require().NoError(err)
 
 			// Test Get with binary data
-			records, err := store.Get("binary-key", "bin-db", "bin-table")
+			records, err := store.Get(s.ctx, "binary-key", "bin-db", "bin-table")
 			s.Require().NoError(err)
 			s.Require().Len(records, 1)
 			s.Equal("binary-key", records[0].Key)
@@ -266,11 +266,11 @@ func (s *NatsJSTestSuite) TestBinaryData() {
 
 			// Test with empty data
 			emptyData := []byte{}
-			err = store.Set("empty-key", "bin-db", "bin-table", emptyData)
+			err = store.Set(s.ctx, "empty-key", "bin-db", "bin-table", emptyData)
 			s.Require().NoError(err)
 
 			// Test Get with empty data
-			records, err = store.Get("empty-key", "bin-db", "bin-table")
+			records, err = store.Get(s.ctx, "empty-key", "bin-db", "bin-table")
 			s.Require().NoError(err)
 			s.Require().Len(records, 1)
 			s.Equal("empty-key", records[0].Key)
@@ -296,13 +296,13 @@ func (s *NatsJSTestSuite) TestPrefixOperations() {
 				for j := 1; j <= 3; j++ {
 					key := prefix + "item" + string(rune('0'+j))
 					data := []byte(fmt.Sprintf("value-%d-%d", i, j))
-					err := store.Set(key, prefixDB, prefixTable, data)
+					err := store.Set(s.ctx, key, prefixDB, prefixTable, data)
 					s.Require().NoError(err)
 				}
 			}
 
 			// Get all keys and check prefixes
-			allKeys, err := store.Keys(prefixDB, prefixTable)
+			allKeys, err := store.Keys(s.ctx, prefixDB, prefixTable)
 			s.Require().NoError(err)
 			s.Require().Len(allKeys, 9) // 3 prefixes * 3 items
 
@@ -326,11 +326,11 @@ func (s *NatsJSTestSuite) TestEdgeCases() {
 
 			// Test with very long key
 			longKey := strings.Repeat("verylong", 50) // 400 characters
-			err := store.Set(longKey, "edge-db", "edge-table", []byte("long-key-value"))
+			err := store.Set(s.ctx, longKey, "edge-db", "edge-table", []byte("long-key-value"))
 			s.Require().NoError(err)
 
 			// Test Get with long key
-			records, err := store.Get(longKey, "edge-db", "edge-table")
+			records, err := store.Get(s.ctx, longKey, "edge-db", "edge-table")
 			s.Require().NoError(err)
 			s.Require().Len(records, 1)
 			s.Equal(longKey, records[0].Key)
@@ -342,11 +342,11 @@ func (s *NatsJSTestSuite) TestEdgeCases() {
 			validDB := "special_db"
 			validTable := "special_table"
 
-			err = store.Set(specialKey, validDB, validTable, []byte("special-value"))
+			err = store.Set(s.ctx, specialKey, validDB, validTable, []byte("special-value"))
 			s.Require().NoError(err)
 
 			// Test Get with special characters
-			records, err = store.Get(specialKey, validDB, validTable)
+			records, err = store.Get(s.ctx, specialKey, validDB, validTable)
 			s.Require().NoError(err)
 			s.Require().Len(records, 1)
 			s.Equal(specialKey, records[0].Key)
@@ -354,9 +354,9 @@ func (s *NatsJSTestSuite) TestEdgeCases() {
 
 			// Test with empty values
 			emptyValue := []byte{}
-			err = store.Set("empty-value-key", validDB, validTable, emptyValue)
+			err = store.Set(s.ctx, "empty-value-key", validDB, validTable, emptyValue)
 			s.Require().NoError(err)
-			records, err = store.Get("empty-value-key", validDB, validTable)
+			records, err = store.Get(s.ctx, "empty-value-key", validDB, validTable)
 			s.Require().NoError(err)
 			s.Require().Len(records, 1)
 			s.Equal("empty-value-key", records[0].Key)
@@ -365,9 +365,9 @@ func (s *NatsJSTestSuite) TestEdgeCases() {
 			// Test with unicode characters in key
 			unicodeKey := "unicode_😀_🚀_🌍"
 			unicodeValue := []byte("unicode value 😀")
-			err = store.Set(unicodeKey, validDB, validTable, unicodeValue)
+			err = store.Set(s.ctx, unicodeKey, validDB, validTable, unicodeValue)
 			s.Require().NoError(err)
-			records, err = store.Get(unicodeKey, validDB, validTable)
+			records, err = store.Get(s.ctx, unicodeKey, validDB, validTable)
 			s.Require().NoError(err)
 			s.Require().Len(records, 1)
 			s.Equal(unicodeKey, records[0].Key)
@@ -404,7 +404,7 @@ func (s *NatsJSTestSuite) TestConcurrentOperations() {
 					key := fmt.Sprintf("concurrent-key-%d", index)
 					value := []byte(fmt.Sprintf("concurrent-value-%d", index))
 
-					err := store.Set(key, concurrentDB, concurrentTable, value)
+					err := store.Set(s.ctx, key, concurrentDB, concurrentTable, value)
 					if err != nil {
 						errChan <- fmt.Errorf("set failed for index %d: %w", index, err)
 					}
@@ -421,7 +421,7 @@ func (s *NatsJSTestSuite) TestConcurrentOperations() {
 			}
 
 			// Verify all keys were set
-			keys, err := store.Keys(concurrentDB, concurrentTable)
+			keys, err := store.Keys(s.ctx, concurrentDB, concurrentTable)
 			s.Require().NoError(err)
 			s.Require().Len(keys, numOperations)
 
@@ -430,7 +430,7 @@ func (s *NatsJSTestSuite) TestConcurrentOperations() {
 				key := fmt.Sprintf("concurrent-key-%d", i)
 				expectedValue := []byte(fmt.Sprintf("concurrent-value-%d", i))
 
-				records, err := store.Get(key, concurrentDB, concurrentTable)
+				records, err := store.Get(s.ctx, key, concurrentDB, concurrentTable)
 				s.Require().NoError(err)
 				s.Require().Len(records, 1)
 				s.Equal(key, records[0].Key)
@@ -444,41 +444,41 @@ func (s *NatsJSTestSuite) TestErrorHandling() {
 	for name, store := range s.stores {
 		s.Run(name, func() {
 			// Create a key first to ensure the bucket exists
-			err := store.Set("setup-key", "error-db", "error-table", []byte("setup-value"))
+			err := store.Set(s.ctx, "setup-key", "error-db", "error-table", []byte("setup-value"))
 			s.Require().NoError(err)
 
 			// Test Get with non-existent key
-			_, err = store.Get("non-existent-key", "error-db", "error-table")
+			_, err = store.Get(s.ctx, "non-existent-key", "error-db", "error-table")
 			s.Require().ErrorIs(err, kvstore.ErrNotFound)
 
 			// For Keys with non-existent database, we need to use a database name that we know doesn't exist
 			// We can't guarantee empty results from non-existent buckets due to NATS behavior
 			// Instead, just test that Keys for an existing database works
-			keys, err := store.Keys("error-db", "error-table")
+			keys, err := store.Keys(s.ctx, "error-db", "error-table")
 			s.Require().NoError(err)
 			s.Contains(keys, "setup-key")
 
 			// Test Purge with non-existent key
-			err = store.Purge("non-existent-key", "error-db", "error-table")
+			err = store.Purge(s.ctx, "non-existent-key", "error-db", "error-table")
 			s.Require().NoError(err) // Should not error
 
 			// Test DropTable with non-existent table (but existing database)
 			// For BucketPerTable=true, we need to ensure the database exists first
 			if s.configs[name].bucketPerTable {
 				// Ensure the database exists
-				err = store.Set("setup-key", "error-db", "temp-table", []byte("temp-value"))
+				err = store.Set(s.ctx, "setup-key", "error-db", "temp-table", []byte("temp-value"))
 				s.Require().NoError(err)
 
 				// Now test dropping a non-existent table in an existing database
-				err = store.DropTable("error-db", "non-existent-table")
+				err = store.DropTable(s.ctx, "error-db", "non-existent-table")
 				s.Require().Error(err)
 
 				// Cleanup - drop the temp table
-				err = store.DropTable("error-db", "temp-table")
+				err = store.DropTable(s.ctx, "error-db", "temp-table")
 				s.Require().NoError(err)
 			} else {
 				// When BucketPerTable is false, it should error because dropping tables is not allowed
-				err = store.DropTable("error-db", "non-existent-table")
+				err = store.DropTable(s.ctx, "error-db", "non-existent-table")
 				s.Require().Error(err)
 				s.Contains(err.Error(), "can't drop table when bucket per table is disabled")
 			}
@@ -497,35 +497,35 @@ func (s *NatsJSTestSuite) TestBatchOperations() {
 			for i := 0; i < count; i++ {
 				key := fmt.Sprintf("batch-key-%d", i)
 				value := fmt.Sprintf("batch-value-%d", i)
-				err := store.Set(key, db, table, []byte(value))
+				err := store.Set(s.ctx, key, db, table, []byte(value))
 				s.Require().NoError(err)
 			}
 
 			// Get all keys
-			keys, err := store.Keys(db, table)
+			keys, err := store.Keys(s.ctx, db, table)
 			s.Require().NoError(err)
 			s.Require().Len(keys, count)
 
 			// Test batch get by iterating through all keys
 			for _, key := range keys {
-				records, err := store.Get(key, db, table)
+				records, err := store.Get(s.ctx, key, db, table)
 				s.Require().NoError(err)
 				s.Require().Len(records, 1)
 			}
 
 			// Test batch delete by dropping the database
-			err = store.DropDatabase(db)
+			err = store.DropDatabase(s.ctx, db)
 			s.Require().NoError(err)
 
 			// After dropping the database, verify keys are gone by attempting to get one of them
 			// This should return ErrNotFound
 			key := fmt.Sprintf("batch-key-%d", 0)
-			_, err = store.Get(key, db, table)
+			_, err = store.Get(s.ctx, key, db, table)
 			s.Require().ErrorIs(err, kvstore.ErrNotFound)
 
 			// Try to get all keys - this should either return empty or an error
 			// Both are acceptable since the bucket might not exist
-			keys, err = store.Keys(db, table)
+			keys, err = store.Keys(s.ctx, db, table)
 			if err == nil {
 				s.Require().Empty(keys)
 			}
@@ -541,7 +541,7 @@ func (s *NatsJSTestSuite) TestContextHandling() {
 			defer cancel()
 
 			// Test operations with valid context
-			err := store.Set("ctx-key", "ctx-db", "ctx-table", []byte("ctx-value"))
+			err := store.Set(s.ctx, "ctx-key", "ctx-db", "ctx-table", []byte("ctx-value"))
 			s.Require().NoError(err)
 
 			// Test context cancelation after operations (should not affect them)
@@ -549,7 +549,7 @@ func (s *NatsJSTestSuite) TestContextHandling() {
 
 			// This should still work because the context is only used for JetStream operations internally
 			// and we're testing the store operations which have already completed
-			records, err := store.Get("ctx-key", "ctx-db", "ctx-table")
+			records, err := store.Get(s.ctx, "ctx-key", "ctx-db", "ctx-table")
 			s.Require().NoError(err)
 			s.Require().Len(records, 1)
 			s.Equal("ctx-key", records[0].Key)
@@ -578,13 +578,13 @@ func (s *NatsJSTestSuite) TestKeysWithPattern() {
 			// Set all keys
 			for _, keys := range patterns {
 				for _, key := range keys {
-					err := store.Set(key, db, table, []byte("pattern-value-"+key))
+					err := store.Set(s.ctx, key, db, table, []byte("pattern-value-"+key))
 					s.Require().NoError(err)
 				}
 			}
 
 			// Get all keys to verify they were created
-			allKeys, err := store.Keys(db, table)
+			allKeys, err := store.Keys(s.ctx, db, table)
 			s.Require().NoError(err)
 			s.Require().Len(allKeys, 9) // 3 patterns with 3 keys each
 
@@ -598,7 +598,7 @@ func (s *NatsJSTestSuite) TestKeysWithPattern() {
 			// Test getting each key and verify its value
 			for _, keys := range patterns {
 				for _, key := range keys {
-					records, err := store.Get(key, db, table)
+					records, err := store.Get(s.ctx, key, db, table)
 					s.Require().NoError(err)
 					s.Require().Len(records, 1)
 					s.Equal(key, records[0].Key)
@@ -613,7 +613,7 @@ func (s *NatsJSTestSuite) TestGenericKVStoreInterface() {
 	for name, store := range s.stores {
 		s.Run(name, func() {
 			// Test Read method
-			err := store.Set("read-key", "generic-db", "generic-table", []byte("read-value"))
+			err := store.Set(s.ctx, "read-key", "generic-db", "generic-table", []byte("read-value"))
 			s.Require().NoError(err)
 
 			// Use Read method with options
@@ -636,7 +636,7 @@ func (s *NatsJSTestSuite) TestGenericKVStoreInterface() {
 			s.Require().NoError(err)
 
 			// Verify written record
-			getRecords, err := store.Get("write-key", "generic-db", "generic-table")
+			getRecords, err := store.Get(s.ctx, "write-key", "generic-db", "generic-table")
 			s.Require().NoError(err)
 			s.Require().Len(getRecords, 1)
 			s.Equal("write-key", getRecords[0].Key)
@@ -658,21 +658,8 @@ func (s *NatsJSTestSuite) TestGenericKVStoreInterface() {
 			s.Require().NoError(err)
 
 			// Verify key was deleted
-			_, err = store.Get("write-key", "generic-db", "generic-table")
+			_, err = store.Get(s.ctx, "write-key", "generic-db", "generic-table")
 			s.Require().ErrorIs(err, kvstore.ErrNotFound)
-		})
-	}
-}
-
-func (s *NatsJSTestSuite) TestStringAndType() {
-	for name, store := range s.stores {
-		s.Run(name, func() {
-			// Test the String method
-			str := store.String()
-			s.Contains(str, "natsjs")
-
-			// Test the Type method
-			s.Equal("kvstore", store.Type())
 		})
 	}
 }
@@ -686,7 +673,7 @@ func (s *NatsJSTestSuite) TestErrorScenarios() {
 			s.Require().ErrorIs(err, kvstore.ErrNotFound)
 
 			// Test with invalid database/table names (should not crash)
-			err = store.Set("key", strings.Repeat("a", 1000), "table", []byte("value"))
+			err = store.Set(s.ctx, "key", strings.Repeat("a", 1000), "table", []byte("value"))
 			// The error might vary depending on NATS implementation, so just check it doesn't panic
 			// We're intentionally not asserting any specific error here
 			_ = err
@@ -698,15 +685,15 @@ func (s *NatsJSTestSuite) TestEmptyKeyValues() {
 	for name, store := range s.stores {
 		s.Run(name, func() {
 			// Test with empty key
-			err := store.Set("", "empty-db", "empty-table123", []byte("empty-key-value"))
+			err := store.Set(s.ctx, "", "empty-db", "empty-table123", []byte("empty-key-value"))
 			s.Require().Error(err)
 
 			// Test with valid key but empty value (should succeed)
-			err = store.Set("empty-value-key", "empty-db", "empty-table", []byte{})
+			err = store.Set(s.ctx, "empty-value-key", "empty-db", "empty-table", []byte{})
 			s.Require().NoError(err)
 
 			// Get the empty value and verify
-			records, err := store.Get("empty-value-key", "empty-db", "empty-table")
+			records, err := store.Get(s.ctx, "empty-value-key", "empty-db", "empty-table")
 			s.Require().NoError(err)
 			s.Require().Len(records, 1)
 			s.Equal("empty-value-key", records[0].Key)
@@ -715,11 +702,11 @@ func (s *NatsJSTestSuite) TestEmptyKeyValues() {
 			s.Empty(records[0].Value)
 
 			// Test with nil value (should be treated as empty)
-			err = store.Set("nil-value-key", "empty-db", "empty-table", nil)
+			err = store.Set(s.ctx, "nil-value-key", "empty-db", "empty-table", nil)
 			s.Require().NoError(err)
 
 			// Get the nil value and verify
-			records, err = store.Get("nil-value-key", "empty-db", "empty-table")
+			records, err = store.Get(s.ctx, "nil-value-key", "empty-db", "empty-table")
 			s.Require().NoError(err)
 			s.Require().Len(records, 1)
 			s.Equal("nil-value-key", records[0].Key)
@@ -740,16 +727,29 @@ func (s *NatsJSTestSuite) TestLargeData() {
 			}
 
 			// Store large data
-			err := store.Set("large-key", "large-db", "large-table", largeData)
+			err := store.Set(s.ctx, "large-key", "large-db", "large-table", largeData)
 			s.Require().NoError(err)
 
 			// Retrieve and verify large data
-			records, err := store.Get("large-key", "large-db", "large-table")
+			records, err := store.Get(s.ctx, "large-key", "large-db", "large-table")
 			s.Require().NoError(err)
 			s.Require().Len(records, 1)
 			s.Equal("large-key", records[0].Key)
 			s.Equal(largeData, records[0].Value)
 			s.Len(records[0].Value, size)
+		})
+	}
+}
+
+func (s *NatsJSTestSuite) TestStringAndType() {
+	for name, store := range s.stores {
+		s.Run(name, func() {
+			// Test the String method
+			str := store.String()
+			s.Contains(str, "natsjs")
+
+			// Test the Type method
+			s.Equal("kvstore", store.Type())
 		})
 	}
 }

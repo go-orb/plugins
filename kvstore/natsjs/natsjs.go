@@ -164,7 +164,7 @@ func (n *NatsJS) natsDataToOrb(table, key string, value []byte) (string, []byte,
 }
 
 // getKVStore gets or creates a KeyValue store for the given database and table.
-func (n *NatsJS) getKVStore(database, table string) (jetstream.KeyValue, error) {
+func (n *NatsJS) getKVStore(ctx context.Context, database, table string) (jetstream.KeyValue, error) {
 	if n.js == nil {
 		return nil, errors.New("not connected to NATS")
 	}
@@ -186,14 +186,14 @@ func (n *NatsJS) getKVStore(database, table string) (jetstream.KeyValue, error) 
 	}
 
 	// Try to get existing bucket
-	kv, err := n.js.KeyValue(n.ctx, bucketName)
+	kv, err := n.js.KeyValue(ctx, bucketName)
 	if err == nil {
 		n.buckets.Set(bucketName, kv)
 		return kv, nil
 	}
 
 	// Create a new bucket if it doesn't exist
-	kv, err = n.js.CreateKeyValue(n.ctx, jetstream.KeyValueConfig{
+	kv, err = n.js.CreateKeyValue(ctx, jetstream.KeyValueConfig{
 		Bucket:       bucketName,
 		Description:  n.config.BucketDescription,
 		MaxValueSize: -1, // No limit
@@ -210,8 +210,8 @@ func (n *NatsJS) getKVStore(database, table string) (jetstream.KeyValue, error) 
 }
 
 // Get takes a key, database, table and optional GetOptions. It returns the Record or an error.
-func (n *NatsJS) Get(key, database, table string, _ ...kvstore.GetOption) ([]kvstore.Record, error) {
-	kv, err := n.getKVStore(database, table)
+func (n *NatsJS) Get(ctx context.Context, key, database, table string, _ ...kvstore.GetOption) ([]kvstore.Record, error) {
+	kv, err := n.getKVStore(ctx, database, table)
 	if err != nil {
 		return nil, err
 	}
@@ -239,8 +239,8 @@ func (n *NatsJS) Get(key, database, table string, _ ...kvstore.GetOption) ([]kvs
 }
 
 // Set takes a key, database, table and data, and optional SetOptions.
-func (n *NatsJS) Set(key, database, table string, data []byte, _ ...kvstore.SetOption) error {
-	kv, err := n.getKVStore(database, table)
+func (n *NatsJS) Set(ctx context.Context, key, database, table string, data []byte, _ ...kvstore.SetOption) error {
+	kv, err := n.getKVStore(ctx, database, table)
 	if err != nil {
 		return err
 	}
@@ -259,26 +259,26 @@ func (n *NatsJS) Set(key, database, table string, data []byte, _ ...kvstore.SetO
 }
 
 // Purge takes a key, database and table and purges it.
-func (n *NatsJS) Purge(key, database, table string) error {
-	kv, err := n.getKVStore(database, table)
+func (n *NatsJS) Purge(ctx context.Context, key, database, table string) error {
+	kv, err := n.getKVStore(ctx, database, table)
 	if err != nil {
 		return orberrors.ErrInternalServerError.Wrap(err)
 	}
 
-	return kv.Purge(n.ctx, natsKey(table, key, n.config.KeyEncoding, n.config.BucketPerTable))
+	return kv.Purge(ctx, natsKey(table, key, n.config.KeyEncoding, n.config.BucketPerTable))
 }
 
 // Keys returns any keys that match, or an empty list with no error if none matched.
-func (n *NatsJS) Keys(database, table string, opts ...kvstore.KeysOption) ([]string, error) {
+func (n *NatsJS) Keys(ctx context.Context, database, table string, opts ...kvstore.KeysOption) ([]string, error) {
 	options := kvstore.NewKeysOptions(opts...)
 
-	kv, err := n.getKVStore(database, table)
+	kv, err := n.getKVStore(ctx, database, table)
 	if err != nil {
 		return nil, orberrors.ErrInternalServerError.Wrap(err)
 	}
 
 	// Get all keys
-	keys, err := kv.Keys(n.ctx, jetstream.IgnoreDeletes())
+	keys, err := kv.Keys(ctx, jetstream.IgnoreDeletes())
 	if err != nil {
 		return nil, orberrors.ErrInternalServerError.Wrap(err)
 	}
@@ -308,7 +308,7 @@ func (n *NatsJS) Keys(database, table string, opts ...kvstore.KeysOption) ([]str
 }
 
 // DropTable drops the table.
-func (n *NatsJS) DropTable(database, table string) error {
+func (n *NatsJS) DropTable(ctx context.Context, database, table string) error {
 	if n.js == nil {
 		return errors.New("not connected to NATS")
 	}
@@ -333,11 +333,11 @@ func (n *NatsJS) DropTable(database, table string) error {
 	n.buckets.Del(bucketName)
 
 	// Delete the bucket
-	return n.js.DeleteKeyValue(n.ctx, bucketName)
+	return n.js.DeleteKeyValue(ctx, bucketName)
 }
 
 // DropDatabase drops the database.
-func (n *NatsJS) DropDatabase(database string) error {
+func (n *NatsJS) DropDatabase(ctx context.Context, database string) error {
 	if n.js == nil {
 		return errors.New("not connected to NATS")
 	}
@@ -348,14 +348,14 @@ func (n *NatsJS) DropDatabase(database string) error {
 	}
 
 	// Delete all KV stores with the database prefix
-	for name := range n.js.KeyValueStoreNames(n.ctx).Name() {
+	for name := range n.js.KeyValueStoreNames(ctx).Name() {
 		// Check if the bucket name starts with the database name
 		if strings.HasPrefix(name, database) {
 			// Remove from our cache
 			n.buckets.Del(name)
 
 			// Delete the bucket
-			err := n.js.DeleteKeyValue(n.ctx, name)
+			err := n.js.DeleteKeyValue(ctx, name)
 			if err != nil {
 				n.logger.Error("failed to delete KV bucket", "bucket", name, "error", err)
 			}
@@ -372,7 +372,7 @@ func (n *NatsJS) Watch(
 	table string,
 	opts ...kvstore.WatchOption,
 ) (<-chan kvstore.WatchEvent, func() error, error) {
-	b, err := n.getKVStore(database, table)
+	b, err := n.getKVStore(ctx, database, table)
 	if err != nil {
 		return nil, nil, orberrors.ErrInternalServerError.Wrap(fmt.Errorf("failed to get bucket: %w", err))
 	}
@@ -449,7 +449,7 @@ func (n *NatsJS) Watch(
 func (n *NatsJS) Read(key string, opts ...kvstore.ReadOption) ([]*kvstore.Record, error) {
 	options := kvstore.NewReadOptions(opts...)
 
-	records, err := n.Get(key, options.Database, options.Table)
+	records, err := n.Get(context.Background(), key, options.Database, options.Table)
 	if err != nil {
 		return nil, err
 	}
@@ -468,14 +468,14 @@ func (n *NatsJS) Read(key string, opts ...kvstore.ReadOption) ([]*kvstore.Record
 func (n *NatsJS) Write(r *kvstore.Record, opts ...kvstore.WriteOption) error {
 	options := kvstore.NewWriteOptions(opts...)
 
-	return n.Set(r.Key, options.Database, options.Table, r.Value)
+	return n.Set(context.Background(), r.Key, options.Database, options.Table, r.Value)
 }
 
 // Delete removes the record with the corresponding key from the store.
 // Deprecated: use Remove instead.
 func (n *NatsJS) Delete(key string, opts ...kvstore.DeleteOption) error {
 	options := kvstore.NewDeleteOptions(opts...)
-	return n.Purge(key, options.Database, options.Table)
+	return n.Purge(context.Background(), key, options.Database, options.Table)
 }
 
 // List returns any keys that match, or an empty list with no error if none matched.
@@ -501,5 +501,5 @@ func (n *NatsJS) List(opts ...kvstore.ListOption) ([]string, error) {
 		keysOpts = append(keysOpts, kvstore.KeysOffset(options.Offset))
 	}
 
-	return n.Keys(options.Database, options.Table, keysOpts...)
+	return n.Keys(context.Background(), options.Database, options.Table, keysOpts...)
 }
