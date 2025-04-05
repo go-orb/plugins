@@ -7,7 +7,7 @@ require (
 	github.com/go-orb/go-orb v0.3.1-0.20250405015028-7ca2e976a1d4
 	github.com/go-orb/plugins/codecs/json v0.2.1-0.20250405021654-a07e18286de4
 	github.com/nats-io/nats-server/v2 v2.10.26
-	github.com/nats-io/nats.go v1.39.1
+	github.com/nats-io/nats.go v1.41.0
 	github.com/stretchr/testify v1.10.0
 )
 
