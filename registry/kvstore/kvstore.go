@@ -268,7 +268,7 @@ func Provide(
 	kvstoreDatas := map[string]any{}
 
 	tmp, err := config.WalkMap([]string{registry.DefaultConfigSection}, datas)
-	if err != nil {
+	if err == nil {
 		kvstoreDatas = tmp
 	}
 
