@@ -67,23 +67,6 @@ func setupServer(sn string) (*tests.SetupData, error) {
 	ep2, err := http.New(
 		sn,
 		"",
-		"h2c",
-		http.NewConfig(
-			http.WithHandlers(hRegister),
-			http.WithInsecure(),
-			http.WithAllowH2C(),
-		),
-		logger,
-		reg,
-	)
-	if err != nil {
-		cancel()
-
-		return nil, err
-	}
-	ep3, err := http.New(
-		sn,
-		"",
 		"https",
 		http.NewConfig(
 			http.WithHandlers(hRegister),
@@ -96,7 +79,8 @@ func setupServer(sn string) (*tests.SetupData, error) {
 
 		return nil, err
 	}
-	ep4, err := http.New(
+
+	ep3, err := http.New(
 		sn,
 		"",
 		"http3",
@@ -115,7 +99,7 @@ func setupServer(sn string) (*tests.SetupData, error) {
 
 	setupData.Logger = logger
 	setupData.Registry = reg
-	setupData.Entrypoints = []server.Entrypoint{ep1, ep2, ep3, ep4}
+	setupData.Entrypoints = []server.Entrypoint{ep1, ep2, ep3}
 	setupData.Ctx = ctx
 	setupData.Stop = cancel
 
@@ -123,7 +107,7 @@ func setupServer(sn string) (*tests.SetupData, error) {
 }
 
 func newSuite() *tests.TestSuite {
-	s := tests.NewSuite(setupServer, []string{"http", "h2c", "https", "http3"})
+	s := tests.NewSuite(setupServer, []string{"http", "https", "http3"})
 	// s.Debug = true
 	return s
 }
