@@ -26,10 +26,6 @@ type httpServer struct {
 }
 
 func (s *Server) newHTTPServer(router *Router) (*httpServer, error) {
-	var protocols http.Protocols
-
-	protocols.SetUnencryptedHTTP2(true)
-
 	s.handler = router
 
 	server := http.Server{
@@ -38,7 +34,6 @@ func (s *Server) newHTTPServer(router *Router) (*httpServer, error) {
 		WriteTimeout:      time.Duration(s.config.WriteTimeout),
 		IdleTimeout:       time.Duration(s.config.IdleTimeout),
 		ReadHeaderTimeout: time.Second * 4,
-		Protocols:         &protocols,
 
 		// TODO(davincible): do we need to set this? would be nice but doesn't take interface
 		// ErrorLog:          httpServerLogger,
