@@ -3,7 +3,7 @@ module github.com/go-orb/plugins/server/drpc
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.3.0
+	github.com/go-orb/go-orb v0.4.1
 	github.com/lithammer/shortuuid/v4 v4.2.0
 	github.com/zeebo/errs v1.4.0
 	google.golang.org/protobuf v1.36.5
