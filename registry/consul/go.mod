@@ -3,11 +3,11 @@ module github.com/go-orb/plugins/registry/consul
 go 1.23.6
 
 require (
-	github.com/go-orb/go-orb v0.3.0
-	github.com/go-orb/plugins/codecs/json v0.2.0
-	github.com/go-orb/plugins/log/slog v0.2.0
-	github.com/go-orb/plugins/registry/regutil v0.2.0
-	github.com/go-orb/plugins/registry/tests v0.2.0
+	github.com/go-orb/go-orb v0.4.1
+	github.com/go-orb/plugins/codecs/json v0.2.1-0.20250407194133-d2fb2774bb09
+	github.com/go-orb/plugins/log/slog v0.2.1-0.20250407194133-d2fb2774bb09
+	github.com/go-orb/plugins/registry/regutil v0.2.1-0.20250407194133-d2fb2774bb09
+	github.com/go-orb/plugins/registry/tests v0.2.1-0.20250407194133-d2fb2774bb09
 	github.com/hashicorp/consul/api v1.31.2
 	github.com/hashicorp/consul/sdk v0.16.2
 	github.com/hashicorp/go-hclog v1.6.3
@@ -40,6 +40,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
 	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/sync v0.13.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
