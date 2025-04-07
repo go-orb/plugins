@@ -78,17 +78,28 @@ func (t *Transport) Name() string {
 
 // Request does the actual rpc call to the server.
 //
-//nolint:gocyclo,funlen
+//nolint:gocyclo,funlen,gocognit,cyclop
 func (t *Transport) Request(ctx context.Context, infos client.RequestInfos, req any, result any, opts *client.CallOptions) error {
-	codec, err := codecs.GetMime(opts.ContentType)
-	if err != nil {
-		return orberrors.ErrBadRequest.Wrap(err)
-	}
+	var (
+		releaseBuff bool
+		buff        *bytes.Buffer
+	)
 
-	// Encode the request into a *bytes.Buffer{}.
-	buff := t.bufPool.Get().(*bytes.Buffer) //nolint:errcheck
-	if err := codec.NewEncoder(buff).Encode(req); err != nil {
-		return orberrors.ErrBadRequest.Wrap(err)
+	switch reqTyped := req.(type) {
+	case []byte:
+		buff = bytes.NewBuffer(reqTyped)
+	default:
+		codec, err := codecs.GetMime(opts.ContentType)
+		if err != nil {
+			return orberrors.ErrBadRequest.Wrap(err)
+		}
+
+		buff = t.bufPool.Get().(*bytes.Buffer) //nolint:errcheck
+		releaseBuff = true
+
+		if err := codec.NewEncoder(buff).Encode(reqTyped); err != nil {
+			return orberrors.ErrBadRequest.Wrap(err)
+		}
 	}
 
 	// Set the connection timeout
@@ -96,6 +107,7 @@ func (t *Transport) Request(ctx context.Context, infos client.RequestInfos, req 
 	defer cancel()
 
 	var (
+		err  error
 		hReq *http.Request
 	)
 
@@ -140,13 +152,21 @@ func (t *Transport) Request(ctx context.Context, infos client.RequestInfos, req 
 	// Run the request.
 	resp, err := t.hclient.Do(hReq)
 	if err != nil {
+		// Reset the buffer.
+		if releaseBuff {
+			buff.Reset()
+			t.bufPool.Put(buff)
+		}
+
 		return orberrors.From(err)
 	}
 
-	// Reset the buffer.
-	buff.Reset()
+	if releaseBuff {
+		buff.Reset()
+		t.bufPool.Put(buff)
+	}
 
-	_, err = buff.ReadFrom(resp.Body)
+	responseBytes, err := io.ReadAll(resp.Body)
 	if err != nil && !errors.Is(err, io.EOF) {
 		return orberrors.From(err)
 	}
@@ -182,16 +202,21 @@ func (t *Transport) Request(ctx context.Context, infos client.RequestInfos, req 
 		return orberrors.HTTP(resp.StatusCode)
 	}
 
-	// Decode the response into `result`.
-	err = codec.NewDecoder(buff).Decode(result)
-	if err != nil {
-		return orberrors.ErrBadRequest.Wrap(err)
+	switch resultTyped := result.(type) {
+	case *[]byte:
+		*resultTyped = responseBytes
+	default:
+		codec, err := codecs.GetMime(opts.ContentType)
+		if err != nil {
+			return orberrors.ErrBadRequest.Wrap(err)
+		}
+
+		// Decode the response into `result`.
+		err = codec.Unmarshal(responseBytes, result)
+		if err != nil {
+			return orberrors.ErrBadRequest.Wrap(err)
+		}
 	}
-
-	// Reset the buffer.
-	buff.Reset()
-
-	t.bufPool.Put(buff)
 
 	return nil
 }
