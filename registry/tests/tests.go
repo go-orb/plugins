@@ -711,6 +711,122 @@ func (r *TestSuite) TestUnixSocket() {
 	r.Require().NoError(r.Registries[0].Deregister(r.Ctx, node))
 }
 
+// TestSameName tests the same name for different services.
+//
+//nolint:funlen
+func (r *TestSuite) TestSameName() {
+	services := []registry.ServiceNode{
+		{
+			Name:      "filter",
+			Version:   "v1.0.0",
+			Node:      "filter-http-node",
+			Address:   "10.0.1.1:8080",
+			Scheme:    "http",
+			Namespace: "default",
+			Region:    "us-west",
+		},
+		{
+			Name:      "filter",
+			Version:   "v2.0.0",
+			Node:      "filter-grpc-node",
+			Address:   "10.0.1.2:8080",
+			Scheme:    "grpc",
+			Namespace: "default",
+			Region:    "us-east",
+		},
+		{
+			Name:      "filter",
+			Version:   "v1.0.0",
+			Node:      "filter-https-node",
+			Address:   "10.0.1.3:8080",
+			Scheme:    "https",
+			Namespace: "production",
+			Region:    "eu-west",
+		},
+		{
+			Name:      "filter",
+			Version:   "v1.0.0",
+			Node:      "filter2-http-node",
+			Address:   "10.0.1.4:8080",
+			Scheme:    "http",
+			Namespace: "default",
+			Region:    "us-west",
+		},
+		{
+			Name:      "filter",
+			Version:   "v2.0.0",
+			Node:      "filter2-grpc-node",
+			Address:   "10.0.1.5:8080",
+			Scheme:    "grpc",
+			Namespace: "default",
+			Region:    "us-east",
+		},
+		{
+			Name:      "filter",
+			Version:   "v1.0.0",
+			Node:      "filter2-https-node",
+			Address:   "10.0.1.6:8080",
+			Scheme:    "https",
+			Namespace: "production",
+			Region:    "eu-west",
+		},
+	}
+
+	// Register all services
+	for _, svc := range services {
+		r.Require().NoError(r.Registries[0].Register(r.Ctx, svc))
+	}
+
+	// Cleanup
+	defer func() {
+		for _, svc := range services {
+			r.Require().NoError(r.Registries[0].Deregister(r.Ctx, svc))
+		}
+	}()
+
+	time.Sleep(r.UpdateTime)
+
+	// Test filtering by version and other parameters
+	filtered, err := r.Registries[1].GetService(
+		r.Ctx, "default", "us-west", "filter", []string{"http"})
+	r.Require().NoError(err)
+	r.Require().Len(filtered, 2, "Should find exactly two services with version v1.0.0 in default/us-west")
+	r.Require().Equal("v1.0.0", filtered[0].Version)
+	r.Require().Equal("default", filtered[0].Namespace)
+	r.Require().Equal("us-west", filtered[0].Region)
+
+	// Test filtering by namespace
+	filtered, err = r.Registries[1].GetService(
+		r.Ctx, "production", "eu-west", "filter", nil)
+	r.Require().NoError(err)
+	r.Require().Len(filtered, 2, "Should find exactly two services in production/eu-west")
+	r.Require().Equal("v1.0.0", filtered[0].Version)
+	r.Require().Equal("production", filtered[0].Namespace)
+	r.Require().Equal("eu-west", filtered[0].Region)
+
+	// Test filtering by region
+	filtered, err = r.Registries[1].GetService(
+		r.Ctx, "default", "us-east", "filter", nil)
+	r.Require().NoError(err)
+	r.Require().Len(filtered, 2, "Should find exactly two services in default/us-east")
+	r.Require().Equal("v2.0.0", filtered[0].Version)
+	r.Require().Equal("default", filtered[0].Namespace)
+	r.Require().Equal("us-east", filtered[0].Region)
+
+	// Test filtering by scheme
+	filtered, err = r.Registries[1].GetService(
+		r.Ctx, "default", "us-west", "filter", []string{"http"})
+	r.Require().NoError(err)
+	r.Require().Len(filtered, 2, "Should find exactly two services with HTTP scheme")
+	r.Require().Equal("http", filtered[0].Scheme)
+
+	// Test for no matches with a combination of filters
+	filtered, err = r.Registries[1].GetService(
+		r.Ctx, "production", "us-east", "filter", nil)
+	r.Require().ErrorIs(err, registry.ErrNotFound)
+	r.Require().Empty(filtered, "Should find no services in production/us-east")
+}
+
 // BenchmarkGetService benchmarks.
 func (r *TestSuite) BenchmarkGetService(b *testing.B) {
 	b.Helper()
