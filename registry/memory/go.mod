@@ -4,9 +4,9 @@ go 1.23.6
 
 require (
 	github.com/go-orb/go-orb v0.4.1
-	github.com/go-orb/plugins/codecs/json v0.2.1-0.20250407194133-d2fb2774bb09
-	github.com/go-orb/plugins/log/slog v0.2.1-0.20250407194133-d2fb2774bb09
-	github.com/go-orb/plugins/registry/tests v0.2.1-0.20250407194133-d2fb2774bb09
+	github.com/go-orb/plugins/codecs/json v0.2.0
+	github.com/go-orb/plugins/log/slog v0.2.0
+	github.com/go-orb/plugins/registry/tests v0.3.0
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.10.0
 )
