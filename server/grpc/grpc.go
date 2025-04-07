@@ -26,6 +26,8 @@ import (
 	"github.com/go-orb/go-orb/util/addr"
 	mnet "github.com/go-orb/go-orb/util/net"
 	mtls "github.com/go-orb/go-orb/util/tls"
+
+	"github.com/lithammer/shortuuid/v4"
 )
 
 // Interface guard.
@@ -33,6 +35,7 @@ var _ server.Entrypoint = (*Server)(nil)
 
 // Server is an entrypoint with a gRPC server.
 type Server struct {
+	id             string
 	serviceName    string
 	serviceVersion string
 	epName         string
@@ -87,6 +90,7 @@ func New(
 	}
 
 	srv := Server{
+		id:             shortuuid.New(),
 		serviceName:    serviceName,
 		serviceVersion: serviceVersion,
 		epName:         epName,
@@ -330,7 +334,7 @@ func (s *Server) registryService() registry.ServiceNode {
 	return registry.ServiceNode{
 		Name:     s.serviceName,
 		Version:  s.serviceVersion,
-		Node:     s.Name(),
+		Node:     s.id,
 		Address:  s.Address(),
 		Network:  s.Network(),
 		Scheme:   s.Transport(),

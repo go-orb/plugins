@@ -12,6 +12,7 @@ require (
 	github.com/go-orb/plugins/log/slog v0.2.0
 	github.com/go-orb/plugins/registry/mdns v0.1.0
 	github.com/julienschmidt/httprouter v1.3.0
+	github.com/lithammer/shortuuid/v4 v4.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/quic-go/quic-go v0.50.0
 	github.com/stretchr/testify v1.10.0

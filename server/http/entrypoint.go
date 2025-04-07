@@ -30,6 +30,8 @@ import (
 
 	mtcp "github.com/go-orb/plugins/server/http/utils/tcp"
 	mudp "github.com/go-orb/plugins/server/http/utils/udp"
+
+	"github.com/lithammer/shortuuid/v4"
 )
 
 const networkUnix = "unix"
@@ -44,6 +46,8 @@ const Plugin = "http"
 // want to listen on multiple interfaces, or multiple ports in parallel, even
 // with the same handler.
 type Server struct {
+	id string
+
 	serviceName    string
 	serviceVersion string
 	epName         string
@@ -109,6 +113,7 @@ func New(
 	router := NewRouter(logger)
 
 	entrypoint := Server{
+		id:             shortuuid.New(),
 		serviceName:    serviceName,
 		serviceVersion: serviceVersion,
 		epName:         epName,
@@ -372,7 +377,7 @@ func (s *Server) registryService() registry.ServiceNode {
 	return registry.ServiceNode{
 		Name:     s.serviceName,
 		Version:  s.serviceVersion,
-		Node:     s.Name(),
+		Node:     s.id,
 		Address:  s.Address(),
 		Network:  s.Network(),
 		Scheme:   s.Transport(),

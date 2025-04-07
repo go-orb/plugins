@@ -17,6 +17,8 @@ import (
 	"github.com/go-orb/go-orb/registry"
 	orbserver "github.com/go-orb/go-orb/server"
 	"github.com/go-orb/go-orb/util/addr"
+
+	"github.com/lithammer/shortuuid/v4"
 )
 
 var _ orbserver.Entrypoint = (*Server)(nil)
@@ -26,6 +28,8 @@ const Plugin = "drpc"
 
 // Server is the drpc Server for go-orb.
 type Server struct {
+	id string
+
 	serviceName    string
 	serviceVersion string
 	epName         string
@@ -188,7 +192,7 @@ func (s *Server) registryService() registry.ServiceNode {
 		Name:     s.serviceName,
 		Version:  s.serviceVersion,
 		Address:  s.Address(),
-		Node:     s.Name(),
+		Node:     s.id,
 		Network:  s.Network(),
 		Scheme:   s.Transport(),
 		Metadata: make(map[string]string),
@@ -246,6 +250,7 @@ func New(name string, version string, epName string, acfg any, logger log.Logger
 	ctx, cancelFunc := context.WithCancel(context.Background())
 
 	entrypoint := Server{
+		id:             shortuuid.New(),
 		serviceName:    name,
 		serviceVersion: version,
 		epName:         epName,
