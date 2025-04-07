@@ -168,12 +168,13 @@ func (c *Client) resolveService(
 		}
 
 		if err == nil && len(services) > 0 {
-			c.logger.Trace("service resolution successful", "service", service)
 			break // Service found, exit retry loop
 		}
 
 		c.logger.Debug(
 			"service resolution failed, retrying",
+			"namespace", opts.Namespace,
+			"region", opts.Region,
 			"service", service,
 			"attempt", retries+1,
 			"error", err,
