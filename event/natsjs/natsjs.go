@@ -495,7 +495,9 @@ func (n *NatsJS) HandleRequest(
 func (n *NatsJS) Start(_ context.Context) error {
 	var err error
 
-	n.nc, err = n.config.ToOptions().Connect()
+	nConfig := n.config.ToOptions()
+
+	n.nc, err = nConfig.Connect()
 	if err != nil {
 		return err
 	}
@@ -556,7 +558,7 @@ func Provide(
 		return event.Type{}, fmt.Errorf("create nats registry config: %w", err)
 	}
 
-	if err := config.Parse(nil, event.DefaultConfigSection, configData, &cfg); err != nil && !errors.Is(err, config.ErrNoSuchKey) {
+	if err := config.Parse(nil, "", configData, &cfg); err != nil && !errors.Is(err, config.ErrNoSuchKey) {
 		return event.Type{}, fmt.Errorf("parse config: %w", err)
 	}
 
